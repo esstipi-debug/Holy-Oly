@@ -1,7 +1,7 @@
 # 🗺️ PLAN — Hoja de Ruta HolyOly
 
 **Última actualización:** 2026-04-16  
-**Estado:** Fase 1 — 78% completada (21/27 wireframes)
+**Estado:** Fase 1 — 85% completada (23/27 wireframes)
 
 ---
 
@@ -36,8 +36,8 @@ Construir una **plataforma SaaS de coaching inteligente** para halterofilia olí
 - [x] 1.4 Design System (4 temas, colores, tipografía)
 
 #### Falta terminar (6 pantallas):
-- [ ] B4 — Session Summary (post-sesión wrap-up con XP, streaks, ratios)
-- [ ] B5 — Warmup Generator (protocolo pre-sesión readiness-aware)
+- [x] B4 — Session Summary (post-sesión wrap-up con XP, streaks, ratios)
+- [x] B5 — Warmup Generator (protocolo pre-sesión readiness-aware)
 - [ ] B11 — OLY Index (tabla percentiles, ranking, drill-down)
 - [ ] B12/B13 — Pulse Hub + Cockpit (retos EMOM/For Time, freshness gate)
 - [ ] B14 — Píldoras / Stories (tips diarios, +50 XP, 5 segundos)
@@ -52,7 +52,7 @@ wireframes/
 ├── A1_A2_A3_auth.html               ✅
 ├── B1_dashboard_atleta.html         ✅
 ├── B3_injury_shield.html            ✅
-├── B4_session_summary.html          ⏳ FALTA
+├── B4_session_summary.html          ✅
 ├── B5_warmup_generator.html         ⏳ FALTA
 ├── B6_active_session.html           ✅
 ├── B7_B8_victory_screen.html        ✅
@@ -285,4 +285,4 @@ git commit -m "Memory: Fase 1 → 27/27 complete, ready Phase 2"
 
 **Versión:** 1.0  
 **Creado:** 2026-04-15  
-**Última actualización:** 2026-04-16 — En Fase 1, 21/27 wireframes
+**Última actualización:** 2026-04-16 — En Fase 1, 23/27 wireframes

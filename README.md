@@ -12,7 +12,7 @@
 | Métrica | Estado |
 |---------|--------|
 | **Fase** | 1 — UX/UI Wireframing |
-| **Pantallas** | 21 / 27 completadas (78%) |
+| **Pantallas** | 22 / 27 completadas (81%) |
 | **Engines** | 21 especificados, 0 implementados |
 | **Stack** | React + Vite + Tailwind (frontend) · Node.js + Express + Prisma (backend) |
 | **BD** | PostgreSQL · ~60 modelos · 150+ queries |

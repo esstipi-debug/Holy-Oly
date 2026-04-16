@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>B12/B13 — Pulse Hub & Cockpit</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --color-bg: #07070F;
+      --color-pulse: #818cf8;
+      --color-danger: #EF4444;
+      --color-success: #22C55E;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0D0D18;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+    .phone {
+      width: 390px;
+      min-height: 844px;
+      background: var(--color-bg);
+      border-radius: 44px;
+      border: 2px solid #2a2a3a;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 0 80px rgba(129, 140, 248, 0.15);
+      display: flex;
+      flex-direction: column;
+    }
+    .status-bar { height: 44px; padding: 0 28px; display: flex; align-items: center; justify-content: space-between; }
+    .scroll-area { flex: 1; overflow-y: auto; padding: 24px; scrollbar-width: none; }
+    .scroll-area::-webkit-scrollbar { display: none; }
+
+    .pulse-card {
+      background: linear-gradient(135deg, #0f0f2e, #07070F);
+      border: 1px solid #3730a3;
+      border-radius: 24px;
+      padding: 24px;
+      text-align: center;
+      margin-bottom: 24px;
+      position: relative;
+    }
+
+    .timer-display {
+      font-size: 64px;
+      font-weight: 900;
+      color: white;
+      font-variant-numeric: tabular-nums;
+      text-shadow: 0 0 20px rgba(129, 140, 248, 0.4);
+      line-height: 1;
+      margin: 20px 0;
+    }
+
+    .round-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #1e1b4b;
+      border: 1px solid #3730a3;
+    }
+    .round-dot.active { background: #818cf8; border-color: #c7d2fe; box-shadow: 0 0 8px #818cf8; }
+    .round-dot.done { background: #3730a3; }
+
+    .drop-off-alert {
+      background: #450a0a;
+      border: 1px solid #ef4444;
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 20px;
+      animation: flash 1s infinite alternate;
+    }
+    @keyframes flash { from { opacity: 1; } to { opacity: 0.7; } }
+  </style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="status-bar">
+    <span style="font-size:12px; color:#94a3b8; font-weight:600;">10:15</span>
+    <span style="font-size:12px; color:#94a3b8; font-weight:600;">72%</span>
+  </div>
+
+  <div class="scroll-area">
+    <!-- Header -->
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:28px;">
+      <a href="B1_dashboard_atleta.html" style="width:36px; height:36px; border-radius:10px; background:#1a1a28; border:1px solid #2a2a3a; display:flex; align-items:center; justify-content:center; text-decoration:none; color:#94a3b8;">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      </a>
+      <h1 style="color:white; font-size:20px; font-weight:900;">Pulse Cockpit</h1>
+    </div>
+
+    <!-- Freshness Gate (Conditional UI) -->
+    <div style="background:#111118; border:1px solid #1e1e30; border-radius:20px; padding:16px; margin-bottom:24px; display:flex; align-items:center; gap:16px;">
+      <div style="width:48px; height:48px; border-radius:12px; background:#064e3b; display:flex; align-items:center; justify-content:center; font-size:20px;">🛡️</div>
+      <div style="flex:1;">
+        <p style="color:#f1f5f9; font-size:13px; font-weight:700;">Freshness Gate: PASSED</p>
+        <p style="color:#64748b; font-size:11px;">Estrés acumulado bajo. Seguro para HIIT.</p>
+      </div>
+    </div>
+
+    <!-- Pulse Card -->
+    <div class="pulse-card">
+      <p style="color:#818cf8; font-size:11px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase;">EMOM 12 MIN — Reto Pulso</p>
+      
+      <div class="timer-display">08:42</div>
+      
+      <p style="color:#94a3b8; font-size:14px; font-weight:600; margin-bottom:20px;">RONDA 9 / 12</p>
+
+      <div style="display:flex; justify-content:center; gap:8px; margin-bottom:24px;">
+        <div class="round-dot done"></div>
+        <div class="round-dot done"></div>
+        <div class="round-dot done"></div>
+        <div class="round-dot done"></div>
+        <div class="round-dot done"></div>
+        <div class="round-dot done"></div>
+        <div class="round-dot done"></div>
+        <div class="round-dot done"></div>
+        <div class="round-dot active"></div>
+        <div class="round-dot"></div>
+        <div class="round-dot"></div>
+        <div class="round-dot"></div>
+      </div>
+
+      <div style="background:#1a1b3a; border-radius:16px; padding:16px;">
+        <p style="color:#818cf8; font-size:11px; font-weight:700; margin-bottom:4px;">MOVIMIENTO ACTUAL</p>
+        <p style="color:white; font-size:18px; font-weight:800;">12 Cal AirBike</p>
+        <p style="color:#6366f1; font-size:12px; margin-top:4px;">Target: < 45 seg</p>
+      </div>
+
+      <!-- Drop-off Alert (Hidden by default, shown here for wireframe demo) -->
+      <div class="drop-off-alert">
+        <span style="font-size:20px;">⚠️</span>
+        <div style="text-align:left;">
+          <p style="color:#fecaca; font-size:12px; font-weight:800;">DROP-OFF DETECTADO</p>
+          <p style="color:#fca5a5; font-size:11px;">Potencia cayó 15%. Considera bajar 2 reps.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Log Section -->
+    <div style="margin-bottom:32px;">
+      <p style="color:#475569; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:12px;">Desempeño por Ronda</p>
+      
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 16px; background:#111118; border-radius:12px;">
+          <span style="color:#64748b; font-size:13px; font-weight:700;">Ronda 8</span>
+          <span style="color:#f1f5f9; font-size:13px; font-weight:700;">42 seg</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 16px; background:#111118; border-radius:12px;">
+          <span style="color:#64748b; font-size:13px; font-weight:700;">Ronda 7</span>
+          <span style="color:#f1f5f9; font-size:13px; font-weight:700;">38 seg</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 16px; background:#111118; border-radius:12px;">
+          <span style="color:#64748b; font-size:13px; font-weight:700;">Ronda 6</span>
+          <span style="color:#f1f5f9; font-size:13px; font-weight:700;">37 seg</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom Control -->
+  <div style="padding:24px 24px 44px; display:flex; gap:12px;">
+    <button style="flex:1; height:60px; border-radius:18px; background:#111118; border:1px solid #2a2a3a; color:#ef4444; font-size:16px; font-weight:800; cursor:pointer;">PARAR</button>
+    <button style="flex:2; height:60px; border-radius:18px; background:linear-gradient(135deg, #818cf8, #4f46e5); border:none; color:white; font-size:16px; font-weight:900; cursor:pointer;">LAP / SIGUIENTE</button>
+  </div>
+</div>
+
+<a href="index.html" style="position:fixed; top:20px; left:20px; background:#1e1e30; color:#94a3b8; font-size:13px; padding:8px 14px; border-radius:10px; text-decoration:none; border:1px solid #2a2a3a; z-index:100;">← Volver</a>
+
+</body>
+</html>
