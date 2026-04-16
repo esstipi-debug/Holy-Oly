@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>C5+C6 · Add Athlete + Assign Macrocycle</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background: #07070F; font-family: 'Inter', system-ui, sans-serif; }
+
+    .phone {
+      width: 390px;
+      min-height: 844px;
+      background: #0D0D1A;
+      border-radius: 48px;
+      border: 2px solid #1e1e3a;
+      overflow: hidden;
+      box-shadow: 0 32px 80px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.06);
+    }
+    .phone-inner { overflow-y: auto; max-height: 844px; padding-bottom: 80px; }
+    .phone-inner::-webkit-scrollbar { display: none; }
+
+    .status-bar {
+      height: 44px; display: flex; align-items: center;
+      justify-content: space-between; padding: 0 24px;
+      font-size: 12px; color: #9ca3af; flex-shrink: 0;
+    }
+    .bottom-nav {
+      position: sticky; bottom: 0;
+      background: rgba(13,13,26,0.97);
+      border-top: 1px solid #1e1e3a;
+      display: flex; justify-content: space-around;
+      padding: 10px 0 14px; z-index: 10;
+    }
+    .nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 9px; color: #4b5563; }
+    .nav-item.active { color: #6366f1; }
+    .nav-icon { font-size: 18px; }
+
+    .card { background: #111127; border: 1px solid #1e1e3a; border-radius: 16px; padding: 14px; }
+
+    /* Step indicator */
+    .step-dot { width: 8px; height: 8px; border-radius: 50%; transition: all .3s; }
+    .step-dot.done  { background: #4ade80; }
+    .step-dot.active { background: #6366f1; width: 20px; border-radius: 4px; }
+    .step-dot.pending { background: #1e1e3a; }
+
+    /* Input */
+    .input-field {
+      width: 100%; background: #0d0d1a; border: 1px solid #1e1e3a;
+      border-radius: 12px; padding: 12px 14px; color: white;
+      font-size: 13px; outline: none; transition: border-color .2s;
+    }
+    .input-field:focus { border-color: #6366f1; }
+    .input-field::placeholder { color: #374151; }
+
+    /* School card */
+    .school-card {
+      background: #0d0d1a; border: 1.5px solid #1e1e3a;
+      border-radius: 14px; padding: 12px; cursor: pointer;
+      transition: all .2s; position: relative;
+    }
+    .school-card:hover { border-color: #6366f1; background: #111127; }
+    .school-card.selected { border-color: #6366f1; background: rgba(99,102,241,.08); }
+    .school-card.selected::after {
+      content: '✓';
+      position: absolute; top: 10px; right: 10px;
+      color: #6366f1; font-weight: 900; font-size: 12px;
+    }
+
+    /* Difficulty bar */
+    .diff-bar { display: flex; gap: 2px; }
+    .diff-seg { width: 10px; height: 4px; border-radius: 2px; background: #1e1e3a; }
+    .diff-seg.on { background: #6366f1; }
+    .diff-seg.on.hard { background: #f87171; }
+
+    /* Time-Shift slider */
+    .ts-slider {
+      -webkit-appearance: none; width: 100%; height: 6px;
+      border-radius: 6px; outline: none;
+      background: linear-gradient(to right, #6366f1 0%, #6366f1 var(--pct, 50%), #1e1e3a var(--pct, 50%), #1e1e3a 100%);
+    }
+    .ts-slider::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 22px; height: 22px;
+      border-radius: 50%; background: #6366f1;
+      border: 3px solid #818cf8; cursor: pointer;
+      box-shadow: 0 0 8px rgba(99,102,241,.5);
+    }
+
+    /* Prog bar */
+    .prog-bar { background: #1e1e3a; border-radius: 9999px; height: 5px; overflow: hidden; }
+    .prog-fill { height: 100%; border-radius: 9999px; }
+
+    /* Flag emoji wrapper */
+    .flag { font-size: 18px; }
+
+    /* Invite method btn */
+    .invite-btn {
+      border: 1.5px solid #1e1e3a; border-radius: 12px;
+      padding: 10px 12px; display: flex; align-items: center; gap: 8px;
+      cursor: pointer; transition: all .2s; background: #0d0d1a;
+    }
+    .invite-btn:hover { border-color: #6366f1; background: #111127; }
+    .invite-btn.selected { border-color: #6366f1; background: rgba(99,102,241,.1); }
+
+    /* Tag chips */
+    .tag { font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
+
+    @keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    .slide-up { animation: slideUp .3s ease both; }
+
+    /* School filter tabs */
+    .filter-tab { font-size: 10px; padding: 4px 10px; border-radius: 20px; border: 1px solid #1e1e3a; color: #6b7280; cursor: pointer; white-space: nowrap; }
+    .filter-tab.active { background: rgba(99,102,241,.2); color: #818cf8; border-color: rgba(99,102,241,.4); }
+  </style>
+</head>
+<body class="min-h-screen p-8">
+
+  <!-- Header -->
+  <div class="text-center mb-10">
+    <div class="inline-flex items-center gap-2 bg-indigo-900/20 border border-indigo-500/30 rounded-full px-4 py-1.5 mb-4">
+      <span class="text-indigo-400 text-xs font-bold uppercase tracking-widest">Wireframe C5+C6 · Coach View</span>
+    </div>
+    <h1 class="text-3xl font-black text-white mb-2">Add Athlete + Assign Macrocycle</h1>
+    <p class="text-slate-400 text-sm max-w-2xl mx-auto">C5: Invitar atleta con 45-day Elite Trial · C6: Selección de los 19 programas + Time-Shift slider</p>
+  </div>
+
+  <div class="flex justify-center items-start gap-8 flex-wrap">
+
+    <!-- ══════════════════════
+         PHONE 1 — C5: Add Athlete
+         ══════════════════════ -->
+    <div>
+      <p class="text-center text-slate-500 text-xs font-bold uppercase tracking-widest mb-4">C5 · Añadir nuevo atleta</p>
+      <div class="phone">
+        <div class="phone-inner">
+          <div class="status-bar">
+            <span>9:41</span>
+            <span class="text-slate-600">Coach · Premium</span>
+            <span>●●●</span>
+          </div>
+
+          <!-- Header -->
+          <div class="flex items-center gap-3 px-5 pb-4">
+            <button class="text-slate-400 text-lg">←</button>
+            <div>
+              <h2 class="text-white font-bold text-base">Nuevo atleta</h2>
+              <p class="text-slate-500 text-xs">Paso 1 de 3 · Datos básicos</p>
+            </div>
+          </div>
+
+          <!-- Step progress -->
+          <div class="flex items-center gap-2 justify-center mb-5">
+            <div class="step-dot done"></div>
+            <div class="h-px w-8 bg-indigo-500/40"></div>
+            <div class="step-dot active"></div>
+            <div class="h-px w-8 bg-slate-700"></div>
+            <div class="step-dot pending"></div>
+          </div>
+
+          <div class="px-5 space-y-5">
+
+            <!-- Athlete basic info -->
+            <div class="slide-up">
+              <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Información del atleta</p>
+              <div class="space-y-3">
+                <div>
+                  <label class="text-xs text-slate-500 mb-1.5 block">Nombre completo</label>
+                  <input class="input-field" placeholder="Ej. Ana García López" value="Carlos Mendoza"/>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="text-xs text-slate-500 mb-1.5 block">Peso corporal (kg)</label>
+                    <input class="input-field" placeholder="73" value="73"/>
+                  </div>
+                  <div>
+                    <label class="text-xs text-slate-500 mb-1.5 block">Sexo biológico</label>
+                    <select class="input-field" style="cursor:pointer">
+                      <option value="M" selected>Masculino</option>
+                      <option value="F">Femenino ♀</option>
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label class="text-xs text-slate-500 mb-1.5 block">Nivel de experiencia</label>
+                  <div class="grid grid-cols-3 gap-2">
+                    <button class="text-xs py-2.5 rounded-xl border border-slate-700 text-slate-400">Principiante</button>
+                    <button class="text-xs py-2.5 rounded-xl border border-indigo-500 bg-indigo-900/30 text-indigo-400 font-bold">Intermedio</button>
+                    <button class="text-xs py-2.5 rounded-xl border border-slate-700 text-slate-400">Avanzado</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 1RM inputs (coach enters or defers to athlete) -->
+            <div class="slide-up" style="animation-delay:.05s">
+              <div class="flex items-center justify-between mb-3">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">1RMs conocidos</p>
+                <button class="text-xs text-indigo-400 font-bold">Atleta los ingresa →</button>
+              </div>
+              <div class="space-y-2.5">
+                <div class="flex items-center gap-3">
+                  <span class="text-slate-400 text-xs w-28">Arrancada</span>
+                  <input class="input-field flex-1" placeholder="kg" value="88"/>
+                  <span class="text-slate-600 text-xs">kg</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="text-slate-400 text-xs w-28">Dos Tiempos</span>
+                  <input class="input-field flex-1" placeholder="kg" value="110"/>
+                  <span class="text-slate-600 text-xs">kg</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="text-slate-400 text-xs w-28">Back Squat</span>
+                  <input class="input-field flex-1" placeholder="kg" value="130"/>
+                  <span class="text-slate-600 text-xs">kg</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="text-slate-400 text-xs w-28">Front Squat</span>
+                  <input class="input-field flex-1" placeholder="kg" value="115"/>
+                  <span class="text-slate-600 text-xs">kg</span>
+                </div>
+              </div>
+              <!-- Ratio preview chip -->
+              <div class="bg-indigo-900/20 border border-indigo-500/30 rounded-xl p-3 mt-3 flex items-center gap-3">
+                <span class="text-indigo-400 text-lg">📐</span>
+                <div>
+                  <p class="text-xs text-white font-bold">Ratios detectados: todos en zona ideal ✓</p>
+                  <p class="text-xs text-slate-500">Sn/CJ 0.80 · FS/BS 0.88 · Sn/BS 0.68</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Invite method -->
+            <div class="slide-up" style="animation-delay:.1s">
+              <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Método de invitación</p>
+              <div class="grid grid-cols-1 gap-2">
+                <div class="invite-btn selected">
+                  <span class="text-lg">📱</span>
+                  <div>
+                    <p class="text-white text-xs font-bold">Link de invitación</p>
+                    <p class="text-slate-500 text-xs">Comparte por WhatsApp, IG, email</p>
+                  </div>
+                  <span class="ml-auto text-indigo-400 text-xs font-bold">✓</span>
+                </div>
+                <div class="invite-btn">
+                  <span class="text-lg">🔲</span>
+                  <div>
+                    <p class="text-white text-xs font-bold">Código QR</p>
+                    <p class="text-slate-500 text-xs">Escanear en el gimnasio</p>
+                  </div>
+                </div>
+                <div class="invite-btn">
+                  <span class="text-lg">✉️</span>
+                  <div>
+                    <p class="text-white text-xs font-bold">Invitar por email</p>
+                    <p class="text-slate-500 text-xs">Carlos recibe el link directo</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 45-day trial badge -->
+            <div class="slide-up" style="animation-delay:.15s">
+              <div class="bg-gradient-to-r from-amber-900/30 to-yellow-900/20 border border-amber-500/40 rounded-2xl p-4">
+                <div class="flex items-center gap-3 mb-2">
+                  <span class="text-2xl">🎖️</span>
+                  <div>
+                    <p class="text-amber-400 font-black text-sm">45 días Elite Trial</p>
+                    <p class="text-slate-400 text-xs">Gratuito para Carlos — activado al registrarse</p>
+                  </div>
+                </div>
+                <p class="text-slate-500 text-xs leading-relaxed">Los primeros 28 días son para calibrar el modelo Banister. En el día 45 el atleta elige si continúa con Plan Elite.</p>
+                <div class="mt-2 prog-bar" style="background: rgba(251,191,36,.15);">
+                  <div class="prog-fill" style="width:0%; background: #fbbf24;"></div>
+                </div>
+                <div class="flex justify-between text-xs mt-1">
+                  <span class="text-amber-500/60">Día 0</span>
+                  <span class="text-amber-500/60">Día 45</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- CTA -->
+            <div class="slide-up" style="animation-delay:.2s">
+              <button class="w-full bg-indigo-600 text-white font-black text-sm py-4 rounded-2xl mb-3"
+                onclick="showStep2()">
+                Continuar → Asignar Macrociclo
+              </button>
+              <p class="text-slate-600 text-xs text-center">El atleta recibirá la invitación al registrar el macrociclo</p>
+            </div>
+
+          </div>
+
+          <div class="bottom-nav">
+            <div class="nav-item"><span class="nav-icon">⚡</span><span>Hub</span></div>
+            <div class="nav-item active"><span class="nav-icon">👥</span><span>Equipo</span></div>
+            <div class="nav-item"><span class="nav-icon">📊</span><span>Stats</span></div>
+            <div class="nav-item"><span class="nav-icon">👤</span><span>Perfil</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         PHONE 2 — C6: Assign Macrocycle
+         ══════════════════════════════ -->
+    <div>
+      <p class="text-center text-slate-500 text-xs font-bold uppercase tracking-widest mb-4">C6 · Asignar Macrociclo · 19 programas</p>
+      <div class="phone">
+        <div class="phone-inner">
+          <div class="status-bar">
+            <span>9:41</span>
+            <span class="text-slate-600">Coach · Premium</span>
+            <span>●●●</span>
+          </div>
+
+          <!-- Header -->
+          <div class="flex items-center gap-3 px-5 pb-3">
+            <button class="text-slate-400 text-lg">←</button>
+            <div class="flex items-center gap-2 flex-1">
+              <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-black text-xs">C</div>
+              <div>
+                <h2 class="text-white font-bold text-sm">Carlos Mendoza</h2>
+                <p class="text-slate-500 text-xs">Asignar macrociclo · Paso 2 de 3</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step progress -->
+          <div class="flex items-center gap-2 justify-center mb-4">
+            <div class="step-dot done"></div>
+            <div class="h-px w-8 bg-indigo-500/40"></div>
+            <div class="step-dot done"></div>
+            <div class="h-px w-8 bg-indigo-500/40"></div>
+            <div class="step-dot active"></div>
+          </div>
+
+          <div class="px-5">
+
+            <!-- ML recommendation banner -->
+            <div class="bg-indigo-900/20 border border-indigo-500/30 rounded-2xl p-3 mb-4 flex items-start gap-3">
+              <span class="text-xl mt-0.5">🤖</span>
+              <div>
+                <p class="text-indigo-400 font-bold text-xs">IA recomienda para Carlos</p>
+                <p class="text-white font-black text-sm">Colombiano 5D · Escuela Colombiana</p>
+                <p class="text-slate-500 text-xs mt-0.5">Nivel intermedio · 5 días/semana · Ratios ideales para esta escuela</p>
+              </div>
+              <button class="text-xs text-indigo-400 font-bold bg-indigo-900/40 px-2 py-1 rounded-lg ml-auto whitespace-nowrap">¿Por qué?</button>
+            </div>
+
+            <!-- Filter tabs by school -->
+            <div class="flex gap-2 overflow-x-auto pb-2 mb-3" style="scrollbar-width:none;">
+              <button class="filter-tab active">Todos</button>
+              <button class="filter-tab">🇨🇴 Colombia</button>
+              <button class="filter-tab">🇷🇺 Rusia</button>
+              <button class="filter-tab">🇨🇳 China</button>
+              <button class="filter-tab">🇧🇬 Bulgaria</button>
+              <button class="filter-tab">🇵🇱 Polonia</button>
+              <button class="filter-tab">🇰🇷 Korea</button>
+              <button class="filter-tab">🇺🇦 Ucrania</button>
+              <button class="filter-tab">⚡ Híbrido</button>
+            </div>
+
+            <!-- Program list — 19 programs condensed -->
+            <div class="space-y-2 mb-4">
+
+              <!-- COLOMBIANA -->
+              <p class="text-xs text-slate-600 font-bold uppercase tracking-widest pt-1">🇨🇴 Escuela Colombiana</p>
+
+              <div class="school-card selected" onclick="selectProgram(this, 'col5d')">
+                <div class="flex items-start justify-between">
+                  <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                      <p class="text-white font-bold text-sm">Colombiano 5D</p>
+                      <span class="tag bg-indigo-900/40 text-indigo-400 border border-indigo-500/30">IA ✓</span>
+                    </div>
+                    <p class="text-slate-500 text-xs mb-2">16 semanas · 5 días/sem · 80 sesiones</p>
+                    <div class="flex gap-3 text-xs text-slate-500">
+                      <span>Vol: <span class="text-white">Alto</span></span>
+                      <span>Int: <span class="text-white">Medio-Alto</span></span>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <div class="diff-bar justify-end mb-1">
+                      <div class="diff-seg on"></div>
+                      <div class="diff-seg on"></div>
+                      <div class="diff-seg on"></div>
+                      <div class="diff-seg on hard"></div>
+                      <div class="diff-seg"></div>
+                    </div>
+                    <p class="text-xs text-slate-600">Dif. 4/5</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- RUSA -->
+              <p class="text-xs text-slate-600 font-bold uppercase tracking-widest pt-1">🇷🇺 Escuela Rusa</p>
+
+              <div class="school-card" onclick="selectProgram(this, 'rus1')">
+                <div class="flex items-start justify-between">
+                  <div class="flex-1">
+                    <p class="text-white font-bold text-sm mb-1">Vorobyev Classic</p>
+                    <p class="text-slate-500 text-xs mb-2">20 semanas · 4 días/sem · 80 sesiones</p>
+                    <div class="flex gap-3 text-xs text-slate-500">
+                      <span>Vol: <span class="text-white">Medio</span></span>
+                      <span>Int: <span class="text-white">Alto</span></span>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <div class="diff-bar justify-end mb-1">
+                      <div class="diff-seg on"></div>
+                      <div class="diff-seg on"></div>
+                      <div class="diff-seg on"></div>
+                      <div class="diff-seg on hard"></div>
+                      <div class="diff-seg on hard"></div>
+                    </div>
+                    <p class="text-xs text-slate-600">Dif. 5/5</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- CHINA -->
+              <p class="text-xs text-slate-600 font-bold uppercase tracking-widest pt-1">🇨🇳 Escuela China</p>
+
+              <div class="school-card" onclick="selectProgram(this, 'chi1')">
+                <div class="flex items-start justify-between">
+                  <div class="flex-1">
+                    <p class="text-white font-bold text-sm mb-1">Chen Classic 6D</p>
+                    <p class="text-slate-500 text-xs mb-2">12 semanas · 6 días/sem · 72 sesiones</p>
+                    <div class="flex gap-3 text-xs text-slate-500">
+                      <span>Vol: <span class="text-white">Muy Alto</span></span>
+                      <span>Int: <span class="text-white">Máximo</span></span>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <div class="diff-bar justify-end mb-1">
+                      <div class="diff-seg on hard"></div>
+                      <div class="diff-seg on hard"></div>
+                      <div class="diff-seg on hard"></div>
+                      <div class="diff-seg on hard"></div>
+                      <div class="diff-seg on hard"></div>
+                    </div>
+                    <p class="text-xs text-red-400">Dif. 5/5 🔥</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- BULGARA -->
+              <p class="text-xs text-slate-600 font-bold uppercase tracking-widest pt-1">🇧🇬 Escuela Búlgara</p>
+
+              <div class="school-card" onclick="selectProgram(this, 'bul1')">
+                <div class="flex items-start justify-between">
+                  <div class="flex-1">
+                    <p class="text-white font-bold text-sm mb-1">Bulgarian Daily Max</p>
+                    <p class="text-slate-500 text-xs mb-2">8 semanas · 6 días/sem · 48 sesiones</p>
+                    <div class="flex gap-3 text-xs text-slate-500">
+                      <span>Vol: <span class="text-white">Bajo</span></span>
+                      <span>Int: <span class="text-white">Máximo</span></span>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <div class="diff-bar justify-end mb-1">
+                      <div class="diff-seg on hard"></div>
+                      <div class="diff-seg on hard"></div>
+                      <div class="diff-seg on hard"></div>
+                      <div class="diff-seg on hard"></div>
+                      <div class="diff-seg on hard"></div>
+                    </div>
+                    <p class="text-xs text-red-400">Élite 🚨</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- HIBRIDO -->
+              <p class="text-xs text-slate-600 font-bold uppercase tracking-widest pt-1">⚡ Híbrido Moderno</p>
+
+              <div class="school-card" onclick="selectProgram(this, 'hyb1')">
+                <div class="flex items-start justify-between">
+                  <div class="flex-1">
+                    <p class="text-white font-bold text-sm mb-1">Hybrid Strength-OLY</p>
+                    <p class="text-slate-500 text-xs mb-2">16 semanas · 4 días/sem · 64 sesiones</p>
+                    <div class="flex gap-3 text-xs text-slate-500">
+                      <span>Vol: <span class="text-white">Medio</span></span>
+                      <span>Int: <span class="text-white">Medio</span></span>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <div class="diff-bar justify-end mb-1">
+                      <div class="diff-seg on"></div>
+                      <div class="diff-seg on"></div>
+                      <div class="diff-seg on"></div>
+                      <div class="diff-seg"></div>
+                      <div class="diff-seg"></div>
+                    </div>
+                    <p class="text-xs text-slate-600">Dif. 3/5</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- show more hint -->
+              <button class="w-full text-xs text-indigo-400 font-bold py-2 border border-dashed border-indigo-500/30 rounded-xl">
+                + 14 programas más (Polonia, Korea, Ucrania, Híbrido...)
+              </button>
+            </div>
+
+            <!-- TIME-SHIFT SLIDER -->
+            <div class="card mb-4">
+              <div class="flex items-center justify-between mb-3">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">⏱️ Time-Shift</p>
+                <span class="text-xs text-indigo-400 font-bold">Inicio: Semana 1</span>
+              </div>
+              <p class="text-slate-500 text-xs mb-3 leading-relaxed">
+                ¿Carlos ya lleva semanas entrenando? Ajusta el punto de entrada al programa sin necesidad de empezar desde cero.
+              </p>
+              <!-- Week display -->
+              <div class="flex justify-between text-xs text-slate-600 mb-2">
+                <span>Sem 1</span>
+                <span class="text-white font-bold" id="ts-display">Sem 1 (inicio)</span>
+                <span>Sem 16</span>
+              </div>
+              <input type="range" class="ts-slider" min="1" max="16" value="1" id="ts-slider"
+                oninput="updateTimeShift(this.value)" style="--pct: 0%;"/>
+              <div class="grid grid-cols-4 gap-1.5 mt-3">
+                <button class="text-xs py-1.5 rounded-lg bg-slate-800 text-slate-400 font-bold" onclick="setTS(1)">Sem 1</button>
+                <button class="text-xs py-1.5 rounded-lg bg-indigo-900/40 text-indigo-400 border border-indigo-500/30 font-bold" onclick="setTS(5)">Sem 5</button>
+                <button class="text-xs py-1.5 rounded-lg bg-slate-800 text-slate-400 font-bold" onclick="setTS(9)">Sem 9</button>
+                <button class="text-xs py-1.5 rounded-lg bg-slate-800 text-slate-400 font-bold" onclick="setTS(13)">Sem 13</button>
+              </div>
+
+              <!-- Phase indicator -->
+              <div class="mt-3 bg-slate-800 rounded-xl p-3">
+                <div class="flex items-center justify-between text-xs mb-2">
+                  <span class="text-slate-400 font-bold">Fase actual en Sem 1:</span>
+                  <span class="text-green-400 font-bold" id="phase-name">Acumulación</span>
+                </div>
+                <div class="flex gap-1" id="phase-bar">
+                  <div class="flex-1 h-2 rounded-sm bg-green-500 opacity-90" title="Acumulación S1-4"></div>
+                  <div class="flex-1 h-2 rounded-sm bg-yellow-500 opacity-60" title="Intensificación S5-10"></div>
+                  <div class="flex-1 h-2 rounded-sm bg-orange-500 opacity-50" title="Transformación S11-14"></div>
+                  <div class="w-8 h-2 rounded-sm bg-red-500 opacity-50" title="Peak S15-16"></div>
+                  <div class="flex items-center ml-1">
+                    <div class="w-1.5 h-4 bg-indigo-400 rounded-sm relative" id="phase-marker" style="margin-left: 0px;"></div>
+                  </div>
+                </div>
+                <div class="flex justify-between text-xs text-slate-700 mt-1">
+                  <span>Acumulación</span>
+                  <span>Intensif.</span>
+                  <span>Transform.</span>
+                  <span>Peak</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Competition date (optional) -->
+            <div class="card mb-4">
+              <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">🏆 Fecha de competencia (opcional)</p>
+              <div class="flex gap-3 items-center">
+                <input type="date" class="input-field flex-1" value="2026-09-15"/>
+                <div class="text-right text-xs">
+                  <p class="text-white font-bold">21 semanas</p>
+                  <p class="text-slate-500">hasta la comp.</p>
+                </div>
+              </div>
+              <div class="mt-2 bg-indigo-900/20 border border-indigo-500/20 rounded-xl p-2.5">
+                <p class="text-xs text-indigo-400">📅 El sistema ajustará automáticamente el Peak block para que coincida con la fecha de competencia.</p>
+              </div>
+            </div>
+
+            <!-- CONFIRM CTA -->
+            <div class="bg-gradient-to-br from-indigo-900/30 to-purple-900/20 border border-indigo-500/30 rounded-2xl p-4 mb-4">
+              <p class="text-white font-black text-sm mb-1">Resumen de asignación</p>
+              <div class="space-y-1 mb-3 text-xs">
+                <div class="flex justify-between">
+                  <span class="text-slate-400">Atleta</span>
+                  <span class="text-white font-bold">Carlos Mendoza · 73kg</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-400">Programa</span>
+                  <span class="text-white font-bold">Colombiano 5D · 16 sem</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-400">Inicio</span>
+                  <span class="text-white font-bold">Semana 1 · Acumulación</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-400">Competencia</span>
+                  <span class="text-white font-bold">15 Sep 2026</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-400">Trial</span>
+                  <span class="text-amber-400 font-bold">🎖️ 45 días Elite</span>
+                </div>
+              </div>
+              <button class="w-full bg-indigo-600 text-white font-black text-sm py-3.5 rounded-2xl"
+                style="box-shadow: 0 4px 16px rgba(99,102,241,.4);">
+                ✓ Confirmar y enviar invitación
+              </button>
+            </div>
+
+          </div>
+
+          <div class="bottom-nav">
+            <div class="nav-item"><span class="nav-icon">⚡</span><span>Hub</span></div>
+            <div class="nav-item active"><span class="nav-icon">👥</span><span>Equipo</span></div>
+            <div class="nav-item"><span class="nav-icon">📊</span><span>Stats</span></div>
+            <div class="nav-item"><span class="nav-icon">👤</span><span>Perfil</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Engine legend -->
+  <div class="max-w-3xl mx-auto mt-12 bg-slate-900 border border-slate-700/40 rounded-2xl p-6">
+    <h3 class="text-white font-bold mb-4">Engines + datos en estas pantallas</h3>
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+      <div class="bg-slate-800 rounded-xl p-3">
+        <p class="text-indigo-400 font-bold text-xs mb-1">📚 Macrocycle Engine</p>
+        <p class="text-slate-500 text-xs">19 programas · 9 escuelas · Time-Shift configurable</p>
+      </div>
+      <div class="bg-slate-800 rounded-xl p-3">
+        <p class="text-purple-400 font-bold text-xs mb-1">🤖 ML School Selector</p>
+        <p class="text-slate-500 text-xs">Recomienda escuela óptima por perfil de ratios y nivel</p>
+      </div>
+      <div class="bg-slate-800 rounded-xl p-3">
+        <p class="text-amber-400 font-bold text-xs mb-1">🎖️ 45-Day Trial</p>
+        <p class="text-slate-500 text-xs">Activado en el momento de asignación del macro</p>
+      </div>
+      <div class="bg-slate-800 rounded-xl p-3">
+        <p class="text-cyan-400 font-bold text-xs mb-1">📐 Golden Ratio</p>
+        <p class="text-slate-500 text-xs">Validación de 1RMs en tiempo real durante el setup</p>
+      </div>
+      <div class="bg-slate-800 rounded-xl p-3">
+        <p class="text-green-400 font-bold text-xs mb-1">📅 Competition Sync</p>
+        <p class="text-slate-500 text-xs">Peak block se alinea automáticamente con fecha competencia</p>
+      </div>
+      <div class="bg-slate-800 rounded-xl p-3">
+        <p class="text-red-400 font-bold text-xs mb-1">🔒 Privacy Engine</p>
+        <p class="text-slate-500 text-xs">Coach propietario del perfil · atleta invitado por link</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center mt-8 mb-4">
+    <a href="index.html" class="text-indigo-400 text-sm hover:text-indigo-300 transition-colors">← Volver al índice</a>
+  </div>
+
+  <script>
+    // Time-Shift slider
+    function updateTimeShift(val) {
+      val = parseInt(val);
+      const slider = document.getElementById('ts-slider');
+      const pct = ((val - 1) / 15 * 100).toFixed(0);
+      slider.style.setProperty('--pct', pct + '%');
+
+      let phase, phaseColor;
+      if (val <= 4)       { phase = 'Acumulación S1-4';    phaseColor = '#4ade80'; }
+      else if (val <= 10) { phase = 'Intensificación S5-10'; phaseColor = '#facc15'; }
+      else if (val <= 14) { phase = 'Transformación S11-14'; phaseColor = '#fb923c'; }
+      else                { phase = 'Peak S15-16';           phaseColor = '#f87171'; }
+
+      document.getElementById('ts-display').textContent = `Sem ${val} · ${phase.split(' ')[0]}`;
+      const phaseEl = document.getElementById('phase-name');
+      phaseEl.textContent = phase;
+      phaseEl.style.color = phaseColor;
+    }
+
+    function setTS(val) {
+      document.getElementById('ts-slider').value = val;
+      updateTimeShift(val);
+    }
+
+    // Program selection
+    function selectProgram(card, id) {
+      document.querySelectorAll('.school-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+    }
+  </script>
+</body>
+</html>

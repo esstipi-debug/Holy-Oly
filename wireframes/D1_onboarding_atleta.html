@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>D1 — Onboarding Atleta</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #050510;
+      min-height: 100vh;
+      font-family: 'Inter', system-ui, sans-serif;
+      padding: 40px 20px 80px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+    .phone {
+      width: 390px;
+      min-height: 780px;
+      background: #07070F;
+      border-radius: 44px;
+      border: 2px solid #2a2a3a;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 0 1px #1a1a28, 0 0 60px rgba(99,102,241,.1);
+    }
+    .phone-label {
+      width: 390px;
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: .08em; text-transform: uppercase;
+      color: #475569;
+    }
+    .status-bar {
+      height: 44px; background: #07070F;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px; flex-shrink: 0;
+    }
+    .scroll-area { flex:1; overflow-y:auto; scrollbar-width:none; padding-bottom: 20px; }
+    .scroll-area::-webkit-scrollbar { display: none; }
+
+    /* Step indicator */
+    .step-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #1e1e30; transition: all .3s;
+    }
+    .step-dot.active { background: #6366f1; width: 24px; border-radius: 4px; }
+    .step-dot.done   { background: #22C55E; }
+
+    /* 1RM input */
+    .rm-row {
+      background: #111118;
+      border: 1px solid #1e1e30;
+      border-radius: 16px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: border-color .15s;
+    }
+    .rm-row:focus-within { border-color: #6366f1; }
+    .rm-input {
+      background: #1a1a28;
+      border: 1px solid #2a2a3a;
+      border-radius: 10px;
+      padding: 8px 12px;
+      color: #f1f5f9;
+      font-size: 16px;
+      font-weight: 700;
+      text-align: center;
+      width: 80px;
+      outline: none;
+      flex-shrink: 0;
+    }
+    .rm-input:focus { border-color: #6366f1; background: #1e1b4b; }
+
+    /* Trial badge */
+    @keyframes trialGlow {
+      0%, 100% { box-shadow: 0 0 16px rgba(99,102,241,.3); }
+      50%       { box-shadow: 0 0 32px rgba(99,102,241,.6); }
+    }
+    .trial-glow { animation: trialGlow 2.5s ease-in-out infinite; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in { animation: fadeIn .4s ease-out both; }
+    .fade-in:nth-child(1) { animation-delay: .1s; }
+    .fade-in:nth-child(2) { animation-delay: .2s; }
+    .fade-in:nth-child(3) { animation-delay: .3s; }
+    .fade-in:nth-child(4) { animation-delay: .4s; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     PASO 1: Bienvenida + Trial 45 días
+═══════════════════════════════════════ -->
+<div>
+  <p class="phone-label">D1 — Paso 1 · Bienvenida</p>
+  <div class="phone">
+    <div class="status-bar">
+      <span style="font-size:12px;color:#94a3b8;font-weight:600;">9:30</span>
+      <span style="font-size:12px;color:#94a3b8;font-weight:600;">100%</span>
+    </div>
+    <div class="scroll-area">
+      <div style="padding:32px 28px 28px;">
+
+        <!-- Logo -->
+        <div style="text-align:center;margin-bottom:32px;">
+          <p style="font-size:36px;font-weight:900;color:white;letter-spacing:-.04em;">HOLY<span style="color:#6366f1;">OLY</span></p>
+          <p style="font-size:12px;color:#475569;margin-top:4px;font-weight:600;letter-spacing:.05em;">Smart training. Zero burnout.</p>
+        </div>
+
+        <!-- Coach invite message -->
+        <div style="background:linear-gradient(135deg,#1e1b4b,#111128);border:1px solid #3730a3;border-radius:20px;padding:18px;margin-bottom:24px;" class="fade-in">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8B5CF6);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:white;flex-shrink:0;">R</div>
+            <div>
+              <p style="font-size:12px;font-weight:700;color:#f1f5f9;">Coach Ramírez</p>
+              <p style="font-size:10px;color:#818cf8;">te ha invitado a su equipo</p>
+            </div>
+          </div>
+          <p style="font-size:13px;color:#94a3b8;line-height:1.5;">"Bienvenido al equipo. HolyOly va a cambiar cómo entrenas. Sigue los check-ins y el sistema hará el resto."</p>
+        </div>
+
+        <!-- 45-day Elite Trial badge -->
+        <div class="trial-glow" style="background:linear-gradient(135deg,#1e1b4b,#2d1b69);border:1px solid #6366f1;border-radius:20px;padding:20px;margin-bottom:24px;text-align:center;" class="fade-in">
+          <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(99,102,241,.2);border:1px solid rgba(99,102,241,.4);border-radius:20px;padding:4px 14px;margin-bottom:12px;">
+            <span style="font-size:10px;">👑</span>
+            <span style="font-size:10px;font-weight:700;color:#a78bfa;letter-spacing:.06em;text-transform:uppercase;">ACCESO ELITE ACTIVADO</span>
+          </div>
+          <p style="font-size:42px;font-weight:900;color:white;letter-spacing:-.03em;line-height:1;">45</p>
+          <p style="font-size:14px;font-weight:700;color:#a78bfa;margin-top:2px;">días de calibración Elite desbloqueados</p>
+          <div style="display:flex;justify-content:center;gap:16px;margin-top:14px;padding-top:14px;border-top:1px solid rgba(99,102,241,.2);">
+            <div style="text-align:center;">
+              <p style="font-size:11px;color:#818cf8;font-weight:700;">✓ Session Adaptation AI</p>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:8px;">
+            <span style="font-size:10px;color:#6366f1;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.2);border-radius:10px;padding:3px 10px;">Gamificación completa</span>
+            <span style="font-size:10px;color:#6366f1;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.2);border-radius:10px;padding:3px 10px;">Injury Shield</span>
+            <span style="font-size:10px;color:#6366f1;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.2);border-radius:10px;padding:3px 10px;">4 Temas Premium</span>
+            <span style="font-size:10px;color:#6366f1;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.2);border-radius:10px;padding:3px 10px;">Wise Score</span>
+          </div>
+        </div>
+
+        <!-- Why 45 days explanation -->
+        <div style="background:#111118;border:1px solid #1e1e30;border-radius:16px;padding:14px;margin-bottom:28px;display:flex;gap:12px;" class="fade-in">
+          <span style="font-size:20px;flex-shrink:0;">🧬</span>
+          <div>
+            <p style="font-size:12px;font-weight:700;color:#f1f5f9;margin-bottom:4px;">¿Por qué 45 días?</p>
+            <p style="font-size:11px;color:#64748b;line-height:1.5;">El modelo Banister necesita <strong style="color:#22C55E;">28 días</strong> para calibrarse con tu cuerpo. Al día 45, el sistema te conoce perfectamente y tu entrenamiento se vuelve quirúrgico.</p>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <button style="width:100%;background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;border-radius:16px;padding:16px;color:white;font-size:16px;font-weight:800;cursor:pointer;letter-spacing:.02em;">
+          Empezar mi calibración →
+        </button>
+        <p style="text-align:center;font-size:11px;color:#334155;margin-top:10px;">Sin tarjeta de crédito · El Coach gestiona tu plan</p>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     PASO 2: Configurar 1RMs
+═══════════════════════════════════════ -->
+<div>
+  <p class="phone-label">D1 — Paso 2 · Mis 1RMs</p>
+  <div class="phone">
+    <div class="status-bar">
+      <span style="font-size:12px;color:#94a3b8;font-weight:600;">9:32</span>
+      <span style="font-size:12px;color:#94a3b8;font-weight:600;">100%</span>
+    </div>
+    <div class="scroll-area">
+      <div style="padding:24px 24px 28px;">
+
+        <!-- Step dots -->
+        <div style="display:flex;align-items:center;gap:6px;justify-content:center;margin-bottom:28px;">
+          <div class="step-dot done"></div>
+          <div class="step-dot active"></div>
+          <div class="step-dot"></div>
+          <div class="step-dot"></div>
+        </div>
+
+        <p style="font-size:22px;font-weight:900;color:#f1f5f9;margin-bottom:4px;letter-spacing:-.02em;">Tus marcas actuales</p>
+        <p style="font-size:13px;color:#64748b;margin-bottom:24px;line-height:1.5;">Con estos datos, el sistema calcula los pesos exactos de cada sesión. Si no los tienes aún, el coach puede ingresarlos.</p>
+
+        <!-- 1RM inputs -->
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
+
+          <div class="rm-row fade-in">
+            <div style="flex:1;">
+              <p style="font-size:13px;font-weight:700;color:#f1f5f9;">Arrancada</p>
+              <p style="font-size:10px;color:#64748b;margin-top:1px;">Snatch · Máximo en 1 repetición</p>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <input class="rm-input" type="number" placeholder="—" value="89">
+              <span style="font-size:12px;color:#475569;font-weight:600;">kg</span>
+            </div>
+          </div>
+
+          <div class="rm-row fade-in">
+            <div style="flex:1;">
+              <p style="font-size:13px;font-weight:700;color:#f1f5f9;">Dos Tiempos</p>
+              <p style="font-size:10px;color:#64748b;margin-top:1px;">Clean & Jerk · Máximo en 1 repetición</p>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <input class="rm-input" type="number" placeholder="—" value="112">
+              <span style="font-size:12px;color:#475569;font-weight:600;">kg</span>
+            </div>
+          </div>
+
+          <div class="rm-row fade-in">
+            <div style="flex:1;">
+              <p style="font-size:13px;font-weight:700;color:#f1f5f9;">Sentadilla Trasera</p>
+              <p style="font-size:10px;color:#64748b;margin-top:1px;">Back Squat · Máximo en 1 repetición</p>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <input class="rm-input" type="number" placeholder="—" value="145">
+              <span style="font-size:12px;color:#475569;font-weight:600;">kg</span>
+            </div>
+          </div>
+
+          <div class="rm-row fade-in">
+            <div style="flex:1;">
+              <p style="font-size:13px;font-weight:700;color:#f1f5f9;">Sentadilla Frontal</p>
+              <p style="font-size:10px;color:#64748b;margin-top:1px;">Front Squat · Máximo en 1 repetición</p>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <input class="rm-input" type="number" placeholder="—" value="125">
+              <span style="font-size:12px;color:#475569;font-weight:600;">kg</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Smart ratio preview -->
+        <div style="background:#0d1820;border:1px solid #0e4c56;border-radius:16px;padding:14px;margin-bottom:24px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+            <span style="font-size:14px;">🧮</span>
+            <p style="font-size:11px;font-weight:700;color:#06B6D4;letter-spacing:.06em;text-transform:uppercase;">Análisis preliminar de ratios</p>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:12px;color:#94a3b8;">Sn / CJ ratio</span>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span style="font-size:12px;font-weight:700;color:#f1f5f9;">0.795</span>
+                <span style="font-size:10px;background:#0d2718;border:1px solid #14532d;border-radius:6px;padding:1px 6px;color:#4ade80;">✓ Normal</span>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:12px;color:#94a3b8;">FS / BS ratio</span>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span style="font-size:12px;font-weight:700;color:#f1f5f9;">0.862</span>
+                <span style="font-size:10px;background:#0d2718;border:1px solid #14532d;border-radius:6px;padding:1px 6px;color:#4ade80;">✓ Ideal</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <button style="width:100%;background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;border-radius:14px;padding:14px;color:white;font-size:15px;font-weight:800;cursor:pointer;">
+            Continuar →
+          </button>
+          <button style="width:100%;background:transparent;border:1px solid #1e1e30;border-radius:12px;padding:11px;color:#475569;font-size:12px;font-weight:600;cursor:pointer;">
+            No tengo mis marcas — el coach las ingresará
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     PASO 3: Datos personales + Peso corporal
+═══════════════════════════════════════ -->
+<div>
+  <p class="phone-label">D1 — Paso 3 · Perfil base</p>
+  <div class="phone" style="min-height:700px;">
+    <div class="status-bar">
+      <span style="font-size:12px;color:#94a3b8;font-weight:600;">9:35</span>
+      <span style="font-size:12px;color:#94a3b8;font-weight:600;">100%</span>
+    </div>
+    <div class="scroll-area">
+      <div style="padding:24px 24px 28px;">
+
+        <!-- Step dots -->
+        <div style="display:flex;align-items:center;gap:6px;justify-content:center;margin-bottom:28px;">
+          <div class="step-dot done"></div>
+          <div class="step-dot done"></div>
+          <div class="step-dot active"></div>
+          <div class="step-dot"></div>
+        </div>
+
+        <p style="font-size:22px;font-weight:900;color:#f1f5f9;margin-bottom:4px;letter-spacing:-.02em;">Tu perfil base</p>
+        <p style="font-size:13px;color:#64748b;margin-bottom:24px;">Necesario para calcular el OLY Index y las categorías de competencia.</p>
+
+        <!-- Fields -->
+        <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px;">
+
+          <div style="background:#111118;border:1px solid #1e1e30;border-radius:14px;padding:14px 16px;">
+            <p style="font-size:10px;font-weight:700;color:#475569;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;">Nombre completo</p>
+            <div style="background:#1a1a28;border:1px solid #6366f1;border-radius:10px;padding:10px 14px;">
+              <span style="font-size:15px;font-weight:600;color:#f1f5f9;">Juan Pérez</span>
+            </div>
+          </div>
+
+          <div style="background:#111118;border:1px solid #1e1e30;border-radius:14px;padding:14px 16px;">
+            <p style="font-size:10px;font-weight:700;color:#475569;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;">Peso Corporal</p>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <div style="background:#1a1a28;border:1px solid #2a2a3a;border-radius:10px;padding:10px 14px;flex:1;">
+                <span style="font-size:15px;font-weight:700;color:#f1f5f9;">78</span>
+              </div>
+              <span style="font-size:13px;color:#475569;font-weight:600;">kg</span>
+            </div>
+          </div>
+
+          <div style="background:#111118;border:1px solid #1e1e30;border-radius:14px;padding:14px 16px;">
+            <p style="font-size:10px;font-weight:700;color:#475569;letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;">Sexo biológico</p>
+            <div style="display:flex;gap:8px;">
+              <button style="flex:1;background:#1e1b4b;border:1.5px solid #6366f1;border-radius:10px;padding:10px;color:#a78bfa;font-size:13px;font-weight:700;cursor:pointer;">Masculino</button>
+              <button style="flex:1;background:#111118;border:1px solid #1e1e30;border-radius:10px;padding:10px;color:#475569;font-size:13px;font-weight:600;cursor:pointer;">Femenino</button>
+            </div>
+            <p style="font-size:10px;color:#334155;margin-top:6px;">Para atletas femeninas: adapta la carga al ciclo hormonal (Hormonal Engine)</p>
+          </div>
+
+          <div style="background:#111118;border:1px solid #1e1e30;border-radius:14px;padding:14px 16px;">
+            <p style="font-size:10px;font-weight:700;color:#475569;letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;">Nivel de experiencia</p>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <button style="background:#111118;border:1px solid #1e1e30;border-radius:10px;padding:10px 14px;color:#64748b;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">🌱 Novato — menos de 1 año</button>
+              <button style="background:#1e1b4b;border:1.5px solid #6366f1;border-radius:10px;padding:10px 14px;color:#a78bfa;font-size:13px;font-weight:700;cursor:pointer;text-align:left;">⚡ Intermedio — 1 a 3 años</button>
+              <button style="background:#111118;border:1px solid #1e1e30;border-radius:10px;padding:10px 14px;color:#64748b;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">🏆 Avanzado — más de 3 años</button>
+            </div>
+          </div>
+        </div>
+
+        <button style="width:100%;background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;border-radius:14px;padding:14px;color:white;font-size:15px;font-weight:800;cursor:pointer;">
+          Continuar →
+        </button>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     PASO 4: Todo listo — Coach asignó macrociclo
+═══════════════════════════════════════ -->
+<div>
+  <p class="phone-label">D1 — Paso 4 · ¡Listo!</p>
+  <div class="phone" style="min-height:680px;">
+    <div class="status-bar">
+      <span style="font-size:12px;color:#94a3b8;font-weight:600;">9:38</span>
+      <span style="font-size:12px;color:#94a3b8;font-weight:600;">100%</span>
+    </div>
+    <div class="scroll-area">
+      <div style="padding:40px 28px 28px;display:flex;flex-direction:column;align-items:center;text-align:center;">
+
+        <!-- Step dots -->
+        <div style="display:flex;align-items:center;gap:6px;justify-content:center;margin-bottom:36px;">
+          <div class="step-dot done"></div>
+          <div class="step-dot done"></div>
+          <div class="step-dot done"></div>
+          <div class="step-dot active"></div>
+        </div>
+
+        <!-- Success icon -->
+        <div style="width:90px;height:90px;border-radius:24px;background:linear-gradient(135deg,#0d2718,#14532d);border:2px solid #22C55E;display:flex;align-items:center;justify-content:center;font-size:44px;margin-bottom:20px;box-shadow:0 0 32px rgba(34,197,94,.2);">
+          ✅
+        </div>
+
+        <p style="font-size:24px;font-weight:900;color:#f1f5f9;letter-spacing:-.02em;margin-bottom:8px;">¡Calibración iniciada!</p>
+        <p style="font-size:14px;color:#64748b;line-height:1.5;margin-bottom:28px;max-width:280px;">Tu coach ha asignado tu programa. Tienes <strong style="color:#6366f1;">45 días Elite</strong> para que el sistema te conozca a fondo.</p>
+
+        <!-- Macrocycle assigned -->
+        <div style="width:100%;background:#111118;border:1px solid #1e1e30;border-radius:20px;padding:16px;margin-bottom:16px;text-align:left;">
+          <p style="font-size:10px;font-weight:700;color:#475569;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;">Programa asignado por tu coach</p>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="width:44px;height:44px;border-radius:12px;background:#0d1820;border:1px solid #0e4c56;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🇨🇴</div>
+            <div>
+              <p style="font-size:14px;font-weight:800;color:#f1f5f9;">Colombiano 5D</p>
+              <p style="font-size:11px;color:#64748b;">16 semanas · Intermedio · Inicio: Semana 3</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Day 1 preview -->
+        <div style="width:100%;background:#0d1820;border:1px solid #0e4c56;border-radius:20px;padding:16px;margin-bottom:28px;text-align:left;">
+          <p style="font-size:10px;font-weight:700;color:#06B6D4;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;">Tu primera sesión — Mañana</p>
+          <p style="font-size:14px;font-weight:700;color:#f1f5f9;">Semana 3 · Día 1 · Fuerza</p>
+          <p style="font-size:12px;color:#64748b;margin-top:4px;">Arrancada · Dos Tiempos · Sentadilla Frontal</p>
+        </div>
+
+        <button style="width:100%;background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;border-radius:16px;padding:16px;color:white;font-size:16px;font-weight:800;cursor:pointer;margin-bottom:10px;">
+          Ir a mi Dashboard →
+        </button>
+        <p style="font-size:10px;color:#334155;">Día 1 de 45 · Elite Calibration Mode</p>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<a href="index.html" style="position:fixed;top:20px;left:20px;background:#1e1e30;color:#94a3b8;font-size:13px;padding:8px 14px;border-radius:10px;text-decoration:none;border:1px solid #2a2a3a;z-index:99;">← Volver</a>
+
+</body>
+</html>

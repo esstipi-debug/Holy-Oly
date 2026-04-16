@@ -1,0 +1,25 @@
+📂 OPCIÓN A: MACROCICLO UCRANIANO (3 DÍAS/SEMANA)
+
+Perfil: Atleta con tiempo limitado, CrossFitters, o enfoque en alta densidad pura.
+🟢 FASE 1: ACUMULACIÓN (Sem 1-5)
+
+SEMANA 1 (Base - EMOM 3s/2s) | DÍA | TIPO | SLOT 1 (PRINCIPAL) | SLOT 2 (SECUNDARIO) | SLOT 3 (FUERZA) | |:---:|:---|:---|:---|:---| | LUN | VOL | Snatch: EMOM 12' → 2 reps @ 70% | Snatch Pull: 4x4 @ 90% | Back Squat: 5x5 @ 70% | | MIÉ | VOL | C&J: EMOM 12' → (1+1) @ 70% | Clean Pull: 4x4 @ 90% | Front Squat: 4x4 @ 75% | | VIE | INT | Snatch: EMOM 10' → 1 rep @ 75-80% | C&J: EMOM 10' → 1 rep @ 75-80% | Back Squat: 3x3 @ 75% |
+
+SEMANA 2 (Carga - EMOM 2s) | DÍA | TIPO | SLOT 1 (PRINCIPAL) | SLOT 2 (SECUNDARIO) | SLOT 3 (FUERZA) | |:---:|:---|:---|:---|:---| | LUN | VOL | Snatch: EMOM 15' → 2 reps @ 75% | Snatch Pull: 5x3 @ 95% | Back Squat: 5x5 @ 75% | | MIÉ | VOL | C&J: EMOM 15' → (1+1) @ 75% | Clean Pull: 5x3 @ 100% | Front Squat: 5x3 @ 80% | | VIE | INT | Snatch: EMOM 12' → 1 rep @ 80-85% | C&J: EMOM 10' → 1 rep @ 80-85% | Back Squat: 3x2 @ 80% |
+
+SEMANA 3 (Impacto - EMOM Mixto) | DÍA | TIPO | SLOT 1 (PRINCIPAL) | SLOT 2 (SECUNDARIO) | SLOT 3 (FUERZA) | |:---:|:---|:---|:---|:---| | LUN | VOL | Snatch: EMOM 10' (2r @ 75%) + 5' (1r @ 85%) | Pull: 4x3 @ 100% | Back Squat: 4x4 @ 80% | | MIÉ | VOL | C&J: EMOM 10' (1+1 @ 75%) + 5' (1 @ 85%) | Push Press: 4x4 @ 75% | Front Squat: 4x2 @ 85% | | VIE | INT | Snatch: 1x1 @ 90% | C&J: 1x1 @ 90% | Back Squat: 2x2 @ 85% |
+
+SEMANA 4 (Volumen Pico) | DÍA | TIPO | SLOT 1 (PRINCIPAL) | SLOT 2 (SECUNDARIO) | SLOT 3 (FUERZA) | |:---:|:---|:---|:---|:---| | LUN | VOL | Snatch: EMOM 20' → 1 rep @ 80% | Snatch Pull: 3x3 @ 105% | Back Squat: 3x3 @ 85% | | MIÉ | VOL | C&J: EMOM 15' → 1 rep @ 80% | Clean Pull: 3x3 @ 105% | Front Squat: 3x2 @ 88% | | VIE | INT | Snatch: 1x1 @ 90-92% | C&J: 1x1 @ 90-92% | Squat: 1x1 @ 90% |
+
+SEMANA 5 (Descarga Activa / Transición) | DÍA | TIPO | SLOT 1 (PRINCIPAL) | SLOT 2 (SECUNDARIO) | SLOT 3 (FUERZA) | |:---:|:---|:---|:---|:---| | LUN | REC | Muscle Snatch: 3x3 (Ligero) | Power Snatch: 3x2 @ 60% | Back Squat: 3x5 @ 60% | | MIÉ | REC | Muscle Clean: 3x3 (Ligero) | Power Clean: 3x2 @ 60% | Front Squat: 2x3 @ 60% | | VIE | ACT | Snatch: 2x1 @ 70% | C&J: 2x1 @ 70% | Sin Sentadilla |
+🟡 FASE 2: INTENSIFICACIÓN & PEAKING (Sem 6-10)
+
+SEMANA 6 (Re-Intro Singles - "The Grind Begins") | DÍA | TIPO | SLOT 1 (PRINCIPAL) | SLOT 2 (SECUNDARIO) | SLOT 3 (FUERZA) | |:---:|:---|:---|:---|:---| | LUN | INT | Snatch: 15 Singles @ 85% (Sin tiempo límite) | Snatch Pull: 3x3 @ 100% | Back Squat: 3x3 @ 80% | | MIÉ | INT | C&J: 10 Singles @ 85% (Sin tiempo límite) | Jerk Dip: 3x3 @ 90% | Front Squat: 3x2 @ 85% | | VIE | EMOM| Snatch: EMOM 10' → 1 rep @ 85% | C&J: EMOM 8' → 1 rep @ 85% | Back Squat: 2x2 @ 85% |
+
+SEMANA 7 (Volumen de Intensidad) | DÍA | TIPO | SLOT 1 (PRINCIPAL) | SLOT 2 (SECUNDARIO) | SLOT 3 (FUERZA) | |:---:|:---|:---|:---|:---| | LUN | INT | Snatch: 20 Singles @ 85-88% | Pull: 3x2 @ 105% | Back Squat: 3x2 @ 85% | | MIÉ | INT | C&J: 15 Singles @ 85-88% | Push Press: 3x3 @ 80% | Front Squat: 2x2 @ 90% | | VIE | MAX | Snatch: 1x1 @ 92% | C&J: 1x1 @ 92% | Squat: 1x1 @ 90% |
+
+SEMANA 8 (Choque Máximo - "Torokhtiy Challenge") Objetivo: Acumular 25-30 singles totales en la semana sobre el 90%. | DÍA | TIPO | SLOT 1 (PRINCIPAL) | SLOT 2 (SECUNDARIO) | SLOT 3 (FUERZA) | |:---:|:---|:---|:---|:---| | LUN | INT | Snatch: 10 Singles @ 90% | Snatch Pull: 2x2 @ 110% | Back Squat: 2x2 @ 90% | | MIÉ | INT | C&J: 8 Singles @ 90% | Jerk Recovery: 3x2 @ 90% | Front Squat: 1x1 @ 95% | | VIE | EMOM| Snatch: EMOM 6' → 1 rep @ 90% | C&J: EMOM 4' → 1 rep @ 90% | Back Squat: 1x1 @ 95% |
+
+SEMANA 9 (Taper / Afilado) | DÍA | TIPO | SLOT 1 (PRINCIPAL) | SLOT 2 (SECUNDARIO) | SLOT 3 (FUERZA) | |:---:|:---|:---|:---|:---| | LUN | REC | Snatch: 3x1 @ 75% | Power Snatch: 2x2 @ 60% | Back Squat: 2x2 @ 70% | | MIÉ | REC | C&J: 2x1 @ 75% | Power Clean: 2x2 @ 60% | Front Squat: 2x1 @ 70% | | VIE | ACT | Snatch: 1x1 @ 80% | C&J: 1x1 @ 80% | Movilidad |
+
+SEMANA 10 (TEST MAXIMO) | DÍA | TIPO | SLOT 1 (PRINCIPAL) | SLOT 2 (SECUNDARIO) | SLOT 3 (FUERZA) | |:---:|:---|:---|:---|:---| | LUN | ACT | Barra Vacía / Técnica | Movilidad | Visualización | | MIÉ | ACT | Snatch: Hasta 60% | C&J: Hasta 60% | Activación | | VIE | TEST | TEST SNATCH (1RM) | TEST C&J (1RM) | TEST SQUAT |

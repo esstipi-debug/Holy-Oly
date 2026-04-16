@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>B9 — Social Card Generator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #050510;
+      min-height: 100vh;
+      font-family: 'Inter', system-ui, sans-serif;
+      padding: 40px 20px 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+    }
+
+    /* Phone shell */
+    .phone {
+      width: 390px;
+      min-height: 760px;
+      background: #07070F;
+      border-radius: 44px;
+      border: 2px solid #2a2a3a;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 80px rgba(99,102,241,.1), 0 0 0 1px #1a1a28;
+    }
+    .status-bar {
+      height: 44px;
+      background: #07070F;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      flex-shrink: 0;
+    }
+    .scroll-area { flex:1; overflow-y:auto; scrollbar-width:none; }
+    .scroll-area::-webkit-scrollbar { display: none; }
+
+    /* The actual 9:16 card preview */
+    .card-preview {
+      width: 100%;
+      aspect-ratio: 9/16;
+      position: relative;
+      overflow: hidden;
+      border-radius: 16px;
+      cursor: pointer;
+    }
+
+    /* Photo background */
+    .card-bg {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      transition: opacity .4s;
+    }
+    /* Gradient overlay */
+    .card-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        170deg,
+        rgba(0,0,0,.35) 0%,
+        rgba(0,0,0,.5)  40%,
+        rgba(0,0,0,.85) 75%,
+        rgba(0,0,0,.95) 100%
+      );
+    }
+
+    /* Card content layer */
+    .card-content {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 20px 24px;
+    }
+
+    /* Noise grain texture overlay */
+    .card-grain::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    /* Theme selector */
+    .t-pill {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1.5px solid transparent;
+      transition: all .15s;
+      letter-spacing: .03em;
+    }
+    .t-pill.active { opacity: 1; }
+    .t-pill:not(.active) { opacity: .45; }
+
+    /* Card type selector */
+    .card-type-btn {
+      flex: 1;
+      padding: 9px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 10px;
+      cursor: pointer;
+      border: 1.5px solid #1e1e30;
+      background: #111118;
+      color: #475569;
+      transition: all .15s;
+      letter-spacing: .03em;
+    }
+    .card-type-btn.active {
+      color: #f1f5f9;
+      border-color: #3730a3;
+      background: #1e1b4b;
+    }
+
+    /* Copy suggestion chip */
+    .copy-chip {
+      background: #111118;
+      border: 1px solid #1e1e30;
+      border-radius: 12px;
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    .copy-chip:hover { border-color: #3730a3; }
+    .copy-chip.selected { border-color: #6366f1; background: #1e1b4b; }
+
+    @keyframes shimmer {
+      0%   { background-position: -300% 0; }
+      100% { background-position: 300% 0; }
+    }
+    .shimmer-text {
+      background: linear-gradient(90deg, #94a3b8 25%, #f1f5f9 50%, #94a3b8 75%);
+      background-size: 200% 100%;
+      animation: shimmer 2.5s infinite linear;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    @keyframes fadeSlideUp {
+      from { opacity:0; transform:translateY(12px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    .fade-up { animation: fadeSlideUp .35s ease-out both; }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<div style="text-align:center;">
+  <span style="font-size:26px;font-weight:900;color:white;letter-spacing:-.03em;">HOLY<span style="color:#6366f1;">OLY</span></span>
+  <p style="font-size:12px;color:#475569;margin-top:3px;">Social Card Generator · B9</p>
+</div>
+
+<!-- Phone -->
+<div class="phone">
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span style="font-size:12px;color:#94a3b8;font-weight:600;">10:41</span>
+    <span style="font-size:12px;color:#94a3b8;font-weight:600;">81%</span>
+  </div>
+
+  <div class="scroll-area">
+    <div style="padding:14px 20px 32px;">
+
+      <!-- Page header -->
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+        <a href="B7_B8_victory_screen.html" style="width:32px;height:32px;background:#1a1a28;border:1px solid #2a2a3a;border-radius:8px;display:flex;align-items:center;justify-content:center;text-decoration:none;color:#94a3b8;font-size:14px;flex-shrink:0;">←</a>
+        <div>
+          <p style="font-size:17px;font-weight:800;color:#f1f5f9;">Compartir Victoria</p>
+          <p style="font-size:12px;color:#64748b;">Genera tu card para Stories</p>
+        </div>
+      </div>
+
+      <!-- Theme selector -->
+      <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;">
+        <button class="t-pill active" id="tp-carbon" onclick="setCardTheme('carbon')" style="background:#0a1820;color:#06B6D4;border-color:#0e4c56;">Carbon</button>
+        <button class="t-pill" id="tp-gold"   onclick="setCardTheme('gold')"   style="background:#1a1200;color:#F59E0B;border-color:#713f12;">Gold</button>
+        <button class="t-pill" id="tp-cyber"  onclick="setCardTheme('cyber')"  style="background:#150a2e;color:#e879f9;border-color:#6b21a8;">Cyber</button>
+        <button class="t-pill" id="tp-crimson" onclick="setCardTheme('crimson')" style="background:#1a0505;color:#f87171;border-color:#7f1d1d;">Crimson</button>
+      </div>
+
+      <!-- Card type -->
+      <div style="display:flex;gap:8px;margin-bottom:16px;">
+        <button class="card-type-btn active" id="ct-pr"    onclick="setCardType('pr')">⭐ PR Card</button>
+        <button class="card-type-btn"        id="ct-smart" onclick="setCardType('smart')">🛡️ Smart Card</button>
+        <button class="card-type-btn"        id="ct-streak" onclick="setCardType('streak')">🔥 Streak Card</button>
+        <button class="card-type-btn"        id="ct-belt"  onclick="setCardType('belt')">🏅 Belt Card</button>
+      </div>
+
+      <!-- ─── CARD PREVIEW (9:16) ─── -->
+      <div class="card-preview card-grain" id="cardPreview" style="margin-bottom:14px;">
+
+        <!-- Photo BG: gradient simulating a gym photo with athlete -->
+        <div class="card-bg" id="cardBg" style="background: linear-gradient(135deg, #0a1820 0%, #071016 40%, #0d0520 100%);"></div>
+
+        <!-- Simulated athlete silhouette in BG -->
+        <div id="cardSilhouette" style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);opacity:.18;font-size:220px;line-height:1;z-index:1;filter:blur(2px);">🏋️</div>
+
+        <!-- Gradient overlay -->
+        <div class="card-overlay" id="cardOverlay" style="background:linear-gradient(170deg,rgba(0,0,0,.35) 0%,rgba(0,0,0,.5) 40%,rgba(0,0,0,.88) 75%,rgba(0,0,0,.97) 100%);"></div>
+
+        <!-- Accent color bar (top) -->
+        <div id="cardAccentBar" style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#06B6D4,#0891b2);z-index:4;"></div>
+
+        <!-- Card content -->
+        <div class="card-content" style="z-index:4;">
+
+          <!-- Top: athlete info + belt -->
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div style="width:36px;height:36px;border-radius:50%;background:rgba(6,182,212,.2);border:2px solid #06B6D4;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#06B6D4;" id="cardAvatar">J</div>
+              <div>
+                <p style="font-size:12px;font-weight:700;color:white;">Juan Pérez</p>
+                <p style="font-size:10px;color:rgba(255,255,255,.5);">@juanperez · HolyOly</p>
+              </div>
+            </div>
+            <div id="cardBeltChip" style="background:rgba(6,182,212,.15);border:1px solid #06B6D4;border-radius:20px;padding:4px 10px;">
+              <span style="font-size:9px;font-weight:700;color:#06B6D4;letter-spacing:.06em;">BLUE BELT</span>
+            </div>
+          </div>
+
+          <!-- Spacer -->
+          <div style="flex:1;"></div>
+
+          <!-- MAIN ACHIEVEMENT (center-bottom) -->
+          <div id="cardMainContent">
+
+            <!-- PR Card default content -->
+            <div id="prContent">
+              <!-- Achievement label -->
+              <div id="cardAchievementLabel" style="display:inline-flex;align-items:center;gap:6px;background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.4);border-radius:20px;padding:5px 12px;margin-bottom:12px;">
+                <span style="font-size:10px;">⭐</span>
+                <span id="cardAchType" style="font-size:10px;font-weight:700;color:#F59E0B;letter-spacing:.06em;text-transform:uppercase;">NUEVO PR PERSONAL</span>
+              </div>
+
+              <!-- Big number -->
+              <div style="margin-bottom:8px;">
+                <div style="display:flex;align-items:baseline;gap:6px;">
+                  <span id="cardBigNum" style="font-size:72px;font-weight:900;color:white;line-height:1;letter-spacing:-.04em;">94</span>
+                  <div>
+                    <span id="cardBigUnit" style="font-size:22px;font-weight:700;color:rgba(255,255,255,.7);">kg</span>
+                    <div id="cardPRDelta" style="background:rgba(34,197,94,.2);border:1px solid rgba(34,197,94,.4);border-radius:6px;padding:2px 8px;display:inline-block;margin-left:4px;">
+                      <span style="font-size:11px;font-weight:700;color:#4ade80;">+5kg PR!</span>
+                    </div>
+                  </div>
+                </div>
+                <p id="cardExercise" style="font-size:14px;font-weight:700;color:rgba(255,255,255,.65);margin-top:2px;">Arrancada (Snatch)</p>
+              </div>
+
+              <!-- Secondary stats row -->
+              <div style="display:flex;gap:12px;margin-bottom:14px;">
+                <div style="text-align:left;">
+                  <p id="stat1val" style="font-size:16px;font-weight:800;color:white;">18.5t</p>
+                  <p style="font-size:9px;color:rgba(255,255,255,.4);font-weight:600;text-transform:uppercase;letter-spacing:.05em;">Tonelaje</p>
+                </div>
+                <div style="width:1px;background:rgba(255,255,255,.1);"></div>
+                <div>
+                  <p id="stat2val" style="font-size:16px;font-weight:800;color:#f97316;">15 días 🔥</p>
+                  <p style="font-size:9px;color:rgba(255,255,255,.4);font-weight:600;text-transform:uppercase;letter-spacing:.05em;">Racha</p>
+                </div>
+                <div style="width:1px;background:rgba(255,255,255,.1);"></div>
+                <div>
+                  <p id="stat3val" style="font-size:16px;font-weight:800;color:#a78bfa;">7.4</p>
+                  <p style="font-size:9px;color:rgba(255,255,255,.4);font-weight:600;text-transform:uppercase;letter-spacing:.05em;">OLY Index</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Bottom: HolyOly branding + CTA text -->
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;padding-top:10px;border-top:1px solid rgba(255,255,255,.08);">
+            <div>
+              <p style="font-size:13px;font-weight:900;color:white;letter-spacing:-.01em;">HOLY<span id="cardLogoAccent" style="color:#06B6D4;">OLY</span></p>
+              <p style="font-size:9px;color:rgba(255,255,255,.35);font-weight:600;letter-spacing:.05em;">Smart training. Zero burnout.</p>
+            </div>
+            <!-- QR placeholder -->
+            <div style="width:36px;height:36px;background:rgba(255,255,255,.08);border-radius:6px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.1);">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <rect x="1" y="1" width="7" height="7" rx="1" stroke="rgba(255,255,255,.5)" stroke-width="1.5" fill="none"/>
+                <rect x="3" y="3" width="3" height="3" fill="rgba(255,255,255,.5)"/>
+                <rect x="12" y="1" width="7" height="7" rx="1" stroke="rgba(255,255,255,.5)" stroke-width="1.5" fill="none"/>
+                <rect x="14" y="3" width="3" height="3" fill="rgba(255,255,255,.5)"/>
+                <rect x="1" y="12" width="7" height="7" rx="1" stroke="rgba(255,255,255,.5)" stroke-width="1.5" fill="none"/>
+                <rect x="3" y="14" width="3" height="3" fill="rgba(255,255,255,.5)"/>
+                <rect x="12" y="12" width="2" height="2" fill="rgba(255,255,255,.5)"/>
+                <rect x="15" y="12" width="2" height="2" fill="rgba(255,255,255,.5)"/>
+                <rect x="12" y="15" width="2" height="2" fill="rgba(255,255,255,.5)"/>
+                <rect x="15" y="15" width="4" height="4" fill="rgba(255,255,255,.5)"/>
+              </svg>
+            </div>
+          </div>
+
+        </div><!-- end card-content -->
+      </div><!-- end card-preview -->
+
+      <!-- Change photo CTA -->
+      <button onclick="cycleBg()" style="width:100%;background:#111118;border:1px dashed #2a2a3a;border-radius:12px;padding:11px;color:#64748b;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;">
+        <span style="font-size:16px;">📷</span>
+        Elegir foto del levantamiento desde galería
+      </button>
+
+      <!-- ─── COPY SUGGESTIONS ─── -->
+      <div style="margin-bottom:16px;">
+        <p style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#475569;margin-bottom:10px;">Texto sugerido para el caption</p>
+        <div style="display:flex;flex-direction:column;gap:8px;" id="copyOptions">
+
+          <div class="copy-chip selected" id="copy0" onclick="selectCopy(0)">
+            <p style="font-size:11px;font-weight:700;color:#6366f1;margin-bottom:3px;">Competitivo 🔥</p>
+            <p style="font-size:12px;color:#94a3b8;line-height:1.4;" id="copyText0">"Acabo de sumar 5kg a mi Arrancada con HolyOly. ¿Quién se pica? 🏋️ #HalterofiliaInteligente"</p>
+          </div>
+
+          <div class="copy-chip" id="copy1" onclick="selectCopy(1)">
+            <p style="font-size:11px;font-weight:700;color:#22C55E;margin-bottom:3px;">Progreso 📈</p>
+            <p style="font-size:12px;color:#94a3b8;line-height:1.4;" id="copyText1">"15 días consecutivos y nuevo PR desbloqueado 🔓. La constancia siempre gana. @HolyOly"</p>
+          </div>
+
+          <div class="copy-chip" id="copy2" onclick="selectCopy(2)">
+            <p style="font-size:11px;font-weight:700;color:#F59E0B;margin-bottom:3px;">Científico 🧠</p>
+            <p style="font-size:12px;color:#94a3b8;line-height:1.4;" id="copyText2">"El modelo Banister predijo que hoy era mi día. 78/100 de Readiness y nuevo récord. La ciencia no falla 📊 #SmartAthlete"</p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Share buttons -->
+      <div style="display:flex;flex-direction:column;gap:10px;">
+
+        <button style="width:100%;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:white;font-size:14px;font-weight:800;padding:14px;border-radius:14px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8 1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>
+          Compartir en Instagram Stories
+        </button>
+
+        <div style="display:flex;gap:10px;">
+          <button style="flex:1;background:#25D366;color:white;font-size:13px;font-weight:700;padding:12px;border-radius:12px;border:none;cursor:pointer;">
+            📲 WhatsApp
+          </button>
+          <button style="flex:1;background:#1a1a28;border:1px solid #2a2a3a;color:#94a3b8;font-size:13px;font-weight:700;padding:12px;border-radius:12px;cursor:pointer;">
+            💾 Guardar imagen
+          </button>
+          <button style="flex:1;background:#1a1a28;border:1px solid #2a2a3a;color:#94a3b8;font-size:13px;font-weight:700;padding:12px;border-radius:12px;cursor:pointer;">
+            ⋯ Más
+          </button>
+        </div>
+
+        <button onclick="window.location='B1_dashboard_atleta.html'" style="width:100%;background:transparent;border:none;color:#475569;font-size:13px;font-weight:600;padding:10px;cursor:pointer;">
+          Saltar y volver al inicio
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<a href="index.html" style="position:fixed;top:20px;left:20px;background:#1e1e30;color:#94a3b8;font-size:13px;padding:8px 14px;border-radius:10px;text-decoration:none;border:1px solid #2a2a3a;z-index:99;">← Volver</a>
+
+<script>
+  /* ── THEME CONFIG ── */
+  const cardThemes = {
+    carbon: {
+      accent:    '#06B6D4',
+      accent2:   '#0891b2',
+      bgGrad:    'linear-gradient(135deg, #0a1820 0%, #071016 40%, #050d18 100%)',
+      barGrad:   'linear-gradient(90deg,#06B6D4,#0891b2)',
+      beltBg:    'rgba(6,182,212,.15)',
+      beltBorder:'#06B6D4',
+      beltColor: '#06B6D4',
+      beltText:  'BLUE BELT',
+      avatarBg:  'rgba(6,182,212,.2)',
+      logoColor: '#06B6D4',
+    },
+    gold: {
+      accent:    '#F59E0B',
+      accent2:   '#d97706',
+      bgGrad:    'linear-gradient(135deg, #1a1000 0%, #0f0900 40%, #070600 100%)',
+      barGrad:   'linear-gradient(90deg,#F59E0B,#d97706)',
+      beltBg:    'rgba(245,158,11,.15)',
+      beltBorder:'#F59E0B',
+      beltColor: '#F59E0B',
+      beltText:  'GOLD BELT',
+      avatarBg:  'rgba(245,158,11,.2)',
+      logoColor: '#F59E0B',
+    },
+    cyber: {
+      accent:    '#e879f9',
+      accent2:   '#d946ef',
+      bgGrad:    'linear-gradient(135deg, #150a2e 0%, #0a051a 40%, #060410 100%)',
+      barGrad:   'linear-gradient(90deg,#e879f9,#67e8f9)',
+      beltBg:    'rgba(232,121,249,.15)',
+      beltBorder:'#e879f9',
+      beltColor: '#e879f9',
+      beltText:  'CYBER BELT',
+      avatarBg:  'rgba(232,121,249,.2)',
+      logoColor: '#e879f9',
+    },
+    crimson: {
+      accent:    '#EF4444',
+      accent2:   '#dc2626',
+      bgGrad:    'linear-gradient(135deg, #1a0505 0%, #100303 40%, #070000 100%)',
+      barGrad:   'linear-gradient(90deg,#EF4444,#dc2626)',
+      beltBg:    'rgba(239,68,68,.15)',
+      beltBorder:'#EF4444',
+      beltColor: '#EF4444',
+      beltText:  'RED BELT',
+      avatarBg:  'rgba(239,68,68,.2)',
+      logoColor: '#EF4444',
+    },
+  };
+
+  /* ── CARD TYPE CONFIG ── */
+  const cardTypes = {
+    pr: {
+      label:     'NUEVO PR PERSONAL',
+      labelColor:'#F59E0B',
+      labelBg:   'rgba(245,158,11,.15)',
+      labelBorder:'rgba(245,158,11,.4)',
+      bigNum:    '94',
+      bigUnit:   'kg',
+      delta:     '+5kg PR!',
+      exercise:  'Arrancada (Snatch)',
+      stat1:     '18.5t',
+      stat2:     '15 días 🔥',
+      stat3:     '7.4',
+      copies: [
+        { cat:'Competitivo 🔥', color:'#6366f1', text:'"Acabo de sumar 5kg a mi Arrancada con HolyOly. ¿Quién se pica? 🏋️ #HalterofiliaInteligente"' },
+        { cat:'Progreso 📈',    color:'#22C55E', text:'"15 días consecutivos y nuevo PR desbloqueado 🔓. La constancia siempre gana. @HolyOly"' },
+        { cat:'Científico 🧠', color:'#F59E0B', text:'"El modelo Banister predijo que hoy era mi día. 78/100 Readiness y nuevo récord. La ciencia no falla 📊 #SmartAthlete"' },
+      ],
+    },
+    smart: {
+      label:     'LONGEVITY PROTOCOL',
+      labelColor:'#06B6D4',
+      labelBg:   'rgba(6,182,212,.15)',
+      labelBorder:'rgba(6,182,212,.4)',
+      bigNum:    '100',
+      bigUnit:   '%',
+      delta:     '+18% rec.',
+      exercise:  'Smart Session · Adherencia total',
+      stat1:     '+200 XP',
+      stat2:     'Daño Evitado',
+      stat3:     '847',
+      copies: [
+        { cat:'Inteligente 🧠', color:'#06B6D4', text:'"La ciencia dijo baja el ritmo y yo escuché. Longevity Protocol activado. 🛡️ #SmartAthlete"' },
+        { cat:'Filosofía 🌿',  color:'#22C55E', text:'"No se trata de levantar más hoy. Se trata de seguir levantando en 10 años. Wise Score: 847 🏆"' },
+        { cat:'Comunidad 🤝',  color:'#a78bfa', text:'"HolyOly me enseñó que escuchar al cuerpo NO es debilidad. Es élite. ¿Te unes? @HolyOly"' },
+      ],
+    },
+    streak: {
+      label:     'RACHA ÉPICA',
+      labelColor:'#f97316',
+      labelBg:   'rgba(249,115,22,.15)',
+      labelBorder:'rgba(249,115,22,.4)',
+      bigNum:    '30',
+      bigUnit:   'días',
+      delta:     '🔥 Imparable',
+      exercise:  'Smart Streak · Sin interrupciones',
+      stat1:     '30 sesiones',
+      stat2:     '382.5t total',
+      stat3:     '+9,000 XP',
+      copies: [
+        { cat:'Motivación 🔥', color:'#f97316', text:'"30 días sin parar. Ni el trabajo, ni el cansancio me detuvieron. 🔥 #SmartStreak @HolyOly"' },
+        { cat:'Reto 💪',      color:'#EF4444', text:'"¿Puedes mantener una racha de 30 días? Yo sí. Te reto. @HolyOly #HalterofiliaInteligente"' },
+        { cat:'Reflexión ✨',  color:'#a78bfa', text:'"Un mes de constancia vale más que 3 semanas de esfuerzo extremo. Mi racha lo demuestra. 🏆"' },
+      ],
+    },
+    belt: {
+      label:     'ASCENSO DE CINTURÓN',
+      labelColor:'#a78bfa',
+      labelBg:   'rgba(167,139,250,.15)',
+      labelBorder:'rgba(167,139,250,.4)',
+      bigNum:    '🟣',
+      bigUnit:   '',
+      delta:     'Cinturón Púrpura',
+      exercise:  'Belt System · 100,000 XP alcanzados',
+      stat1:     '100k XP',
+      stat2:     '6 meses',
+      stat3:     '7.4 OLY',
+      copies: [
+        { cat:'Orgullo 🏅',   color:'#a78bfa', text:'"Cinturón Púrpura desbloqueado 🟣. 6 meses de trabajo inteligente. El camino no ha terminado. @HolyOly"' },
+        { cat:'Comunidad 🤜', color:'#6366f1', text:'"De Cinturón Blanco a Púrpura en 6 meses con HolyOly. El sistema funciona. ¿Te atreves? 🏋️"' },
+        { cat:'Proceso 📈',   color:'#22C55E', text:'"No fue suerte. Fue el modelo Banister, los engines de HolyOly y yo moviéndome cada día. 🟣 #SmartAthlete"' },
+      ],
+    },
+  };
+
+  let currentCardTheme = 'carbon';
+  let currentCardType  = 'pr';
+  let bgIndex = 0;
+  let selectedCopy = 0;
+
+  /* Simulated BG options (color gradients representing different gym photos) */
+  const bgOptions = [
+    'linear-gradient(135deg, #0a1820 0%, #071016 40%, #050d18 100%)',
+    'linear-gradient(160deg, #1a0a00 0%, #0d0600 50%, #050300 100%)',
+    'linear-gradient(150deg, #0a0018 0%, #06000e 50%, #020005 100%)',
+    'linear-gradient(140deg, #001a0a 0%, #000d05 50%, #000300 100%)',
+  ];
+
+  function cycleBg() {
+    bgIndex = (bgIndex + 1) % bgOptions.length;
+    document.getElementById('cardBg').style.background = bgOptions[bgIndex];
+  }
+
+  function setCardTheme(t) {
+    currentCardTheme = t;
+    const th = cardThemes[t];
+
+    /* Update pill states */
+    ['carbon','gold','cyber','crimson'].forEach(k => {
+      document.getElementById('tp-' + k).classList.toggle('active', k === t);
+    });
+
+    /* Apply theme to card */
+    document.getElementById('cardAccentBar').style.background = th.barGrad;
+    document.getElementById('cardBeltChip').style.background  = th.beltBg;
+    document.getElementById('cardBeltChip').style.borderColor = th.beltBorder;
+    document.getElementById('cardBeltChip').querySelector('span').style.color = th.beltColor;
+    document.getElementById('cardBeltChip').querySelector('span').textContent = th.beltText;
+    document.getElementById('cardAvatar').style.borderColor  = th.accent;
+    document.getElementById('cardAvatar').style.color        = th.accent;
+    document.getElementById('cardAvatar').style.background   = th.avatarBg;
+    document.getElementById('cardLogoAccent').style.color    = th.logoColor;
+  }
+
+  function setCardType(t) {
+    currentCardType = t;
+    const ct = cardTypes[t];
+
+    /* Update type buttons */
+    ['pr','smart','streak','belt'].forEach(k => {
+      const btn = document.getElementById('ct-' + k);
+      btn.classList.toggle('active', k === t);
+    });
+
+    /* Update card content */
+    document.getElementById('cardAchType').textContent   = ct.label;
+    document.getElementById('cardAchType').style.color   = ct.labelColor;
+    document.getElementById('cardAchievementLabel').style.background   = ct.labelBg;
+    document.getElementById('cardAchievementLabel').style.borderColor  = ct.labelBorder;
+    document.getElementById('cardBigNum').textContent    = ct.bigNum;
+    document.getElementById('cardBigUnit').textContent   = ct.bigUnit;
+    document.getElementById('cardPRDelta').querySelector('span').textContent = ct.delta;
+    document.getElementById('cardExercise').textContent  = ct.exercise;
+    document.getElementById('stat1val').textContent      = ct.stat1;
+    document.getElementById('stat2val').textContent      = ct.stat2;
+    document.getElementById('stat3val').textContent      = ct.stat3;
+
+    /* Update copy options */
+    const container = document.getElementById('copyOptions');
+    container.innerHTML = '';
+    ct.copies.forEach((c, i) => {
+      const el = document.createElement('div');
+      el.className = 'copy-chip' + (i === 0 ? ' selected' : '');
+      el.id = 'copy' + i;
+      el.onclick = () => selectCopy(i);
+      el.innerHTML = `<p style="font-size:11px;font-weight:700;color:${c.color};margin-bottom:3px;">${c.cat}</p>
+                      <p style="font-size:12px;color:#94a3b8;line-height:1.4;">${c.text}</p>`;
+      container.appendChild(el);
+    });
+    selectedCopy = 0;
+  }
+
+  function selectCopy(i) {
+    selectedCopy = i;
+    document.querySelectorAll('.copy-chip').forEach((el, idx) => {
+      el.classList.toggle('selected', idx === i);
+    });
+  }
+
+  /* Init */
+  setCardTheme('carbon');
+  setCardType('pr');
+</script>
+</body>
+</html>

@@ -1,0 +1,1872 @@
+# 06. Smart Streak Engine (Adherence + Comebacks)
+
+**Core Module:** `backend/src/services/smart_streak_engine.js`  
+**Database Table:** `athleteStreak`, `streakFreeze`  
+**Trigger:** Daily (00:00 UTC) — marks day as trained or skipped  
+
+---
+
+## Purpose
+
+The **Smart Streak Engine** tracks training consistency while respecting real-world circumstances through **intelligent comeback mechanics**. Unlike traditional all-or-nothing streaks, this system doesn't punish missed days—it counts what matters: **total training dedication over time**.
+
+---
+
+## How Streaks Work
+
+### 1. Daily Status Tracking
+
+Every athlete gets a daily status:
+
+```
+Status: 'COMPLETED' | 'SKIPPED' | 'PENDING'
+
+COMPLETED: Logged session today
+SKIPPED: Didn't log session (missed day)
+PENDING: Day isn't over yet (shows current streak in-progress)
+```
+
+### 2. Streak Rules
+
+**Building Streaks:**
+- Session logged = +1 to streak counter
+- Consecutive days only (1 day skip = broken)
+
+**Streak Freeze (Monthly):**
+- 1 use per month (resets 1st of month)
+- Athlete can "freeze" streak for 1 day
+- Skipped day doesn't break streak, but doesn't add to it either
+- Example:
+  ```
+  Day 1-30: 30-day streak
+  Day 31: Use freeze (didn't train)
+  Day 32: Train again
+  → Streak continues at 31 days (freeze protected)
+  ```
+
+**Smart Comeback (No Reset):**
+- Missed 1 day? Streak broken, but comeback available
+- Unlike traditional streaks (100 → 0), this system gives back:
+  ```
+  Day 1-100: 100-day streak
+  Day 101: Skip (missed)
+  → Streak: 100 → 99 (lose only 1 day, not all)
+  
+  Day 102: Train again
+  → Streak: 99 → 100 (comeback restores it)
+  ```
+
+---
+
+### 3. Comeback Mechanics
+
+**Comeback Eligibility:**
+```
+IF streak broken (day skipped)
+AND athlete returns within 7 days
+AND logs session
+THEN
+  activeStreak = previousStreak - 1
+  comebackEligible = true
+  (athlete can rebuild quickly)
+```
+
+**Example:**
+```
+100-day streak → Skip day 101 → Streak becomes 99
+Days 102-108: Stay available for comeback (7-day window)
+Day 108: Log session → Comeback! Streak: 99 → 100
+
+After Day 108: Comeback window closes
+If still haven't trained by Day 109: Streak resets to 0
+```
+
+---
+
+## Streak Milestones
+
+| Days | Tier | XP Reward | Badge |
+|------|------|-----------|-------|
+| 7 | Week Warrior | +200 | 🔥 |
+| 14 | Fortnight | +300 | 🔥🔥 |
+| 30 | Monthly Warrior | +500 | 🔥 ×5 |
+| 60 | Bimonthly | +750 | 🔥 ×10 |
+| 90 | Quarterly | +1000 | 👑 |
+| 180 | Half-Year | +1500 | 👑👑 |
+| 365 | Annual | +3000 | 👑👑👑 |
+
+---
+
+## Freezes & Comebacks
+
+### Monthly Freeze Allocation
+
+```
+Reset: 1st of every month
+Usage: Up to 1 per month
+
+Example:
+  March 1: Reset (1 freeze available)
+  March 15: Use freeze (protected 1 day)
+  March 15-31: 0 freezes left
+  April 1: Reset (1 freeze available again)
+```
+
+### Comeback Window
+
+```
+7 days to restore broken streak
+
+Timeline:
+  Day 100: Session (streak 100)
+  Day 101: Missed (streak 99, comeback available)
+  Day 102-108: Can still complete session (7-day window)
+  Day 108: Train (comeback accepted, streak 99 → 100)
+  Day 109+: If no training by now, streak resets to 0
+```
+
+---
+
+## Data Structure
+
+```javascript
+{
+  athlete_id: "uuid",
+  current_streak: 47,          // Days
+  longest_streak: 150,         // All-time high
+  freezes_used_this_month: 0,  // 0-1
+  freezes_remaining: 1,        // Next available: May 1
+  comeback_eligible: false,    // Eligible to restore broken streak
+  comeback_days_left: 0,       // Days remaining in comeback window (7)
+  
+  streak_history: [
+    {
+      date: "2026-04-10",
+      status: "completed",     // or "skipped" or "frozen"
+      used_freeze: false,
+      comeback_day: false,
+      notes: ""
+    }
+  ],
+  
+  milestones_achieved: [
+    { days: 7, unlocked: "2026-02-15" },
+    { days: 30, unlocked: "2026-03-05" },
+    { days: 90, unlocked: "2026-04-05" }
+  ]
+}
+```
+
+---
+
+## Integration Points
+
+### Uses Data From:
+- **Session Engine** — Training logged = +1 streak day
+- **Calendar System** — Daily date for streak calculation
+
+### Feeds Data To:
+- **Gamification Engine** — Streak milestone XP rewards
+- **Belt Engine** — Streak requirement for belt progression
+- **Social Engine** — Milestone achievement cards
+- **Notifications** — Streak alerts
+
+---
+
+## Example Progression
+
+```
+Day 1 (Feb 1): First session
+  Streak: 0 → 1
+  Freezes: 1 available
+  
+Day 7 (Feb 7): Milestone reached
+  Streak: 7 ✓
+  XP Reward: +200
+  Badge: 🔥
+  Notification: "Week Warrior! 7-day streak!"
+
+Day 14 (Feb 14): Two weeks
+  Streak: 14 ✓
+  XP Reward: +300
+  
+Day 30 (Mar 1): Monthly milestone + Reset
+  Streak: 30 ✓
+  XP Reward: +500
+  Freezes reset: 1 available (new month)
+  
+Day 45 (Mar 16): Missed a day!
+  Status: SKIPPED
+  Streak: 45 → 44
+  Comeback eligible: YES (7-day window open)
+  Freezes: 1 available (could use to protect next miss)
+  
+Day 46 (Mar 17): Come back!
+  Status: COMPLETED
+  Comeback activated
+  Streak: 44 → 45 (restored!)
+  Notification: "💪 Comeback! 45-day streak restored!"
+
+Day 52 (Mar 23): Last day of comeback window
+  If I miss this day:
+    Streak: 45 → 44
+    But could still comeback until Day 52 midnight
+    
+Day 53+ (Mar 24+): Comeback window closed
+  If streak broken: 45 → 0 (hard reset)
+  Notification: "Streak lost. New challenge: Start again!"
+
+Day 90 (Apr 30): Quarterly milestone
+  Streak: 90 ✓
+  XP Reward: +1000
+  Badge: 👑
+  Tier: Athlete now "elite" status
+```
+
+---
+
+## Cron Job
+
+**Trigger:** Daily at 00:00 UTC
+
+```
+For each athlete:
+  1. Check if logged session yesterday
+  2. Update yesterday's status (COMPLETED or SKIPPED)
+  3. Recalculate current_streak
+  4. Check if milestone reached → Award XP
+  5. Check if comeback window expired → Reset streak
+  6. Email athlete (optional): "Streak update: 47 days"
+```
+
+---
+
+## Psychology Benefits
+
+1. **No permanent failure** — Comeback mechanic removes shame of missed day
+2. **Sustainable goals** — Monthly freezes prevent burnout
+3. **Cumulative progress** — -1 instead of -100 feels achievable
+4. **Visible reset** — 1st of month = fresh start psychologically
+5. **Respects life** — Freezes acknowledge illness, travel, family
+
+---
+
+## Testing & Validation
+
+**Unit Test Location:** `backend/__tests__/smart_streak_engine.test.js`
+
+**Test Cases:**
+1. Streak increment on training
+2. Freeze usage and protection
+3. Comeback window behavior
+4. Comeback window expiration
+5. Milestone XP rewards
+6. Monthly reset of freezes
+7. All-time longest streak tracking
+
+---
+
+**Next:** See [07_bw_milestone_engine.md](./07_bw_milestone_engine.md) for bodyweight achievement tracking.
+
+
+# 07. BW Milestone Engine (Body Weight Achievements)
+
+**Core Module:** `backend/src/services/bw_milestone_engine.js`  
+**Database Table:** `athleteBwMilestone`  
+**Trigger:** On PR update (snatch/CJ/FS/BS log)  
+
+---
+
+## Purpose
+
+The **BW Milestone Engine** tracks **relative strength achievements** — hitting specific lift amounts relative to body weight. This celebrates progress meaningful to the athlete, regardless of absolute strength.
+
+---
+
+## Standard Milestones
+
+### Snatch @ Bodyweight (Snatch = 1.0 × BW)
+
+| Bodyweight | Snatch Target | Badge | XP |
+|-----------|---|---|---|
+| 60kg | Snatch 60kg | 🥉 | 150 |
+| 70kg | Snatch 70kg | 🥈 | 150 |
+| 80kg | Snatch 80kg | 🥇 | 200 |
+| 90kg | Snatch 90kg | 👑 | 250 |
+| 100kg | Snatch 100kg | 🔥 | 300 |
+| 110kg | Snatch 110kg | 💎 | 350 |
+
+### Clean+Jerk @ 1.2× Bodyweight
+
+| Bodyweight | CJ Target | Badge | XP |
+|-----------|---|---|---|
+| 60kg | CJ 72kg | 🥉 | 150 |
+| 70kg | CJ 84kg | 🥈 | 150 |
+| 80kg | CJ 96kg | 🥇 | 200 |
+| 90kg | CJ 108kg | 👑 | 250 |
+| 100kg | CJ 120kg | 🔥 | 300 |
+| 110kg | CJ 132kg | 💎 | 350 |
+
+### Front Squat @ 1.3× Bodyweight
+
+| Bodyweight | FS Target | Badge | XP |
+|-----------|---|---|---|
+| 60kg | FS 78kg | 🥉 | 100 |
+| 70kg | FS 91kg | 🥈 | 100 |
+| 80kg | FS 104kg | 🥇 | 150 |
+| 90kg | FS 117kg | 👑 | 150 |
+| 100kg | FS 130kg | 🔥 | 200 |
+| 110kg | FS 143kg | 💎 | 250 |
+
+### Back Squat @ 1.5× Bodyweight
+
+| Bodyweight | BS Target | Badge | XP |
+|-----------|---|---|---|
+| 60kg | BS 90kg | 🥉 | 100 |
+| 70kg | BS 105kg | 🥈 | 100 |
+| 80kg | BS 120kg | 🥇 | 150 |
+| 90kg | BS 135kg | 👑 | 150 |
+| 100kg | BS 150kg | 🔥 | 200 |
+| 110kg | BS 165kg | 💎 | 250 |
+
+---
+
+## Detection Logic
+
+```javascript
+On each session completion:
+  FOR each exercise (snatch, CJ, FS, BS):
+    IF athlete_pr[exercise] >= milestone_target[exercise][bw]
+    AND athlete NOT yet earned this milestone
+    THEN:
+      Unlock milestone
+      Award XP
+      Create achievement card
+      Notify athlete
+```
+
+**Example:**
+```
+Athlete: 75kg bodyweight
+Session logs: Snatch 75kg (new PR)
+
+Check milestones:
+  Snatch @ 75kg = 1.0 × BW ✓
+  → Unlock "Snatch 75kg" milestone
+  → +150 XP
+  → Notification: "🎉 Snatch @ BW! 75kg achieved!"
+```
+
+---
+
+## Data Structure
+
+```javascript
+{
+  athlete_id: "uuid",
+  body_weight: 75,
+  
+  milestones: [
+    {
+      milestone_type: "snatch_at_bw",
+      target_weight: 75,
+      achieved: true,
+      achieved_date: "2026-03-15",
+      xp_reward: 150,
+      badge: "🥉",
+      pr_weight: 75
+    },
+    {
+      milestone_type: "cj_at_120_percent_bw",
+      target_weight: 90,      // 75 × 1.2
+      achieved: false,
+      current_best: 88,       // Close!
+      progress_pct: 97.8,
+      xp_reward: 150,
+      badge: "🥈"
+    }
+  ],
+  
+  progress_summary: {
+    total_unlocked: 3,
+    total_available: 24,
+    completion_pct: 12.5,
+    next_milestone: "CJ @ 90kg (2kg away)"
+  }
+}
+```
+
+---
+
+## Integration Points
+
+### Uses Data From:
+- **Athlete Profile** — Body weight
+- **Session Engine** — PR updates
+- **Stress Engine** — Training load (indirectly)
+
+### Feeds Data To:
+- **Gamification Engine** — XP rewards
+- **Social Engine** — Achievement cards
+- **Frontend** — Progress display
+
+---
+
+## Example Progression (75kg Athlete)
+
+```
+Month 1: Joins HolyOly
+  BW: 75kg
+  Current Snatch: 50kg (no milestones yet)
+
+Month 2: Snatch 60kg
+  Milestone unlocked: Not yet (need 75kg)
+  Progress: 60/75 = 80%
+
+Month 3: Snatch 70kg
+  Milestone unlocked: Not yet (need 75kg)
+  Progress: 70/75 = 93% (so close!)
+
+Month 4: Snatch 75kg (PR)
+  ✓ Milestone unlocked: "Snatch @ BW"
+  +150 XP
+  Notification: "🥉 Snatch @ Bodyweight! 75kg!"
+  Badge displayed on profile
+
+Month 5: CJ 88kg (PR)
+  Progress toward "CJ @ 90kg": 88/90 = 97.8%
+  Expected next month
+
+Month 6: CJ 90kg (PR)
+  ✓ Milestone unlocked: "CJ @ 1.2×BW"
+  +150 XP
+  Notification: "🥈 Clean+Jerk milestone! 90kg!"
+
+Month 8: FS 97kg (PR)
+  Progress toward "FS @ 1.3×BW": 97/97.5 = 99.5%
+
+Month 9: FS 97.5kg (PR)
+  ✓ Milestone unlocked: "FS @ 1.3×BW"
+  +150 XP
+  Cumulative: 3 milestones, 450 XP earned
+
+Month 12: BS 112kg (PR)
+  Progress toward "BS @ 1.5×BW": 112/112.5 = 99.6%
+  Expected next month
+
+Progress Dashboard:
+  Unlocked: 3/24 (12.5%)
+  Next: BS @ 112.5kg (0.5kg away!)
+  Recent: CJ @ 90kg (Sep 2026)
+```
+
+---
+
+## Testing & Validation
+
+**Unit Test Location:** `backend/__tests__/bw_milestone_engine.test.js`
+
+**Test Cases:**
+1. Milestone unlock on PR
+2. No duplicate unlocks
+3. Progress calculation (current / target)
+4. BW change affects future milestones
+5. XP reward distribution
+
+---
+
+**Next:** See [09_pulse_engine.md](./09_pulse_engine.md) for conditioning challenges.
+
+
+# 08. Warmup Engine (Adaptive Protocol)
+
+**Core Module:** `backend/src/services/warmup_engine.js`  
+**Data Source:** Ported from `warmup_generator.py`  
+**Trigger:** Athlete requests warmup for specific exercise (on-demand)  
+
+---
+
+## Purpose
+
+The **Warmup Engine** generates **readiness-aware warmup protocols** that scale from 55% intensity to competition weight. Unlike generic "5×5 at 50%" warmups, this system adapts to athlete fatigue level, ensuring adequate preparation without wasteful volume.
+
+---
+
+## Warmup Phases
+
+### Standard 4-Phase Protocol
+
+| Phase | Intensity | Reps | Category | Purpose |
+|-------|-----------|------|----------|---------|
+| **Technical** | 55% | 3 | technical | Form work, activation |
+| **Speed** | 65% | 2 | speed | Movement fluidity |
+| **Power** | 75% | 2 | power | Dynamic preparation |
+| **Competition** | 85% | 1 | competition | Final approach |
+
+**Example for Athlete with 100kg Snatch 1RM:**
+```
+Target intensity: 90% (90kg work set)
+
+Phase 1: Technical
+  55% × 3 = 55kg × 3 reps
+
+Phase 2: Speed
+  65% × 2 = 65kg × 2 reps
+
+Phase 3: Power
+  75% × 2 = 75kg × 2 reps
+
+Phase 4: Competition
+  85% × 1 = 85kg × 1 rep
+
+Then: Work set
+  90% × 3 = 90kg × 3 reps
+```
+
+---
+
+## Readiness-Based Adaptations
+
+### Adaptation Levels
+
+| Readiness | Level | Warmup Profile | Extra Activation |
+|-----------|-------|-----------|---------|
+| < 40 | **Exhausted** | Extended + mobility | Yes (+45% set) |
+| 40-60 | **Fatigued** | Standard | No |
+| 60-80 | **Normal** | Standard | No |
+| > 80 | **Fresh** | Reduced (skip technical) | No |
+
+**Examples:**
+
+**Exhausted (Readiness 30):**
+```
+Phase 0 (Extra): Activation
+  45% × 3 = 45kg × 3 reps
+  
+Phase 1: Technical
+  55% × 3 = 55kg × 3 reps
+  
+Phase 2: Speed
+  65% × 2 = 65kg × 2 reps
+  
+Phase 3: Power
+  75% × 2 = 75kg × 2 reps
+  
+Phase 4: Competition
+  80% × 1 = 80kg × 1 rep (reduced from 85%)
+
+Coach note: "Extended warmup. Extra mobility work."
+```
+
+**Fresh (Readiness 85):**
+```
+Phase 1: SKIP (technical phase skipped for fresh athlete)
+
+Phase 2: Speed
+  65% × 2 = 65kg × 2 reps
+  
+Phase 3: Power
+  75% × 2 = 75kg × 2 reps
+  
+Phase 4: Competition
+  85% × 1 = 85kg × 1 rep
+
+Coach note: "Brief warmup. You're ready to go!"
+```
+
+---
+
+## Position-Based Variants
+
+**First Exercise in Session:** Full warmup (activation through competition)  
+**Second Exercise:** Reduced warmup (skip technical phase, start at speed)  
+**Third+ Exercise:** Minimal (just 1-2 sets at 75-80%)
+
+**Example Session:**
+```
+Exercise 1 (Snatch): Full warmup
+  45% × 3, 55% × 3, 65% × 2, 75% × 2, 85% × 1
+  Then: 90% × 3 (work set)
+
+Exercise 2 (Clean): Reduced warmup
+  65% × 2, 75% × 2, 85% × 1
+  Then: 88% × 3 (work set)
+
+Exercise 3 (Back Squat): Minimal warmup
+  80% × 2
+  Then: 85% × 5 (work set)
+
+Exercise 4 (Snatch Pull): Minimal warmup
+  75% × 3
+  Then: 90% × 3 (work set)
+```
+
+---
+
+## Exercise-Specific Variations
+
+### Snatch (Complexity: 9/10)
+- **Full warmup always** (complex movement, most CNS demand)
+- Extra mobility if exhausted
+- Includes approach set at 90%+ intensity
+
+### Clean (Complexity: 8/10)
+- **Full warmup** but slightly less activation than snatch
+- Same phases as snatch
+
+### Front Squat (Complexity: 6/10)
+- **Reduced warmup** (less complex)
+- Can skip activation phase even if exhausted
+
+### Back Squat (Complexity: 5/10)
+- **Minimal warmup** (simple movement)
+- 2-3 sets sufficient
+
+### Pulls (Complexity: 4/10)
+- **Brief warmup** (low technique demand)
+- Just 1-2 sets
+
+### Accessory (Complexity: 2-3/10)
+- **No formal warmup** (bodyweight activation sufficient)
+
+---
+
+## Data Structure
+
+```javascript
+{
+  exercise_name: "Snatch",
+  target_intensity: 90,        // % of 1RM
+  athlete_1rm: 100,            // kg
+  position_in_session: 1,      // 1st exercise = full
+  athlete_readiness: 72,       // 0-100
+  
+  warmup_protocol: [
+    {
+      set_number: 1,
+      reps: 3,
+      intensity_pct: 55,
+      weight_kg: 55,
+      description: "Técnica / Forma",
+      category: "technical"
+    },
+    {
+      set_number: 2,
+      reps: 2,
+      intensity_pct: 65,
+      weight_kg: 65,
+      description: "Velocidad / Fluidez",
+      category: "speed"
+    },
+    // ... more sets
+  ],
+  
+  total_warmup_load: 1200,     // Sum of all sets
+  estimated_duration: 8,       // minutes
+  notes: "Standard warmup. Athlete ready.",
+  readiness_level: "normal"
+}
+```
+
+---
+
+## Integration Points
+
+### Uses Data From:
+- **Athlete Profile** — 1RM for each exercise
+- **Stress Engine** — Readiness score (determines adaptation)
+- **Macrocycle Engine** — Exercise order in session
+
+### Feeds Data To:
+- **Frontend** — Display warmup on mobile (athlete follows)
+- **Session Recording** — Warmup data stored but not counted toward training load
+
+---
+
+## Example Workflow
+
+```
+Athlete opens "Today's Session"
+  → Snatch 5×3 @ 90%
+  → Back Squat 4×5 @ 85%
+  → Snatch Pull 3×5 @ 95%
+
+Athlete clicks "Generate Warmup"
+  System fetches:
+    - Readiness: 65 (fatigued)
+    - Snatch 1RM: 100kg
+    - Target: 90kg
+    - Position: 1 (first exercise)
+  
+  Calculates:
+    - Readiness level: "fatigued" → standard warmup
+    - Position: 1 → full warmup (no skips)
+    - Complexity: 9 → include competition phase
+  
+  Generates:
+    Set 1: 55kg × 3 (Technical)
+    Set 2: 65kg × 2 (Speed)
+    Set 3: 75kg × 2 (Power)
+    Set 4: 85kg × 1 (Competition)
+    
+  Notes: "Standard warmup. You're ready."
+
+Athlete completes warmup (doesn't log volume)
+  Then: 90kg × 5 × 3 (work sets)
+  
+  Logs RPE, actual weight, compliance
+  → Feeds into Stress Engine for next day's readiness
+
+Next Exercise: Back Squat
+  Click "Generate Warmup"
+  Position: 2 (second) → reduced warmup
+  
+  Generates:
+    Set 1: 65kg × 2 (Speed, skip technical)
+    Set 2: 75kg × 2 (Power)
+    Set 3: 85kg × 1 (Competition)
+  
+  Notes: "Brief warmup. Already warmed up."
+```
+
+---
+
+## Performance Optimization
+
+**Warmup Generation:** ~20ms (O(1) lookup + calculation)  
+**Weight Rounding:** Automatic to nearest 0.5kg (plate increments)
+
+---
+
+## Testing & Validation
+
+**Unit Test Location:** `backend/__tests__/warmup_engine.test.js`
+
+**Test Cases:**
+1. Weight calculation and rounding
+2. Phase generation for each readiness level
+3. Position-based reduction (2nd, 3rd exercise)
+4. Exercise-specific complexity adjustments
+5. Total load estimation
+
+---
+
+**Next:** See [10_balance_engine.md](./10_balance_engine.md) for exercise ratio enforcement.
+
+
+
+# 09. Pulse Engine — Acondicionamiento Anaeróbico para Levantadores Olímpicos
+
+**Propósito:** Generar, programar y monitorear sesiones de acondicionamiento anaeróbico en máquinas ergométricas, diseñadas específicamente como soporte de recuperación y potencia sistémica para pesistas olímpicos.
+
+**Status:** Core engine, integrado con Stress Engine, Macrocycle Engine, Gamification  
+**Frecuencia de generación:** Semanal (Lunes 00:00 UTC)  
+**Rendimiento:** O(1) por atleta
+
+---
+
+## 1. Fundamento Científico
+
+El levantamiento olímpico depende casi exclusivamente del sistema de fosfágenos (esfuerzos <5 segundos). Sin embargo, mejorar el sistema anaeróbico láctico y aláctico mediante otros medios optimiza el rendimiento específico de la barra.
+
+### 1.1 Beneficios para el Pesista
+
+| # | Beneficio | Mecanismo | Impacto en Plataforma |
+|---|-----------|-----------|----------------------|
+| 1 | **Resíntesis de ATP/PC** | Intervalos anaeróbicos mejoran la eficiencia en la resíntesis de energía rápida | Recuperación más rápida entre intentos pesados en sesión y competencia |
+| 2 | **Reclutamiento de Fibras Tipo IIx** | Sprints en máquinas reclutan fibras rápidas sin impacto articular | Entrenar explosividad cuando rodillas o espalda baja necesitan descanso de la barra |
+| 3 | **Capacidad de Buffering** | Mejora la amortiguación de iones de hidrógeno (acidez) | La técnica no se desmorona en la 4ta-5ta repetición de series complejas; menor riesgo de lesión por fatiga técnica |
+| 4 | **Salud del SNC** | Estímulo de alta intensidad con patrón de movimiento diferente | Mantiene el SNC alerta sin sobreentrenamiento específico del gesto técnico |
+| 5 | **Capacidad de Carga Semanal** | Mayor tolerancia al volumen total de entrenamiento | El cuerpo tolera más trabajo sin colapsar |
+| 6 | **Composición Corporal** | Optimiza metabolismo de glucosa | Mantener peso de competencia (categoría) |
+
+### 1.2 Regla de Seguridad Fundamental
+
+> **Un levantador olímpico debe evitar el entrenamiento anaeróbico de muy larga duración (>60-90 segundos de esfuerzo continuo intenso) de forma recurrente.** Esto podría inducir una conversión de fibras rápidas a lentas, lo cual es contraproducente para la velocidad de la barra.
+
+---
+
+## 2. Equipamiento Permitido (Solo Máquinas)
+
+Solo se permiten máquinas ergométricas porque:
+- Mantienen técnica controlada bajo fatiga
+- Reducen drásticamente el porcentaje de lesión
+- Permiten alcanzar alta intensidad para activar el motor anaeróbico
+- Eliminan el componente de coordinación compleja que interferiría con el gesto técnico del levantamiento
+
+| Máquina | Énfasis | Transferencia al Levantamiento |
+|---------|---------|-------------------------------|
+| **Airbike** (Assault / Echo Bike) | Potencia sistémica total (tren superior + inferior) | Máxima descarga de potencia, torso erguido |
+| **RowErg** (Remo Concept2) | Extensión de cadera + core | Mayor transferencia biomecánica al "pull" del levantamiento |
+| **SkiErg** | Tren superior + core + extensión de cadera | Potencia de empuje, trabajo de core bajo fatiga |
+| **BikeErg** (Concept2) | Cadencia alta, control de vatios | Cero impacto, menor carga de flexión profunda |
+| **Trotadora** | Cadena posterior (solo sprints en colina) | Reclutamiento cadena posterior; mayor impacto articular |
+
+### 2.1 Selección de Máquina según Estado del Atleta
+
+| Situación del Levantador | Máquina Recomendada | Razón |
+|--------------------------|---------------------|-------|
+| Dolor de rodillas | BikeErg o SkiErg | Cero impacto y menor carga de flexión profunda |
+| Espalda baja cargada | Airbike | Permite mantener torso erguido. **Evitar Remo.** |
+| Falta de "punch" en el tirón | Remo o SkiErg | Fortalece apertura de cadera y core bajo fatiga |
+| Día de recuperación total | Trotadora (caminata) | Promueve drenaje linfático sin fatiga neuromuscular |
+| Sin restricciones | Cualquiera (rotar) | Variedad de estímulos |
+
+---
+
+## 3. Los Tres Vectores de Entrenamiento
+
+### Escala de Intensidad (RPE)
+
+| Vector | Zona | RPE | Descripción |
+|--------|------|-----|-------------|
+| **Vector 1** | Zona 2 (Aeróbico) | 4-5 | Conversacional, respiración nasal |
+| **Vector 2** | VO2 Max | 8-9 | Duro, respiración pesada, no puedes hablar |
+| **Vector 3** | Anaeróbico (Sprints) | 10 | Esfuerzo máximo absoluto, "All-out" |
+
+---
+
+### 3.1 Vector 1 — Zona 2 (Base Aeróbica)
+
+**Propósito:** Recuperación activa, flujo sanguíneo, tolerancia al volumen de pesas.
+
+| Máquina | Protocolo | Duración | Detalle |
+|---------|-----------|----------|---------|
+| Airbike | **Steady 30** | 30 min | RPM constantes en zona 2 |
+| BikeErg | **Cadencia Progresiva** | 40 min | Aumentar 5 RPM cada 10 min, siempre en Zona 2 |
+| SkiErg | **Resistencia de Empuje** | 30 min | Constante, foco en técnica de core |
+| RowErg | **Baja Cadencia / Alta Potencia** | 20 min | 18-20 SPM (paladas/min), tirando fuerte en cada una |
+| Trotadora | **Recuperación en Colina** | 30 min | Ritmo suave, inclinación 3-5% |
+
+---
+
+### 3.2 Vector 2 — VO2 Max (Capacidad Aeróbica Máxima)
+
+**Propósito:** Mejorar capacidad cardiovascular y buffering de acidez.
+
+| Máquina | Protocolo | Estructura | Detalle |
+|---------|-----------|------------|---------|
+| Airbike | **4×4 Clásico** | 4 min fuertes / 3 min descanso activo | Pedaleo muy suave en descanso |
+| BikeErg | **Intervalos de Umbral** | 5 × 5 min fuertes / 2 min suaves | Control de vatios constante |
+| BikeErg | **30/30 Micro-Intervalos** | 20 min: 30 seg fuerte / 30 seg suave | Alternancia rápida |
+| SkiErg | **Intervalos de 500m** | 6-8 × 500m fuertes / 2 min descanso activo | Mantener split constante |
+| SkiErg | **Pirámide de Metros** | 250m → 500m → 750m → 500m → 250m | Descanso 1:1 (mismo tiempo de trabajo) |
+| RowErg | **Intervalos de 1000m** | 4 × 1000m / 3 min descanso | Mantener split (ritmo/500m) constante |
+| Trotadora | **Intervalos de 800m** | 5 × 800m fuertes / 3 min caminando | Control de ritmo |
+| Trotadora | **Tempo Run** | 20 min continuos | Ritmo más rápido sostenible de forma constante |
+
+---
+
+### 3.3 Vector 3 — Anaeróbico (Sprints Máximos)
+
+**Propósito:** Potencia neuromuscular pura, reclutamiento de fibras tipo IIx, resíntesis de ATP/PC.
+
+| Máquina | Protocolo | Estructura | Detalle |
+|---------|-----------|------------|---------|
+| Airbike | **Wingate 6×30** | 30 seg sprint máximo / 3:30 min descanso total | Protocolo estándar de potencia |
+| Airbike | **Tabata** | 8 × (20 seg On / 10 seg Off) | 4 min total, máxima intensidad |
+| Airbike | **EMOM de Calorías** | Empezar 5-8 cal, +1-2 cal/min hasta fallar | Progresivo hasta el fallo |
+| BikeErg | **Sprints de 1km** | 4 × 1000m máxima velocidad / 3 min descanso | Vatios máximos sostenidos |
+| SkiErg | **Sprints Explosivos** | 10 × 20 seg potencia máxima / 1:40 min descanso | Total: ~20 min con descansos |
+| RowErg | **Sprints de 250m** | 8 × 250m al 100% / 2 min descanso total | Máxima extensión de cadera |
+| RowErg | **Muerte por Metros** | EMOM: Min 1 = 100m, Min 2 = 110m... hasta fallar | Progresivo, cada minuto sube 10m |
+| Trotadora | **Sprints en Colina** | 10 × 15 seg sprint en inclinación máxima / 2 min caminata | Menos impacto que plano |
+
+---
+
+## 4. Reglas de Elegibilidad (Freshness Gate)
+
+El atleta **DEBE estar fresco** para realizar Vectores 2 y 3. Estas reglas son obligatorias y no negociables.
+
+### 4.1 Reglas de Readiness
+
+| Regla | Condición | Acción |
+|-------|-----------|--------|
+| **Regla de Readiness General** | `readiness < 60` | Solo Vector 1 permitido. Vectores 2 y 3 **BLOQUEADOS** |
+| **Regla de Sueño** | `sleep_hours < 7` O `sleep_quality === 'poor'` | Solo Vector 1. Vectores 2 y 3 **CANCELADOS** |
+| **Regla de HRV** | HRV cae >15% por debajo de línea base de 7 días | Solo Vector 1. SNC está fatigado |
+| **Regla de Fatiga del SNC** | Levantamientos fallan por "falta de chispa" (falla técnica sin cansancio muscular) | Eliminar Vector 3, luego Vector 2. Solo Vector 1 |
+| **Regla de Estrés Lifestyle** | `lifestyle_load_factor > 70` (Engine 12) | Solo Vector 1 |
+| **Regla de Sobreentrenamiento** | `stress_engine.fatigue > 75` (Engine 01) | Vectores 2 y 3 **BLOQUEADOS** hasta que fatigue < 60 |
+
+### 4.2 Regla del 15% (Drop-off) — Aborto de Sesión
+
+Durante intervalos de alta intensidad (Vector 2 y 3):
+
+```
+MONITOREAR: Watts promedio o máximos por ronda
+
+SI ronda_actual.watts < ronda_1.watts × 0.85:
+    → ABORTAR SESIÓN INMEDIATAMENTE
+    → Registrar como "aborted_dropoff"
+    → Razón: Continuar solo genera fatiga sistémica sin beneficio adaptativo
+```
+
+**Ejemplo:**
+- Ronda 1: 450 watts
+- Umbral de aborto: 450 × 0.85 = 382 watts
+- Ronda 4: 370 watts → **ABORTAR** (cayó por debajo del 85%)
+
+### 4.3 Regla de Frecuencia Máxima
+
+| Restricción | Límite |
+|-------------|--------|
+| Sesiones Vector 3 por semana | **Máximo 2** (sumando todas las máquinas) |
+| Sesiones Vector 2 por semana | **Máximo 2** |
+| Misma máquina + mismo vector en la semana | **No repetir** |
+| Duración total semanal de acondicionamiento | Varía por fase del macrociclo (ver sección 5) |
+
+### 4.4 Regla de No-Interferencia con Fuerza
+
+| Restricción | Razón |
+|-------------|-------|
+| **NUNCA** hacer Vector 3 el día anterior a Sentadilla Pesada | Fibras rápidas dañadas + fosfocreatina agotada |
+| **NUNCA** hacer Vector 3 el día siguiente a Fuerza Máxima de tren inferior | Daño muscular residual impide alcanzar potencia necesaria = "esfuerzo basura" |
+| **NUNCA** hacer sprints ANTES de Snatch o Clean & Jerk | Agotan fosfocreatina y fatigan unidades motoras; la barra se sentirá "lenta" o "pesada" |
+| Acondicionamiento siempre DESPUÉS de pesas | O en sesión separada por mínimo 6 horas |
+| Evitar resistencia de larga duración (>40 min) de forma recurrente | Podría interferir con señalización de mTOR necesaria para hipertrofia y fuerza explosiva |
+
+---
+
+## 5. Integración con el Macrociclo (Engine 03)
+
+El volumen de acondicionamiento es **inversamente proporcional** a la especificidad del levantamiento.
+
+### 5.1 Fase de Preparación General (Hipertrofia / Base)
+
+**Objetivo:** Construir el "tanque de combustible". Las cargas de levantamiento no son máximas → el cuerpo tolera más fatiga sistémica.
+
+| Parámetro | Valor |
+|-----------|-------|
+| **Frecuencia** | 3-4 sesiones/semana |
+| **Vector 1 (Zona 2)** | 2 veces/semana (30-40 min) |
+| **Vector 2 (VO2 Max)** | 1-2 veces/semana |
+| **Vector 3 (Sprints)** | 0-1 vez/semana |
+| **Ubicación** | Final de sesión de pesas o días de descanso activo |
+| **Beneficio** | Tolerar el alto volumen de repeticiones con barra |
+
+### 5.2 Fase de Preparación Específica (Fuerza Base)
+
+**Objetivo:** Intensidades de Snatch/Clean suben al 80-90%. El acondicionamiento se vuelve más explosivo y menos agotador.
+
+| Parámetro | Valor |
+|-----------|-------|
+| **Frecuencia** | 2 sesiones/semana |
+| **Vector 1 (Zona 2)** | 1 vez/semana (mantenimiento cardiovascular) |
+| **Vector 2 (VO2 Max)** | 0-1 vez/semana |
+| **Vector 3 (Sprints cortos)** | 1 vez/semana (sprints de 10-15 seg) |
+| **Ubicación** | Lejos de días de Sentadilla Pesada |
+| **Beneficio** | Mantener potencia neuromuscular sin interferir con fuerza |
+
+**Ejemplo:** Si Sentadillas son Lunes y Jueves → Sprints el Martes o Miércoles.
+
+### 5.3 Fase de Pre-Competición (Peaking / Realización)
+
+**Objetivo:** Prioridad absoluta = velocidad de la barra y SNC. Cualquier fatiga extra es contraproducente.
+
+| Parámetro | Valor |
+|-----------|-------|
+| **Frecuencia** | 0-1 sesión/semana |
+| **Vector 1 (Zona 2)** | Solo si el atleta se siente "pesado" o congestionado (20 min suaves) |
+| **Vector 2 (VO2 Max)** | **ELIMINADO** |
+| **Vector 3 (Sprints)** | **ELIMINADO** |
+| **Ubicación** | Día de descanso activo intermedio |
+| **Beneficio** | Solo flujo sanguíneo para recuperación |
+
+### 5.4 Resumen Visual por Fase
+
+```
+                    V1(Zona2)    V2(VO2Max)    V3(Sprints)
+                    ─────────    ──────────    ───────────
+Preparación General   ██████       ████           ██
+Fuerza Base           ████         ██             ██
+Peaking               ██           ░░             ░░
+
+██ = Activo    ░░ = Eliminado
+```
+
+---
+
+## 6. Gestión del "Día Después"
+
+La planificación semanal se adapta al estímulo del día anterior para optimizar la supercompensación.
+
+| Entrenamiento Realizado | Estado Fisiológico Esperado | Protocolo del Día Siguiente |
+|------------------------|----------------------------|----------------------------|
+| **Vector 1 (Zona 2)** | Sistema parasimpático activo. Músculos oxigenados. | **Vía libre.** Fuerza Máxima o sesión de alta intensidad permitida. |
+| **Vector 2 (VO2 Max)** | Fatiga cardiovascular y depleción parcial de glucógeno. | **Evitar cardio intenso.** Priorizar levantamientos de fuerza estricta o técnica. |
+| **Vector 3 (Sprints)** | Fatiga profunda del SNC. Fibras rápidas dañadas. | **OBLIGATORIO:** Solo Vector 1 (recuperación activa) o descanso total. |
+| **Fuerza Máxima (tren inferior)** | Daño muscular residual severo. | **PROHIBIDO:** No hacer Vector 3 al día siguiente. |
+
+---
+
+## 7. Reglas de Nutrición y Combustible
+
+| Regla | Detalle |
+|-------|---------|
+| **Ventana Peri-Entrenamiento** | Si la dieta general es baja en carbohidratos, ubicar estratégicamente la ingesta de carbohidratos exclusivamente antes y después de sesiones Vector 2 y Vector 3 |
+| **Razón** | El trabajo anaeróbico depende enteramente del glucógeno; intentarlo sin combustible reduce la potencia de salida |
+| **Vector 1** | No requiere carga de carbohidratos especial (usa grasa como combustible) |
+| **Hidratación** | Obligatoria antes de cualquier vector. Deshidratación >2% del BW = cancelar Vector 3 |
+
+---
+
+## 8. Programación Semanal Típica (Fase de Fuerza)
+
+Para un levantador que entrena pesas 5 días/semana:
+
+| Día | Entrenamiento de Pesas | Acondicionamiento (Pulse) | Notas |
+|-----|----------------------|--------------------------|-------|
+| **Lunes** | Snatch + Sentadilla Trasera | ❌ No | Foco en fuerza pura |
+| **Martes** | Clean & Jerk + Accesorios | **Vector 2** (VO2 Max) al final | Ej: 4×4 en Airbike |
+| **Miércoles** | Técnica Ligera / Pulls | **Vector 1** (Zona 2) | 30 min constantes en Remo |
+| **Jueves** | Sentadilla Pesada + Push Press | ❌ No | Prioridad recuperación SNC |
+| **Viernes** | Máximos / Snatch + CJ | ❌ No | Simulación de competencia |
+| **Sábado** | Accesorios / Bodybuilding | **Vector 3** (Sprints) | Ej: 6×30 Wingate en Airbike |
+| **Domingo** | Descanso Total | ❌ No | Recuperación completa |
+
+---
+
+## 9. Algoritmo de Generación
+
+### 9.1 Selección del Vector
+
+```javascript
+function selectVector(readiness, sleep, hrv, fatigue, phase) {
+  // FRESHNESS GATE — Obligatorio
+  if (readiness < 60) return 'vector_1';
+  if (sleep.hours < 7 || sleep.quality === 'poor') return 'vector_1';
+  if (hrv.percentChange < -15) return 'vector_1';  // vs línea base 7 días
+  if (fatigue > 75) return 'vector_1';
+
+  // FASE DEL MACROCICLO
+  if (phase === 'peaking') return 'vector_1';  // Solo zona 2 en peaking
+
+  // SELECCIÓN POR READINESS + FASE
+  if (readiness >= 80 && phase !== 'peaking') {
+    return 'vector_3';  // Fresco → Sprints
+  }
+  if (readiness >= 60) {
+    return 'vector_2';  // Moderado → VO2 Max
+  }
+  return 'vector_1';
+}
+```
+
+### 9.2 Selección de Máquina
+
+```javascript
+function selectMachine(athleteCondition, usedThisWeek) {
+  const machines = ['airbike', 'rower', 'skierg', 'bikeerg', 'treadmill'];
+
+  // RESTRICCIONES POR CONDICIÓN
+  if (athleteCondition.knee_pain) exclude('treadmill', 'rower');
+  if (athleteCondition.lower_back_loaded) exclude('rower');
+  if (athleteCondition.lacks_pull_power) prefer('rower', 'skierg');
+  if (athleteCondition.recovery_day) return 'treadmill';  // Caminata
+
+  // NO REPETIR MISMA MÁQUINA + MISMO VECTOR ESTA SEMANA
+  const available = machines.filter(m => !usedThisWeek[m]?.includes(selectedVector));
+
+  // ROTAR ESTÍMULO
+  return selectLeastUsed(available);
+}
+```
+
+### 9.3 Selección de Protocolo
+
+```javascript
+function selectProtocol(vector, machine, athleteLevel) {
+  // Buscar en tabla de protocolos (sección 3)
+  const protocols = PROTOCOL_TABLE[machine][vector];
+
+  // Escalar dificultad según OLY Index
+  const difficulty = getDifficulty(athleteLevel.olyIndex);
+  //   < 250 → beginner
+  //   250-350 → intermediate
+  //   350-450 → advanced
+  //   450+ → elite
+
+  return scaleProtocol(protocols, difficulty);
+}
+```
+
+### 9.4 Monitoreo en Tiempo Real (Drop-off)
+
+```javascript
+function monitorDropoff(rounds) {
+  const baseline = rounds[0].watts;
+  const threshold = baseline * 0.85;
+
+  for (let i = 1; i < rounds.length; i++) {
+    if (rounds[i].watts < threshold) {
+      return {
+        action: 'ABORT',
+        reason: 'dropoff_15_percent',
+        abortedAtRound: i + 1,
+        baselineWatts: baseline,
+        currentWatts: rounds[i].watts,
+        dropPercent: ((baseline - rounds[i].watts) / baseline * 100).toFixed(1)
+      };
+    }
+  }
+  return { action: 'CONTINUE' };
+}
+```
+
+---
+
+## 10. Inputs y Outputs
+
+### 10.1 Inputs
+
+```json
+{
+  "athlete_id": "uuid",
+  "oly_index": 385,
+  "readiness": 78,
+  "fatigue": 42,
+  "sleep": {
+    "hours": 7.5,
+    "quality": "good",
+    "efficiency": 0.88
+  },
+  "hrv": {
+    "current": 62,
+    "baseline_7d": 68,
+    "percentChange": -8.8
+  },
+  "macrocycle_phase": "strength",
+  "athlete_condition": {
+    "knee_pain": false,
+    "lower_back_loaded": true,
+    "lacks_pull_power": false
+  },
+  "week_history": {
+    "airbike": ["vector_2"],
+    "rower": [],
+    "skierg": [],
+    "bikeerg": [],
+    "treadmill": ["vector_1"]
+  },
+  "training_schedule": {
+    "heavy_squat_days": ["monday", "thursday"],
+    "olympic_max_days": ["friday"]
+  }
+}
+```
+
+### 10.2 Output
+
+```json
+{
+  "pulse_session": {
+    "id": "pulse_2026_04_14_v2_airbike",
+    "vector": 2,
+    "vector_name": "VO2 Max",
+    "machine": "airbike",
+    "protocol": "4x4 Clásico",
+    "structure": {
+      "rounds": 4,
+      "work_seconds": 240,
+      "rest_seconds": 180,
+      "total_minutes": 28,
+      "rpe_target": "8-9"
+    },
+    "difficulty": "intermediate",
+    "placement": "post_weights",
+    "day": "tuesday",
+    "freshness_check": {
+      "readiness": "PASS (78 >= 60)",
+      "sleep": "PASS (7.5h >= 7h)",
+      "hrv": "PASS (-8.8% > -15%)",
+      "fatigue": "PASS (42 < 75)",
+      "day_before": "PASS (no V3 yesterday)",
+      "day_after": "OK (no heavy squat tomorrow)"
+    },
+    "abort_rules": {
+      "dropoff_threshold": 0.85,
+      "monitor": "watts_per_round"
+    },
+    "nutrition_note": "Ingerir carbohidratos en ventana peri-entrenamiento",
+    "xp_reward": 300
+  }
+}
+```
+
+---
+
+## 11. Reglas Específicas de Frescura (Freshness Gate Completo)
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    FRESHNESS GATE — PULSE ENGINE                │
+│                                                                 │
+│  PASO 1: ¿Readiness >= 60?                                     │
+│          NO → Solo Vector 1                                     │
+│          SÍ → Continuar                                         │
+│                                                                 │
+│  PASO 2: ¿Durmió >= 7 horas con buena calidad?                │
+│          NO → Solo Vector 1                                     │
+│          SÍ → Continuar                                         │
+│                                                                 │
+│  PASO 3: ¿HRV dentro del 15% de línea base?                   │
+│          NO → Solo Vector 1 (SNC fatigado)                     │
+│          SÍ → Continuar                                         │
+│                                                                 │
+│  PASO 4: ¿Fatigue del Stress Engine < 75?                      │
+│          NO → Solo Vector 1 hasta fatigue < 60                 │
+│          SÍ → Continuar                                         │
+│                                                                 │
+│  PASO 5: ¿Lifestyle Load Factor < 70?                          │
+│          NO → Solo Vector 1                                     │
+│          SÍ → Continuar                                         │
+│                                                                 │
+│  PASO 6: ¿Ayer fue Vector 3 o Fuerza Máxima tren inferior?    │
+│          SÍ → Solo Vector 1                                     │
+│          NO → Continuar                                         │
+│                                                                 │
+│  PASO 7: ¿Mañana hay Sentadilla Pesada o Máximos?             │
+│          SÍ → Solo Vector 1 o Vector 2 (NO Vector 3)          │
+│          NO → Continuar                                         │
+│                                                                 │
+│  PASO 8: ¿Fase del macrociclo = Peaking?                       │
+│          SÍ → Solo Vector 1                                     │
+│          NO → TODOS LOS VECTORES DISPONIBLES ✅                │
+│                                                                 │
+│  PASO 9: Seleccionar vector según readiness                    │
+│          Readiness 60-79 → Vector 2                            │
+│          Readiness >= 80 → Vector 2 o Vector 3                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 12. XP y Gamificación
+
+### 12.1 XP Base por Vector
+
+| Vector | XP Base | Razón |
+|--------|---------|-------|
+| Vector 1 (Zona 2) | 150 XP | Menor intensidad, pero valioso para recuperación |
+| Vector 2 (VO2 Max) | 300 XP | Intensidad moderada-alta |
+| Vector 3 (Sprints) | 400 XP | Máxima intensidad, mayor demanda |
+
+### 12.2 Bonificaciones
+
+| Condición | XP Bonus |
+|-----------|----------|
+| Completar el mismo día que se asigna | +50 XP |
+| Superar tu mejor marca anterior en el mismo protocolo | +75 XP |
+| Nuevo récord personal (watts, metros, calorías) | +100 XP |
+| Mayor score del club en la semana | +50 XP |
+| Completar sin abortar (Vector 3 completo) | +25 XP |
+
+### 12.3 Leaderboard Semanal
+
+```json
+{
+  "leaderboard_id": "pulse_weekly_2026_w15",
+  "entries": [
+    {
+      "rank": 1,
+      "athlete": "María",
+      "vector": 3,
+      "machine": "airbike",
+      "protocol": "Wingate 6×30",
+      "score": "485 watts pico",
+      "xp_earned": 475
+    }
+  ]
+}
+```
+
+---
+
+## 13. Métricas de Tracking
+
+### 13.1 Por Sesión
+
+| Métrica | Unidad | Aplica a |
+|---------|--------|----------|
+| **Watts pico** | W | Todos los vectores en todas las máquinas |
+| **Watts promedio** | W | Todos los vectores |
+| **Caída de watts (fatiga)** | % | Vector 2 y 3 (para regla del 15%) |
+| **RPE al finalizar** | 1-10 | Todos los vectores |
+| **Metros totales** | m | Remo, SkiErg, BikeErg, Trotadora |
+| **Calorías** | kcal | Airbike, BikeErg |
+| **Recuperación HR 2 min post** | bpm | Vector 2 y 3 |
+| **Rondas completadas** | # | Protocolos con intervalos |
+| **Ronda de aborto** | # | Si se activó regla del 15% |
+| **Duración real** | min | Todos |
+
+### 13.2 Por Semana (Tendencias)
+
+| Métrica | Cálculo |
+|---------|---------|
+| Sesiones completadas por vector | Conteo V1, V2, V3 |
+| Watts promedio semanal | Media de watts de todas las sesiones |
+| Tasa de aborto | Sesiones abortadas / sesiones totales |
+| Variedad de máquinas | Máquinas diferentes usadas |
+| Cumplimiento de frecuencia | Sesiones realizadas vs planificadas |
+
+---
+
+## 14. Data Storage
+
+```sql
+CREATE TABLE "PulseSession" (
+  "id"                    UUID PRIMARY KEY,
+  "athleteId"             UUID NOT NULL,
+  "weekNumber"            INT NOT NULL,
+  "vector"                INT NOT NULL,        -- 1, 2, 3
+  "vectorName"            VARCHAR NOT NULL,     -- "zona_2", "vo2_max", "anaerobic"
+  "machine"               VARCHAR NOT NULL,     -- "airbike", "rower", "skierg", "bikeerg", "treadmill"
+  "protocol"              VARCHAR NOT NULL,     -- "wingate_6x30", "4x4_clasico", "steady_30"...
+  "difficulty"            VARCHAR NOT NULL,     -- "beginner", "intermediate", "advanced", "elite"
+  "macrocyclePhase"       VARCHAR NOT NULL,     -- "preparation", "strength", "peaking"
+  "placement"             VARCHAR NOT NULL,     -- "post_weights", "separate_session", "rest_day"
+
+  -- Freshness Gate (snapshot al momento de asignar)
+  "readinessAtAssign"     INT,
+  "fatigueAtAssign"       INT,
+  "sleepHours"            DECIMAL,
+  "hrvPercentChange"      DECIMAL,
+
+  -- Estructura del protocolo
+  "rounds"                INT,
+  "workSeconds"           INT,
+  "restSeconds"           INT,
+  "totalMinutes"          INT,
+  "rpeTarget"             VARCHAR,              -- "8-9", "10", "4-5"
+
+  -- Resultados
+  "status"                VARCHAR NOT NULL,     -- "assigned", "in_progress", "completed", "aborted", "skipped"
+  "wattsPeak"             INT,
+  "wattsAverage"          INT,
+  "wattsDropPercent"      DECIMAL,              -- Caída entre ronda 1 y última
+  "metersTotal"           INT,
+  "caloriesTotal"         INT,
+  "roundsCompleted"       INT,
+  "abortedAtRound"        INT,                  -- NULL si completado
+  "abortReason"           VARCHAR,              -- "dropoff_15", "athlete_choice", "coach_override"
+  "rpeFinal"              INT,                  -- 1-10
+  "hrRecovery2min"        INT,                  -- HR 2 min post
+
+  -- Gamificación
+  "xpBase"                INT NOT NULL,
+  "xpBonus"               INT DEFAULT 0,
+  "xpTotal"               INT NOT NULL,
+  "isPersonalRecord"      BOOLEAN DEFAULT FALSE,
+
+  -- Timestamps
+  "assignedAt"            TIMESTAMP NOT NULL,
+  "startedAt"             TIMESTAMP,
+  "completedAt"           TIMESTAMP,
+  "createdAt"             TIMESTAMP DEFAULT NOW()
+);
+
+-- Índices
+CREATE INDEX idx_pulse_athlete ON "PulseSession"("athleteId");
+CREATE INDEX idx_pulse_week ON "PulseSession"("weekNumber");
+CREATE INDEX idx_pulse_status ON "PulseSession"("status");
+CREATE INDEX idx_pulse_vector ON "PulseSession"("vector");
+```
+
+---
+
+## 15. Integration Points
+
+### 15.1 Recibe de (Inputs)
+
+| Engine | Dato | Uso |
+|--------|------|-----|
+| **01 Stress Engine** | readiness, fatigue | Freshness Gate (pasos 1, 4) |
+| **03 Macrocycle Engine** | phase, heavy_squat_days | Frecuencia por fase + regla de no-interferencia |
+| **12 Lifestyle Engine** | lifestyle_load_factor | Freshness Gate (paso 5) |
+| **Dispositivo HRV** | hrv, sleep | Freshness Gate (pasos 2, 3) |
+| **Perfil del Atleta** | oly_index, conditions | Escalado de dificultad + selección de máquina |
+
+### 15.2 Alimenta a (Outputs)
+
+| Engine | Dato | Uso |
+|--------|------|-----|
+| **01 Stress Engine** | training_load (watts × tiempo) | Contribuye al cálculo de fatiga/fitness |
+| **04 Gamification Engine** | xp_earned | XP por completar sesiones |
+| **14 Smart Coach Engine** | completion_rate, abort_rate | Alertas si atleta aborta mucho o salta sesiones |
+| **16 Social Engine** | PR de watts, completar desafío | Tarjetas compartibles |
+| **21 Leaderboard Cache** | weekly_score | Rankings semanales de Pulse |
+
+---
+
+## 16. Coach Dashboard — Pulse Analytics
+
+```json
+{
+  "pulse_team_insights": {
+    "completion_rate": 0.87,
+    "abort_rate": 0.08,
+    "average_watts_trend": "+3.2% vs last 4 weeks",
+    "most_used_machine": "airbike",
+    "vector_distribution": {
+      "vector_1": 45,
+      "vector_2": 35,
+      "vector_3": 20
+    },
+    "freshness_gate_blocks": {
+      "total_blocks": 12,
+      "by_reason": {
+        "low_readiness": 5,
+        "poor_sleep": 4,
+        "hrv_drop": 2,
+        "high_fatigue": 1
+      }
+    },
+    "at_risk_athletes": [
+      {
+        "athlete": "João",
+        "concern": "3 sesiones V3 abortadas por dropoff en 2 semanas",
+        "recommendation": "Reducir a V2 por 2 semanas, revisar recuperación"
+      }
+    ]
+  }
+}
+```
+
+---
+
+## 17. Testing Checklist
+
+- [ ] Freshness Gate bloquea Vector 2 y 3 cuando readiness < 60
+- [ ] Freshness Gate bloquea cuando sleep < 7 horas
+- [ ] Freshness Gate bloquea cuando HRV cae >15%
+- [ ] Freshness Gate bloquea cuando fatigue > 75
+- [ ] Freshness Gate bloquea V3 si ayer fue Fuerza Máxima tren inferior
+- [ ] Freshness Gate bloquea V3 si mañana hay Sentadilla Pesada
+- [ ] Solo Vector 1 en fase Peaking
+- [ ] Regla del 15% aborta sesión cuando watts caen
+- [ ] No se repite misma máquina + mismo vector en la semana
+- [ ] Máximo 2 sesiones V3 por semana
+- [ ] Selección de máquina respeta condición del atleta (rodilla, espalda)
+- [ ] XP se calcula correctamente (base + bonificaciones)
+- [ ] Leaderboard semanal se actualiza tras completar sesión
+- [ ] Coach dashboard muestra abort_rate y freshness_gate_blocks
+- [ ] Protocolo correcto se asigna según vector + máquina + dificultad
+- [ ] Integración con Stress Engine (training_load contribuye a fatiga)
+- [ ] Nutrición: nota de carbohidratos peri-entrenamiento en V2 y V3
+
+---
+
+## 18. Parámetros Críticos de Configuración
+
+| Parámetro | Valor Default | Configurable | Notas |
+|-----------|---------------|--------------|-------|
+| `READINESS_MIN_V2` | 60 | Sí | Umbral mínimo para Vector 2 |
+| `READINESS_MIN_V3` | 80 | Sí | Umbral mínimo para Vector 3 |
+| `SLEEP_MIN_HOURS` | 7 | Sí | Mínimo para V2/V3 |
+| `HRV_DROP_THRESHOLD` | -15% | Sí | vs línea base 7 días |
+| `FATIGUE_MAX_V2V3` | 75 | Sí | Stress Engine fatigue |
+| `FATIGUE_UNLOCK_V2V3` | 60 | Sí | Umbral para re-habilitar V2/V3 |
+| `LIFESTYLE_MAX_V2V3` | 70 | Sí | Lifestyle Engine load factor |
+| `DROPOFF_THRESHOLD` | 0.85 | Sí | 15% caída = abortar |
+| `MAX_V3_PER_WEEK` | 2 | Sí | Límite semanal de sprints |
+| `MAX_V2_PER_WEEK` | 2 | Sí | Límite semanal de VO2 Max |
+| `MIN_HOURS_AFTER_WEIGHTS` | 6 | Sí | Separación mínima en sesión aparte |
+| `MAX_CONTINUOUS_EFFORT_SEC` | 90 | No | Regla de seguridad: >90s puede convertir fibras rápidas→lentas |
+
+---
+
+**Generado:** 2026-04-11  
+**Fuente:** Investigación de periodización anaeróbica para levantadores olímpicos  
+**Integración:** Stress Engine, Macrocycle Engine, Lifestyle Engine, Gamification, Smart Coach, Social, Leaderboard  
+**Status:** ✅ Completo — Listo para implementación
+
+
+# 10. Balance Engine — Exercise Ratio Enforcement
+
+**Purpose:** Maintain healthy exercise ratios (FS/BS, Snatch/Clean, Pull/Push) to prevent imbalances and injuries
+
+**Status:** Integrated with session adaptation + macrocycle design  
+**Update Frequency:** Per session (real-time validation)  
+**Performance:** O(1) ratio calculation
+
+---
+
+## Overview
+
+Olympic lifting creates natural imbalances (athletes train Snatch more than Clean, prioritize squats). Balance Engine ensures sustainable training by enforcing healthy ratios across macro-level programming.
+
+**Three Critical Ratios:**
+1. **FS/BS** (Front Squat / Back Squat) = 0.70–0.90
+2. **Snatch/Clean** (Snatch volume / Clean volume) = 0.80–1.00
+3. **Pull/Push** (Pulling movements / Pushing movements) = 1.00–1.20
+
+---
+
+## Target Ratios & Physiological Basis
+
+### 1. FS/BS Ratio: 0.70–0.90
+
+**Physiological Goal:** Maintain quad strength while protecting spinal loading
+
+```
+Front Squat = ~0.75–0.85 × Back Squat
+
+Why?
+• Back Squat is primary strength builder (full posterior chain)
+• Front Squat complements with anterior quad emphasis
+• Too much FS (ratio > 0.90) = quad dominance, spinal stress reduced (too easy)
+• Too little FS (ratio < 0.70) = insufficient quad strength for C&J catches
+```
+
+**Example Target:**
+```
+Athlete BS 1RM: 200kg
+Target FS: 150kg (ratio 0.75)
+
+Volume over 4 weeks:
+  BS: 12 reps @ 90%+ = ~10,800 kg total
+  FS: 12 reps @ 85%+ = ~9,360 kg total
+  Ratio: 0.87 ✅ (within 0.70-0.90 range)
+```
+
+---
+
+### 2. Snatch/Clean Ratio: 0.80–1.00
+
+**Physiological Goal:** Balance technical work (Snatch) with strength emphasis (Clean)
+
+```
+Snatch Volume ≈ 0.80–1.00 × Clean Volume
+
+Why?
+• Snatch = more technical, lower loading capacity (athletes lift ~80% of Clean PR)
+• Clean = heavier loads, more strength building
+• Balanced approach = technical + strength + safety
+• Too much Snatch (ratio > 1.00) = technical fatigue, CNS tax
+• Too little Snatch (ratio < 0.80) = insufficient competition prep
+```
+
+**Example Tracking:**
+```
+Month-long volume:
+  Snatch variants total: 1,200 kg
+  Clean variants total: 1,400 kg
+  Ratio: 0.86 ✅ (within 0.80-1.00 range)
+
+By family:
+  Full Snatch 5×2 @ 90%: 900kg
+  Hang Snatch 5×2 @ 85%: 300kg
+  Total: 1,200 kg
+```
+
+---
+
+### 3. Pull/Push Ratio: 1.00–1.20
+
+**Physiological Goal:** Posterior chain health + shoulder stability
+
+```
+Pull Volume ≥ Push Volume (ideally 1.00–1.20)
+
+Why?
+• Overhead pressing can imbalance shoulders (internal rotation)
+• Pulling movements (rows, chin-ups) counterbalance
+• Ratio 1.00–1.20 maintains shoulder health + posture
+• Too much pushing (ratio < 1.00) = impingement risk
+• Excessive pulling (ratio > 1.20) = unnecessary
+```
+
+**Example:**
+```
+Weekly push movements:
+  Press 5×3: 500kg
+  Push Jerk 3×2: 450kg
+  Dips 3×5: (bodyweight + weight)
+  Total: ~1,000 kg
+
+Weekly pull movements:
+  Snatch Pull 6×2 @ 90%: 1,200kg
+  Clean Pull 6×2 @ 90%: 1,200kg
+  Rows 4×5: 400kg
+  Total: ~2,800 kg
+
+Ratio: 2.8 ⚠️ (TOO HIGH - reduce pulls or increase push)
+```
+
+---
+
+## Balance Calculation Algorithm
+
+### Step 1: Aggregate Exercise Volume
+
+```javascript
+function calculateRatios(athlete, timeframe = '4weeks') {
+  const sessions = getSessionsInTimeframe(athlete, timeframe);
+  
+  // Initialize volume trackers
+  let fs_volume = 0;      // Front Squat total kg
+  let bs_volume = 0;      // Back Squat total kg
+  let snatch_volume = 0;  // All Snatch variants
+  let clean_volume = 0;   // All Clean variants
+  let pull_volume = 0;    // Pull, deadlift, rows
+  let push_volume = 0;    // Press, jerk, dips
+  
+  // Sum across all sessions
+  for (const session of sessions) {
+    for (const exercise of session.exercises) {
+      const volume = exercise.sets × exercise.reps × exercise.weight_kg;
+      
+      if (exercise.is_front_squat) fs_volume += volume;
+      if (exercise.is_back_squat) bs_volume += volume;
+      if (exercise.category === 'snatch') snatch_volume += volume;
+      if (exercise.category === 'clean') clean_volume += volume;
+      if (exercise.movement_type === 'pull') pull_volume += volume;
+      if (exercise.movement_type === 'push') push_volume += volume;
+    }
+  }
+  
+  return { fs_volume, bs_volume, snatch_volume, clean_volume, pull_volume, push_volume };
+}
+```
+
+### Step 2: Calculate Ratios
+
+```javascript
+function getRatios(athlete, timeframe = '4weeks') {
+  const volumes = calculateRatios(athlete, timeframe);
+  
+  return {
+    fs_bs: bs_volume > 0 ? fs_volume / bs_volume : 0,      // 0.70-0.90
+    snatch_clean: clean_volume > 0 ? snatch_volume / clean_volume : 0,  // 0.80-1.00
+    pull_push: push_volume > 0 ? pull_volume / push_volume : 0  // 1.00-1.20
+  };
+}
+```
+
+### Step 3: Status Classification
+
+```javascript
+function classifyRatios(ratios) {
+  return {
+    fs_bs: {
+      value: ratios.fs_bs,
+      target: "0.70-0.90",
+      status: ratios.fs_bs >= 0.70 && ratios.fs_bs <= 0.90 ? "✅ optimal" : "⚠️ needs adjustment",
+      suggestion: ratios.fs_bs < 0.70 ? "↑ Add Front Squat volume" : "↓ Reduce Front Squat"
+    },
+    snatch_clean: {
+      value: ratios.snatch_clean,
+      target: "0.80-1.00",
+      status: ratios.snatch_clean >= 0.80 && ratios.snatch_clean <= 1.00 ? "✅ optimal" : "⚠️ needs adjustment",
+      suggestion: ratios.snatch_clean < 0.80 ? "↑ Add Snatch volume" : "↓ Reduce Snatch"
+    },
+    pull_push: {
+      value: ratios.pull_push,
+      target: "1.00-1.20",
+      status: ratios.pull_push >= 1.00 && ratios.pull_push <= 1.20 ? "✅ optimal" : "⚠️ needs adjustment",
+      suggestion: ratios.pull_push < 1.00 ? "↑ Add Pull volume" : "↓ Reduce Pull"
+    }
+  };
+}
+```
+
+---
+
+## Macrocycle Design Integration
+
+### Pre-Build Validation
+
+Before macrocycle is assigned to athlete:
+
+```javascript
+async function validateMacrocycleBalance(macrocycleId, athleteCurrentState) {
+  const macrocycle = await getMacrocycle(macrocycleId);
+  const projected_ratios = calculateMacrocycleRatios(macrocycle);
+  const current_ratios = calculateRatios(athleteCurrentState, '4weeks');
+  
+  // After macrocycle, will ratios stay healthy?
+  const post_macrocycle_ratios = {
+    fs_bs: (currentState.fs_volume + macrocycle.projected_fs) / (currentState.bs_volume + macrocycle.projected_bs),
+    snatch_clean: (currentState.snatch_vol + macrocycle.projected_snatch) / (currentState.clean_vol + macrocycle.projected_clean),
+    pull_push: (currentState.pull_vol + macrocycle.projected_pull) / (currentState.push_vol + macrocycle.projected_push)
+  };
+  
+  // All within range?
+  const is_balanced = 
+    post_macrocycle_ratios.fs_bs >= 0.70 && post_macrocycle_ratios.fs_bs <= 0.90 &&
+    post_macrocycle_ratios.snatch_clean >= 0.80 && post_macrocycle_ratios.snatch_clean <= 1.00 &&
+    post_macrocycle_ratios.pull_push >= 1.00 && post_macrocycle_ratios.pull_push <= 1.20;
+  
+  return is_balanced;
+}
+```
+
+---
+
+## Session-Level Suggestions
+
+### Real-Time Balance Feedback
+
+```json
+{
+  "session_id": "uuid",
+  "balance_analysis": {
+    "current_ratios": {
+      "fs_bs": 0.65,    // ⚠️ Below 0.70
+      "snatch_clean": 0.95, // ✅ Good
+      "pull_push": 1.15     // ✅ Good
+    },
+    "session_exercises": [
+      { "exercise": "Back Squat", "volume": 2000 },
+      { "exercise": "Snatch Pull", "volume": 1800 }
+    ],
+    "post_session_ratios": {
+      "fs_bs": 0.62,    // ⚠️ Will get worse
+      "snatch_clean": 0.95,
+      "pull_push": 1.18
+    },
+    "suggestions": [
+      {
+        "issue": "FS/BS too low (0.62, target 0.70+)",
+        "fix": "Add 1-2 Front Squat sets to this session",
+        "example": "Add 3×5 @ 140kg Front Squat (+2,100 kg volume)"
+      }
+    ]
+  }
+}
+```
+
+---
+
+## Coach Dashboard View
+
+### Balance Analytics
+
+```
+BALANCE REPORT — Last 4 Weeks
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Athlete: Maria | Training Phase: Strength
+
+┌─ Front Squat / Back Squat ─────────────┐
+│ Current Ratio: 0.72 ✅ (target 0.70-0.90)  │
+│ Volume: 1,200 kg FS / 1,667 kg BS      │
+│ Status: OPTIMAL                        │
+└────────────────────────────────────────┘
+
+┌─ Snatch / Clean ──────────────────────┐
+│ Current Ratio: 0.89 ✅ (target 0.80-1.00)  │
+│ Volume: 1,300 kg Sn / 1,462 kg Cl     │
+│ Status: OPTIMAL                        │
+└────────────────────────────────────────┘
+
+┌─ Pull / Push ─────────────────────────┐
+│ Current Ratio: 1.18 ✅ (target 1.00-1.20)  │
+│ Volume: 4,200 kg Pull / 3,559 kg Push │
+│ Status: OPTIMAL                        │
+└────────────────────────────────────────┘
+
+Recommendation: Continue current programming
+```
+
+---
+
+## Imbalance Intervention
+
+### Automatic Suggestions When Out of Range
+
+```javascript
+// If ratio goes outside target range, system suggests fixes
+
+if (fs_bs < 0.70) {
+  suggestion = "Front Squat volume is low. Add 1-2 sessions/week";
+}
+
+if (snatch_clean > 1.00) {
+  suggestion = "Snatch volume is high. Reduce complexity or add Clean variants";
+}
+
+if (pull_push < 1.00) {
+  suggestion = "Not enough pulling. Add rows, more pulls to sessions";
+}
+```
+
+### Coach Override
+
+Coach can:
+1. **Accept suggestion** — Auto-adjust next macrocycle
+2. **Modify session** — Add/remove exercises this week
+3. **Override** — Consciously ignore for specific goal (e.g., "competition prep = more heavy singles")
+
+---
+
+## Data Storage
+
+```sql
+CREATE TABLE "ExerciseRatioAnalysis" (
+  "id" UUID PRIMARY KEY,
+  "athleteId" UUID,
+  "timeframeStart" DATE,
+  "timeframeEnd" DATE,
+  "fs_volume_kg" DECIMAL,
+  "bs_volume_kg" DECIMAL,
+  "snatch_volume_kg" DECIMAL,
+  "clean_volume_kg" DECIMAL,
+  "pull_volume_kg" DECIMAL,
+  "push_volume_kg" DECIMAL,
+  "fs_bs_ratio" DECIMAL,        -- 0.70-0.90
+  "snatch_clean_ratio" DECIMAL, -- 0.80-1.00
+  "pull_push_ratio" DECIMAL,    -- 1.00-1.20
+  "fs_bs_status" VARCHAR,       -- optimal|low|high
+  "snatch_clean_status" VARCHAR,
+  "pull_push_status" VARCHAR,
+  "calculated_at" TIMESTAMP
+);
+```
+
+---
+
+## Integration Points
+
+**Feeds Into:**
+- **Macrocycle Engine** → Validates program balance before assigning
+- **Session Adaptation** → Suggests substitutions to rebalance
+- **Coach Dashboard** → Visualizes ratios over time
+
+**Receives From:**
+- **Session Completion** → Records exercise volume
+- **Athlete Profile** → Gets squat/lift 1RMs for calculation
+
+---
+
+## Testing Checklist
+
+- [ ] FS/BS ratio calculation accurate (0.70-0.90 range)
+- [ ] Snatch/Clean ratio accurate (0.80-1.00 range)
+- [ ] Pull/Push ratio accurate (1.00-1.20 range)
+- [ ] Volume aggregation across multiple sessions correct
+- [ ] Macrocycle pre-validation prevents imbalanced programs
+- [ ] Session-level suggestions appear when ratio drifts
+- [ ] Coach override works without validation errors
+- [ ] Dashboard displays all three ratios correctly
+- [ ] Timeframe filtering (1 week, 4 weeks, 8 weeks) works
+- [ ] Ratio status labels (✅/⚠️) display correctly
+
+---
+
+## Performance Notes
+
+**Ratio Calculation:** O(n) where n = number of exercises in timeframe
+- Typically ~50-100 exercises per 4-week macrocycle
+- Pre-calculated at macrocycle end (non-blocking)
+
+**Validation Query:** O(1) via cached ratio calculations
+
+---
+
+**Generated:** 2026-04-10  
+**Source:** Extracted from balance_engine.js + macrocycle_engine.js  
+**Integration Status:** ✅ Complete (macrocycle + session level)
+
+

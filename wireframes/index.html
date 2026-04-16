@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HolyOly — Wireframes v0.2</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background: #07070F; font-family: 'Inter', system-ui, sans-serif; }
+    .card {
+      transition: transform .15s, box-shadow .15s;
+      text-decoration: none;
+      display: block;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 32px rgba(99,102,241,.2);
+    }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .group-label {
+      font-size: 10px; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: #334155;
+      padding: 8px 0 10px;
+      border-bottom: 1px solid #1e1e30;
+      margin-bottom: 14px;
+    }
+  </style>
+</head>
+<body class="min-h-screen p-8">
+
+  <!-- Header -->
+  <div class="max-w-5xl mx-auto">
+    <div class="flex items-center justify-between mb-10">
+      <div>
+        <div class="flex items-center gap-3 mb-1">
+          <span class="text-3xl font-black tracking-tight text-white">HOLY<span class="text-indigo-400">OLY</span></span>
+          <span class="text-xs bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-500/30 font-bold">v0.2</span>
+        </div>
+        <p class="text-slate-500 text-sm">Wireframes Fase 1 · Smart training. Zero burnout.</p>
+      </div>
+      <div class="text-right">
+        <p class="text-xs text-slate-600 font-semibold uppercase tracking-wider">Estado</p>
+        <p class="text-sm text-green-400 font-bold mt-0.5">21 pantallas · Fase 1</p>
+      </div>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="mb-10 bg-slate-900 border border-slate-700/50 rounded-2xl p-5">
+      <div class="flex justify-between items-center mb-3">
+        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Cobertura de pantallas</span>
+        <span class="text-xs font-bold text-indigo-400">21 / 27 pantallas</span>
+      </div>
+      <div class="h-2 bg-slate-800 rounded-full overflow-hidden">
+        <div class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-500" style="width:37%;"></div>
+      </div>
+      <div class="flex gap-6 mt-3">
+        <span class="text-xs text-green-400 font-semibold">✅ Activo: 21</span>
+        <span class="text-xs text-slate-600 font-semibold">⬜ Pendiente: 6</span>
+      </div>
+    </div>
+
+    <!-- ─── GRUPO A: Auth ─── -->
+    <p class="group-label">A — Autenticación</p>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+      <!-- A1 ✅ -->
+      <a href="A1_A2_A3_auth.html" class="card bg-slate-900 border border-slate-700/50 rounded-2xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="status-dot bg-green-400"></span>
+          <span class="text-xs text-green-400 font-bold uppercase tracking-wider">Listo</span>
+        </div>
+        <h3 class="text-white font-bold mb-1">A1 · Login</h3>
+        <p class="text-slate-400 text-xs">Email + social auth · roles auto-detectados · link de invite</p>
+        <div class="flex flex-wrap gap-1 mt-3">
+          <span class="text-xs bg-blue-900/40 text-blue-400 px-2 py-0.5 rounded">JWT Auth</span>
+        </div>
+      </a>
+      <!-- A2 ✅ -->
+      <a href="A1_A2_A3_auth.html" class="card bg-slate-900 border border-slate-700/50 rounded-2xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="status-dot bg-green-400"></span>
+          <span class="text-xs text-green-400 font-bold uppercase tracking-wider">Listo</span>
+        </div>
+        <h3 class="text-white font-bold mb-1">A2 · Register</h3>
+        <p class="text-slate-400 text-xs">Registro con invite coach · 45-day Elite Trial · selector de rol</p>
+        <div class="flex flex-wrap gap-1 mt-3">
+          <span class="text-xs bg-amber-900/40 text-amber-400 px-2 py-0.5 rounded">45-Day Trial</span>
+        </div>
+      </a>
+      <!-- A3 ✅ -->
+      <a href="A1_A2_A3_auth.html" class="card bg-slate-900 border border-slate-700/50 rounded-2xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="status-dot bg-green-400"></span>
+          <span class="text-xs text-green-400 font-bold uppercase tracking-wider">Listo</span>
+        </div>
+        <h3 class="text-white font-bold mb-1">A3 · Forgot Password</h3>
+        <p class="text-slate-400 text-xs">3 estados: Email → OTP 6 dígitos → Nueva contraseña</p>
+        <div class="flex flex-wrap gap-1 mt-3">
+          <span class="text-xs bg-blue-900/40 text-blue-400 px-2 py-0.5 rounded">OTP · JWT</span>
+        </div>
+      </a>
+    </div>
+
+    <!-- ─── GRUPO B: Atleta ─── -->
+    <p class="group-label">B — Atleta (15 pantallas)</p>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+
+      <!-- B1 ✅ -->
+      <a href="B1_dashboard_atleta.html" class="card bg-slate-900 border border-slate-700/50 rounded-2xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="status-dot bg-green-400"></span>
+          <span class="text-xs text-green-400 font-bold uppercase tracking-wider">Listo</span>
+        </div>
+        <h3 class="text-white font-bold mb-1">B1 · Dashboard Atleta</h3>
+        <p class="text-slate-400 text-xs">Readiness, OLY Index, sesión del día, XP/Cinturón, Píldoras, Pulse widget</p>
+        <div class="flex flex-wrap gap-1 mt-3">
+          <span class="text-xs bg-green-900/40 text-green-400 px-2 py-0.5 rounded">Stress</span>
+          <span class="text-xs bg-purple-900/40 text-purple-400 px-2 py-0.5 rounded">Gamification</span>
+          <span class="text-xs bg-yellow-900/40 text-yellow-400 px-2 py-0.5 rounded">Píldoras</span>
+        </div>
+      </a>
+
+      <!-- B2 ✅ (en B6) -->
+      <a href="B6_active_session.html" class="card bg-slate-900 border border-slate-700/50 rounded-2xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="status-dot bg-green-400"></span>
+          <span class="text-xs text-green-400 font-bold uppercase tracking-wider">Listo</span>
+        </div>
+        <h3 class="text-white font-bold mb-1">B2 · Pre-Check (5 sliders)</h3>
+        <p class="text-slate-400 text-xs">Coordinación, fatiga, dolor, enfoque, sueño · Risk Score · Injury Shield</p>
+        <div class="flex flex-wrap gap-1 mt-3">
+          <span class="text-xs bg-red-900/40 text-red-400 px-2 py-0.5 rounded">Session Adaptation</span>
+          <span class="text-xs bg-blue-900/40 text-blue-400 px-2 py-0.5 rounded">Stress Engine</span>
+        </div>
+      </a>
+
+      <!-- B3 ✅ -->
+      <a href="B3_injury_shield.html" class="card bg-slate-900 border border-slate-700/50 rounded-2xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="status-dot bg-green-400"></span>
+          <span class="text-xs text-green-400 font-bold uppercase tracking-wider">Listo</span>
+        </div>
+        <h3 class="text-white font-bold mb-1">B3 · Injury Shield Modal</h3>
+        <p class="text-slate-400 text-xs">3 estados: Rojo/Amarillo/Guardian · Sustitución inteligente · [Aceptar +200 XP] vs [Ignorar]</p>
+        <div class="flex flex-wrap gap-1 mt-3">
+          <span class="text-xs bg-red-900/40 text-red-400 px-2 py-0.5 rounded">Session Adaptation</span>
+          <span class="text-xs bg-orange-900/40 text-orange-400 px-2 py-0.5 rounded">Risk Score</span>
+        </div>
+      </a>
+
+      <!-- B4 pendiente -->
+      <div class="bg-slate-900/50 border border-dashed border-slate-700/40 rounded-2xl p-5 opacity-40">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="status-dot bg-slate-600"></span>
+          <span class="text-xs text-slate-500 font-bold uppercase tracking-wider">Pendiente</span>
+        </div>
+        <h3 class="text-slate-400 font-bold">B4 · Session Summary Preview</h3>
+        <p class="text-slate-600 text-xs mt-1">Vista previa de la sesión del día antes de arrancar</p>
+      </div>
+
+      <!-- B5 pendiente -->
+      <div class="bg-slate-900/50 border border-dashed border-slate-700/40 rounded-2xl p-5 opacity-40">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="status-dot bg-slate-600"></span>
+          <span class="text-xs text-slate-500 font-bold uppercase tracking-wider">Pendiente</span>
+        </div>
+        <h3 class="text-slate-400 font-bold">B5 · Warmup Generator</h3>
+        <p class="text-slate-600 text-xs mt-1">Checkmarks grandes, pesos pre-calculados, opción Skip</p>
+      </div>
+
+      <!-- B6 ✅ -->
+      <a href="B6_active_session.html" class="card bg-slate-900 border border-slate-700/50 rounded-2xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="status-dot bg-green-400"></span>
+          <span class="text-xs text-green-400 font-bold uppercase tracking-wider">Listo</span>
+        </div>
+        <h3 class="text-white font-bold mb-1">B6 · Sesión Activa</h3>
+        <p class="text-slate-400 text-xs">Logging [Peso × Reps], RPE pop-over, PR flash dorado, Check-and-Balance</p>
+        <div class="flex flex-wrap gap-1 mt-3">
+          <span class="text-xs bg-amber-900/40 text-amber-400 px-2 py-0.5 rounded">Logging</span>
+          <span class="text-xs bg-green-900/40 text-green-400 px-2 py-0.5 rounded">Warmup</span>
+        </div>
+      </a>
+
+      <!-- B7/B8 ✅ -->
+      <a href="B7_B8_victory_screen.html" class="card bg-slate-900 border border-amber-500/30 rounded-2xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="status-dot bg-amber-400"></span>
+          <span class="text-xs text-amber-400 font-bold uppercase tracking-wider">⭐ Viral Asset</span>
+        </div>
+        <h3 class="text-white font-bold mb-1">B7/B8 · Victory Screen</h3>
+        <p class="text-slate-400 text-xs">4 temas · 2 modos (Epic PR / Smart Victory) · Pixel art + Vectorial · Wise Score</p>
+        <div class="flex flex-wrap gap-1 mt-3">
+          <span class="text-xs bg-amber-900/40 text-amber-400 px-2 py-0.5 rounded">Epic PR</span>
+          <span class="text-xs bg-cyan-900/40 text-cyan-400 px-2 py-0.5 rounded">Smart Victory</span>
+          <span class="text-xs bg-purple-900/40 text-purple-400 px-2 py-0.5 rounded">4 Temas</span>
+        </div>
+      </a>
+
+      <!-- B9 ✅ -->
+      <a href="B9_social_card.html" class="card bg-slate-900 border border-indigo-500/30 rounded-2xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="status-dot bg-indigo-400"></span>
+          <span class="text-xs text-indigo-400 font-bold uppercase tracking-wider">🚀 Motor Viral</span>
+        </div>
+        <h3 class="text-white font-bold mb-1">B9 · Social Card Generator</h3>
+        <p class="text-slate-400 text-xs">4 tipos de card · Foto del atleta · 4 temas · Copy pre-escrito · IG/WhatsApp share</p>
+        <div class="flex flex-wrap gap-1 mt-3">
+          <span class="text-xs bg-indigo-900/40 text-indigo-400 px-2 py-0.5 rounded">PR Card</span>
+          <span class="text-xs bg-cyan-900/40 text-cyan-400 px-2 py-0.5 rounded">Smart Card</span>
+          <span class="text-xs bg-orange-900/40 text-orange-400 px-2 py-0.5 rounded">Streak Card</span>
+          <span class="text-xs bg-purple-900/40 text-purple-400 px-2 py-0.5 rounded">Belt Card</span>
+        </div>
+      </a>
+
+      <!-- B10 ✅ -->
+      <a href="B10_performance_deep_dive.html" class="card bg-slate-900 border border-slate-700/50 rounded-2xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="status-dot bg-green-400"></span>
+          <span class="text-xs text-green-400 font-bold uppercase tracking-wider">Listo</span>
+        </div>
+        <h3 class="text-white font-bold mb-1">B10 · Performance Deep Dive</h3>
+        <p class="text-slate-400 text-xs">Radar Golden Ratio (6 ejes) · Banister readiness 90d + proyección · Supercompensation window</p>
+        <div class="flex flex-wrap gap-1 mt-3">
+          <span class="text-xs bg-indigo-900/40 text-indigo-400 px-2 py-0.5 rounded">Golden Ratio</span>
+          <span class="text-xs bg-green-900/40 text-green-400 px-2 py-0.5 rounded">Stress Engine</span>
+        </div>
+      </a>
+      <div class="bg-slate-900/50 border border-dashed border-slate-700/40 rounded-2xl p-5 opacity-40">
+        <div class="flex items-center gap-2 mb-2"><span class="status-dot bg-slate-600"></span><span class="text-xs text-slate-500 font-bold uppercase tracking-wider">Pendiente</span></div>
+        <h3 class="text-slate-400 font-bold">B11 · OLY Index</h3>
+        <p class="text-slate-600 text-xs mt-1">Tabla percentiles · ranking club · drill-down</p>
+      </div>
+      <div class="bg-slate-900/50 border border-dashed border-slate-700/40 rounded-2xl p-5 opacity-40">
+        <div class="flex items-center gap-2 mb-2"><span class="status-dot bg-slate-600"></span><span class="text-xs text-slate-500 font-bold uppercase tracking-wider">Pendiente</span></div>
+        <h3 class="text-slate-400 font-bold">B12–B13 · Pulse Hub</h3>
+        <p class="text-slate-600 text-xs mt-1">Freshness Gate · Cockpit EMOM/AMRAP · Drop-off alert</p>
+      </div>
+      <div class="bg-slate-900/50 border border-dashed border-slate-700/40 rounded-2xl p-5 opacity-40">
+        <div class="flex items-center gap-2 mb-2"><span class="status-dot bg-slate-600"></span><span class="text-xs text-slate-500 font-bold uppercase tracking-wider">Pendiente</span></div>
+        <h3 class="text-slate-400 font-bold">B14 · Píldoras / Stories</h3>
+        <p class="text-slate-600 text-xs mt-1">Stories row · +50 XP · 5 segundos</p>
+      </div>
+      <!-- B15 ✅ -->
+      <a href="B15_perfil_atleta.html" class="card bg-slate-900 border border-slate-700/50 rounded-2xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="status-dot bg-green-400"></span>
+          <span class="text-xs text-green-400 font-bold uppercase tracking-wider">Listo</span>
+        </div>
+        <h3 class="text-white font-bold mb-1">B15 · Perfil del Atleta</h3>
+        <p class="text-slate-400 text-xs">1RMs + PR badge · OLY/Wise Score · Selector 4 temas Premium · Privacidad · Plan info</p>
+        <div class="flex flex-wrap gap-1 mt-3">
+          <span class="text-xs bg-purple-900/40 text-purple-400 px-2 py-0.5 rounded">Theme Engine</span>
+          <span class="text-xs bg-blue-900/40 text-blue-400 px-2 py-0.5 rounded">Privacy Engine</span>
+        </div>
+      </a>
+    </div>
+
+    <!-- ─── GRUPO C: Coach ─── -->
+    <p class="group-label">C — Coach (9 pantallas)</p>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+
+      <!-- C1 ✅ -->
+      <a href="C1_command_center_coach.html" class="card bg-slate-900 border border-slate-700/50 rounded-2xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="status-dot bg-green-400"></span>
+          <span class="text-xs text-green-400 font-bold uppercase tracking-wider">Listo (3 vistas)</span>
+        </div>
+        <h3 class="text-white font-bold mb-1">C1 · Command Center</h3>
+        <p class="text-slate-400 text-xs">Heatmap riesgo · 4 bandejas · Métricas globales</p>
+        <div class="flex flex-wrap gap-1 mt-3">
+          <span class="text-xs bg-red-900/40 text-red-400 px-2 py-0.5 rounded">Smart Coach</span>
+          <span class="text-xs bg-blue-900/40 text-blue-400 px-2 py-0.5 rounded">Pulse Engine</span>
+        </div>
+      </a>
+
+      <!-- C2 ✅ (en C1) -->
+      <a href="C1_command_center_coach.html" class="card bg-slate-900 border border-slate-700/50 rounded-2xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="status-dot bg-green-400"></span>
+          <span class="text-xs text-green-400 font-bold uppercase tracking-wider">Listo</span>
+        </div>
+        <h3 class="text-white font-bold mb-1">C2 · Risk Intervention Modal</h3>
+        <p class="text-slate-400 text-xs">Panel lateral: sueño, dolor, sesión · 3 acciones rápidas</p>
+        <div class="flex flex-wrap gap-1 mt-3">
+          <span class="text-xs bg-red-900/40 text-red-400 px-2 py-0.5 rounded">Session Adapt.</span>
+        </div>
+      </a>
+
+      <!-- C3 ✅ (en C1) -->
+      <a href="C1_command_center_coach.html" class="card bg-slate-900 border border-slate-700/50 rounded-2xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="status-dot bg-green-400"></span>
+          <span class="text-xs text-green-400 font-bold uppercase tracking-wider">Listo</span>
+        </div>
+        <h3 class="text-white font-bold mb-1">C3 · Adjustment Hub</h3>
+        <p class="text-slate-400 text-xs">Bulk approve · swipe L/R · Aprobar todas de seguridad</p>
+        <div class="flex flex-wrap gap-1 mt-3">
+          <span class="text-xs bg-green-900/40 text-green-400 px-2 py-0.5 rounded">1-Tap</span>
+        </div>
+      </a>
+
+      <!-- C4 ✅ -->
+      <a href="C4_athlete_deep_dive.html" class="card bg-slate-900 border border-slate-700/50 rounded-2xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="status-dot bg-green-400"></span>
+          <span class="text-xs text-green-400 font-bold uppercase tracking-wider">Listo</span>
+        </div>
+        <h3 class="text-white font-bold mb-1">C4 · Athlete Deep Dive 360°</h3>
+        <p class="text-slate-400 text-xs">Scatter Stress/Lifestyle · Radar editable metas Coach · Historial adaptaciones · Smart Coach alert</p>
+        <div class="flex flex-wrap gap-1 mt-3">
+          <span class="text-xs bg-green-900/40 text-green-400 px-2 py-0.5 rounded">Stress Engine</span>
+          <span class="text-xs bg-yellow-900/40 text-yellow-400 px-2 py-0.5 rounded">Smart Coach</span>
+          <span class="text-xs bg-purple-900/40 text-purple-400 px-2 py-0.5 rounded">Golden Ratio</span>
+        </div>
+      </a>
+      <!-- C5+C6 ✅ -->
+      <a href="C5_C6_add_athlete_assign_macro.html" class="card bg-slate-900 border border-slate-700/50 rounded-2xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="status-dot bg-green-400"></span>
+          <span class="text-xs text-green-400 font-bold uppercase tracking-wider">Listo</span>
+        </div>
+        <h3 class="text-white font-bold mb-1">C5 · Add New Athlete</h3>
+        <p class="text-slate-400 text-xs">Datos + 1RMs · Invitación link/QR/email · 45-day Elite Trial activado al registrar</p>
+        <div class="flex flex-wrap gap-1 mt-3">
+          <span class="text-xs bg-amber-900/40 text-amber-400 px-2 py-0.5 rounded">45-Day Trial</span>
+          <span class="text-xs bg-cyan-900/40 text-cyan-400 px-2 py-0.5 rounded">Golden Ratio</span>
+        </div>
+      </a>
+      <a href="C5_C6_add_athlete_assign_macro.html" class="card bg-slate-900 border border-slate-700/50 rounded-2xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="status-dot bg-green-400"></span>
+          <span class="text-xs text-green-400 font-bold uppercase tracking-wider">Listo</span>
+        </div>
+        <h3 class="text-white font-bold mb-1">C6 · Assign Macrocycle</h3>
+        <p class="text-slate-400 text-xs">19 programas · 9 escuelas · ML recomendación · Time-Shift slider · Competition date sync</p>
+        <div class="flex flex-wrap gap-1 mt-3">
+          <span class="text-xs bg-purple-900/40 text-purple-400 px-2 py-0.5 rounded">Macrocycle Engine</span>
+          <span class="text-xs bg-indigo-900/40 text-indigo-400 px-2 py-0.5 rounded">ML Selector</span>
+        </div>
+      </a>
+      <div class="bg-slate-900/50 border border-dashed border-slate-700/40 rounded-2xl p-5 opacity-40">
+        <div class="flex items-center gap-2 mb-2"><span class="status-dot bg-slate-600"></span><span class="text-xs text-slate-500 font-bold uppercase tracking-wider">Pendiente</span></div>
+        <h3 class="text-slate-400 font-bold">C7–C9 · Pulse, Longevity, Perfil</h3>
+        <p class="text-slate-600 text-xs mt-1">Pulse approval · Coach Health Score · Configuración</p>
+      </div>
+    </div>
+
+    <!-- ─── GRUPO D: Onboarding ─── -->
+    <p class="group-label">D — Onboarding</p>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+      <!-- D1 ✅ -->
+      <a href="D1_onboarding_atleta.html" class="card bg-slate-900 border border-slate-700/50 rounded-2xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="status-dot bg-green-400"></span>
+          <span class="text-xs text-green-400 font-bold uppercase tracking-wider">Listo</span>
+        </div>
+        <h3 class="text-white font-bold mb-1">D1 · Onboarding Atleta</h3>
+        <p class="text-slate-400 text-xs">4 pasos · Invitación Coach · 45-day Elite Trial · Setup 1RMs + Ratios smart · Macrociclo asignado</p>
+        <div class="flex flex-wrap gap-1 mt-3">
+          <span class="text-xs bg-amber-900/40 text-amber-400 px-2 py-0.5 rounded">45-Day Trial</span>
+          <span class="text-xs bg-cyan-900/40 text-cyan-400 px-2 py-0.5 rounded">Golden Ratio</span>
+        </div>
+      </a>
+      <!-- D2 ✅ -->
+      <a href="D2_free_premium_transition.html" class="card bg-slate-900 border border-red-500/30 rounded-2xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="status-dot bg-red-400"></span>
+          <span class="text-xs text-red-400 font-bold uppercase tracking-wider">💰 Business Critical</span>
+        </div>
+        <h3 class="text-white font-bold mb-1">D2 · Free → Premium Transition</h3>
+        <p class="text-slate-400 text-xs">Día 40/45 countdown · Upsell contextual con datos reales · "La Herramienta Estéril" — motores OFF</p>
+        <div class="flex flex-wrap gap-1 mt-3">
+          <span class="text-xs bg-red-900/40 text-red-400 px-2 py-0.5 rounded">Fear of Loss</span>
+          <span class="text-xs bg-indigo-900/40 text-indigo-400 px-2 py-0.5 rounded">Upsell</span>
+        </div>
+      </a>
+    </div>
+
+    <!-- Design System note -->
+    <div class="bg-slate-900 border border-indigo-500/20 rounded-2xl p-6">
+      <div class="flex items-start gap-4">
+        <span class="text-2xl">🎨</span>
+        <div>
+          <p class="text-white font-bold mb-1">Sistema de Diseño — 4 Temas Premium</p>
+          <p class="text-slate-400 text-sm mb-3">Cada tema modifica la Victory Screen, la Social Card y la paleta completa de la app.</p>
+          <div class="flex flex-wrap gap-2">
+            <div style="background:#0a1820;border:1px solid #0e4c56;border-radius:8px;padding:5px 12px;">
+              <span style="font-size:12px;font-weight:700;color:#06B6D4;">⬛ Carbon Stealth</span>
+              <span style="font-size:10px;color:#475569;margin-left:6px;">Silueta vectorial</span>
+            </div>
+            <div style="background:#1a1200;border:1px solid #713f12;border-radius:8px;padding:5px 12px;">
+              <span style="font-size:12px;font-weight:700;color:#F59E0B;">🏅 Olympic Gold</span>
+              <span style="font-size:10px;color:#475569;margin-left:6px;">Silueta vectorial</span>
+            </div>
+            <div style="background:#150a2e;border:1px solid #6b21a8;border-radius:8px;padding:5px 12px;">
+              <span style="font-size:12px;font-weight:700;color:#e879f9;">👾 Cyber Neon</span>
+              <span style="font-size:10px;color:#475569;margin-left:6px;">Pixel art 16-bits</span>
+            </div>
+            <div style="background:#1a0505;border:1px solid #7f1d1d;border-radius:8px;padding:5px 12px;">
+              <span style="font-size:12px;font-weight:700;color:#f87171;">🔴 Crimson Power</span>
+              <span style="font-size:10px;color:#475569;margin-left:6px;">Silueta vectorial</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-8 text-center text-slate-600 text-xs">
+      HolyOly · Wireframes Fase 1 · 2026-04-15 · Smart training, zero burnout.
+    </div>
+  </div>
+
+</body>
+</html>

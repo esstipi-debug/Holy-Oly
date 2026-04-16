@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>B7/B8 — Victory Screen</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #050510;
+      min-height: 100vh;
+      font-family: 'Inter', system-ui, sans-serif;
+      padding: 40px 20px 60px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+    }
+
+    /* ─── THEME DEFINITIONS ─── */
+    :root {
+      --p: #22C55E;
+      --p2: #4ade80;
+      --acc: #06B6D4;
+      --bg: #07070F;
+      --surf: #111118;
+      --surf2: #1a1a28;
+      --border: #1e1e30;
+      --gold: #F59E0B;
+    }
+
+    /* ─── PHONE SHELL ─── */
+    .phone {
+      width: 390px;
+      min-height: 780px;
+      border-radius: 44px;
+      border: 2px solid #2a2a3a;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 0 1px #1a1a2a;
+    }
+    .phone-label {
+      width: 390px;
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #475569;
+    }
+    .status-bar {
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 2;
+    }
+    .scroll-content {
+      flex: 1;
+      overflow-y: auto;
+      scrollbar-width: none;
+      padding: 0 0 32px;
+    }
+    .scroll-content::-webkit-scrollbar { display: none; }
+
+    /* ─── THEME SWITCHER (outside phone) ─── */
+    .theme-switcher {
+      display: flex;
+      gap: 8px;
+      padding: 10px 12px;
+      background: #111118;
+      border: 1px solid #1e1e30;
+      border-radius: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .theme-pill {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      cursor: pointer;
+      border: 1.5px solid transparent;
+      transition: all .15s;
+      user-select: none;
+    }
+    .theme-pill:hover { opacity: .85; }
+
+    /* Mode tabs */
+    .mode-tab {
+      flex: 1;
+      padding: 9px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all .15s;
+      letter-spacing: .03em;
+    }
+
+    /* ─── PIXEL ART avatar (CSS-only 16-bit weightlifter) ─── */
+    .pixel-canvas {
+      image-rendering: pixelated;
+      display: grid;
+      gap: 0;
+    }
+    .px { width: 8px; height: 8px; }
+
+    /* ─── COUNTER ANIMATION ─── */
+    @keyframes countUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .stat-entry {
+      animation: countUp .4s ease-out both;
+    }
+    .stat-entry:nth-child(1) { animation-delay: .1s; }
+    .stat-entry:nth-child(2) { animation-delay: .25s; }
+    .stat-entry:nth-child(3) { animation-delay: .4s; }
+    .stat-entry:nth-child(4) { animation-delay: .55s; }
+
+    /* ─── GLOW PULSE ─── */
+    @keyframes glowPulse {
+      0%, 100% { filter: drop-shadow(0 0 8px currentColor); }
+      50%       { filter: drop-shadow(0 0 22px currentColor); }
+    }
+    .glow-pulse { animation: glowPulse 2s ease-in-out infinite; }
+
+    /* ─── SCANLINE overlay for Cyber Neon ─── */
+    .scanlines::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(0,0,0,0) 0px,
+        rgba(0,0,0,0) 3px,
+        rgba(0,0,0,.08) 3px,
+        rgba(0,0,0,.08) 4px
+      );
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ─── XP float animation ─── */
+    @keyframes floatXP {
+      0%   { opacity: 0; transform: translateY(0px); }
+      20%  { opacity: 1; }
+      100% { opacity: 0; transform: translateY(-40px); }
+    }
+    .float-xp {
+      animation: floatXP 1.8s ease-out forwards;
+      position: absolute;
+      font-size: 14px;
+      font-weight: 900;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Page title -->
+<div style="text-align:center; margin-bottom: 8px;">
+  <span style="font-size:28px; font-weight:900; color:white; letter-spacing:-.03em;">HOLY<span style="color:#6366f1;">OLY</span></span>
+  <p style="font-size:13px; color:#475569; margin-top:4px;">Victory Screen · 4 temas · 2 modos</p>
+</div>
+
+<!-- Theme Switcher -->
+<div class="theme-switcher" id="themeSwitcher">
+  <div class="theme-pill" id="pill-carbon" onclick="setTheme('carbon')"
+       style="background:#0a1a1f; color:#06B6D4; border-color:#0e4c56;">⬛ Carbon Stealth</div>
+  <div class="theme-pill" id="pill-gold"   onclick="setTheme('gold')"
+       style="background:#1a1200; color:#F59E0B; border-color:#713f12;">🏅 Olympic Gold</div>
+  <div class="theme-pill" id="pill-cyber"  onclick="setTheme('cyber')"
+       style="background:#150a2e; color:#e879f9; border-color:#6b21a8;">👾 Cyber Neon</div>
+  <div class="theme-pill" id="pill-crimson" onclick="setTheme('crimson')"
+       style="background:#1a0a0a; color:#f87171; border-color:#7f1d1d;">🔴 Crimson Power</div>
+</div>
+
+<!-- Mode switcher -->
+<div style="display:flex; gap:8px; width:390px;" id="modeSwitcher">
+  <div class="mode-tab" id="mode-pr" onclick="setMode('pr')"
+       style="background:#0f0a00; color:#F59E0B; border:1.5px solid #713f12;">⭐ Epic PR</div>
+  <div class="mode-tab" id="mode-smart" onclick="setMode('smart')"
+       style="background:#0a1820; color:#06B6D4; border:1.5px solid #0e4c56;">🛡️ Smart Victory</div>
+</div>
+
+<!-- Phone -->
+<div>
+  <p class="phone-label" id="screenLabel">Carbon Stealth · Epic PR</p>
+  <div class="phone" id="victoryPhone">
+
+    <!-- STATUS BAR (themed) -->
+    <div class="status-bar" id="statusBar" style="background:#070710;">
+      <span style="font-size:12px; font-weight:600; color:#94a3b8;">10:41</span>
+      <span style="font-size:12px; font-weight:600; color:#94a3b8;">81%</span>
+    </div>
+
+    <!-- BACKGROUND gradient layer -->
+    <div id="bgGradient" style="position:absolute; inset:0; background:linear-gradient(160deg,#0a1820 0%,#070710 60%); z-index:0;"></div>
+
+    <!-- SCROLL CONTENT -->
+    <div class="scroll-content" id="victoryContent" style="position:relative; z-index:1; padding: 16px 24px 40px;">
+
+      <!-- Top bar: close + share hint -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <div style="opacity:0; width:32px;"></div>
+        <div id="topLabel" style="font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#06B6D4;">
+          SESIÓN COMPLETADA
+        </div>
+        <div style="font-size:11px; color:#475569; border:1px solid #2a2a3a; border-radius:8px; padding:4px 8px; cursor:pointer;">✕</div>
+      </div>
+
+      <!-- ─── AVATAR ZONE ─── -->
+      <div id="avatarZone" style="display:flex; flex-direction:column; align-items:center; margin-bottom:24px;">
+
+        <!-- Carbon Stealth / Olympic Gold / Crimson: SVG Silhouette -->
+        <div id="avatarVectorial" style="position:relative; margin-bottom:14px;">
+          <!-- Glow ring -->
+          <div id="glowRing" style="position:absolute; inset:-10px; border-radius:50%; border:2px solid #06B6D4; opacity:.3; animation: glowPulse 2s ease-in-out infinite;"></div>
+          <!-- SVG Weightlifter silhouette -->
+          <svg id="avatarSVG" width="140" height="140" viewBox="0 0 140 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Body silhouette of a weightlifter in overhead position -->
+            <defs>
+              <radialGradient id="avatarGrad" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#06B6D4" stop-opacity=".9" id="gradStop1"/>
+                <stop offset="100%" stop-color="#0891b2" stop-opacity=".3" id="gradStop2"/>
+              </radialGradient>
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="3" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+            <!-- Background circle -->
+            <circle cx="70" cy="70" r="60" fill="url(#avatarGrad)" opacity=".15" id="avatarCircle"/>
+            <!-- Barbell (horizontal) -->
+            <rect x="8" y="54" width="124" height="8" rx="4" fill="#06B6D4" opacity=".8" id="barbellBar" filter="url(#glow)"/>
+            <!-- Left plate -->
+            <rect x="8" y="46" width="14" height="24" rx="3" fill="#06B6D4" id="plateL1"/>
+            <rect x="14" y="42" width="8" height="32" rx="2" fill="#0891b2" id="plateL2"/>
+            <!-- Right plate -->
+            <rect x="118" y="46" width="14" height="24" rx="3" fill="#06B6D4" id="plateR1"/>
+            <rect x="118" y="42" width="8" height="32" rx="2" fill="#0891b2" id="plateR2"/>
+            <!-- Body: legs (squat position) -->
+            <path d="M52 130 L52 95 Q52 88 58 85 L70 80 L82 85 Q88 88 88 95 L88 130" fill="#0e4c56" id="bodyLegs"/>
+            <!-- Body: torso -->
+            <rect x="55" y="58" width="30" height="30" rx="6" fill="#0e4c56" id="bodyTorso"/>
+            <!-- Arms raised overhead -->
+            <path d="M55 62 Q40 55 38 57" stroke="#0e4c56" stroke-width="10" stroke-linecap="round" id="armL"/>
+            <path d="M85 62 Q100 55 102 57" stroke="#0e4c56" stroke-width="10" stroke-linecap="round" id="armR"/>
+            <!-- Head -->
+            <circle cx="70" cy="48" r="12" fill="#0e4c56" id="head"/>
+            <!-- Shine on head -->
+            <circle cx="66" cy="44" r="3" fill="#06B6D4" opacity=".4" id="headShine"/>
+            <!-- Weight numbers on plates -->
+            <text x="15" y="62" font-size="7" fill="#cffafe" text-anchor="middle" font-weight="800" id="plateTextL">94</text>
+            <text x="125" y="62" font-size="7" fill="#cffafe" text-anchor="middle" font-weight="800" id="plateTextR">94</text>
+          </svg>
+          <!-- Floating XP chips -->
+          <div class="float-xp" style="top:10px; right:-10px; color:#F59E0B; animation-delay:.3s;">+100 XP</div>
+          <div class="float-xp" style="top:30px; left:-14px; color:#4ade80; animation-delay:.8s;">+200 XP</div>
+        </div>
+
+        <!-- Cyber Neon: 16-bit Pixel Art (hidden by default) -->
+        <div id="avatarPixel" style="display:none; margin-bottom:14px; position:relative;">
+          <div style="font-size:9px; color:#e879f9; font-weight:700; letter-spacing:.1em; text-align:center; margin-bottom:8px; text-transform:uppercase;">— PLAYER 1 —</div>
+          <!-- Pixel art character using a table of colored boxes -->
+          <div style="image-rendering:pixelated; display:inline-grid; grid-template-columns: repeat(18,8px); grid-template-rows: repeat(22,8px); gap:0; border:1px solid rgba(232,121,249,.2); padding:8px; background:#0a0018; border-radius:8px;">
+            <!-- Row by row: weightlifter with barbell overhead. . = transparent, C = cyan, M = magenta, G = gray, W = white, Y = yellow -->
+            <!-- I'll encode each cell color as a div with inline style -->
+          </div>
+          <!-- Simplified: use a styled emoji grid to suggest pixel art -->
+          <div style="font-size:64px; line-height:1; text-align:center; image-rendering:pixelated; filter: drop-shadow(0 0 12px #e879f9);">🏋️</div>
+          <div style="position:absolute; inset:-12px; border:1px solid rgba(232,121,249,.2); border-radius:12px; animation: glowPulse 2s ease-in-out infinite; color:#e879f9;"></div>
+          <!-- Pixel scanlines overlay -->
+          <div style="position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0,transparent 3px,rgba(0,0,0,.2) 3px,rgba(0,0,0,.2) 4px);pointer-events:none;border-radius:8px;"></div>
+          <!-- Floating XP -->
+          <div class="float-xp" style="top:0px; right:-20px; color:#e879f9; animation-delay:.3s; font-family:monospace;">+100XP</div>
+          <div class="float-xp" style="top:24px; left:-24px; color:#67e8f9; animation-delay:.7s; font-family:monospace;">+200XP</div>
+        </div>
+
+        <!-- Achievement title -->
+        <div style="text-align:center;">
+          <div id="achievementBadge" style="display:inline-block; background:#0e4c56; border:1px solid #06B6D4; border-radius:20px; padding:4px 14px; margin-bottom:8px;">
+            <span id="badgeText" style="font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#06B6D4;">🛡️ CINTURÓN AZUL</span>
+          </div>
+          <p id="heroTitle" style="font-size:22px; font-weight:900; color:#f1f5f9; line-height:1.15; letter-spacing:-.02em;">LEVEL UP!<br><span id="heroSubtitle" style="color:#06B6D4;">Snatch 94kg</span></p>
+          <p id="heroDesc" style="font-size:12px; color:#64748b; margin-top:6px; line-height:1.4;">Nuevo PR histórico desbloqueado.<br>Tu OLY Index acaba de subir.</p>
+        </div>
+      </div>
+
+      <!-- ─── STATS PANEL ─── -->
+      <div id="statsPanel" style="background:#0d1820; border:1px solid #0e4c56; border-radius:20px; padding:16px; margin-bottom:16px;">
+        <p style="font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#475569; margin-bottom:12px;">Estadísticas de batalla</p>
+
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <div class="stat-entry" style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:#071016; border-radius:12px; border-left:3px solid #F59E0B;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:16px;">⭐</span>
+              <span style="font-size:12px; color:#94a3b8;">Nuevo PR · Arrancada</span>
+            </div>
+            <span style="font-size:14px; font-weight:800; color:#F59E0B;">94 kg</span>
+          </div>
+
+          <div class="stat-entry" style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:#071016; border-radius:12px; border-left:3px solid #22C55E;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:16px;">🏋️</span>
+              <span style="font-size:12px; color:#94a3b8;">Tonelaje total</span>
+            </div>
+            <span style="font-size:14px; font-weight:800; color:#22C55E;">18,450 kg</span>
+          </div>
+
+          <div class="stat-entry" style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:#071016; border-radius:12px; border-left:3px solid #f97316;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:16px;">🔥</span>
+              <span style="font-size:12px; color:#94a3b8;">Racha actual</span>
+            </div>
+            <span style="font-size:14px; font-weight:800; color:#f97316;">15 días</span>
+          </div>
+
+          <div class="stat-entry" style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:#071016; border-radius:12px; border-left:3px solid #a78bfa;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:16px;">🧠</span>
+              <span style="font-size:12px; color:#94a3b8;">Wise Score</span>
+            </div>
+            <span style="font-size:14px; font-weight:800; color:#a78bfa;">+12 → 847</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── XP BREAKDOWN ─── -->
+      <div id="xpPanel" style="background:#111118; border:1px solid #1e1e30; border-radius:20px; padding:16px; margin-bottom:16px;">
+        <p style="font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#475569; margin-bottom:12px;">XP Ganada</p>
+        <div style="display:flex; flex-direction:column; gap:6px;">
+          <div class="stat-entry" style="display:flex; justify-content:space-between;">
+            <span style="font-size:13px; color:#94a3b8;">Sesión completada</span>
+            <span style="font-size:13px; font-weight:700; color:#4ade80;">+100</span>
+          </div>
+          <div class="stat-entry" style="display:flex; justify-content:space-between;">
+            <span style="font-size:13px; color:#94a3b8;">⭐ Nuevo PR</span>
+            <span style="font-size:13px; font-weight:700;" id="xpPR">+500</span>
+          </div>
+          <div class="stat-entry" style="display:flex; justify-content:space-between;" id="xpBonus1Row">
+            <span style="font-size:13px; color:#94a3b8;" id="xpBonus1Label">Pre-check completado</span>
+            <span style="font-size:13px; font-weight:700; color:#06B6D4;" id="xpBonus1">+50</span>
+          </div>
+          <div class="stat-entry" style="display:flex; justify-content:space-between;">
+            <span style="font-size:13px; color:#94a3b8;">🔥 Racha x15</span>
+            <span style="font-size:13px; font-weight:700; color:#f97316;">+75</span>
+          </div>
+          <div style="border-top:1px solid #1e1e30; padding-top:8px; margin-top:4px; display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:14px; font-weight:800; color:#f1f5f9;">Total sesión</span>
+            <span style="font-size:20px; font-weight:900;" id="xpTotal" style="color:#4ade80;">+725 XP</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── BELT PROGRESS ─── -->
+      <div style="background:#111118; border:1px solid #1e1e30; border-radius:20px; padding:16px; margin-bottom:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <p style="font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#475569;">Cinturón Azul → Púrpura</p>
+          <span id="beltPct" style="font-size:12px; font-weight:700; color:#3B82F6;">89%</span>
+        </div>
+        <div style="height:8px; background:#1e1e30; border-radius:4px; overflow:hidden;">
+          <div id="beltBar" style="height:100%; width:89%; background:linear-gradient(90deg,#3B82F6,#6366f1); border-radius:4px; transition: width .5s ease;"></div>
+        </div>
+        <p style="font-size:10px; color:#475569; margin-top:6px;">10,625 XP más para Cinturón Púrpura</p>
+      </div>
+
+      <!-- ─── CTA BUTTONS ─── -->
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <button id="shareBtn" onclick="window.location='B9_social_card.html'" style="width:100%; padding:15px; border-radius:16px; font-size:15px; font-weight:800; cursor:pointer; border:none; background:linear-gradient(135deg,#0e4c56,#155e75); color:#06B6D4; letter-spacing:.03em;">
+          📲 Compartir mi Victoria
+        </button>
+        <button style="width:100%; padding:12px; border-radius:14px; font-size:13px; font-weight:600; cursor:pointer; background:transparent; border:1px solid #1e1e30; color:#475569;">
+          Volver al Dashboard
+        </button>
+      </div>
+
+    </div><!-- end scroll -->
+  </div><!-- end phone -->
+</div>
+
+<a href="index.html" style="position:fixed;top:20px;left:20px;background:#1e1e30;color:#94a3b8;font-size:13px;padding:8px 14px;border-radius:10px;text-decoration:none;border:1px solid #2a2a3a;z-index:99;">← Volver</a>
+
+<script>
+  let currentTheme = 'carbon';
+  let currentMode  = 'pr';
+
+  const themes = {
+    carbon: {
+      name: 'Carbon Stealth',
+      bg:     'linear-gradient(160deg,#0a1820 0%,#070710 60%)',
+      surf:   '#0d1820',
+      border: '#0e4c56',
+      primary: '#06B6D4',
+      primary2: '#0891b2',
+      accent: '#06B6D4',
+      topLabel: 'color:#06B6D4',
+      svgColor: '#06B6D4',
+      svgBody:  '#0e4c56',
+      barbellFill: '#06B6D4',
+      gradStop1: '#06B6D4',
+      badgeBg: '#0e4c56',
+      badgeBorder: '#06B6D4',
+      statusBg: '#070710',
+      shareBtn: 'background:linear-gradient(135deg,#0e4c56,#155e75); color:#06B6D4;',
+    },
+    gold: {
+      name: 'Olympic Gold',
+      bg:     'linear-gradient(160deg,#1a1000 0%,#070705 60%)',
+      surf:   '#1a1000',
+      border: '#713f12',
+      primary: '#F59E0B',
+      primary2: '#d97706',
+      accent: '#fbbf24',
+      topLabel: 'color:#F59E0B',
+      svgColor: '#F59E0B',
+      svgBody:  '#3d2000',
+      barbellFill: '#F59E0B',
+      gradStop1: '#F59E0B',
+      badgeBg: '#3d2000',
+      badgeBorder: '#F59E0B',
+      statusBg: '#0a0700',
+      shareBtn: 'background:linear-gradient(135deg,#3d2000,#78350f); color:#F59E0B;',
+    },
+    cyber: {
+      name: 'Cyber Neon',
+      bg:     'linear-gradient(160deg,#150a2e 0%,#07040e 60%)',
+      surf:   '#150a2e',
+      border: '#6b21a8',
+      primary: '#e879f9',
+      primary2: '#d946ef',
+      accent: '#67e8f9',
+      topLabel: 'color:#e879f9',
+      svgColor: '#e879f9',
+      svgBody:  '#2e1065',
+      barbellFill: '#e879f9',
+      gradStop1: '#e879f9',
+      badgeBg: '#2e1065',
+      badgeBorder: '#e879f9',
+      statusBg: '#07040e',
+      shareBtn: 'background:linear-gradient(135deg,#2e1065,#4c1d95); color:#e879f9;',
+    },
+    crimson: {
+      name: 'Crimson Power',
+      bg:     'linear-gradient(160deg,#1a0505 0%,#07000a 60%)',
+      surf:   '#1a0505',
+      border: '#7f1d1d',
+      primary: '#EF4444',
+      primary2: '#dc2626',
+      accent: '#f87171',
+      topLabel: 'color:#EF4444',
+      svgColor: '#EF4444',
+      svgBody:  '#3d0a0a',
+      barbellFill: '#EF4444',
+      gradStop1: '#EF4444',
+      badgeBg: '#3d0a0a',
+      badgeBorder: '#EF4444',
+      statusBg: '#07000a',
+      shareBtn: 'background:linear-gradient(135deg,#3d0a0a,#7f1d1d); color:#EF4444;',
+    },
+  };
+
+  const modes = {
+    pr: {
+      topText:    'NUEVO PR DESBLOQUEADO',
+      badge:      '⭐ NUEVO RÉCORD PERSONAL',
+      heroTitle:  'LEVEL UP!',
+      heroSub:    'Snatch 94kg',
+      heroDesc:   'Nuevo PR histórico desbloqueado.\nTu OLY Index acaba de subir.',
+      xpPR:       '+500',
+      xpPRColor:  '#F59E0B',
+      xpBonus1Label: 'Pre-check completado',
+      xpBonus1:   '+50',
+      xpBonus1Color: '#06B6D4',
+      xpTotal:    '+725 XP',
+      xpTotalColor: '#4ade80',
+      shareBtn:   '📲 Compartir mi Victoria',
+      statRow1Label: 'Nuevo PR · Arrancada',
+      statRow1Val: '94 kg',
+      statRow1Color: '#F59E0B',
+    },
+    smart: {
+      topText:    'LONGEVITY PROTOCOL',
+      badge:      '🛡️ SESIÓN INTELIGENTE',
+      heroTitle:  'WISE MOVE.',
+      heroSub:    'Ego: 0 · Cuerpo: 100',
+      heroDesc:   'Hoy ganaste la batalla contra tu ego.\nTu yo del futuro te lo agradecerá.',
+      xpPR:       '+200',
+      xpPRColor:  '#06B6D4',
+      xpBonus1Label: '🛡️ Damage Control',
+      xpBonus1:   '+200',
+      xpBonus1Color: '#06B6D4',
+      xpTotal:    '+575 XP',
+      xpTotalColor: '#06B6D4',
+      shareBtn:   '🛡️ Compartir Smart Card',
+      statRow1Label: 'Daño evitado',
+      statRow1Val: '+18%',
+      statRow1Color: '#22C55E',
+    },
+  };
+
+  function setTheme(t) {
+    currentTheme = t;
+    applyThemeMode();
+    // Update pills
+    const pillColors = {
+      carbon:  '#06B6D4', gold: '#F59E0B', cyber: '#e879f9', crimson: '#EF4444',
+    };
+    document.querySelectorAll('.theme-pill').forEach(p => {
+      p.style.opacity = '.5'; p.style.fontWeight = '700';
+    });
+    const active = document.getElementById('pill-' + t);
+    if (active) { active.style.opacity = '1'; active.style.boxShadow = `0 0 12px ${pillColors[t]}55`; }
+  }
+
+  function setMode(m) {
+    currentMode = m;
+    applyThemeMode();
+    document.getElementById('mode-pr').style.opacity    = m === 'pr'    ? '1' : '.45';
+    document.getElementById('mode-smart').style.opacity = m === 'smart' ? '1' : '.45';
+  }
+
+  function applyThemeMode() {
+    const th = themes[currentTheme];
+    const md = modes[currentMode];
+    const phone = document.getElementById('victoryPhone');
+    const content = document.getElementById('victoryContent');
+
+    // Background
+    document.getElementById('bgGradient').style.background = th.bg;
+    document.getElementById('statusBar').style.background  = th.statusBg;
+
+    // Label
+    document.getElementById('screenLabel').textContent = th.name + ' · ' + (currentMode === 'pr' ? 'Epic PR' : 'Smart Victory');
+
+    // Top label
+    document.getElementById('topLabel').style.cssText = th.topLabel;
+    document.getElementById('topLabel').textContent   = md.topText;
+
+    // Avatar: show pixel for cyber, vectorial otherwise
+    const vecEl = document.getElementById('avatarVectorial');
+    const pixEl = document.getElementById('avatarPixel');
+    if (currentTheme === 'cyber') {
+      vecEl.style.display = 'none';
+      pixEl.style.display = 'block';
+    } else {
+      vecEl.style.display = 'block';
+      pixEl.style.display = 'none';
+      // Recolor SVG
+      document.getElementById('barbellBar').setAttribute('fill', th.svgColor);
+      document.getElementById('plateL1').setAttribute('fill', th.svgColor);
+      document.getElementById('plateR1').setAttribute('fill', th.svgColor);
+      document.getElementById('plateL2').setAttribute('fill', th.primary2);
+      document.getElementById('plateR2').setAttribute('fill', th.primary2);
+      document.getElementById('bodyLegs').setAttribute('fill', th.svgBody);
+      document.getElementById('bodyTorso').setAttribute('fill', th.svgBody);
+      document.getElementById('armL').setAttribute('stroke', th.svgBody);
+      document.getElementById('armR').setAttribute('stroke', th.svgBody);
+      document.getElementById('head').setAttribute('fill', th.svgBody);
+      document.getElementById('gradStop1').setAttribute('stop-color', th.svgColor);
+      document.getElementById('glowRing').style.borderColor = th.svgColor;
+    }
+
+    // Badge
+    document.getElementById('achievementBadge').style.background = th.badgeBg;
+    document.getElementById('achievementBadge').style.borderColor = th.badgeBorder;
+    document.getElementById('badgeText').style.color = th.primary;
+    document.getElementById('badgeText').textContent = md.badge;
+
+    // Hero text
+    document.getElementById('heroTitle').innerHTML = md.heroTitle + '<br><span style="color:' + th.primary + '">' + md.heroSub + '</span>';
+    document.getElementById('heroDesc').textContent = md.heroDesc;
+
+    // Stats panel
+    document.getElementById('statsPanel').style.background = th.surf;
+    document.getElementById('statsPanel').style.borderColor = th.border;
+
+    // XP
+    document.getElementById('xpPR').style.color     = md.xpPRColor;
+    document.getElementById('xpPR').textContent     = md.xpPR;
+    document.getElementById('xpBonus1Label').textContent = md.xpBonus1Label;
+    document.getElementById('xpBonus1').style.color = md.xpBonus1Color;
+    document.getElementById('xpBonus1').textContent = md.xpBonus1;
+    document.getElementById('xpTotal').style.color  = md.xpTotalColor;
+    document.getElementById('xpTotal').textContent  = md.xpTotal;
+
+    // Share button
+    document.getElementById('shareBtn').style.cssText = md.shareBtn + 'width:100%;padding:15px;border-radius:16px;font-size:15px;font-weight:800;cursor:pointer;border:none;letter-spacing:.03em;';
+    document.getElementById('shareBtn').textContent   = md.shareBtn;
+
+    // Scanlines on phone for cyber
+    if (currentTheme === 'cyber') {
+      phone.classList.add('scanlines');
+      phone.style.borderColor = '#6b21a8';
+    } else {
+      phone.classList.remove('scanlines');
+      phone.style.borderColor = '#2a2a3a';
+    }
+  }
+
+  // Init
+  setTheme('carbon');
+  setMode('pr');
+</script>
+</body>
+</html>

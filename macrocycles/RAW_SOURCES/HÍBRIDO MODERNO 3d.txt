@@ -1,0 +1,81 @@
+Escuela: Híbrido Moderno (Modern Hybrid).
+
+    Duración: 12 Semanas.
+
+    Frecuencia: 3 Días / Semana.
+
+    Best For: Mantenimiento a largo plazo, atletas máster o "Time-constrained" (tiempo limitado).
+
+    Filosofía: Alta densidad por sesión. Se priorizan los ejercicios compuestos grandes. Menos accesorios aislados, más complejos.
+
+    Rango Intensidad: 70% → 95%+.
+
+🟢 MES 1: ACUMULACIÓN (Capacidad y Estructura)
+
+Objetivo: Construir base aeróbica local muscular y corrección técnica bajo fatiga. Estructura: Uso de complejos (varios movimientos sin soltar la barra) para aumentar el tiempo bajo tensión. IMR Promedio: 70-75%.
+SEMANA 1 (Base - IMR 70%)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA)
+1	VOL	Hang Snatch + OHS: 5x(2+1) @ 70%	Snatch Pull: 4x5 @ 90%	Back Squat: 5x6 @ 70%
+2	MED	Muscle Snatch: 4x4 @ 60%	Power Clean + Push Jerk: 5x(2+2) @ 70%	Press Militar: 4x6 @ 65%
+3	INT	Power Snatch: 5x2 @ 75%	C&J: 5x(1+1) @ 75%	Front Squat: 4x5 @ 72%
+SEMANA 2 (Carga - IMR 73%)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA)
+1	VOL	Hang Snatch + OHS: 5x(2+1) @ 73%	Snatch Pull: 4x5 @ 95%	Back Squat: 5x6 @ 73%
+2	MED	No-Foot Snatch: 4x3 @ 65%	Clean + F.Squat + Jerk: 4x(1+1+1) @ 73%	Push Press: 4x5 @ 70%
+3	INT	Power Snatch: 5x2 @ 78%	C&J: 5x(1+1) @ 78%	Front Squat: 4x4 @ 75%
+SEMANA 3 (Choque - IMR 76%)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA)
+1	VOL	Hang Snatch: 6x3 @ 76%	Snatch Pull: 5x4 @ 100%	Back Squat: 5x5 @ 76%
+2	MED	Snatch (Pausa rodilla): 4x2 @ 70%	Power Clean + Jerk: 5x(2+1) @ 76%	Press Militar: 5x5 @ 72%
+3	INT	Snatch: 6x2 @ 80%	C&J: 5x(1+1) @ 80%	Front Squat: 5x3 @ 80%
+SEMANA 4 (Descarga - IMR 65%)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA)
+1	VOL	Snatch: 4x2 @ 65%	Clean Pull: 3x3 @ 85%	Back Squat: 3x5 @ 65%
+2	TEC	Técnica Barra (Complex)	Saltos / Pliometría	Core / Accesorios
+3	INT	Power Snatch: 3x2 @ 70%	Power C&J: 3x1 @ 70%	Front Squat: 3x3 @ 70%
+🟡 MES 2: TRANSMUTACIÓN (Densidad EMOM)
+
+Objetivo: Fuerza específica y capacidad de trabajo de alta intensidad. Metodología: Uso intensivo de EMOMs (Every Minute on the Minute) en el Día 2 para condensar volumen en poco tiempo. IMR Promedio: 80-85%.
+SEMANA 5 (Fuerza Base - IMR 80%)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA)
+1	VOL	Snatch: 5x2 @ 80%	Clean Pull: 4x3 @ 105%	Back Squat: 5x3 @ 80%
+2	DENS	EMOM Snatch: 10 min x 1 rep @ 75%	EMOM C&J: 10 min x 1 rep @ 75%	Push Press: 4x4 @ 75%
+3	INT	Snatch (Block): 4x2 @ 82%	C&J: 4x1 @ 82%	Front Squat: 4x3 @ 82%
+SEMANA 6 (Intensificación - IMR 83%)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA)
+1	VOL	Snatch: 5x2 @ 83%	Snatch Pull: 4x3 @ 105%	Back Squat: 5x3 @ 83%
+2	DENS	EMOM P.Snatch: 12 min x 1 @ 78%	EMOM P.Clean + Jerk: 10 min @ 78%	Press Militar: 5x3 @ 78%
+3	INT	Snatch: 3x2 @ 85%	C&J: 3x1 @ 85%	Front Squat: 4x2 @ 85%
+SEMANA 7 (Choque - IMR 85%)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA)
+1	VOL	Snatch: 4x2 @ 85%	Clean Pull: 4x2 @ 110%	Back Squat: 4x3 @ 85%
+2	DENS	EMOM Snatch: 8 min x 1 (Pesado)	EMOM C&J: 8 min x 1 (Pesado)	Push Press: 4x2 @ 82%
+3	INT	Snatch: 3x1 @ 88%	C&J: 3x1 @ 88%	Front Squat: 3x1 @ 90%
+SEMANA 8 (Descarga Estructural - IMR 70%)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA)
+1	VOL	Snatch: 3x1 @ 70%	Pull: 3x2 @ 85%	Back Squat: 3x3 @ 70%
+2	AUX	Hang Power Snatch: 3x2 @ 60%	Power Clean: 3x2 @ 65%	Movilidad
+3	INT	Snatch: 2x1 @ 75%	C&J: 2x1 @ 75%	Front Squat: 2x2 @ 75%
+🔴 MES 3: REALIZACIÓN (Peaking)
+
+Objetivo: Máxima intensidad y simulación de competencia. Estructura: Días muy pesados (INT) seguidos de recuperación completa. IMR Promedio: 90%+.
+SEMANA 9 (Activación - IMR 88-90%)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA)
+1	INT	Snatch: 5x1 @ 88%	Snatch Pull: 3x2 @ 105%	Back Squat: 3x2 @ 88%
+2	AUX	Power Snatch: 3x1 @ 82%	Power Clean + Jerk: 3x(1+1) @ 82%	Jerk Support: 3x3 @ 100%
+3	INT	Snatch: 4x1 @ 90%	C&J: 4x1 @ 90%	Front Squat: 2x1 @ 92%
+SEMANA 10 (Simulación - IMR 92-95%)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA)
+1	INT	Snatch: 3x1 @ 90-92%	Squat: 2x1 @ 90%	Pull: 2x1 @ 100%
+2	AUX	Power Snatch: 2x1 @ 85%	Power Clean: 2x1 @ 85%	Activación SNC
+3	INT	Snatch: 1x1 @ 95%	C&J: 1x1 @ 95%	Front Squat: 1x1 @ 95%
+SEMANA 11 (Taper / Afilado - IMR 80% descendente)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA)
+1	MED	Snatch: 3x1 @ 80-85%	C&J: 2x1 @ 80-85%	Back Squat: 2x1 @ 80%
+2	TEC	Power Snatch: 2x2 @ 60%	Power Clean: 2x1 @ 60%	Movilidad
+3	MED	Snatch: 2x1 @ 75%	C&J: 1x1 @ 75%	Front Squat: 2x1 @ 70%
+SEMANA 12 (TEST / COMPETENCIA)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA)
+1	ACT	Snatch: 3x2 @ 50%	C&J: 3x1 @ 50%	Back Squat: 3x2 @ 50%
+2	ACT	Barra Vacía: 15 min	Velocidad	Activación SNC
+3	TEST	TEST SNATCH (1RM)	TEST C&J (1RM)	TEST SQUAT (1RM)

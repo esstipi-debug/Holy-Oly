@@ -1,0 +1,1747 @@
+# 01. Stress Engine (Readiness Calculator)
+
+**Core Module:** `backend/src/services/stress_engine.js`
+**Related Service:** `backend/src/services/readiness_cache_service.js`
+**Cron Job:** Daily at 00:30 UTC
+
+---
+
+## Purpose
+
+The **Stress Engine** is the central nervous system of HolyOly. It calculates athlete readiness using the **Banister Fitness-Fatigue Model**, predicting when an athlete is prepared to train hard vs. when they need recovery.
+
+**Key Outputs:**
+- **Fitness Score** — Long-term training adaptation (28-day EMA)
+- **Fatigue Score** — Short-term accumulated stress (7-day EMA)
+- **Readiness** — Current readiness to train (Fitness - Fatigue)
+- **Readiness Projection** — Next 4 weeks of predicted readiness
+
+---
+
+## How It Works
+
+### 1. Training Load Calculation
+
+**Formula:**
+```
+Training Load = Sets × Reps × Weight (kg) × RPE Factor
+```
+
+**RPE Factor Table (1-10 scale):**
+| RPE | Factor | RPE | Factor |
+|-----|--------|-----|--------|
+| 10  | 1.00   | 5   | 0.75   |
+| 9.5 | 0.975  | 5.5 | 0.775  |
+| 9   | 0.95   | 6   | 0.80   |
+| 8.5 | 0.925  | 6.5 | 0.825  |
+| 8   | 0.90   | 7   | 0.85   |
+| 7.5 | 0.875  | 7.5 | 0.875  |
+| 7   | 0.85   | ...and so on|
+
+**Example:**
+```
+Exercise: Snatch
+  Sets: 5
+  Reps: 3
+  Weight: 100kg
+  RPE: 8.5
+
+Load = 5 × 3 × 100 × 0.925 = 1,387.5
+```
+
+**Session Total:** Sum of all exercise loads
+
+---
+
+### 2. Fatigue Score (7-Day Exponential Moving Average)
+
+**Formula:**
+```
+Fatigue_today = α × Load_today + (1-α) × Fatigue_yesterday
+
+where α (alpha) = 2 / (7 + 1) = 0.25
+```
+
+**Interpretation:**
+- **Higher fatigue** = Accumulated stress from recent sessions
+- **Decays slowly** — Takes ~28 days to fully recover from a single high-load session
+- **Example:** If you hit 5,000 load today and rest tomorrow:
+  - Day 1: Fatigue = 0.25 × 5000 + 0.75 × 0 = 1,250
+  - Day 2: Fatigue = 0.25 × 0 + 0.75 × 1,250 = 938
+  - Day 3: Fatigue = 0.25 × 0 + 0.75 × 938 = 704
+  - ... continues decaying
+
+---
+
+### 3. Fitness Score (28-Day Exponential Moving Average)
+
+**Formula:**
+```
+Fitness_today = β × Load_today + (1-β) × Fitness_yesterday
+
+where β (beta) = 2 / (28 + 1) ≈ 0.069
+```
+
+**Interpretation:**
+- **Higher fitness** = Long-term training adaptations and strength gains
+- **Builds slowly** — Requires consistent ~4 weeks of training to see peak
+- **Persists longer** — Doesn't decay as fast as fatigue (key to supercompensation)
+
+---
+
+### 4. Readiness (Base Calculation)
+
+**Formula:**
+```
+Readiness_base = ((Fitness - Fatigue) / Fitness) × 100
+
+Range: 0-100 (clamped)
+```
+
+**Interpretation:**
+- **Readiness = 100** → Fully recovered, adapted, ready for hard session
+- **Readiness = 50** → Neutral state (default if no data)
+- **Readiness = 0** → Completely fatigued, overreached, needs immediate rest
+
+---
+
+### 5. Readiness Modifiers
+
+After base readiness is calculated, the system applies **4 modifiers** to refine the score:
+
+#### A. Sleep Modifier
+
+**For Men:**
+- \< 6 hours → **-10** readiness
+- 6-7 hours → **-5** readiness
+- ≥ 7 hours → **0** (no penalty)
+
+**For Women:**
+- \< 7 hours → **-10** readiness
+- 7-8 hours → **-5** readiness
+- ≥ 8 hours → **0** (no penalty)
+
+**Rationale:** CNS recovery requires adequate sleep; women have slightly higher sleep needs.
+
+---
+
+#### B. RPE Divergence Modifier
+
+**Condition:** If athlete reports RPE much higher than expected for the load
+
+**Formula:**
+```
+RPE_divergence = RPE_real - RPE_expected
+if divergence > 1.5 → -5 readiness
+else → 0
+```
+
+**Example:**
+- Planned session: 75% intensity (RPE ~7.5)
+- Athlete reports: RPE 9.2
+- Divergence: 9.2 - 7.5 = 1.7 (> 1.5) → Apply -5 penalty
+
+**Interpretation:** Session felt harder than expected = nervous system isn't recovered
+
+---
+
+#### C. Compliance Modifier
+
+**Based on:** Last 7 sessions (completed vs. planned)
+
+**Formula:**
+```
+Compliance_rate = Completed / Planned × 100
+
+if compliance < 50% → -7 readiness
+if compliance < 70% → -3 readiness
+else → 0
+```
+
+**Example:**
+- Planned: 6 sessions / week
+- Completed: 3 sessions
+- Compliance: 50% → Apply -7 penalty
+
+**Interpretation:** Skipping sessions = possible overtraining, illness, or life stress
+
+---
+
+#### D. Operating Mode Modifier
+
+**Depends on athlete's configured operating mode:**
+
+| Mode | Input | Adjustment |
+|------|-------|-----------|
+| **Zero Friction** | No input (estimated 100% compliance) | No penalty |
+| **Semi** | RPE only | No additional penalty |
+| **Pro** | Full data (sets, reps, weight, RPE) | Can apply RPE divergence |
+
+---
+
+### 6. Final Readiness Score
+
+**Formula:**
+```
+Readiness_raw = Readiness_base + Sleep_mod + RPE_div_mod + Compliance_mod
+
+Readiness_final = CLAMP(Readiness_raw, 0, 100)
+```
+
+---
+
+### 7. Readiness Projection (4 Weeks)
+
+The engine projects the next 4 weeks assuming:
+- **Current sessions continue** at the same load
+- **No additional stressors** appear
+- **Linear fatigue decay**
+
+**Output:** Array of projected readiness values for days 1-28
+
+**Use Case:** Coach sees "readiness drops to 25 in 3 days" → can plan deload before athlete hits burnout
+
+---
+
+## Input Data Structure
+
+```javascript
+{
+  fitness: 68.2,              // Current fitness EMA (28-day)
+  fatigue: 45.3,              // Current fatigue EMA (7-day)
+  sleepHours: 7.2,            // Last night's sleep (null if not logged)
+  gender: 'M',                // 'M' or 'F'
+  rpeReal: 8.5,               // Reported RPE (null if not logged)
+  rpeExpected: 7.5,           // Estimated RPE from intensity%
+  completedSessions: 5,       // Last 7 days completed
+  plannedSessions: 6          // Last 7 days planned
+}
+```
+
+---
+
+## Output Data Structure
+
+```javascript
+{
+  fitness: 68.2,
+  fatigue: 45.3,
+  readiness: 22.9,
+  readiness_category: "Low",  // "Low" (<40), "Moderate" (40-60), "High" (>60)
+  breakdown: {
+    base: 22.9,               // Before modifiers
+    sleep_mod: -5,            // Sleep modifier
+    rpe_divergence_mod: 0,    // RPE divergence
+    compliance_mod: 0         // Compliance
+  },
+  projection: [               // Next 28 days
+    { date: "2026-04-11", readiness: 23.5 },
+    { date: "2026-04-12", readiness: 24.1 },
+    ...
+  ]
+}
+```
+
+---
+
+## Constants & Calibration
+
+```javascript
+// Exponential Moving Average parameters
+FATIGUE_ALPHA = 0.25      // 2 / (7 + 1) — 7-day decay
+FITNESS_BETA = 0.069      // 2 / (28 + 1) — 28-day decay
+
+// Defaults
+DEFAULT_READINESS = 50    // Neutral when no historical data
+BASELINE_DAYS = 28        // Time to reach full calibration
+MAX_PROJECTION_WEEKS = 4  // How far to project readiness
+```
+
+---
+
+## Integration Points
+
+### Uses Data From:
+- **Session Results** — Training load (sets, reps, weight, RPE)
+- **Daily Metrics** — Sleep hours logged by athlete
+- **Lifestyle Profile** — Daily stress, work hours (affects compliance)
+- **Operating Mode** — How much data athlete provides
+
+### Feeds Data To:
+- **Readiness Cache Service** — Stores daily snapshot (fast lookups)
+- **Session Adaptation Engine** — Risk score uses fitness/fatigue
+- **Smart Coach Engine** — Alert triggers based on readiness trends
+- **Píldoras Engine** — Daily tip selection based on readiness
+- **Frontend Dashboard** — Real-time readiness gauge
+
+---
+
+## Cron Job Schedule
+
+**Trigger:** Daily at 00:30 UTC
+**Function:** `recalculateDailyMetrics()` in `backend/src/services/cron.js`
+
+**Process:**
+1. For each athlete, fetch last 90 days of sessions
+2. Recalculate fitness/fatigue/readiness for each day
+3. Store results in `ReadinessCache` table
+4. Generate readiness projections (next 28 days)
+5. Log completion: `[Cron] Daily metrics: 450/500 athletes updated`
+
+**Performance:** ~50ms per athlete on cached data
+
+---
+
+## Example Workflow
+
+### Day 1: Heavy Session
+```
+Athlete completes:
+  - 5×3 Snatch @ 100kg, RPE 8.5 → Load = 1,387.5
+  - 3×2 Clean+Jerk @ 110kg, RPE 8.0 → Load = 528
+  - 3×3 Back Squat @ 140kg, RPE 7.0 → Load = 882
+  - Total Load = 2,797.5
+
+Current State:
+  Fitness = 60, Fatigue = 30
+  Sleep = 8h, RPE_div = 0, Compliance = 100%
+
+After Stress Engine:
+  Fitness = 0.069 × 2797.5 + (1-0.069) × 60 = 192.8 + 55.9 = 248.7 (↑)
+  Fatigue = 0.25 × 2797.5 + (1-0.25) × 30 = 699.4 + 22.5 = 721.9 (↑)
+  Readiness_base = ((248.7 - 721.9) / 248.7) × 100 = -190 → CLAMP(0) = 0
+
+  No modifiers (sleep OK, RPE matches, compliance good)
+
+  Final Readiness = 0 → "Flatlined" (completely fatigued)
+```
+
+### Day 2: Rest
+```
+Load = 0
+
+After Stress Engine:
+  Fitness = 0.069 × 0 + 0.931 × 248.7 = 231.6 (slight decay)
+  Fatigue = 0.25 × 0 + 0.75 × 721.9 = 541.4 (decays fast)
+  Readiness_base = ((231.6 - 541.4) / 231.6) × 100 = -134 → CLAMP(0) = 0
+
+  Final Readiness = 0 (still fatigued)
+```
+
+### Day 3: Rest + Good Sleep
+```
+Load = 0, Sleep = 9h (good recovery)
+
+After Stress Engine:
+  Fitness = 0.069 × 0 + 0.931 × 231.6 = 215.6
+  Fatigue = 0.25 × 0 + 0.75 × 541.4 = 406.1
+  Readiness_base = ((215.6 - 406.1) / 215.6) × 100 = -88 → CLAMP(0) = 0
+
+  Sleep modifier = 0 (9h is good)
+
+  Final Readiness = 0 (still recovering)
+```
+
+### Day 8: Readiness Returns
+```
+After 7 rest days, fatigue has decayed significantly
+
+Fitness ≈ 215
+Fatigue ≈ 50
+Readiness_base = ((215 - 50) / 215) × 100 = 77
+
+Sleep = 7.5h (slight dip)
+Sleep_mod = -5
+
+Final Readiness = 77 - 5 = 72 → "High" ✓ Ready to train hard
+```
+
+---
+
+## Key Insights
+
+1. **Fatigue decays fast** (7-day EMA) — A single hard session's fatigue recovers in ~3-4 days
+2. **Fitness builds slow** (28-day EMA) — Peak adaptation takes ~4 weeks of consistent training
+3. **Sleep is critical** — CNS recovery (sleep) can flip a session from "doable" to "too risky"
+4. **Compliance matters** — Skipping sessions signals problem (illness, overtraining, life stress)
+5. **Readiness is predictive** — Using projection, coach can avoid burnout 3-4 weeks in advance
+
+---
+
+## Performance Optimization
+
+**Without Cache:**
+- Recalculating for one athlete: ~500ms (O(90) recalculations)
+- Dashboard loading for 100 athletes: ~50 seconds ❌
+
+**With Readiness Cache (implemented):**
+- Reading from cache: ~50ms (O(1) lookup)
+- Dashboard loading for 100 athletes: ~5 seconds ✓
+
+**Cron Pre-calculation (00:30 UTC):**
+- Runs once daily, not on every request
+- Stores results in PostgreSQL for instant retrieval
+- Scales to 10,000+ athletes without performance impact
+
+---
+
+## Testing & Validation
+
+**Unit Test Location:** `backend/__tests__/stress_engine.test.js`
+
+**Test Cases:**
+1. Training load calculation with various RPE values
+2. EMA convergence over 90 days
+3. Readiness bounds (0-100)
+4. Modifier application (sleep, RPE, compliance)
+5. Projection accuracy
+
+---
+
+## Dependencies
+
+- **Prisma ORM** — Fetch session data from `completedSession` table
+- **PostgreSQL** — Store `ReadinessCache` table (pre-calculated values)
+- **Cron Service** — Scheduled recalculation daily
+
+---
+
+**Next:** See [02_session_adaptation_engine.md](./02_session_adaptation_engine.md) for how readiness feeds into risk-based session modification.
+
+================================================================================
+ENGINE 02: Session Adaptation Engine
+================================================================================
+
+# 02. Session Adaptation Engine
+
+**Core Module:** `backend/src/services/session_adaptation_engine.js`
+**Endpoint:** `POST /coaching/athlete/:athleteId/pre-check`
+**Trigger:** Athlete initiates pre-session check-in
+
+---
+
+## Purpose
+
+The **Session Adaptation Engine** protects athletes from injury by intelligently degrading sessions when they're not ready. It **never blocks** a session—it **suggests safer alternatives** that the coach can approve with one tap.
+
+**Philosophy:** *"The system SUGGESTS, the coach APPROVES with 1 tap. The coach's job is NOT eliminated—it's accelerated."*
+
+---
+
+## How It Works
+
+### 1. Risk Score Calculation
+
+**Input Data (1-5 Scale):**
+```javascript
+{
+  coordinationScore: 4,      // 1=terrible, 5=excellent
+  fatigueLevel: 3,           // 1=fresh, 5=destroyed
+  sorenessLevel: 2,          // 1=none, 5=severe
+  mentalFocus: 3,            // 1=unfocused, 5=locked in
+  sleepHours: 6.5            // numeric hours (null = unknown)
+}
+```
+
+**Normalization to 0-100 "Risk" Scale:**
+- **Coordination:** `risk = (5 - score) / 4 × 100`
+  - Score 5 (excellent) → 0 risk
+  - Score 1 (terrible) → 100 risk
+- **Fatigue:** `risk = (level - 1) / 4 × 100`
+  - Level 1 (fresh) → 0 risk
+  - Level 5 (destroyed) → 100 risk
+- **Soreness:** `risk = (level - 1) / 4 × 100`
+  - Level 1 (none) → 0 risk
+  - Level 5 (severe) → 100 risk
+- **Mental Focus:** `risk = (5 - focus) / 4 × 100`
+  - Focus 5 (locked) → 0 risk
+  - Focus 1 (unfocused) → 100 risk
+- **Sleep:** `risk = (8 - hours) / 4 × 100`
+  - 8+ hours → 0 risk
+  - 4 hours → 100 risk
+  - Unknown (null) → 50 risk (assume moderate)
+
+---
+
+### 2. Risk Weighting
+
+**Final Risk Score:**
+```
+RiskScore = Σ(individual_risk × weight)
+
+Weights:
+  Coordination: 30% (most important for WL safety)
+  Fatigue:      25% (overall body stress)
+  Sleep:        20% (CNS recovery)
+  Soreness:     15% (muscular damage)
+  Mental:       10% (focus/motivation)
+```
+
+**Example:**
+```
+coordinationScore = 4 → coordRisk = 25
+fatigueLevel = 4 → fatigueRisk = 75
+sorenessLevel = 2 → sorenessRisk = 25
+mentalFocus = 3 → mentalRisk = 50
+sleepHours = 6 → sleepRisk = 50
+
+RiskScore = (25 × 0.30) + (75 × 0.25) + (50 × 0.20) + (25 × 0.15) + (50 × 0.10)
+          = 7.5 + 18.75 + 10 + 3.75 + 5
+          = 45 → YELLOW zone
+```
+
+---
+
+### 3. Risk Zones
+
+Once risk score is calculated, the system assigns a **risk zone** and **recommended action:**
+
+| Zone | Range | Color | Recommended Action |
+|------|-------|-------|-----------|
+| **GREEN** | 0-25 | 🟢 | Execute session as planned |
+| **YELLOW** | 26-50 | 🟡 | Reduce load or simplify variants |
+| **ORANGE** | 51-75 | 🟠 | Substitute complex exercises + reduce volume |
+| **RED** | 76-100 | 🔴 | Technique-only with light bar or rest |
+
+---
+
+### 4. Exercise Degradation Levels
+
+For each exercise in the session, the engine determines a **degradation level** (0-3):
+
+```javascript
+degradationLevel(exerciseComplexity, exerciseCnsDemand, riskScore, riskZone)
+
+where:
+  exerciseComplexity: 1-10 (snatch=9, clean=8, back squat=6)
+  exerciseCnsDemand: 1-10 (snatch=10, clean=9, squat=5)
+  riskZone: green/yellow/orange/red
+```
+
+**Decision Logic:**
+
+```
+IF riskZone == 'green'
+  → degradationLevel = 0 (no change)
+
+IF riskZone == 'red'
+  → IF exerciseComplexity ≥ 5
+     → degradationLevel = 3 (heavy degradation)
+  → ELSE
+     → degradationLevel = 2 (moderate degradation)
+
+IF riskZone == 'orange'
+  → exerciseRisk = (complexity × 0.6 + cnsDemand × 0.4) / 10
+  → IF exerciseRisk > 0.7
+     → degradationLevel = 3
+  → ELSE IF exerciseRisk > 0.4
+     → degradationLevel = 2
+  → ELSE
+     → degradationLevel = 1
+
+IF riskZone == 'yellow'
+  → IF exerciseRisk > 0.7
+     → degradationLevel = 2 (complex exercise + moderate risk)
+  → ELSE IF exerciseRisk > 0.5
+     → degradationLevel = 1
+  → ELSE
+     → degradationLevel = 0
+```
+
+---
+
+### 5. Degradation Actions
+
+**Degradation Level 0 (No Change):**
+- Snatch 5×3 @ 90% → Execute as planned
+
+**Degradation Level 1 (Mild - Reduce volume):**
+- Snatch 5×3 @ 90% → Snatch 3×3 @ 90% (fewer sets)
+- Or: Snatch 5×3 @ 90% → Snatch 5×2 @ 90% (fewer reps)
+
+**Degradation Level 2 (Moderate - Reduce load):**
+- Snatch 5×3 @ 90% → Snatch 3×3 @ 75% (fewer sets + lower intensity)
+- Back Squat 4×5 @ 85% → Back Squat 3×3 @ 70%
+
+**Degradation Level 3 (Heavy - Substitute or technique):**
+- Snatch 5×3 @ 90% → Snatch technique 5×2 @ 40% (light bar only)
+- **Or substitute** with safer movement:
+  - Snatch → Power Snatch or Snatch Balance
+  - Clean → Power Clean or Hang Clean
+  - Complex barbell → Accessory work (leg press, bench press)
+
+---
+
+### 6. Substitution Chains
+
+When degradation level 3 is needed, the engine looks up **substitution chains** in the database:
+
+```javascript
+// Substitution priority (safest to complex)
+snatchChain = [
+  "Snatch Balance",        // Safest, pure position
+  "Power Snatch",          // Similar movement, less demand
+  "Hang Snatch",           // Reduced range
+  "Snatch Pull",           // No catch, pure power
+  "Snatch Push Press",     // Shoulder-only variation
+];
+
+cleanChain = [
+  "Power Clean",
+  "Hang Clean",
+  "Clean Pull",
+  "Muscle Clean",
+];
+
+squatChain = [
+  "Leg Press",
+  "Belt Squat",
+  "Smith Machine Squat",
+];
+```
+
+---
+
+## Input Data Structure
+
+```javascript
+{
+  athleteId: "uuid",
+  sessionId: "macrocycleSessionId",
+  preCheckData: {
+    coordinationScore: 4,
+    fatigueLevel: 3,
+    sorenessLevel: 2,
+    mentalFocus: 3,
+    sleepHours: 6.5
+  }
+}
+```
+
+---
+
+## Output Data Structure
+
+```javascript
+{
+  approved: true,                    // Coach can execute session
+  modified: false,                   // No adaptations needed
+  risk_score: 45,
+  risk_zone: "yellow",
+
+  breakdown: {
+    coordination: { raw: 4, risk: 25 },
+    fatigue: { raw: 3, risk: 75 },
+    sleep: { raw: 6.5, risk: 50 },
+    soreness: { raw: 2, risk: 25 },
+    mental: { raw: 3, risk: 50 }
+  },
+
+  recommendation: "Reduce load or simplify variants",
+
+  originalPlan: [
+    { exercise: "Snatch", sets: 5, reps: 3, weight: "90%", complexity: 9 },
+    { exercise: "Back Squat", sets: 4, reps: 5, weight: "85%", complexity: 6 }
+  ],
+
+  adaptedPlan: [
+    {
+      exercise: "Snatch",
+      sets: 3,
+      reps: 3,
+      weight: "90%",
+      degradation: 1,
+      reasoning: "Yellow zone + high complexity → reduce volume"
+    },
+    {
+      exercise: "Back Squat",
+      sets: 3,
+      reps: 5,
+      weight: "85%",
+      degradation: 1,
+      reasoning: "Yellow zone + medium complexity → reduce volume"
+    }
+  ],
+
+  warnings: [
+    "Sleep was low (6.5h) — consider extra recovery day",
+    "Fatigue elevated — monitor for overtraining"
+  ]
+}
+```
+
+---
+
+## Integration Points
+
+### Uses Data From:
+- **Stress Engine** — Readiness level informs risk baseline
+- **Pre-Check Form** — Athlete inputs (coordination, fatigue, soreness, mental, sleep)
+- **Session Plan** — Exercise complexity, CNS demand
+- **Macrocycle Definition** — Substitution chains per exercise
+
+### Feeds Data To:
+- **Session Recording** — Modified plan is logged as "prescribed"
+- **Smart Coach Engine** — Alert if RED zone 3+ days
+- **Gamification Engine** — Completion tracked (adapted vs. original)
+
+---
+
+## Example Workflow
+
+### Scenario: Athlete in YELLOW Zone
+
+```
+Pre-Check Inputs:
+  coordinationScore: 3 (struggling with position)
+  fatigueLevel: 4 (tired)
+  sorenessLevel: 3 (sore from yesterday)
+  mentalFocus: 2 (unfocused, distracted)
+  sleepHours: 6
+
+Risk Calculation:
+  coordRisk = (5-3)/4 × 100 = 50
+  fatigueRisk = (4-1)/4 × 100 = 75
+  sorenessRisk = (3-1)/4 × 100 = 50
+  mentalRisk = (5-2)/4 × 100 = 75
+  sleepRisk = (8-6)/4 × 100 = 50
+
+  RiskScore = (50×0.30) + (75×0.25) + (50×0.20) + (50×0.15) + (75×0.10)
+            = 15 + 18.75 + 10 + 7.5 + 7.5
+            = 58.75 → ORANGE zone ⚠️
+
+Adaptation:
+  Original: Snatch 5×3 @ 90%, Back Squat 4×5 @ 85%
+
+  Snatch (complexity=9, cnsDemand=10):
+    exerciseRisk = (9×0.6 + 10×0.4) / 10 = 0.94 (very high)
+    → degradationLevel = 3 (heavy)
+    → SUBSTITUTE: "Snatch Balance 3×3 @ 60%"
+
+  Back Squat (complexity=6, cnsDemand=5):
+    exerciseRisk = (6×0.6 + 5×0.4) / 10 = 0.56 (moderate-high)
+    → degradationLevel = 2 (moderate)
+    → MODIFY: "Back Squat 3×3 @ 70%"
+
+Recommendation:
+  "Coordination and mental focus are compromised.
+   Substitute complex movements with accessories.
+   Still get quality work but reduce technical demand."
+
+Coach Actions:
+  [See Adapted Plan]  [Adjust Further]  [Accept]
+```
+
+---
+
+### Scenario: Athlete in RED Zone
+
+```
+Pre-Check Inputs:
+  coordinationScore: 1 (poor position awareness)
+  fatigueLevel: 5 (destroyed)
+  sorenessLevel: 4 (very sore)
+  mentalFocus: 1 (can't focus)
+  sleepHours: 4 (slept terribly)
+
+Risk Score: 88 → RED zone 🔴
+
+Recommendation:
+  "Technique-only with light bar or rest.
+   Your body is signaling overtraining.
+   Consider a full rest day instead."
+
+Options:
+  [Technique Warmup Only]  [Full Rest Day]  [Custom Adaptation]
+```
+
+---
+
+## Key Insights
+
+1. **Coordination is critical** (30% weight) — Fatigued nervous system + heavy bar = injury risk
+2. **Sleep > all** — Missing sleep affects everything: coordination, fatigue recovery, mental focus
+3. **Degradation != Cancellation** — Even RED zone athletes get quality work (technique, accessories)
+4. **Coach retains authority** — System suggests, coach makes final call
+5. **Transparent reasoning** — Athlete sees breakdown of why session was adapted
+
+---
+
+## Performance Optimization
+
+**Query Pattern:**
+```sql
+SELECT * FROM macrocycleSession
+WHERE id = ?
+INCLUDE exercises
+INCLUDE exercise (for complexity + cnsDemand)
+```
+
+**Response Time:** ~50-100ms (with database indexes)
+
+---
+
+## Testing & Validation
+
+**Unit Test Location:** `backend/__tests__/session_adaptation_engine.test.js`
+
+**Test Cases:**
+1. Risk score calculation for various inputs
+2. Degradation level assignment (all 4 zones)
+3. Substitution chain lookup
+4. Session reconstruction with modified exercises
+5. Edge cases (single exercise, rest day, etc.)
+
+---
+
+## Constants
+
+```javascript
+const RISK_WEIGHTS = {
+  coordination: 0.30,
+  fatigue: 0.25,
+  sleep: 0.20,
+  soreness: 0.15,
+  mental: 0.10,
+};
+
+const RISK_ZONES = {
+  GREEN: { min: 0, max: 25, action: "Execute as planned" },
+  YELLOW: { min: 26, max: 50, action: "Reduce load or simplify" },
+  ORANGE: { min: 51, max: 75, action: "Substitute + reduce volume" },
+  RED: { min: 76, max: 100, action: "Technique-only or rest" },
+};
+```
+
+---
+
+## Dependencies
+
+- **Stress Engine** — Readiness context (optional, for alert triggering)
+- **Prisma ORM** — Fetch session + exercise definitions
+- **PostgreSQL** — Store substitution chains, exercise complexity ratings
+
+---
+
+**Next:** See [03_macrocycle_engine.md](./03_macrocycle_engine.md) for how sessions are generated and assigned to athletes.
+
+================================================================================
+ENGINE 03: Macrocycle Engine
+================================================================================
+
+# 03. Macrocycle Engine
+
+**Core Module:** `backend/src/services/macrocycle_service.js`
+**Data Source:** `/archive/escuelas con macrociclos/` (1,236 canonical sessions)
+**Database Tables:** `macrocycle`, `macrocycleWeek`, `macrocycleSession`, `macrocycleSessionExercise`
+**Trigger:** Coach assigns macrocycle to athlete
+
+---
+
+## Purpose
+
+The **Macrocycle Engine** manages 23 standardized training programs from 9 weightlifting schools worldwide. It provides a **pre-validated, research-backed foundation** for athlete training, eliminating the need for coaches to program from scratch.
+
+**Key Features:**
+- **1,236 canonical sessions** from 9 Olympic schools
+- **4-20 week programs** covering all training phases
+- **Progressive periodization** (hypertrophy → strength → peaking)
+- **Automatic session generation** with exercise ordering, loads, reps
+
+---
+
+## The 23 Macrocycles
+
+### By School & Focus
+
+**Bulgarian School (3 cycles):**
+1. **High Frequency Pure Oly** (8 weeks) — Daily singles, daily maxes
+2. **Bulgarian Heavy** (12 weeks) — Extreme frequency + loads
+3. **Bulgarian Strength Block** (6 weeks) — Lower frequency, higher intensity
+
+**Russian School (4 cycles):**
+4. **Russian Classic Periodization** (12 weeks) — Hypertrophy → Strength → Power
+5. **Russian Strength-Speed Block** (8 weeks) — Speed under load
+6. **Russian Heavy Chains** (10 weeks) — Wave loading with chains/bands
+7. **Russian Competition Prep** (4 weeks) — Peaking taper
+
+**Chinese School (3 cycles):**
+8. **Chinese Extensive** (16 weeks) — High volume, moderate intensity
+9. **Chinese Competition Phase** (6 weeks) — Peaking focus
+10. **Chinese Youth Development** (12 weeks) — Foundation building
+
+**American School (2 cycles):**
+11. **American Hybrid Complex** (10 weeks) — Oly + strength + CrossFit transfer
+12. **American Strength Bias** (8 weeks) — Heavy squats + pulls
+
+**Iranian School (2 cycles):**
+13. **Iranian High Volume** (14 weeks) — ~20+ exercises per session
+14. **Iranian Competition Block** (5 weeks) — 72h taper to peak
+
+**European School (3 cycles):**
+15. **European Technical Focus** (10 weeks) — Technique refinement
+16. **European Periodized Waves** (12 weeks) — 3-week waves, undulating
+17. **European Endurance-Strength Hybrid** (9 weeks) — WL + conditioning
+
+**Japanese School (2 cycles):**
+18. **Japanese Precision OLY** (10 weeks) — Position work + technical fidelity
+19. **Japanese Strength Endurance** (12 weeks) — High reps (5-6) at 85%+
+
+**Ukrainian School (2 cycles):**
+20. **Ukrainian Extreme Frequency** (6 weeks) — 10+ sessions/week
+21. **Ukrainian Strength Block** (8 weeks) — 3×/week with heavy squats
+
+**Turkish School (2 cycles):**
+22. **Turkish Volume Progression** (14 weeks) — Slow volume increase
+23. **Turkish Speed-Strength** (7 weeks) — Explosive + technical
+
+---
+
+## Macrocycle Structure
+
+### Timeline Example: Russian Classic Periodization (12 weeks)
+
+```
+Week 1-4:   HYPERTROPHY BLOCK
+            Sessions: 5-6/week
+            Rep Range: 5-8 @ 70-78%
+            Focus: Volume, muscle damage, GH response
+            Example: 5×5 Back Squat @ 75%, 4×6 Clean + 3×8 Jerk Dip
+
+Week 5-8:   STRENGTH BLOCK
+            Sessions: 4-5/week
+            Rep Range: 2-4 @ 85-92%
+            Focus: CNS adaptation, peak strength
+            Example: 3×2 Snatch @ 90%, 3×3 Clean @ 85%
+
+Week 9-11:  POWER/PEAKING BLOCK
+            Sessions: 4/week
+            Rep Range: 1-3 @ 90-95%+
+            Focus: Competition simulation, tapering volume
+            Example: 2×1 Snatch @ 95%, 2×1 Clean @ 92%
+
+Week 12:    COMPETITION / REST
+            Sessions: 1-2 (very light)
+            Focus: Recovery, mental preparation
+            Example: 2×2 Technique @ 60%, 3×3 Snatch Balance @ 70%
+```
+
+---
+
+## Session Components
+
+Each **MacrocycleSession** contains:
+
+```javascript
+{
+  id: "session-uuid",
+  macrocycleId: "macro-uuid",
+  week: 2,
+  dayOfWeek: "Monday",
+  sessionOrder: 1,
+  sessionTheme: "Snatch Focus + Squat",
+  estimatedDuration: 90,        // minutes
+
+  exercises: [
+    {
+      exerciseId: "snatch-uuid",
+      name: "Snatch",
+      sets: 5,
+      reps: 3,
+      intensity: "80%",          // of 1RM
+      rpe: 8,
+      notes: "Perfect technique focus",
+      complexity: 9,
+      cnsDemand: 10,
+      position: "Competition",
+      substitutableWith: ["Power Snatch", "Snatch Balance"],
+      estimatedLoad: 3500        // in "load units"
+    },
+    {
+      exerciseId: "bs-uuid",
+      name: "Back Squat",
+      sets: 4,
+      reps: 5,
+      intensity: "78%",
+      rpe: 7.5,
+      notes: "Controlled tempo, 2sec descent",
+      complexity: 6,
+      cnsDemand: 7,
+      position: "Competition",
+      estimatedLoad: 2100
+    },
+    // ... more exercises
+  ]
+}
+```
+
+---
+
+## Exercise Attributes
+
+| Attribute | Purpose | Example |
+|-----------|---------|---------|
+| **exerciseId** | Database reference | uuid |
+| **name** | Display name | "Snatch", "Back Squat" |
+| **sets** | Planned volume | 5 |
+| **reps** | Reps per set | 3 |
+| **intensity** | % of 1RM | "80%", "85%", "90%" |
+| **rpe** | Rate of Perceived Exertion | 7-9 |
+| **position** | Training position | "Competition", "Power", "Hang", "From blocks" |
+| **complexity** | Technical difficulty (1-10) | 9=Snatch, 6=Squat, 3=Leg Press |
+| **cnsDemand** | CNS stress (1-10) | 10=Snatch, 5=Squat, 2=Belt Squat |
+| **substitutableWith** | Safer alternatives | ["Power Snatch", "Snatch Balance"] |
+| **notes** | Coaching cues | "Tempo: 2s descent", "Perfect position focus" |
+| **estimatedLoad** | Training load estimate | ~2500 load units |
+
+---
+
+## How Assignment Works
+
+### Step 1: Coach Selects Macrocycle
+
+```
+Coach: "I want to assign Russian Classic Periodization to this athlete"
+
+System checks:
+  - Athlete age/gender ✓
+  - Current fitness level ✓
+  - Previous training phase ✓
+  - Competition date ✓
+→ Suggests optimal start week (e.g., "Week 1" for fresh athlete)
+```
+
+### Step 2: System Generates Athlete-Specific Sessions
+
+```
+For each MacrocycleSession in the template:
+  1. Load exercise template
+  2. Calculate %1RM from athlete's current maxes
+     (If athlete Snatch 1RM = 100kg, and session is 80% → 80kg)
+  3. Estimate load using Stress Engine
+  4. Create athlete's CompletedSession record (pre-populated, pending)
+  5. Generate notifications (athlete gets "New program assigned")
+```
+
+### Step 3: Athlete Executes Sessions
+
+```
+Athlete sees:
+  [Session 1: Snatch Focus + Squat]
+  Monday, Jan 15
+
+  Snatch 5×3 @ 80kg (80% of your 1RM)
+  Back Squat 4×5 @ 78kg
+  ... [more exercises]
+
+Athlete completes (logs RPE, actual weight, comments)
+→ Feeds into Stress Engine for readiness calc
+```
+
+### Step 4: Progression to Next Week
+
+```
+Cron Job (weekly, Monday 00:00):
+  1. Check if athlete completed ≥80% of previous week's sessions
+  2. If YES → Unlock next week automatically
+  3. If NO → Warn coach "Compliance low, advance anyway?"
+  4. Generate new week's sessions with updated %1RM
+```
+
+---
+
+## Integration Points
+
+### Uses Data From:
+- **Athlete Profile** — Current 1RM maxes (snatch, clean, jerk, squat)
+- **Body Weight** — For ratio calculations
+- **Age/Gender** — For periodization recommendations
+- **Competition Date** — For peaking phase timing
+
+### Feeds Data To:
+- **Session Adaptation Engine** — Exercise complexity for risk scoring
+- **Balance Engine** — Session ratios (FS/BS, Sn/CJ)
+- **Gamification Engine** — Planned load for XP estimation
+- **Smart Coach Engine** — Periodization phase for alert generation
+- **Frontend** — Session display on athlete dashboard
+
+---
+
+## Example: Assigning Russian Classic to 90kg Male Athlete
+
+```
+Athlete Profile:
+  Name: Ivan
+  Age: 28
+  BW: 95kg
+  1RM Snatch: 120kg
+  1RM Clean: 145kg
+  1RM Back Squat: 200kg
+  Competition: 8 weeks away
+
+Coach Action: Assign "Russian Classic Periodization (12 weeks)"
+
+System Calculates:
+  Week 1 Snatch Target: 120kg × 0.70 = 84kg (70% for hypertrophy)
+  Week 1 BS Target: 200kg × 0.75 = 150kg
+  ... continue for all exercises
+
+Generated Week 1 Sessions:
+  Monday: Snatch Focus
+    - Snatch 5×5 @ 84kg (70%)
+    - Clean 4×4 @ 100kg (69%)
+    - Back Squat 5×6 @ 120kg (60%)
+    - Snatch Pull 3×5 @ 110kg
+
+  Wednesday: Clean Focus
+    - Clean 5×5 @ 100kg (69%)
+    - Jerk 4×4 @ 110kg (76%)
+    - Front Squat 4×5 @ 140kg (70%)
+    - Push Press 3×5 @ 100kg
+
+  Friday: Heavy Squat
+    - Back Squat 4×4 @ 160kg (80%)
+    - Snatch Pull 3×3 @ 125kg
+    - Jerk Drive 3×4 @ 120kg
+    - Core Work
+
+Ivan receives notification:
+  "New macrocycle assigned: Russian Classic Periodization
+   Starting Monday — 12 weeks to competition
+   [View Program] [Questions?]"
+```
+
+---
+
+## Data Storage
+
+### Database Schema
+
+```sql
+CREATE TABLE "macrocycle" (
+  "id" UUID PRIMARY KEY,
+  "name" VARCHAR NOT NULL,      -- "Russian Classic"
+  "school" VARCHAR,             -- "Russian", "Bulgarian", etc.
+  "duration_weeks" INT,         -- 12
+  "focus_type" VARCHAR,         -- "Strength", "Hypertrophy", "Peaking"
+  "difficulty_level" INT,       -- 1-5 (1=novice, 5=elite)
+  "description" TEXT
+);
+
+CREATE TABLE "macrocycleWeek" (
+  "id" UUID PRIMARY KEY,
+  "macrocycleId" UUID,
+  "week_number" INT,
+  "theme" VARCHAR,              -- "Hypertrophy Block", etc.
+  "sessions_per_week" INT,      -- 5-6
+  "intensity_target" VARCHAR,   -- "70-78%", "85-92%", etc.
+  "volume_estimate" INT         -- ~8000 load units
+);
+
+CREATE TABLE "macrocycleSession" (
+  "id" UUID PRIMARY KEY,
+  "macrocycleWeekId" UUID,
+  "dayOfWeek" VARCHAR,
+  "sessionTheme" VARCHAR,
+  "estimatedDuration" INT,      -- minutes
+  "sessionOrder" INT
+);
+
+CREATE TABLE "macrocycleSessionExercise" (
+  "id" UUID PRIMARY KEY,
+  "macrocycleSessionId" UUID,
+  "exerciseId" UUID,
+  "sets" INT,
+  "reps" INT,
+  "intensity" VARCHAR,          -- "80%"
+  "rpe" DECIMAL,
+  "notes" TEXT,
+  "exerciseOrder" INT
+);
+
+CREATE TABLE "athleteMacrocycle" (
+  "id" UUID PRIMARY KEY,
+  "athleteId" UUID,
+  "macrocycleId" UUID,
+  "assignedDate" TIMESTAMPTZ,
+  "startDate" TIMESTAMPTZ,
+  "endDate" TIMESTAMPTZ,
+  "currentWeek" INT,
+  "status" VARCHAR             -- "active", "completed", "paused"
+);
+```
+
+---
+
+## Performance Optimization
+
+**Initial Load (Assign Macrocycle):**
+- Fetch template: ~20ms
+- Generate 60-80 sessions: ~500ms
+- Bulk insert: ~100ms
+- **Total: ~620ms**
+
+**Weekly Progression:**
+- Check compliance: ~50ms
+- Generate next week (8-10 sessions): ~100ms
+- Bulk insert: ~50ms
+- **Total: ~200ms** (efficient cron job)
+
+**Display Session:**
+- Query + exercise details: ~50ms (with indexes)
+
+---
+
+## Validation Rules
+
+1. **Intensity Progression** — Each week should slightly increase or maintain intensity (not regress without reason)
+2. **Session Balance** — Each week should have ≥1 snatch day, ≥1 clean day, ≥1 squat focus
+3. **Exercise Variety** — Don't repeat exact same session twice in 3 weeks
+4. **CNS Load** — Total complexity-weighted load per week should not exceed threshold
+5. **Rest Days** — Minimum 1 rest day per 3-4 training days
+
+---
+
+## Example Workflow
+
+```
+Timeline:
+
+Week 0: Coach selects "Russian Classic Periodization"
+  → System generates Weeks 1-4 (Month 1)
+
+Week 1: Athlete trains sessions
+  → Logs data, gets readiness updates
+
+Week 2: Cron checks compliance
+  → "Ivan: 5/5 sessions completed. Week 2 unlocked."
+  → System generates Week 5 (Strength Block)
+
+Week 4: End of Hypertrophy Block
+  → Intensity increases for Week 5
+
+...continue through Week 12
+
+Week 12: Competition Day
+  → Macrocycle marked "completed"
+  → Coach can assign next 12-week cycle
+```
+
+---
+
+## Key Insights
+
+1. **Pre-validated programs** — No need to design from scratch; research-backed
+2. **Scalable to unlimited athletes** — One coach manages 50+ athletes, all progressing automatically
+3. **Athlete-specific loads** — Templates auto-adjust to each athlete's 1RMs
+4. **Transparent periodization** — Athlete sees "Hypertrophy Block → Strength Block → Peaking"
+5. **Flexible reassignment** — Coach can swap to different macrocycle at any week
+
+---
+
+## Testing & Validation
+
+**Unit Test Location:** `backend/__tests__/macrocycle_engine.test.js`
+
+**Test Cases:**
+1. Macrocycle fetch from canonical data
+2. Session generation with athlete 1RMs
+3. Intensity progression (no regressions)
+4. Exercise balance validation
+5. Cron-based week progression
+
+---
+
+**Next:** See [04_gamification_engine.md](./04_gamification_engine.md) for how sessions feed into reward systems.
+
+================================================================================
+ENGINE 04: Gamification Engine (XP, Levels, Clubs)
+================================================================================
+
+# 04. Gamification Engine (XP, Levels, Clubs)
+
+**Core Module:** `backend/src/services/gamification_engine.js`
+**Database Tables:** `gamification`, `athleteAchievement`, `athleteShield`
+**Trigger:** Real-time on session completion, PR unlocks, streak milestones
+
+---
+
+## Purpose
+
+The **Gamification Engine** tracks athlete engagement through **XP (experience points), levels, shields, and total clubs**. It provides continuous positive feedback and recognizable progression milestones, keeping athletes motivated through the long training journey.
+
+---
+
+## XP Rewards System
+
+| Event | XP | Trigger |
+|-------|----|----|
+| **Session Complete** | +100 | Log any training session |
+| **Week Complete** | +300 | Complete ≥5 sessions in 1 week |
+| **PR Broken** | +500 | New personal record logged |
+| **Streak 7 Days** | +200 | 7 consecutive training days |
+| **Streak 30 Days** | +1000 | 30 consecutive training days |
+| **Daily Check-in** | +50 | Log PRE-session readiness |
+| **Shield Activated** | +200 | Activate a shield item |
+| **Club Entry** | +1000 | Join a total club (100kg, 150kg, etc.) |
+| **Challenge Complete** | +300 | Finish Pulse conditioning challenge |
+| **Damage Control** | +150 | Complete reduced session (adaptation) |
+| **Píldora Followed** | +50 | Practice coaching tip |
+| **Invincible Mode** | +500 | Complete session with max shields active |
+| **Golden Ratio** | +200 | Hit proportion (e.g., Sn = 0.8×CJ) |
+| **BW Milestone** | +150 | Snatch/CJ at specific bodyweight level |
+| **Coach Stamp** | +300 | Receive coach approval/stamp |
+
+---
+
+## Level System
+
+**9 Tier Structure:**
+
+| Level Range | Tier Name | XP Threshold |
+|-------------|-----------|--------------|
+| 1-10 | **Novato** (Novice) | 0 - 5,000 XP |
+| 11-25 | **Intermedio** (Intermediate) | 5,000 - 20,000 XP |
+| 26-50 | **Avanzado** (Advanced) | 20,000 - 60,000 XP |
+| 51-75 | **Élite** | 60,000 - 120,000 XP |
+| 76-100 | **Legendario** (Legendary) | 120,000 - 250,000+ XP |
+
+**Level Progression Example:**
+```
+Level 1 @ 0 XP
+    ↓ +100 XP per session
+Level 5 @ 2,000 XP
+    ↓ +100 XP per session
+Level 10 @ 5,000 XP (← Tier boundary)
+    ↓ switch to "Intermedio" tier
+Level 11 @ 6,000 XP
+    ↓ continue...
+Level 25 @ 20,000 XP (← Tier boundary)
+    ↓ switch to "Avanzado" tier
+```
+
+---
+
+## Total Clubs System
+
+Athletes unlock **strength achievement clubs** when they hit absolute strength thresholds:
+
+| Club | Snatch + CJ Total | Icon | XP Reward |
+|------|-------------------|------|-----------|
+| 100kg Club | 100kg | 🥉 | 1,000 |
+| 150kg Club | 150kg | 🥈 | 1,000 |
+| 200kg Club | 200kg | 🥇 | 1,000 |
+| 250kg Club | 250kg | 💎 | 1,500 |
+| 300kg Club | 300kg+ | 👑 | 2,000 |
+
+**Logic:**
+```
+If (athleteSnatchMax + athleteCleanJerkMax) ≥ 100kg
+  AND athlete not yet in club
+  → Unlock "100kg Club"
+  → Award +1,000 XP
+  → Display achievement card
+```
+
+---
+
+## Shield System
+
+**5 Shield Types** (one-time use, cooldown-based):
+
+| Shield | Effect | Cooldown | Benefit |
+|--------|--------|----------|---------|
+| **SLEEP** | Recover from bad sleep day | 1/month | +10 readiness |
+| **PROTEIN** | Boost recovery on low intake | 2/month | +5 fitness gain |
+| **ANTI_STRESS** | Reduce daily stress impact | 2/month | -10 fatigue |
+| **CONSISTENCY** | Protect streak if miss 1 day | 1/month | Freeze streak 1 day |
+| **RECOVERY** | Extra recovery day bonus | 2/month | +3 readiness |
+
+**Usage:**
+```
+Athlete had poor sleep (5 hours)
+Readiness = 35 (low)
+
+Athlete activates SLEEP shield:
+Readiness = 35 + 10 = 45 (moderate)
+Shield on cooldown until next month
++200 XP for shield use
+```
+
+---
+
+## Achievement System
+
+### Tier 1: Strength Milestones
+- "First 100kg Club" — Snatch + CJ ≥ 100kg
+- "Golden Snatcher" — Snatch ≥ 80kg
+- "Clean Beast" — Clean+Jerk ≥ 120kg
+
+### Tier 2: Consistency Milestones
+- "Week Warrior" — 5 sessions / week
+- "Month Master" — 20 sessions / month
+- "Unbreakable" — 100 consecutive training days
+
+### Tier 3: Skill Milestones
+- "Proportionate" — Golden ratio achieved
+- "Perfect Bars" — 10 sessions with RPE match
+- "Balanced Athlete" — All exercise ratios in target range
+
+---
+
+## Data Structure
+
+```javascript
+{
+  athlete_id: "uuid",
+  xp: 28500,
+  current_level: 35,
+  level_name: "Intermedio",
+  xp_to_next_level: 1500,
+
+  clubs: [
+    {
+      name: "100kg Club",
+      unlocked_date: "2026-02-15",
+      xp_reward: 1000,
+      icon: "🥉"
+    },
+    {
+      name: "150kg Club",
+      unlocked_date: "2026-03-20",
+      xp_reward: 1000,
+      icon: "🥈"
+    }
+  ],
+
+  shields: {
+    sleep: {
+      active: false,
+      last_used: "2026-04-01",
+      next_available: "2026-05-01"
+    },
+    protein: {
+      active: true,
+      expires: "2026-04-11",
+      uses_left: 1
+    }
+  },
+
+  achievements: [
+    {
+      id: "achievement-100-club",
+      name: "100kg Club",
+      unlocked_date: "2026-02-15"
+    }
+  ]
+}
+```
+
+---
+
+## Integration Points
+
+### Receives Notifications From:
+- **Session Engine** — Session completion triggers XP (+100)
+- **Stress Engine** — PR unlock triggers XP (+500)
+- **Smart Streak Engine** — Streak milestones (+200, +1000)
+- **BW Milestone Engine** — Bodyweight achievement (+150)
+- **Golden Ratio Engine** — Ratio achieved (+200)
+- **Pulse Engine** — Challenge completion (+300)
+
+### Feeds Data To:
+- **Leaderboard Cache** — XP rankings (global, club-based)
+- **Social Engine** — Milestone cards (club entry, level up)
+- **Frontend Dashboard** — XP bar, level display, achievement notifications
+
+---
+
+## Example Progression
+
+```
+Day 1: Athlete joins HolyOly
+  XP = 0
+  Level = 1 (Novato)
+
+Day 2: First session completed
+  XP = 100
+  Level = 1
+  Notification: "Great start! +100 XP"
+
+Day 8: Week complete (5 sessions)
+  XP = 100 + 500 (5 sessions) + 300 (week bonus)
+  = 900 XP
+  Level = 1
+  Notification: "Week Warrior badge earned! +300 XP"
+
+Day 15: 7-day streak
+  XP = 900 + 700 (7 more sessions) + 200 (streak bonus)
+  = 1800 XP
+  Level = 1
+  Notification: "🔥 7-Day Streak! +200 XP"
+
+Day 20: PR broken (Snatch 100kg → 105kg)
+  XP = 1800 + 200 (3 sessions) + 500 (PR)
+  = 2500 XP
+  Level = 1
+  Notification: "🎉 New PR! Snatch 105kg! +500 XP"
+
+Day 35: 30-day streak
+  XP = 2500 + 1500 (more sessions) + 1000 (30-day streak)
+  = 5000 XP
+  Level = 11 (← Tier change to Intermedio)
+  Notification: "🎊 Level 11! Welcome to Intermedio tier"
+
+Day 50: Club unlock (Snatch 80kg + CJ 95kg = 175kg, but already over 100kg club)
+  Athlete hits 100kg Club threshold
+  XP += 1000
+  = 6000+ XP
+  Level = 12
+  Notification: "🏆 100kg Club unlocked! +1,000 XP"
+```
+
+---
+
+## Performance Optimization
+
+**Real-time Updates:**
+- XP addition: O(1) — Simple field update
+- Level recalculation: O(1) — Lookup threshold table
+- Club unlock check: O(n) where n=5 clubs (negligible)
+
+**Cron Operations (optional nightly roll-up):**
+- Verify unlocked achievements: ~10ms per athlete
+- Send milestone notifications: Batched, ~100ms for 1000 athletes
+
+---
+
+## Testing & Validation
+
+**Unit Test Location:** `backend/__tests__/gamification_engine.test.js`
+
+**Test Cases:**
+1. XP award for session completion
+2. Level-up detection and tier transitions
+3. Club unlock when threshold met
+4. Shield cooldown calculation
+5. Achievement unlock logic
+6. Multiple simultaneous unlocks (e.g., level + club)
+
+---
+
+**Next:** See [05_belt_engine.md](./05_belt_engine.md) for progressive belt ranking system.
+
+================================================================================
+ENGINE 05: Belt System (Cinturones de Progresión)
+================================================================================
+
+# 05. Belt System (Cinturones de Progresión)
+
+**Core Module:** `backend/src/services/belt_engine.js`
+**Database Table:** `athleteBelt`
+**Trigger:** Daily validation (achieved criteria → auto-upgrade)
+
+---
+
+## Purpose
+
+The **Belt System** provides long-term gamification progression. Unlike XP (fast, attainable), belts require **sustained excellence across multiple dimensions**, creating aspirational goals that keep athletes engaged for months/years.
+
+---
+
+## Belt Progression
+
+| Belt | Color | Min OLY Index | Min Streak | Min Shields | Min Club | Min Pulse | Min Ratios | Min Active Days |
+|------|-------|--|---|---|---|---|---|---|
+| **White** | ⚪ | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| **Yellow** | 🟡 | 150 | 1w | 1 | 0 | 0 | 0 | 7d |
+| **Orange** | 🟠 | 250 | 2w | 2 | 100kg | 0 | 0 | 30d |
+| **Green** | 🟢 | 400 | 4w | 3 | 150kg | 10 | 0 | 90d |
+| **Blue** | 🔵 | 550 | 8w | 4 | 200kg | 20 | 1 | 180d |
+| **Purple** | 🟣 | 700 | 12w | 5 | 250kg | 30 | 2 | 270d |
+| **Brown** | 🟤 | 850 | 16w | 6 | 300kg | 40 | 3 | 365d |
+| **Red** | 🔴 | 1000 | 24w | 7 | 300kg | 50 | 4 | 500d |
+| **Gold** | 🥇 | 1200+ | 52w | 8+ | 300kg | 75 | 5+ | 730d |
+
+**Key Metrics:**
+- **OLY Index** — Normalized strength (Sn + CJ) / BW
+- **Smart Streak** — Consecutive training days (never reset, frozen days)
+- **Shields** — Defensive items activated
+- **Club** — Total lifted (cumulative strength)
+- **Pulse** — Conditioning challenges completed
+- **Golden Ratios** — Proportion achievements (Sn/CJ, FS/BS, etc.)
+- **Active Days** — Training days (cumulative, lifetime)
+
+---
+
+## How Belts Work
+
+### 1. Criteria Check
+
+Each day at 00:30 UTC (via cron):
+
+```
+For each athlete:
+  - Check if current_belt criteria still met (no demotion)
+  - Check if next_belt criteria met (auto-promote)
+  - If promoted: Award XP, send notification, update belt_color
+```
+
+### 2. Auto-Promotion
+
+```
+IF athlete.olyIndex ≥ 550
+   AND athlete.streak ≥ 8 weeks
+   AND athlete.shields ≥ 4
+   AND athlete.totalClub ≥ 200kg
+   AND athlete.pulseCompleted ≥ 20
+   AND athlete.goldenRatios ≥ 1
+   AND athlete.activeDays ≥ 180
+THEN
+  athlete.belt = 'blue'
+  athlete.beltColor = '#0081C8'
+  athlete.xp += 5000 (belt promotion bonus)
+  notify(athlete, "🎊 Blue Belt achieved! You're elite now.")
+```
+
+### 3. Permanent Progression
+
+**Belts are never lost** — Once earned, permanent. This removes fear and creates cumulative achievement.
+
+```
+Edge case: Athlete stops training 6 months
+  → Streak resets (smart_streak_engine)
+  → But Blue Belt stays
+  → Can regain Blue Belt by restarting streak
+
+This design is intentional:
+  - Respects past achievements
+  - Motivates comeback ("I was Blue Belt, let's get back there")
+  - No punishment for life circumstances
+```
+
+---
+
+## XP Rewards Per Belt
+
+| Belt Promotion | XP | Notes |
+|---|---|---|
+| White → Yellow | 500 | Starting threshold |
+| Yellow → Orange | 1,000 | |
+| Orange → Green | 1,500 | Entering "Advanced" |
+| Green → Blue | 2,000 | Entering "Elite" |
+| Blue → Purple | 2,500 | |
+| Purple → Brown | 3,000 | |
+| Brown → Red | 3,500 | |
+| Red → Gold | 5,000 | Legendary rank |
+
+---
+
+## Integration Points
+
+### Uses Data From:
+- **OLY Index Engine** — Strength calculation
+- **Smart Streak Engine** — Consecutive days
+- **Gamification Engine** — Shields count
+- **Macrocycle Engine** — Club unlocks
+- **Pulse Engine** — Challenge completions
+- **Golden Ratio Engine** — Proportion achievements
+
+### Feeds Data To:
+- **Frontend Dashboard** — Belt display (prominent)
+- **Social Engine** — Belt promotion cards
+- **Leaderboard** — Belt tier grouping
+
+---
+
+## Example Progression
+
+```
+Month 1: White Belt (default)
+  - Athlete joins and trains
+  - OLY Index: 120 (low)
+
+Month 2: Yellow Belt achieved ✓
+  - OLY Index: 180 (≥150 ✓)
+  - Streak: 35 days (≥7 ✓)
+  - Shields: 1 (≥1 ✓)
+  - Active Days: 45 (≥7 ✓)
+  → Promoted to Yellow
+  → +500 XP
+  → Notification: "Yellow Belt! You're consistent!"
+
+Month 4: Orange Belt achieved ✓
+  - OLY Index: 280 (≥250 ✓)
+  - Streak: 60+ days (≥14 ✓)
+  - Shields: 2 (≥2 ✓)
+  - Club: 110kg (≥100 ✓)
+  - Active Days: 90+ (≥30 ✓)
+  → Promoted to Orange
+  → +1,000 XP
+  → Notification: "Orange Belt! Intermediate achieved!"
+
+Month 12: Blue Belt (elite status)
+  - OLY Index: 600 (≥550 ✓)
+  - Streak: 8+ weeks maintained
+  - Shields: 4+ activated over time
+  - Club: 210kg (≥200 ✓)
+  - Pulse: 25 challenges (≥20 ✓)
+  - Ratios: 2 golden achievements (≥1 ✓)
+  - Active Days: 200+ (≥180 ✓)
+  → Promoted to Blue ("Elite" tier)
+  → +2,000 XP
+  → Notification: "🎊 Blue Belt! You're now ELITE!"
+
+Year 2+: Purple, Brown, Red, Gold
+  - Belts require sustained excellence
+  - Red Belt: ~2 years dedicated training
+  - Gold Belt: Only top 5-10% of community
+```
+
+---
+
+## Display & Psychology
+
+**Frontend Display (Dashboard):**
+
+```
+┌─────────────────────────────┐
+│  Belt Progression           │
+├─────────────────────────────┤
+│                             │
+│  Current: Blue Belt  🔵     │
+│  Earned: April 10, 2026    │
+│                             │
+│  Next Goal: Purple Belt     │
+│  ▓▓▓▓▓░░░░ 57% progress    │
+│  (Need OLY Index 700)       │
+│                             │
+│  Your OLY Index: 645/700   │
+│  Still need: 55 points      │
+│                             │
+└─────────────────────────────┘
+```
+
+**Psychology Benefits:**
+1. **Visible aspiration** — See next belt immediately
+2. **Measurable progress** — 57% toward next goal
+3. **No punishment** — Current belt never lost
+4. **Community respect** — Belt color signals status
+5. **Lifetime achievement** — "I earned Gold Belt" is real
+
+---
+
+## Testing & Validation
+
+**Unit Test Location:** `backend/__tests__/belt_engine.test.js`
+
+**Test Cases:**
+1. Promotion when all criteria met
+2. No demotion (permanent progression)
+3. XP reward per belt
+4. Multiple athletes in different belts
+5. Criteria combination (e.g., high OLY but low streak → no promotion)
+
+---
+
+**Next:** See [06_smart_streak_engine.md](./06_smart_streak_engine.md) for adherence tracking with comeback mechanics.

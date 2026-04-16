@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>B1 — Dashboard Atleta</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --color-bg: #07070F;
+      --color-surface: #111118;
+      --color-surface2: #1A1A26;
+      --color-primary: #22C55E;
+      --color-gold: #F59E0B;
+      --color-cyan: #06B6D4;
+      --color-danger: #EF4444;
+      --color-warning: #EAB308;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0D0D18;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+    .phone {
+      width: 390px;
+      min-height: 844px;
+      background: var(--color-bg);
+      border-radius: 44px;
+      border: 2px solid #2a2a3a;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 0 80px rgba(99,102,241,0.15), 0 0 0 1px #1e1e30;
+      display: flex;
+      flex-direction: column;
+    }
+    .status-bar {
+      height: 44px;
+      background: var(--color-bg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      flex-shrink: 0;
+    }
+    .scroll-area {
+      flex: 1;
+      overflow-y: auto;
+      padding-bottom: 80px;
+      scrollbar-width: none;
+    }
+    .scroll-area::-webkit-scrollbar { display: none; }
+    .bottom-nav {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 76px;
+      background: #0E0E1C;
+      border-top: 1px solid #1e1e30;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding-bottom: 12px;
+    }
+    .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; }
+    .nav-label { font-size: 10px; color: #475569; }
+    .nav-label.active { color: #22C55E; }
+    .readiness-ring {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      border: 6px solid #1e2d1e;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .ring-green { border-color: #22C55E; box-shadow: 0 0 24px rgba(34,197,94,0.3); }
+    .belt-bar {
+      height: 6px;
+      border-radius: 3px;
+      background: #1e1e30;
+      overflow: hidden;
+    }
+    .belt-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, #3B82F6, #6366F1);
+    }
+    .story-ring {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      padding: 2px;
+      background: linear-gradient(135deg, #22C55E, #06B6D4);
+      flex-shrink: 0;
+    }
+    .story-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: #141420;
+      border: 2px solid var(--color-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+    .chip {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+    .chip-green { background: #14532d; color: #4ade80; }
+    .chip-yellow { background: #713f12; color: #fbbf24; }
+    .chip-red { background: #7f1d1d; color: #f87171; }
+    .chip-blue { background: #1e3a5f; color: #60a5fa; }
+    .chip-pulse { background: #1e1b4b; color: #a78bfa; }
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #475569;
+      margin-bottom: 8px;
+    }
+    .exercise-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #1e1e30;
+    }
+    .exercise-row:last-child { border-bottom: none; }
+  </style>
+</head>
+<body>
+
+<div class="phone">
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span style="font-size:12px; color:#94a3b8; font-weight:600;">9:41</span>
+    <div style="display:flex; gap:6px; align-items:center;">
+      <svg width="16" height="12" fill="#94a3b8" viewBox="0 0 16 12"><rect x="0" y="3" width="3" height="9" rx="1"/><rect x="4.5" y="2" width="3" height="10" rx="1"/><rect x="9" y="0" width="3" height="12" rx="1"/><rect x="13.5" y="0" width="2.5" height="12" rx="1" opacity=".3"/></svg>
+      <svg width="16" height="12" fill="#94a3b8" viewBox="0 0 24 24"><path d="M1 7c5.5-5.5 15.5-5.5 22 0M5 11c3.5-3.5 10.5-3.5 14 0M9 15c1.5-1.5 5.5-1.5 6 0M12 19h.01" stroke="#94a3b8" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      <span style="font-size:12px; color:#94a3b8; font-weight:600;">87%</span>
+    </div>
+  </div>
+
+  <!-- Scroll Content -->
+  <div class="scroll-area">
+
+    <!-- Header -->
+    <div style="padding: 8px 24px 16px; display:flex; align-items:center; justify-content:space-between;">
+      <div>
+        <p style="font-size:13px; color:#64748b;">Buenos días,</p>
+        <p style="font-size:20px; font-weight:800; color:#f1f5f9; letter-spacing:-.02em;">Juan Pérez</p>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <!-- Belt badge -->
+        <div style="background: linear-gradient(135deg,#1e3a5f,#1e1e3f); border:1px solid #3B82F6; border-radius:20px; padding:4px 10px; display:flex; align-items:center; gap:5px;">
+          <span style="font-size:9px; color:#60a5fa; font-weight:700; letter-spacing:.06em;">CINTURÓN AZUL</span>
+        </div>
+        <!-- Avatar -->
+        <div style="width:38px; height:38px; border-radius:50%; background: linear-gradient(135deg,#22C55E,#3B82F6); display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:800; color:white;">J</div>
+      </div>
+    </div>
+
+    <!-- Píldoras / Stories Row -->
+    <div style="padding: 0 24px 16px;">
+      <p class="section-label">Píldoras de hoy</p>
+      <div style="display:flex; gap:12px; overflow-x:auto; scrollbar-width:none; padding-bottom:4px;">
+        <!-- Story activa -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0;">
+          <div class="story-ring">
+            <div class="story-inner">🧠</div>
+          </div>
+          <span style="font-size:10px; color:#94a3b8;">Mentalidad</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0;">
+          <div style="width:56px;height:56px;border-radius:50%;padding:2px;background:linear-gradient(135deg,#F59E0B,#EF4444);flex-shrink:0;">
+            <div class="story-inner">💤</div>
+          </div>
+          <span style="font-size:10px; color:#94a3b8;">Recuperación</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0;">
+          <div style="width:56px;height:56px;border-radius:50%;padding:2px;background:#1e1e30;flex-shrink:0;">
+            <div class="story-inner" style="border-color:#2a2a3a;">🎯</div>
+          </div>
+          <span style="font-size:10px; color:#475569;">Técnica</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0;">
+          <div style="width:56px;height:56px;border-radius:50%;padding:2px;background:#1e1e30;flex-shrink:0;">
+            <div class="story-inner" style="border-color:#2a2a3a;">🥗</div>
+          </div>
+          <span style="font-size:10px; color:#475569;">Nutrición</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Readiness + OLY Index row -->
+    <div style="padding: 0 24px 16px; display:flex; gap:12px;">
+
+      <!-- Readiness Card -->
+      <div style="flex:1; background:#111118; border:1px solid #1e1e30; border-radius:20px; padding:16px; display:flex; flex-direction:column; align-items:center; gap:8px;">
+        <p style="font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#64748b;">Readiness</p>
+        <div class="readiness-ring ring-green">
+          <span style="font-size:28px; font-weight:900; color:#22C55E; line-height:1;">78</span>
+          <span style="font-size:11px; color:#4ade80; font-weight:600;">VERDE</span>
+        </div>
+        <div style="display:flex; gap:4px; flex-wrap:wrap; justify-content:center;">
+          <span style="font-size:10px; color:#4ade80;">↑ +5 vs ayer</span>
+        </div>
+      </div>
+
+      <!-- Right column: OLY Index + Streak -->
+      <div style="display:flex; flex-direction:column; gap:12px; flex:1;">
+
+        <!-- OLY Index -->
+        <div style="background:#111118; border:1px solid #1e1e30; border-radius:20px; padding:14px;">
+          <p style="font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#64748b; margin-bottom:4px;">OLY Index</p>
+          <p style="font-size:26px; font-weight:900; color:#F59E0B; letter-spacing:-.02em; line-height:1;">7.4</p>
+          <p style="font-size:10px; color:#64748b; margin-top:2px;">Top 23% del club</p>
+        </div>
+
+        <!-- Streak -->
+        <div style="background:#111118; border:1px solid #1e1e30; border-radius:20px; padding:14px;">
+          <p style="font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#64748b; margin-bottom:4px;">Racha</p>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span style="font-size:22px;">🔥</span>
+            <span style="font-size:26px; font-weight:900; color:#f97316; line-height:1;">14</span>
+            <span style="font-size:11px; color:#78350f; font-weight:700;">DÍAS</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Belt Progress -->
+    <div style="padding: 0 24px 16px;">
+      <div style="background:#111118; border:1px solid #1e1e30; border-radius:20px; padding:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <div>
+            <p style="font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#64748b;">XP — Cinturón Azul → Púrpura</p>
+            <p style="font-size:13px; font-weight:700; color:#f1f5f9; margin-top:2px;">88,400 <span style="color:#475569; font-weight:400;">/ 100,000 XP</span></p>
+          </div>
+          <div style="background:#1e1e3f; border:1px solid #3B82F6; border-radius:12px; padding:4px 8px;">
+            <span style="font-size:11px; color:#60a5fa; font-weight:700;">88%</span>
+          </div>
+        </div>
+        <div class="belt-bar">
+          <div class="belt-fill" style="width:88%;"></div>
+        </div>
+        <p style="font-size:10px; color:#475569; margin-top:6px;">11,600 XP para Cinturón Púrpura</p>
+      </div>
+    </div>
+
+    <!-- TODAY's SESSION -->
+    <div style="padding: 0 24px 16px;">
+      <p class="section-label">Sesión de hoy · Semana 6 · Día 2</p>
+      <div style="background:#111118; border:1px solid #1e1e30; border-radius:20px; overflow:hidden;">
+
+        <!-- Session header -->
+        <div style="padding:14px 16px; background:linear-gradient(135deg,#0f2318,#111118); border-bottom:1px solid #1e1e30; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <p style="font-size:13px; font-weight:700; color:#f1f5f9;">Colombiano 5D — Fuerza</p>
+            <p style="font-size:11px; color:#4ade80; margin-top:2px;">IMR estimado: 76% · 5 ejercicios</p>
+          </div>
+          <span class="chip chip-green">VERDE</span>
+        </div>
+
+        <!-- Exercises list -->
+        <div style="padding: 4px 16px;">
+          <div class="exercise-row">
+            <div>
+              <p style="font-size:13px; font-weight:600; color:#f1f5f9;">Arrancada</p>
+              <p style="font-size:11px; color:#64748b;">5×3 @ 80kg <span style="color:#4ade80;">(85% 1RM)</span></p>
+            </div>
+            <span style="font-size:18px;">⭐</span>
+          </div>
+          <div class="exercise-row">
+            <div>
+              <p style="font-size:13px; font-weight:600; color:#f1f5f9;">Dos Tiempos</p>
+              <p style="font-size:11px; color:#64748b;">4×2 @ 100kg <span style="color:#4ade80;">(80% 1RM)</span></p>
+            </div>
+            <span style="font-size:18px;">⭐</span>
+          </div>
+          <div class="exercise-row">
+            <div>
+              <p style="font-size:13px; font-weight:600; color:#f1f5f9;">Sentadilla Frontal</p>
+              <p style="font-size:11px; color:#64748b;">4×4 @ 105kg <span style="color:#64748b;">(75% 1RM)</span></p>
+            </div>
+            <span style="font-size:11px; color:#475569;">+ 2 más</span>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <div style="padding:14px 16px;">
+          <button onclick="window.location='B2_precheck.html'" style="width:100%; background:linear-gradient(135deg,#16a34a,#15803d); color:white; font-size:15px; font-weight:800; padding:14px; border-radius:14px; border:none; cursor:pointer; letter-spacing:.02em;">
+            Iniciar Sesión →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pulse Widget (lunes) -->
+    <div style="padding: 0 24px 16px;">
+      <div style="background: linear-gradient(135deg, #0f0f2e, #111118); border:1px solid #3730a3; border-radius:20px; padding:16px; display:flex; align-items:center; gap:14px;">
+        <div style="width:48px; height:48px; border-radius:14px; background:#1e1b4b; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;">⚡</div>
+        <div style="flex:1;">
+          <p style="font-size:11px; color:#818cf8; font-weight:700; letter-spacing:.06em; text-transform:uppercase;">Reto Semanal Pulse</p>
+          <p style="font-size:13px; font-weight:700; color:#f1f5f9; margin-top:2px;">EMOM 12min · AirBike</p>
+          <p style="font-size:10px; color:#6366f1; margin-top:1px;">Caduca domingo · +300 XP</p>
+        </div>
+        <span style="font-size:11px; color:#818cf8; font-weight:700; border:1px solid #3730a3; border-radius:8px; padding:4px 8px;">Ver →</span>
+      </div>
+    </div>
+
+    <!-- Quick stats row -->
+    <div style="padding: 0 24px 20px;">
+      <p class="section-label">Esta semana</p>
+      <div style="display:flex; gap:10px;">
+        <div style="flex:1; background:#111118; border:1px solid #1e1e30; border-radius:16px; padding:12px; text-align:center;">
+          <p style="font-size:20px; font-weight:800; color:#f1f5f9;">3</p>
+          <p style="font-size:10px; color:#64748b; margin-top:2px;">Sesiones</p>
+        </div>
+        <div style="flex:1; background:#111118; border:1px solid #1e1e30; border-radius:16px; padding:12px; text-align:center;">
+          <p style="font-size:20px; font-weight:800; color:#F59E0B;">42.5</p>
+          <p style="font-size:10px; color:#64748b; margin-top:2px;">Ton. (t)</p>
+        </div>
+        <div style="flex:1; background:#111118; border:1px solid #1e1e30; border-radius:16px; padding:12px; text-align:center;">
+          <p style="font-size:20px; font-weight:800; color:#4ade80;">+750</p>
+          <p style="font-size:10px; color:#64748b; margin-top:2px;">XP ganada</p>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end scroll -->
+
+  <!-- Bottom Nav -->
+  <div class="bottom-nav">
+    <div class="nav-item">
+      <svg width="22" height="22" fill="none" stroke="#22C55E" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span class="nav-label active">Inicio</span>
+    </div>
+    <div class="nav-item">
+      <svg width="22" height="22" fill="none" stroke="#475569" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+      <span class="nav-label">Sesión</span>
+    </div>
+    <div class="nav-item">
+      <svg width="22" height="22" fill="none" stroke="#475569" stroke-width="2" viewBox="0 0 24 24"><path d="M3 20l4-8 4 4 4-6 4 10"/></svg>
+      <span class="nav-label">Progreso</span>
+    </div>
+    <div class="nav-item">
+      <svg width="22" height="22" fill="none" stroke="#475569" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      <span class="nav-label">Perfil</span>
+    </div>
+  </div>
+
+</div><!-- end phone -->
+
+<!-- Back link -->
+<a href="index.html" style="position:fixed;top:20px;left:20px;background:#1e1e30;color:#94a3b8;font-size:13px;padding:8px 14px;border-radius:10px;text-decoration:none;border:1px solid #2a2a3a;">← Volver</a>
+
+</body>
+</html>

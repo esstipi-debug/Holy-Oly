@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A1+A2+A3 · Auth — Login, Register, Forgot Password</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background: #07070F; font-family: 'Inter', system-ui, sans-serif; }
+
+    .phone {
+      width: 390px;
+      min-height: 844px;
+      background: #0D0D1A;
+      border-radius: 48px;
+      border: 2px solid #1e1e3a;
+      overflow: hidden;
+      box-shadow: 0 32px 80px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.06);
+      display: flex;
+      flex-direction: column;
+    }
+    .phone-inner { overflow-y: auto; flex: 1; padding-bottom: 40px; }
+    .phone-inner::-webkit-scrollbar { display: none; }
+
+    .status-bar {
+      height: 44px; display: flex; align-items: center;
+      justify-content: space-between; padding: 0 24px;
+      font-size: 12px; color: #9ca3af; flex-shrink: 0;
+    }
+
+    .input-field {
+      width: 100%; background: #111127; border: 1.5px solid #1e1e3a;
+      border-radius: 14px; padding: 14px 16px; color: white;
+      font-size: 14px; outline: none; transition: border-color .2s;
+      box-sizing: border-box;
+    }
+    .input-field:focus { border-color: #6366f1; }
+    .input-field::placeholder { color: #374151; }
+
+    .btn-primary {
+      width: 100%; background: #6366f1;
+      color: white; font-weight: 900; font-size: 15px;
+      padding: 16px; border-radius: 16px;
+      box-shadow: 0 6px 20px rgba(99,102,241,.4);
+      transition: all .2s; border: none; cursor: pointer;
+    }
+    .btn-primary:hover { background: #4f46e5; }
+
+    .btn-ghost {
+      width: 100%; background: transparent;
+      border: 1.5px solid #1e1e3a;
+      color: #9ca3af; font-weight: 600; font-size: 14px;
+      padding: 14px; border-radius: 14px;
+      transition: all .2s; cursor: pointer;
+    }
+    .btn-ghost:hover { border-color: #6366f1; color: white; }
+
+    /* Logo mark */
+    .logo-mark {
+      width: 72px; height: 72px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-radius: 24px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px;
+      box-shadow: 0 12px 32px rgba(99,102,241,.4);
+    }
+
+    /* Social auth button */
+    .social-btn {
+      flex: 1; background: #111127; border: 1.5px solid #1e1e3a;
+      border-radius: 14px; padding: 12px;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      font-size: 13px; font-weight: 600; color: #9ca3af;
+      cursor: pointer; transition: all .2s;
+    }
+    .social-btn:hover { border-color: #6366f1; color: white; }
+
+    /* Step indicator (register) */
+    .reg-step { display: flex; align-items: center; gap: 6px; }
+    .step-num {
+      width: 22px; height: 22px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 900;
+    }
+    .step-num.done { background: #4ade80; color: #052e16; }
+    .step-num.active { background: #6366f1; color: white; }
+    .step-num.pending { background: #1e1e3a; color: #6b7280; }
+    .step-line { flex: 1; height: 1px; background: #1e1e3a; }
+    .step-line.done { background: #4ade80; }
+
+    /* Role card */
+    .role-card {
+      border: 1.5px solid #1e1e3a; border-radius: 16px;
+      padding: 16px; cursor: pointer; transition: all .2s;
+      background: #0d0d1a;
+    }
+    .role-card:hover { border-color: #6366f1; }
+    .role-card.selected { border-color: #6366f1; background: rgba(99,102,241,.08); }
+
+    /* Divider */
+    .divider { display: flex; align-items: center; gap: 12px; }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px; background: #1e1e3a;
+    }
+
+    /* OTP boxes */
+    .otp-box {
+      width: 52px; height: 60px; background: #111127;
+      border: 1.5px solid #1e1e3a; border-radius: 14px;
+      font-size: 24px; font-weight: 900; color: white;
+      text-align: center; outline: none; transition: border-color .2s;
+    }
+    .otp-box:focus { border-color: #6366f1; }
+    .otp-box.filled { border-color: #4ade80; color: #4ade80; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fadeIn .4s ease both; }
+
+    /* Invite badge */
+    .invite-badge {
+      background: linear-gradient(135deg, rgba(251,191,36,.15), rgba(245,158,11,.08));
+      border: 1px solid rgba(251,191,36,.35);
+      border-radius: 16px; padding: 14px;
+    }
+  </style>
+</head>
+<body class="min-h-screen p-8">
+
+  <!-- Header -->
+  <div class="text-center mb-10">
+    <div class="inline-flex items-center gap-2 bg-indigo-900/20 border border-indigo-500/30 rounded-full px-4 py-1.5 mb-4">
+      <span class="text-indigo-400 text-xs font-bold uppercase tracking-widest">Wireframe A1+A2+A3 · Auth Flows</span>
+    </div>
+    <h1 class="text-3xl font-black text-white mb-2">Login · Register · Forgot Password</h1>
+    <p class="text-slate-400 text-sm max-w-2xl mx-auto">A1: Login con roles · A2: Registro con invite link del coach · A3: Reset de contraseña por OTP</p>
+  </div>
+
+  <div class="flex justify-center items-start gap-8 flex-wrap">
+
+    <!-- ══════════════
+         A1 — LOGIN
+         ══════════════ -->
+    <div>
+      <p class="text-center text-slate-500 text-xs font-bold uppercase tracking-widest mb-4">A1 · Login</p>
+      <div class="phone">
+        <div class="phone-inner">
+          <div class="status-bar"><span>9:41</span><span></span><span>●●●</span></div>
+
+          <div class="px-6 pt-4">
+            <!-- Logo -->
+            <div class="flex flex-col items-center mb-8 fade-in">
+              <div class="logo-mark mb-4">🏋️</div>
+              <h1 class="text-white font-black text-2xl tracking-tight">HolyOly</h1>
+              <p class="text-slate-500 text-sm mt-1">Smart training, zero burnout.</p>
+            </div>
+
+            <!-- Form -->
+            <div class="space-y-3 mb-5 fade-in" style="animation-delay:.1s">
+              <div>
+                <label class="text-xs text-slate-500 font-bold mb-1.5 block">Email</label>
+                <input class="input-field" type="email" placeholder="tu@email.com" value="coach@example.com"/>
+              </div>
+              <div>
+                <div class="flex justify-between mb-1.5">
+                  <label class="text-xs text-slate-500 font-bold">Contraseña</label>
+                  <button class="text-xs text-indigo-400 font-bold">¿Olvidaste tu contraseña?</button>
+                </div>
+                <input class="input-field" type="password" placeholder="••••••••" value="••••••••"/>
+              </div>
+            </div>
+
+            <!-- CTA -->
+            <div class="space-y-3 fade-in" style="animation-delay:.15s">
+              <button class="btn-primary">Iniciar sesión</button>
+
+              <div class="divider">
+                <span class="text-slate-600 text-xs">o continúa con</span>
+              </div>
+
+              <div class="flex gap-3">
+                <button class="social-btn">
+                  <span>🍎</span><span>Apple</span>
+                </button>
+                <button class="social-btn">
+                  <span>🔵</span><span>Google</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Register link -->
+            <div class="text-center mt-6 fade-in" style="animation-delay:.2s">
+              <p class="text-slate-500 text-sm">
+                ¿Primera vez?
+                <button class="text-indigo-400 font-bold">Crear cuenta</button>
+              </p>
+            </div>
+
+            <!-- Role note -->
+            <div class="mt-6 bg-slate-800/50 rounded-2xl p-4 fade-in" style="animation-delay:.25s">
+              <p class="text-slate-600 text-xs text-center leading-relaxed">
+                Los roles (Atleta / Coach) se detectan automáticamente desde tu cuenta. Si tienes una invitación de coach,
+                <span class="text-indigo-400 font-bold">usa el link del email</span> para activar tu Elite Trial.
+              </p>
+            </div>
+
+            <!-- Version -->
+            <p class="text-slate-700 text-xs text-center mt-6">v1.0.0 · HolyOly © 2026</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═════════════════
+         A2 — REGISTER
+         ═════════════════ -->
+    <div>
+      <p class="text-center text-slate-500 text-xs font-bold uppercase tracking-widest mb-4">A2 · Registro — con invite de coach</p>
+      <div class="phone">
+        <div class="phone-inner">
+          <div class="status-bar"><span>9:41</span><span></span><span>●●●</span></div>
+
+          <div class="px-6 pt-4">
+            <!-- Back + title -->
+            <div class="flex items-center gap-3 mb-6">
+              <button class="text-slate-400 text-lg">←</button>
+              <div>
+                <h2 class="text-white font-bold text-lg">Crear cuenta</h2>
+                <p class="text-slate-500 text-xs">Atleta · Invitado por Coach Ramírez</p>
+              </div>
+            </div>
+
+            <!-- Step indicator -->
+            <div class="flex items-center mb-6">
+              <div class="reg-step flex items-center flex-1">
+                <div class="step-num active">1</div>
+                <div class="step-line flex-1"></div>
+                <div class="step-num pending">2</div>
+                <div class="step-line flex-1"></div>
+                <div class="step-num pending">3</div>
+              </div>
+            </div>
+            <p class="text-xs text-slate-500 mb-5 -mt-3">Paso 1: Cuenta · 2: Tu perfil · 3: Tu primer acceso</p>
+
+            <!-- Invite badge (pre-filled context) -->
+            <div class="invite-badge mb-5 fade-in">
+              <div class="flex items-center gap-3">
+                <span class="text-2xl">🎖️</span>
+                <div>
+                  <p class="text-amber-400 font-black text-sm">45 días Elite gratis</p>
+                  <p class="text-slate-400 text-xs">Invitado por Coach Ramírez · HolyOly Gym</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Role selector (auto-detected but shown for clarity) -->
+            <div class="mb-5 fade-in" style="animation-delay:.05s">
+              <p class="text-xs text-slate-500 font-bold mb-3">Registrarme como</p>
+              <div class="grid grid-cols-2 gap-3">
+                <div class="role-card selected">
+                  <div class="text-2xl mb-2">🏋️</div>
+                  <p class="text-white font-bold text-sm">Atleta</p>
+                  <p class="text-slate-500 text-xs">Sigo un programa · tengo un coach</p>
+                </div>
+                <div class="role-card">
+                  <div class="text-2xl mb-2">📋</div>
+                  <p class="text-white font-bold text-sm">Coach</p>
+                  <p class="text-slate-500 text-xs">Dirijo atletas · gestiono equipos</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Form fields -->
+            <div class="space-y-3 mb-5 fade-in" style="animation-delay:.1s">
+              <div>
+                <label class="text-xs text-slate-500 font-bold mb-1.5 block">Nombre completo</label>
+                <input class="input-field" placeholder="Tu nombre" value="Carlos Mendoza"/>
+              </div>
+              <div>
+                <label class="text-xs text-slate-500 font-bold mb-1.5 block">Email</label>
+                <input class="input-field" type="email" placeholder="tu@email.com" value="carlos@email.com"/>
+              </div>
+              <div>
+                <label class="text-xs text-slate-500 font-bold mb-1.5 block">Contraseña</label>
+                <input class="input-field" type="password" placeholder="Mínimo 8 caracteres"/>
+              </div>
+              <div>
+                <label class="text-xs text-slate-500 font-bold mb-1.5 block">Confirmar contraseña</label>
+                <input class="input-field" type="password" placeholder="Repite tu contraseña"/>
+              </div>
+            </div>
+
+            <!-- Terms -->
+            <div class="flex items-start gap-3 mb-5 fade-in" style="animation-delay:.15s">
+              <div class="w-5 h-5 rounded-md bg-indigo-600 border border-indigo-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span class="text-white text-xs">✓</span>
+              </div>
+              <p class="text-slate-500 text-xs leading-relaxed">
+                Acepto los <span class="text-indigo-400 font-bold">Términos de Servicio</span> y la
+                <span class="text-indigo-400 font-bold">Política de Privacidad</span> de HolyOly.
+              </p>
+            </div>
+
+            <!-- CTA -->
+            <div class="space-y-3 fade-in" style="animation-delay:.2s">
+              <button class="btn-primary">Crear mi cuenta → Paso 2</button>
+
+              <div class="divider">
+                <span class="text-slate-600 text-xs">o regístrate con</span>
+              </div>
+
+              <div class="flex gap-3">
+                <button class="social-btn"><span>🍎</span><span>Apple</span></button>
+                <button class="social-btn"><span>🔵</span><span>Google</span></button>
+              </div>
+            </div>
+
+            <!-- Login link -->
+            <div class="text-center mt-5">
+              <p class="text-slate-500 text-sm">¿Ya tienes cuenta? <button class="text-indigo-400 font-bold">Iniciar sesión</button></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════
+         A3 — FORGOT PASSWORD
+         ═══════════════════════ -->
+    <div>
+      <p class="text-center text-slate-500 text-xs font-bold uppercase tracking-widest mb-4">A3 · Recuperar contraseña</p>
+      <div class="phone">
+        <div class="phone-inner">
+          <div class="status-bar"><span>9:41</span><span></span><span>●●●</span></div>
+
+          <div class="px-6 pt-4">
+            <!-- Back -->
+            <div class="flex items-center gap-3 mb-8">
+              <button class="text-slate-400 text-lg">←</button>
+              <p class="text-slate-400 text-sm">Volver al login</p>
+            </div>
+
+            <!-- State toggle (for wireframe demo) -->
+            <div class="flex gap-2 mb-6">
+              <button onclick="showAuthState('email')" id="btn-email"
+                class="flex-1 text-xs py-2 rounded-xl font-bold bg-indigo-600 text-white">
+                1. Email
+              </button>
+              <button onclick="showAuthState('otp')" id="btn-otp"
+                class="flex-1 text-xs py-2 rounded-xl font-bold bg-slate-800 text-slate-400">
+                2. Código OTP
+              </button>
+              <button onclick="showAuthState('new-pass')" id="btn-newpass"
+                class="flex-1 text-xs py-2 rounded-xl font-bold bg-slate-800 text-slate-400">
+                3. Nueva pass
+              </button>
+            </div>
+
+            <!-- STATE 1: Email input -->
+            <div id="state-email" class="fade-in">
+              <div class="text-center mb-8">
+                <div class="w-16 h-16 rounded-2xl bg-indigo-900/30 border border-indigo-500/30 flex items-center justify-center text-3xl mx-auto mb-4">✉️</div>
+                <h2 class="text-white font-black text-xl mb-2">Olvidé mi contraseña</h2>
+                <p class="text-slate-400 text-sm leading-relaxed">Ingresa tu email y te enviamos un código de 6 dígitos.</p>
+              </div>
+              <div class="space-y-4">
+                <div>
+                  <label class="text-xs text-slate-500 font-bold mb-1.5 block">Email registrado</label>
+                  <input class="input-field" type="email" placeholder="tu@email.com" value="carlos@email.com"/>
+                </div>
+                <button class="btn-primary" onclick="showAuthState('otp')">Enviar código →</button>
+              </div>
+              <p class="text-slate-600 text-xs text-center mt-4">¿No recuerdas el email? Contacta a tu coach.</p>
+            </div>
+
+            <!-- STATE 2: OTP code entry -->
+            <div id="state-otp" class="fade-in hidden">
+              <div class="text-center mb-8">
+                <div class="w-16 h-16 rounded-2xl bg-green-900/20 border border-green-500/30 flex items-center justify-center text-3xl mx-auto mb-4">📱</div>
+                <h2 class="text-white font-black text-xl mb-2">Código enviado</h2>
+                <p class="text-slate-400 text-sm">Revisá tu email <span class="text-white font-bold">carlos@email.com</span></p>
+                <p class="text-slate-500 text-xs mt-1">El código expira en <span class="text-indigo-400 font-bold" id="otp-timer">4:47</span></p>
+              </div>
+
+              <!-- OTP input boxes -->
+              <div class="flex justify-center gap-2 mb-6">
+                <input class="otp-box" maxlength="1" value="8"/>
+                <input class="otp-box" maxlength="1" value="4"/>
+                <input class="otp-box" maxlength="1" value="3"/>
+                <input class="otp-box filled" maxlength="1" value=""/>
+                <input class="otp-box" maxlength="1" value=""/>
+                <input class="otp-box" maxlength="1" value=""/>
+              </div>
+
+              <button class="btn-primary mb-3" onclick="showAuthState('new-pass')">Verificar código →</button>
+              <button class="btn-ghost">Reenviar código</button>
+            </div>
+
+            <!-- STATE 3: New password -->
+            <div id="state-new-pass" class="fade-in hidden">
+              <div class="text-center mb-8">
+                <div class="w-16 h-16 rounded-2xl bg-purple-900/20 border border-purple-500/30 flex items-center justify-center text-3xl mx-auto mb-4">🔐</div>
+                <h2 class="text-white font-black text-xl mb-2">Nueva contraseña</h2>
+                <p class="text-slate-400 text-sm">Elige una contraseña segura para tu cuenta.</p>
+              </div>
+
+              <div class="space-y-3 mb-5">
+                <div>
+                  <label class="text-xs text-slate-500 font-bold mb-1.5 block">Nueva contraseña</label>
+                  <input class="input-field" type="password" placeholder="Mínimo 8 caracteres"/>
+                  <!-- Strength indicator -->
+                  <div class="flex gap-1 mt-2">
+                    <div class="flex-1 h-1 rounded-full bg-green-500"></div>
+                    <div class="flex-1 h-1 rounded-full bg-green-500"></div>
+                    <div class="flex-1 h-1 rounded-full bg-green-500"></div>
+                    <div class="flex-1 h-1 rounded-full bg-slate-700"></div>
+                  </div>
+                  <p class="text-green-400 text-xs mt-1">Buena · agrega símbolos para "Fuerte"</p>
+                </div>
+                <div>
+                  <label class="text-xs text-slate-500 font-bold mb-1.5 block">Confirmar contraseña</label>
+                  <input class="input-field" type="password" placeholder="Repite la contraseña"/>
+                </div>
+              </div>
+
+              <button class="btn-primary mb-3">🔒 Guardar nueva contraseña</button>
+
+              <!-- Success hint -->
+              <div class="bg-green-900/20 border border-green-500/30 rounded-2xl p-3 text-center">
+                <p class="text-green-400 text-xs">Al confirmar, tu sesión anterior se cerrará en todos los dispositivos.</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /flex -->
+
+  <div class="text-center mt-8 mb-4">
+    <a href="index.html" class="text-indigo-400 text-sm hover:text-indigo-300 transition-colors">← Volver al índice</a>
+  </div>
+
+  <script>
+    function showAuthState(state) {
+      ['email','otp','new-pass'].forEach(s => {
+        document.getElementById('state-' + s)?.classList.add('hidden');
+        document.getElementById('btn-' + (s === 'new-pass' ? 'newpass' : s))?.classList.replace('bg-indigo-600','bg-slate-800');
+        document.getElementById('btn-' + (s === 'new-pass' ? 'newpass' : s))?.classList.replace('text-white','text-slate-400');
+      });
+      document.getElementById('state-' + state)?.classList.remove('hidden');
+      const btnId = state === 'new-pass' ? 'btn-newpass' : 'btn-' + state;
+      document.getElementById(btnId)?.classList.replace('bg-slate-800','bg-indigo-600');
+      document.getElementById(btnId)?.classList.replace('text-slate-400','text-white');
+    }
+  </script>
+</body>
+</html>

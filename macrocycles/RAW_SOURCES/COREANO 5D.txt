@@ -1,0 +1,115 @@
+Aquí tienes el macrociclo completo diseñado bajo la metodología Coreana, adaptado a una estructura de 5 días a la semana.
+
+Este programa sigue estrictamente los parámetros de la Base de Datos Oly School para la escuela Coreana (Estructura rígida, énfasis en tirones y fuerza posicional, 1 sesión al día) y utiliza el formato detallado del archivo de referencia.
+🇰🇷 MACROCICLO OLÍMPICO: SISTEMA COREANO (12 SEMANAS)
+📋 PARÁMETROS CLAVE DEL PROGRAMA
+
+    Sistema / Escuela: Coreana (Enfoque: Estructura, Fuerza Posicional y Disciplina).
+
+    Duración: 12 Semanas (Dividido en 3 Bloques de 4 semanas).
+
+    Frecuencia: 5 Días / Semana (Sesión Única).
+
+    Intensidad Media (IMR): 70% - 85% (Rango medio-alto sostenido).
+
+    Volumen Mensual Objetivo: 450 - 600 repeticiones significativas (Barra > 60%).
+
+    Volumen Total Macro: Rango [400-600] promedio mensual (aprox. 1500-1800 reps totales de calidad).
+
+    Filosofía de Carga: "Similar Chino/Ruso" pero con mayor énfasis en la fuerza estática (Pulls pesados) y trabajo de musculación específico.
+
+    Estructura de Deload: Estructurado (Cada 4ta semana).
+
+🟢 MES 1: CIMENTACIÓN (ACUMULACIÓN)
+
+Objetivo: Hipertrofia funcional, corrección técnica y capacidad de trabajo. Foco Coreano: Trabajo estricto, pausas y musculación (Bodybuilding) al final de la sesión.
+SEMANA 1 (Base - IMR 70%)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA/ACC)
+LUN	VOL	Hang Snatch (Rodilla): 5x3 @ 70%	Snatch Pull: 4x5 @ 90%	Back Squat: 5x5 @ 70%
+MAR	MED	Muscle Snatch: 4x4 @ 50%	Power Clean + Push Press: 4x(2+2) @ 65%	Dominadas: 4x8
+MIE	VOL	Power Snatch: 4x3 @ 70%	Clean & Jerk: 5x(2+1) @ 70%	Front Squat: 4x4 @ 75%
+JUE	ACT	Snatch Balance: 4x3 @ 60%	Press Militar: 5x5 @ 60%	Core / Lumbares
+VIE	INT	Snatch: 4x2 @ 75%	Clean & Jerk: 3x2 @ 75%	Clean Pull: 4x4 @ 100%
+SEMANA 2 (Carga - IMR 72-74%)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA/ACC)
+LUN	VOL	Hang Snatch (Rodilla): 6x3 @ 73%	Snatch Pull: 5x5 @ 95%	Back Squat: 5x5 @ 73%
+MAR	MED	Muscle Snatch: 4x4 @ 55%	Power Clean + Push Press: 5x(2+2) @ 68%	Remos: 4x8
+MIE	VOL	Power Snatch: 5x3 @ 73%	Clean & Jerk: 6x(2+1) @ 73%	Front Squat: 5x4 @ 78%
+JUE	ACT	Drop Snatch: 5x3 @ 60%	Push Press: 5x5 @ 70%	Fondos (Dips): 4x10
+VIE	INT	Snatch: 5x2 @ 78%	Clean & Jerk: 4x2 @ 78%	Clean Pull: 5x3 @ 105%
+SEMANA 3 (Choque - IMR 76%)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA/ACC)
+LUN	VOL	Hang Snatch: 7x2 @ 76%	Snatch Pull (Slow Eccentric): 5x3 @ 100%	Back Squat: 6x4 @ 76%
+MAR	MED	Power Snatch + OHS: 5x(1+2) @ 70%	Power Clean: 5x2 @ 75%	Press Militar: 5x3 @ 75%
+MIE	VOL	No-Foot Snatch: 5x2 @ 75%	Clean & Jerk: 6x(1+1) @ 80%	Front Squat: 5x3 @ 82%
+JUE	ACT	Tall Snatch: 5x3 (Ligero)	Jerk from Rack: 5x3 @ 75%	Saltos Verticales: 5x5
+VIE	INT	Snatch: 6x1 @ 82%	Clean & Jerk: 5x1 @ 82%	Clean Pull: 5x2 @ 110%
+SEMANA 4 (Descarga Estructurada - IMR 65%)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA/ACC)
+LUN	MED	Snatch: 3x2 @ 60%	Snatch Pull: 3x3 @ 80%	Back Squat: 3x5 @ 60%
+MAR	TEC	Muscle Snatch: 3x3 @ 50%	Muscle Clean: 3x3 @ 50%	Movilidad
+MIE	MED	Power Snatch: 3x2 @ 65%	Power Clean: 3x2 @ 65%	Front Squat: 3x3 @ 65%
+JUE	ACT	Barra Técnica	Core	Sin Carga
+VIE	TEST	Snatch: 2x1 @ 75%	Clean & Jerk: 2x1 @ 75%	Back Squat: 2x2 @ 75%
+🟡 MES 2: TRANSFORMACIÓN (FUERZA)
+
+Objetivo: Transferencia a fuerza específica y potencia. Foco Coreano: Énfasis en Tirones (Pulls) pesados por encima del 100% y Sentadillas de alta intensidad.
+SEMANA 5 (Base - IMR 78%)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA/ACC)
+LUN	VOL	Snatch: 5x2 @ 80%	Snatch Pull: 4x3 @ 105%	Back Squat: 5x3 @ 82%
+MAR	MED	Power Snatch: 4x2 @ 75%	Push Jerk: 4x3 @ 75%	Press Sots: 4x4
+MIE	VOL	Clean & Jerk: 5x(1+1) @ 80%	Front Squat: 4x3 @ 85%	Core Rotacional
+JUE	ACT	Snatch Balance: 3x3 @ 70%	Jerk Dip: 4x3 @ 90%	Pliometría
+VIE	INT	Snatch: 1x1 @ 85%	Clean & Jerk: 1x1 @ 85%	Clean Pull: 4x3 @ 110%
+SEMANA 6 (Carga - IMR 80-82%)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA/ACC)
+LUN	VOL	Snatch: 6x2 @ 82%	Snatch Pull: 5x3 @ 108%	Back Squat: 5x3 @ 85%
+MAR	MED	Power Snatch: 5x2 @ 78%	Push Jerk: 5x2 @ 78%	Remo Pendlay: 4x6
+MIE	VOL	Clean & Jerk: 6x(1+1) @ 82%	Front Squat: 5x2 @ 88%	Core Isométrico
+JUE	ACT	Overhead Squat: 4x3 @ 80%	Jerk Drive: 4x3 @ 95%	Saltos Cajón
+VIE	INT	Snatch: 2x1 @ 88%	Clean & Jerk: 2x1 @ 88%	Clean Pull: 4x2 @ 115%
+SEMANA 7 (Choque - IMR 84%)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA/ACC)
+LUN	VOL	Snatch: 7x1 @ 85%	Snatch Pull: 5x2 @ 110%	Back Squat: 5x2 @ 88%
+MAR	MED	Power Snatch: 5x1 @ 80%	Power Clean: 4x2 @ 80%	Press Militar: 5x2 @ 80%
+MIE	VOL	Clean & Jerk: 5x1 @ 85%	Front Squat: 4x2 @ 90%	Fondos Lastrados
+JUE	ACT	Snatch Balance: 3x2 @ 80%	Jerk Recovery: 3x2 @ 90%	Activación
+VIE	INT	Snatch: 1x1 @ 90%	Clean & Jerk: 1x1 @ 90%	Clean Deadlift: 3x2 @ 120%
+SEMANA 8 (Descarga Estructurada - IMR 70%)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA/ACC)
+LUN	MED	Snatch: 3x2 @ 70%	Pull: 3x2 @ 90%	Back Squat: 3x3 @ 70%
+MAR	TEC	Hang Snatch: 3x2 @ 60%	Hang Clean: 3x2 @ 60%	Sin Carga
+MIE	MED	Clean & Jerk: 3x1 @ 70%	Front Squat: 2x2 @ 75%	Core
+JUE	ACT	Movilidad	Estiramientos	Visualización
+VIE	TEST	Snatch: 1x1 @ 80%	Clean & Jerk: 1x1 @ 80%	Back Squat: 2x1 @ 80%
+🔴 MES 3: REALIZACIÓN (COMPETENCIA)
+
+Objetivo: Puesta a punto (Peaking) y Simulación. Foco Coreano: Alta especificidad, eliminación de accesorios y volumen bajo.
+SEMANA 9 (Intensificación - IMR 85%)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA/ACC)
+LUN	VOL	Snatch: 5x1 @ 88%	Snatch Pull: 3x2 @ 105%	Back Squat: 3x2 @ 90%
+MAR	MED	Power Snatch: 3x1 @ 82%	Jerk from Rack: 3x2 @ 85%	Core
+MIE	VOL	Clean & Jerk: 4x1 @ 88%	Front Squat: 3x1 @ 92%	Sin Accesorios
+JUE	ACT	Tall Snatch: 3x3 (Barra)	Shadow Lifting	Activación
+VIE	INT	Snatch: 1x1 @ 92%	Clean & Jerk: 1x1 @ 92%	Clean Pull: 3x1 @ 110%
+SEMANA 10 (Pre-Competición - IMR 88%)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA/ACC)
+LUN	INT	Snatch: 4x1 @ 90%	Back Squat: 2x2 @ 92%	Pull: 2x2 @ 100%
+MAR	MED	Power Clean: 3x1 @ 85%	Jerk Dip: 3x2 @ 100%	Movilidad
+MIE	INT	Clean & Jerk: 3x1 @ 90%	Front Squat: 2x1 @ 95%	Core
+JUE	ACT	Barra Vacía	Velocidad	Descanso
+VIE	MAX	Snatch: 1x1 @ 95%	Clean & Jerk: 1x1 @ 95%	Squat: 1x1 @ 95%
+SEMANA 11 (Taper / Afilado - IMR 75%)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA/ACC)
+LUN	MED	Snatch: 3x1 @ 85%	C&J: 2x1 @ 85%	Back Squat: 2x1 @ 85%
+MAR	TEC	Power Snatch: 2x2 @ 70%	Power Clean: 2x2 @ 70%	Movilidad
+MIE	MED	Snatch: 2x1 @ 80%	C&J: 1x1 @ 80%	Front Squat: 1x1 @ 80%
+JUE	ACT	Barra Técnica	Shadow Lifting	Core
+VIE	ACT	Snatch: 1x1 @ 80%	C&J: 1x1 @ 80%	Saltos: 2x3
+SEMANA 12 (SEMANA DE COMPETENCIA)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA/ACC)
+LUN	ACT	Snatch: 3x2 @ 50%	C&J: 3x1 @ 50%	Back Squat: 3x2 @ 50%
+MAR	ACT	Power Snatch: 3x1 @ 60%	Power Clean: 2x1 @ 60%	Front Squat: 2x1 @ 50%
+MIE	TEC	Muscle Snatch: 3x3 (Barra)	Muscle Clean: 3x3 (Barra)	Movilidad Activa
+JUE	DES	Barra Vacía: 15 min	Velocidad (Sin peso)	Activación Glúteo
+VIE	TEST	COMP SNATCH (1RM)	COMP C&J (1RM)	COMP SQUAT (1RM)

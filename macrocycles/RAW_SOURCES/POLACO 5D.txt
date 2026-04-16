@@ -1,0 +1,56 @@
+Escuela: Polaca (Polish System).
+
+    Duración: 6 Semanas (Ciclo completo de choque corto).
+
+    Frecuencia: 5 Días / Semana.
+
+    Best For: Atletas que necesitan "Progresión cauta" pero frecuente exposición a cargas altas. Ideal para recuperar sensaciones de competencia rápidamente.
+
+    Filosofía: "Calidad sobre cantidad". Series cortas (1-3 reps), mucho trabajo de tirones (Pulls) y variantes desde bloques.
+
+    Deload: Obligatorio en Semana 4 (Patrón "Cada 3-4 sem" ).
+
+🔵 FASE 1: INDUCCIÓN Y CARGA (Semanas 1-3)
+
+Objetivo: Adaptación a intensidades del 85-90% con volumen muy controlado. Estructura: 3 días de carga principal, 2 días de soporte técnico/auxiliar.
+SEMANA 1 (Base - IMR 75%)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA/ACC)
+1	VOL	Hang Snatch: 4x3 @ 70%	Snatch Pull: 4x4 @ 90%	Back Squat: 4x5 @ 75%
+2	TEC	Muscle Snatch: 3x4 @ 60%	Power Clean: 3x3 @ 70%	Press Militar: 4x5 @ 70%
+3	INT	Power Clean + Push Jerk: 4x(2+1) @ 75%	Clean Pull: 4x4 @ 95%	Front Squat: 3x4 @ 75%
+4	AUX	Snatch Balance: 3x3 @ 65%	Remo Pendlay: 3x8	Core Pesado
+5	INT	Snatch: 4x2 @ 75%	C&J: 3x2 @ 75%	RDL (Peso Muerto): 3x6
+SEMANA 2 (Carga - IMR 80%)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA/ACC)
+1	VOL	Snatch (No Feet): 4x2 @ 80%	Snatch Pull: 4x3 @ 95%	Back Squat: 4x4 @ 80%
+2	TEC	Tall Snatch: 4x3 (Barra)	Push Jerk: 4x3 @ 75%	Push Press: 4x4 @ 75%
+3	INT	Clean from Block: 3x2 @ 80%	Jerk from Rack: 4x2 @ 80%	Front Squat: 3x3 @ 82%
+4	AUX	Drop Snatch: 3x3 @ 70%	Dominadas: 3x8	Accesorios Hombro
+5	INT	Snatch: 5x1 @ 85%	C&J: 4x1 @ 85%	Clean Pull: 3x3 @ 100%
+SEMANA 3 (Choque - IMR 88%)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA/ACC)
+1	INT	Snatch: 4x1 @ 85%	Snatch Pull: 3x3 @ 105%	Back Squat: 3x3 @ 85%
+2	MED	Power Snatch: 3x2 @ 80%	Power Clean: 3x2 @ 80%	Jerk Drive: 3x3 @ 90%
+3	INT	Clean & Jerk: 3x1 @ 88%	Jerk Recovery: 3x2 @ 90%	Front Squat: 3x2 @ 88%
+4	AUX	Sots Press: 3x5 (Barra)	Hip Thrust: 3x8	Core Rotacional
+5	MAX	Snatch: 2x1 @ 90-92%	C&J: 2x1 @ 90-92%	Back Squat: 2x2 @ 90%
+⚪ FASE 2: DESCARGA Y REALIZACIÓN (Semanas 4-6)
+
+Objetivo: Recuperación profunda (Semana 4) seguida de un pico rápido de rendimiento.
+SEMANA 4 (Descarga Obligatoria - IMR 60-65%)
+
+Crucial para el sistema Polaco: reducir drásticamente el estrés para permitir la supercompensación. | DÍA | TIPO | SLOT 1 (ARRANQUE) | SLOT 2 (ENVIÓN) | SLOT 3 (FUERZA/ACC) | |:---:|:---:|:---|:---|:---| | 1 | VOL | Muscle Snatch: 3x3 @ 50% | OHS: 3x3 @ 60% | Back Squat: 3x5 @ 60% | | 2 | TEC | Power Clean: 3x2 @ 65% | Push Press: 3x4 @ 60% | Movilidad | | 3 | TEC | Snatch (Técnica): 4x2 @ 60% | C&J (Técnica): 4x1 @ 60% | Front Squat: 2x3 @ 65% | | 4 | ACT | Barra Vacía | Caminata / Cardio | Estiramientos | | 5 | ACT | Juego / Deporte | Core | Sin Carga |
+SEMANA 5 (Activación / Ramp Up - IMR 85%)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA/ACC)
+1	INT	Snatch: 3x1 @ 80%	Snatch Pull: 2x2 @ 95%	Back Squat: 2x2 @ 80%
+2	TEC	Power Snatch: 2x1 @ 75%	Power Clean: 2x1 @ 75%	Saltos Verticales
+3	INT	C&J: 2x1 @ 85%	Jerk Rack: 2x1 @ 85%	Front Squat: 2x1 @ 80%
+4	AUX	Snatch Balance: 2x2 @ 75%	Activación Glúteo	Visualización
+5	MAX	Snatch: 1x1 @ 90%	C&J: 1x1 @ 90%	Pull: 2x1 @ 100%
+SEMANA 6 (TEST / COMPETENCIA)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA/ACC)
+1	ACT	Snatch: 3x1 @ 60%	C&J: 2x1 @ 60%	Back Squat: 2x2 @ 60%
+2	ACT	Power Snatch: 2x1 @ 50%	Power Clean: 2x1 @ 50%	Movilidad Activa
+3	ACT	Muscle Snatch: 2x2 (Barra)	Muscle Clean: 2x2 (Barra)	Core
+4	ACT	Barra Vacía	Activación Neural	Descanso
+5	TEST	TEST SNATCH (1RM)	TEST C&J (1RM)	TEST SQUAT (1RM)

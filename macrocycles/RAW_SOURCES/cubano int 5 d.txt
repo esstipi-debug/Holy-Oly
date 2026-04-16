@@ -1,0 +1,178 @@
+
+---
+
+### 📋 MACROCICLO INTERMEDIO (5 DÍAS) - 80 SESIONES ACTIVAS
+
+**Reglas de Estructura:**
+1.  **Frecuencia:** 5 días/semana (Lunes a Viernes) sin días libres en la planilla.
+2.  [cite_start]**Jerarquía de Slots:** 1. Arranque $\rightarrow$ 2. Envión $\rightarrow$ 3. Fuerza[cite: 348, 349, 352].
+3.  **Distribución Semanal:**
+    * **Lun (35%):** Volumen.
+    * **Mar (22%):** Auxiliar.
+    * **Mié (30%):** Intensidad Media.
+    * **Jue (15%):** Técnico / Recuperación Activa (Cargas bajas).
+    * **Vie (28%):** Intensidad Alta / Test.
+
+---
+
+### 🟢 MES 1: CIMENTACIÓN (Volumen Alto)
+*Objetivo: Capacidad de trabajo. Series de 3 reps.*
+
+#### SEMANA 1 (Base)
+| DÍA | TIPO | SLOT 1 (ARRANQUE) | SLOT 2 (ENVIÓN) | SLOT 3 (FUERZA) |
+|:---:|:---|:---|:---|:---|
+| **1** | **VOL** | **Hang Snatch:** 5x3 @ 70% | **Clean & Jerk:** 4x(2+1) @ 70% | **Back Squat:** 5x5 @ 70% |
+| **2** | **AUX** | **Muscle Snatch:** 4x3 @ 55% | **Muscle Clean + Push Press:** 4x(2+2) @ 60% | **Snatch Deadlift:** 4x4 @ 80% |
+| **3** | **MED** | **Power Snatch:** 4x3 @ 70% | **Power Clean + Jerk:** 4x(2+1) @ 70% | **Front Squat:** 4x4 @ 75% |
+| **4** | **TEC** | **Tall Snatch:** 5x3 (Barra/30%) | **Tall Clean:** 5x3 (Barra/30%) | **Overhead Squat:** 3x5 @ 50% |
+| **5** | **INT** | **Snatch:** 1x2 @ 75% | **Clean & Jerk:** 1x2 @ 75% | **Back Squat:** 3x3 @ 75% |
+
+#### SEMANA 2 (Carga)
+| DÍA | TIPO | SLOT 1 (ARRANQUE) | SLOT 2 (ENVIÓN) | SLOT 3 (FUERZA) |
+|:---:|:---|:---|:---|:---|
+| **6** | **VOL** | **Hang Snatch:** 6x3 @ 72% | **Clean & Jerk:** 5x(2+1) @ 72% | **Back Squat:** 5x5 @ 72% |
+| **7** | **AUX** | **Muscle Snatch:** 4x3 @ 60% | **Muscle Clean + Push Press:** 4x(2+2) @ 65% | **Snatch Deadlift:** 4x4 @ 85% |
+| **8** | **MED** | **Power Snatch:** 5x3 @ 72% | **Power Clean + Jerk:** 5x(2+1) @ 72% | **Front Squat:** 4x4 @ 78% |
+| **9** | **TEC** | **Drop Snatch:** 5x3 @ 40% | **Jerk Balance:** 5x3 @ 40% | **Sots Press:** 3x5 (Barra) |
+| **10** | **INT** | **Snatch:** 1x2 @ 80% | **Clean & Jerk:** 1x2 @ 80% | **Back Squat:** 3x3 @ 80% |
+
+#### SEMANA 3 (Impacto)
+| DÍA | TIPO | SLOT 1 (ARRANQUE) | SLOT 2 (ENVIÓN) | SLOT 3 (FUERZA) |
+|:---:|:---|:---|:---|:---|
+| **11** | **VOL** | **Hang Snatch:** 6x3 @ 75% | **Clean & Jerk:** 5x(2+1) @ 75% | **Back Squat:** 5x5 @ 75% |
+| **12** | **AUX** | **Muscle Snatch:** 4x3 @ 60% | **Muscle Clean + Push Press:** 5x(2+2) @ 65% | **Snatch Deadlift:** 5x4 @ 90% |
+| **13** | **MED** | **Power Snatch:** 5x3 @ 75% | **Power Clean + Jerk:** 5x(2+1) @ 75% | **Front Squat:** 5x3 @ 80% |
+| **14** | **TEC** | **Snatch Balance:** 4x3 @ 50% | **Jerk Recovery:** 4x3 @ 60% | **Good Mornings:** 3x8 |
+| **15** | **INT** | **Snatch:** 1x2 @ 82% | **Clean & Jerk:** 1x2 @ 82% | **Back Squat:** 3x3 @ 82% |
+
+#### SEMANA 4 (Descarga Activa)
+| DÍA | TIPO | SLOT 1 (ARRANQUE) | SLOT 2 (ENVIÓN) | SLOT 3 (FUERZA) |
+|:---:|:---|:---|:---|:---|
+| **16** | **VOL** | **Hang Snatch:** 3x3 @ 60% | **Clean & Jerk:** 3x(1+1) @ 60% | **Back Squat:** 3x5 @ 60% |
+| **17** | **AUX** | **Muscle Snatch:** 3x3 @ 50% | **Muscle Clean:** 3x3 @ 50% | **Snatch Pull:** 3x3 @ 70% |
+| **18** | **MED** | **Power Snatch:** 3x2 @ 60% | **Power Clean:** 3x2 @ 60% | **Front Squat:** 3x3 @ 60% |
+| **19** | **TEC** | **Tall Snatch:** 3x3 (Barra) | **Press Militar:** 3x5 @ 50% | **Planchas:** 3x30s |
+| **20** | **INT** | **Snatch:** 2x2 @ 70% | **Clean & Jerk:** 2x1 @ 70% | **Back Squat:** 2x3 @ 70% |
+
+---
+
+### 🟡 MES 2: FUERZA GENERAL
+*Objetivo: Series de 2 reps. Introducción de variantes de fuerza (No-foot, Blocks).*
+
+#### SEMANA 5 (Base)
+| DÍA | TIPO | SLOT 1 (ARRANQUE) | SLOT 2 (ENVIÓN) | SLOT 3 (FUERZA) |
+|:---:|:---|:---|:---|:---|
+| **21** | **VOL** | **Snatch:** 5x2 @ 75% | **C&J (1+1):** 4x(1+1) @ 75% | **Back Squat:** 5x3 @ 80% |
+| **22** | **AUX** | **No-Foot Snatch:** 4x2 @ 70% | **Push Jerk:** 4x3 @ 70% | **Snatch High Pull:** 4x3 @ 90% |
+| **23** | **MED** | **Block Snatch:** 4x2 @ 75% | **Block Clean:** 4x2 @ 75% | **Front Squat:** 4x3 @ 80% |
+| **24** | **TEC** | **Snatch Balance:** 4x3 @ 60% | **Jerk Dip:** 4x3 @ 80% | **Saltos al Cajón:** 3x5 |
+| **25** | **INT** | **Snatch:** 1x1 @ 85% | **Clean & Jerk:** 1x1 @ 85% | **Clean Deadlift:** 3x3 @ 100% |
+
+#### SEMANA 6 (Carga)
+| DÍA | TIPO | SLOT 1 (ARRANQUE) | SLOT 2 (ENVIÓN) | SLOT 3 (FUERZA) |
+|:---:|:---|:---|:---|:---|
+| **26** | **VOL** | **Snatch:** 6x2 @ 78% | **C&J (1+1):** 5x(1+1) @ 78% | **Back Squat:** 5x3 @ 82% |
+| **27** | **AUX** | **No-Foot Snatch:** 4x2 @ 75% | **Push Jerk:** 5x3 @ 75% | **Snatch High Pull:** 5x3 @ 95% |
+| **28** | **MED** | **Block Snatch:** 5x2 @ 78% | **Block Clean:** 5x2 @ 78% | **Front Squat:** 5x3 @ 82% |
+| **29** | **TEC** | **Overhead Squat:** 4x3 @ 65% | **Jerk Drive:** 4x3 @ 85% | **Remo Pendlay:** 3x8 |
+| **30** | **INT** | **Snatch:** 1x1 @ 87% | **Clean & Jerk:** 1x1 @ 87% | **Clean Deadlift:** 3x3 @ 105% |
+
+#### SEMANA 7 (Impacto)
+| DÍA | TIPO | SLOT 1 (ARRANQUE) | SLOT 2 (ENVIÓN) | SLOT 3 (FUERZA) |
+|:---:|:---|:---|:---|:---|
+| **31** | **VOL** | **Snatch:** 7x2 @ 80% | **C&J (1+1):** 6x(1+1) @ 80% | **Back Squat:** 6x3 @ 85% |
+| **32** | **AUX** | **No-Foot Snatch:** 5x2 @ 75% | **Push Jerk:** 5x2 @ 80% | **Snatch High Pull:** 5x3 @ 100% |
+| **33** | **MED** | **Block Snatch:** 6x2 @ 80% | **Block Clean:** 6x2 @ 80% | **Front Squat:** 3x2 @ 85% |
+| **34** | **TEC** | **Snatch Balance:** 3x2 @ 70% | **Push Press:** 3x3 @ 70% | **Saltos:** 3x5 |
+| **35** | **INT** | **Snatch:** 1x1 @ 90% | **Clean & Jerk:** 1x1 @ 90% | **Clean Deadlift:** 3x2 @ 110% |
+
+#### SEMANA 8 (Descarga Activa)
+| DÍA | TIPO | SLOT 1 (ARRANQUE) | SLOT 2 (ENVIÓN) | SLOT 3 (FUERZA) |
+|:---:|:---|:---|:---|:---|
+| **36** | **VOL** | **Snatch:** 3x2 @ 65% | **Clean & Jerk:** 3x1 @ 65% | **Back Squat:** 3x3 @ 65% |
+| **37** | **AUX** | **No-Foot Snatch:** 3x2 @ 60% | **Push Jerk:** 3x2 @ 60% | **Snatch Pull:** 3x3 @ 80% |
+| **38** | **MED** | **Block Snatch:** 3x2 @ 65% | **Block Clean:** 3x1 @ 65% | **Front Squat:** 2x2 @ 65% |
+| **39** | **TEC** | **Muscle Snatch:** 3x3 (Barra) | **Muscle Clean:** 3x3 (Barra) | **Hip Thrust:** 3x10 |
+| **40** | **INT** | **Snatch:** 2x1 @ 75% | **Clean & Jerk:** 2x1 @ 75% | **Back Squat:** 2x2 @ 75% |
+
+---
+
+### 🔴 MES 3: INTENSIFICACIÓN
+*Objetivo: Potencia Máxima. Series de 1 repetición (Singles).*
+
+#### SEMANA 9 (Base)
+| DÍA | TIPO | SLOT 1 (ARRANQUE) | SLOT 2 (ENVIÓN) | SLOT 3 (FUERZA) |
+|:---:|:---|:---|:---|:---|
+| **41** | **VOL** | **Snatch:** 6x1 @ 80% | **Clean & Jerk:** 5x1 @ 80% | **Back Squat:** 4x2 @ 85% |
+| **42** | **AUX** | **Power Snatch:** 4x2 @ 70% | **Jerk from Rack:** 4x2 @ 80% | **Snatch Pull:** 4x2 @ 100% |
+| **43** | **MED** | **Snatch:** 4x1 @ 85% | **Clean & Jerk:** 3x1 @ 85% | **Front Squat:** 3x2 @ 85% |
+| **44** | **TEC** | **Tall Snatch:** 4x3 @ 40% | **Press in Snatch:** 3x5 (Barra) | **Core Rotacional:** 3x15 |
+| **45** | **INT** | **Snatch:** 1x1 @ 90% | **Clean & Jerk:** 1x1 @ 90% | **Back Squat:** 2x1 @ 90% |
+
+#### SEMANA 10 (Carga)
+| DÍA | TIPO | SLOT 1 (ARRANQUE) | SLOT 2 (ENVIÓN) | SLOT 3 (FUERZA) |
+|:---:|:---|:---|:---|:---|
+| **46** | **VOL** | **Snatch:** 7x1 @ 82% | **Clean & Jerk:** 6x1 @ 82% | **Back Squat:** 5x2 @ 87% |
+| **47** | **AUX** | **Power Snatch:** 4x2 @ 75% | **Jerk from Rack:** 5x1 @ 85% | **Snatch Pull:** 4x2 @ 105% |
+| **48** | **MED** | **Snatch:** 5x1 @ 87% | **Clean & Jerk:** 4x1 @ 87% | **Front Squat:** 4x2 @ 87% |
+| **49** | **TEC** | **Snatch Balance:** 3x2 @ 60% | **Jerk Recovery:** 3x2 @ 80% | **Lumbar Isométrico:** 3x30s |
+| **50** | **INT** | **Snatch:** 1x1 @ 92% | **Clean & Jerk:** 1x1 @ 92% | **Back Squat:** 2x1 @ 92% |
+
+#### SEMANA 11 (Choque)
+| DÍA | TIPO | SLOT 1 (ARRANQUE) | SLOT 2 (ENVIÓN) | SLOT 3 (FUERZA) |
+|:---:|:---|:---|:---|:---|
+| **51** | **VOL** | **Snatch:** 8x1 @ 85% | **Clean & Jerk:** 6x1 @ 85% | **Back Squat:** 3x2 @ 90% |
+| **52** | **AUX** | **Power Snatch:** 3x1 @ 80% | **Jerk from Rack:** 3x1 @ 90% | **Snatch Pull:** 3x2 @ 110% |
+| **53** | **MED** | **Snatch:** 5x1 @ 90% | **Clean & Jerk:** 4x1 @ 90% | **Front Squat:** 2x1 @ 92% |
+| **54** | **TEC** | **Drop Snatch:** 3x3 @ 50% | **Push Press:** 3x2 @ 70% | **Saltos:** 3x3 |
+| **55** | **INT** | **Snatch:** 1x1 @ 95% | **Clean & Jerk:** 1x1 @ 95% | **Back Squat:** 1x1 @ 95% |
+
+#### SEMANA 12 (Descarga Activa)
+| DÍA | TIPO | SLOT 1 (ARRANQUE) | SLOT 2 (ENVIÓN) | SLOT 3 (FUERZA) |
+|:---:|:---|:---|:---|:---|
+| **56** | **VOL** | **Snatch:** 4x1 @ 70% | **Clean & Jerk:** 3x1 @ 70% | **Back Squat:** 3x2 @ 70% |
+| **57** | **AUX** | **Power Snatch:** 3x2 @ 60% | **Power Clean:** 3x2 @ 60% | **Snatch Pull:** 3x2 @ 80% |
+| **58** | **MED** | **Snatch:** 3x1 @ 75% | **Clean & Jerk:** 2x1 @ 75% | **Front Squat:** 2x1 @ 75% |
+| **59** | **TEC** | **Muscle Snatch:** 3x3 @ 40% | **Jerk Support:** 3x3 @ 70% | **Core:** 3x20 |
+| **60** | **INT** | **Snatch:** 1x1 @ 80% | **Clean & Jerk:** 1x1 @ 80% | **Back Squat:** 2x2 @ 75% |
+
+---
+
+### 🟣 MES 4: REALIZACIÓN (Tapering & Test)
+*Objetivo: Puesta a punto. Reducir volumen, mantener frecuencia.*
+
+#### SEMANA 13 (Re-Introducción)
+| DÍA | TIPO | SLOT 1 (ARRANQUE) | SLOT 2 (ENVIÓN) | SLOT 3 (FUERZA) |
+|:---:|:---|:---|:---|:---|
+| **61** | **VOL** | **Snatch:** 4x1 @ 80% | **Clean & Jerk:** 3x1 @ 80% | **Back Squat:** 3x2 @ 80% |
+| **62** | **AUX** | **Power Snatch:** 3x2 @ 70% | **Jerk from Rack:** 3x2 @ 75% | **Clean Pull:** 3x2 @ 90% |
+| **63** | **MED** | **Snatch:** 3x1 @ 85% | **Clean & Jerk:** 2x1 @ 85% | **Front Squat:** 2x2 @ 80% |
+| **64** | **TEC** | **Tall Snatch:** 3x3 @ 40% | **Press Militar:** 3x3 @ 60% | **Buenos Días:** 3x8 |
+| **65** | **INT** | **Snatch:** 1x1 @ 90% | **Clean & Jerk:** 1x1 @ 90% | **Squat:** 1x1 @ 85% |
+
+#### SEMANA 14 (Carga Final)
+| DÍA | TIPO | SLOT 1 (ARRANQUE) | SLOT 2 (ENVIÓN) | SLOT 3 (FUERZA) |
+|:---:|:---|:---|:---|:---|
+| **66** | **VOL** | **Snatch:** 3x1 @ 85% | **Clean & Jerk:** 2x1 @ 85% | **Back Squat:** 2x2 @ 85% |
+| **67** | **AUX** | **Power Clean:** 3x1 @ 75% | **Jerk Support:** 3x3 @ 90% | **Pull:** 3x1 @ 95% |
+| **68** | **MED** | **Snatch:** 2x1 @ 90% | **Clean & Jerk:** 2x1 @ 90% | **Front Squat:** 1x1 @ 85% |
+| **69** | **TEC** | **Snatch Balance:** 3x2 @ 60% | **Tall Jerk:** 3x3 (Barra) | **Core Estático:** 3x30s |
+| **70** | **INT** | **Snatch:** 1x1 @ 92% | **C&J:** 1x1 @ 92% | **Squat:** 1x1 @ 90% |
+
+#### SEMANA 15 (Afilado / Taper)
+| DÍA | TIPO | SLOT 1 (ARRANQUE) | SLOT 2 (ENVIÓN) | SLOT 3 (FUERZA) |
+|:---:|:---|:---|:---|:---|
+| **71** | **VOL** | **Snatch:** 3x1 @ 75% | **Clean & Jerk:** 2x1 @ 75% | **Back Squat:** 2x1 @ 70% |
+| **72** | **AUX** | **Muscle Snatch:** 3x2 (Ligero) | **Muscle Clean:** 3x2 (Ligero) | **Hip Thrust:** 2x8 |
+| **73** | **MED** | **Snatch:** 2x1 @ 70% | **Clean & Jerk:** 1x1 @ 70% | **Front Squat:** 2x1 @ 65% |
+| **74** | **TEC** | **Barra (Velocidad):** 5x2 | **Press (Barra):** 3x5 | **Movilidad Dinámica** |
+| **75** | **INT** | **Snatch:** 1x1 @ 75% | **C&J:** 1x1 @ 75% | **Saltos:** 2x3 |
+
+#### SEMANA 16 (TEST MAX)
+| DÍA | TIPO | SLOT 1 (ARRANQUE) | SLOT 2 (ENVIÓN) | SLOT 3 (FUERZA / ACT) |
+|:---:|:---|:---|:---|:---|
+| **76** | **ACT** | **Snatch:** 3x2 @ 50% | **C&J:** 3x1 @ 50% | **Back Squat:** 3x2 @ 50% |
+| **77** | **ACT** | **Power Snatch:** 3x1 @ 60% | **Power Clean:** 2x1 @ 60% | **Front Squat:** 2x2 @ 50% |
+| **78** | **TEC** | **Muscle Snatch:** 3x3 (Barra) | **Muscle Clean:** 3x3 (Barra) | **Movilidad Torácica** |
+| **79** | **MOV** | **Barra Vacía:** 15 min (Téc) | **Shadow Lifting** (Sin peso) | **Estiramientos** |
+| **80** | **TEST** | **TEST SNATCH (1RM)** | **TEST C&J (1RM)** | **TEST SQUAT (1RM)** |

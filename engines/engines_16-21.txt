@@ -1,0 +1,2026 @@
+# 16. Social Engine — Shareable Athletic Cards & Viral Mechanics
+
+**Purpose:** Generate shareable cards for Instagram/WhatsApp to create viral moments and community engagement
+
+**Status:** Gamification + virality driver  
+**Update Frequency:** On demand (when PR/milestone achieved)  
+**Performance:** O(1) card generation
+
+---
+
+## Overview
+
+When athletes achieve PRs, hit milestones, or win challenges, Social Engine generates beautiful shareable cards that drive virality. Friends see the cards, get motivated, train harder.
+
+---
+
+## Card Types
+
+### 1. PR Card (Personal Record)
+
+```json
+{
+  "card_type": "pr",
+  "title": "New Personal Record!",
+  "athlete_name": "João",
+  "achievement": "Snatch 145kg",
+  "previous_pr": "140kg",
+  "improvement": "+5kg",
+  "improvement_pct": "+3.6%",
+  "date": "2026-04-10",
+  "photo_url": "session_photo.jpg",
+  "club": "Olympic Strikers",
+  "template": "modern_gradient_blue",
+  "sharing_prompt": "Crushed my PR today! 💪 145kg Snatch. Who's next?"
+}
+```
+
+**Visual:**
+```
+╔════════════════════════════════════╗
+║  🏋️ NEW PERSONAL RECORD           ║
+║                                    ║
+║  João                              ║
+║                                    ║
+║  SNATCH: 145kg                     ║
+║  Previous: 140kg  +5kg (+3.6%)    ║
+║                                    ║
+║  [Athlete Photo]                   ║
+║                                    ║
+║  Olympic Strikers                  ║
+║  2026-04-10                        ║
+╚════════════════════════════════════╝
+```
+
+### 2. Club Entry Card (Strength Club)
+
+```json
+{
+  "card_type": "club_entry",
+  "athlete_name": "Maria",
+  "club_name": "150kg Clean Club",
+  "club_threshold": "150kg",
+  "achievement_lift": "150kg Clean & Jerk",
+  "date": "2026-04-10",
+  "club_members": 12,
+  "template": "gold_badge",
+  "sharing_prompt": "I just joined the 150kg Club! 🥇 Welcome to the elite!"
+}
+```
+
+**Visual:**
+```
+╔════════════════════════════════════╗
+║  🥇 CLUB ACHIEVEMENT               ║
+║                                    ║
+║  Maria                             ║
+║                                    ║
+║  JOINED THE                        ║
+║  150kg Clean Club                  ║
+║                                    ║
+║  150kg C&J                         ║
+║  (12 members strong)               ║
+║                                    ║
+║  2026-04-10                        ║
+╚════════════════════════════════════╝
+```
+
+### 3. Belt Promotion Card
+
+```json
+{
+  "card_type": "belt_promotion",
+  "athlete_name": "Carlos",
+  "old_belt": "Yellow",
+  "new_belt": "Orange",
+  "date": "2026-04-10",
+  "template": "gradient_orange",
+  "sharing_prompt": "Orange Belt achieved! 🟠 The journey continues..."
+}
+```
+
+### 4. Streak Milestone Card
+
+```json
+{
+  "card_type": "streak",
+  "athlete_name": "Helena",
+  "milestone_days": 90,
+  "current_streak": 90,
+  "template": "fire_animation",
+  "sharing_prompt": "90 DAYS STRAIGHT! 🔥 Consistency is everything."
+}
+```
+
+### 5. Challenge Victory Card
+
+```json
+{
+  "card_type": "challenge_victory",
+  "athlete_name": "Kristina",
+  "challenge_name": "EMOM 12 min: Weighted Pull-ups",
+  "result": "8 rounds",
+  "rank": "#1 in club",
+  "xp_earned": 425,
+  "template": "modern_blue",
+  "sharing_prompt": "Dominated the Pulse Challenge this week! 🎯"
+}
+```
+
+---
+
+## Viral Mechanic
+
+### Head-to-Head Comparison Card
+
+```json
+{
+  "card_type": "head_to_head",
+  "athlete_1": {
+    "name": "João",
+    "snatch": 145,
+    "status": "just achieved"
+  },
+  "athlete_2": {
+    "name": "Carlos (friend)",
+    "snatch": 140,
+    "status": "current"
+  },
+  "message": "João beat Carlos by 5kg!",
+  "call_to_action": "Carlos, time to lift heavier 💪",
+  "sharing_url": "app.holyoly.com/challenge/carlos"
+}
+```
+
+**Viral Loop:**
+```
+João achieves 145kg Snatch
+  → Card shows: "Beat Carlos by 5kg!"
+  → Shares to WhatsApp
+  → Carlos sees: "João just beat you!"
+  → Motivation spike
+  → Carlos trains harder
+  → Carlos achieves 148kg (new PR)
+  → Loop restarts
+```
+
+---
+
+## Card Generation & Sharing
+
+### Step 1: Detect Achievement
+
+```javascript
+async function onSessionCompleted(athleteId, sessionId) {
+  const session = await prisma.macrocycleSession.findUnique(...);
+  
+  for (const exercise of session.exercises) {
+    // Check if this is new PR
+    const oldPR = await getOldPR(athleteId, exercise.id);
+    const newWeight = session.recordedWeight;
+    
+    if (newWeight > oldPR.weight) {
+      // New PR! Generate card
+      const card = await generatePRCard(athleteId, exercise, newWeight, oldPR);
+      await notifyAthlete(athleteId, card);
+    }
+  }
+  
+  // Check if club entry achieved
+  const clubs = await getApplicableClubs(athleteId, exercise, newWeight);
+  for (const club of clubs) {
+    const card = await generateClubEntryCard(athleteId, club);
+    await notifyAthlete(athleteId, card);
+  }
+}
+```
+
+### Step 2: Card Display & Sharing
+
+```
+┌─ Your New PR! ────────────────────┐
+│                                    │
+│  🏋️ SNATCH 145kg                  │
+│  Previous: 140kg                   │
+│                                    │
+│  [Beautiful gradient card design]  │
+│                                    │
+│  [ Share to Instagram ]            │
+│  [ Share to WhatsApp ]             │
+│  [ Share to Friends ]              │
+│  [ Save for Later ]                │
+│                                    │
+│  [ Keep Private ]                  │
+│                                    │
+└────────────────────────────────────┘
+```
+
+### Step 3: Share & Track
+
+When athlete shares:
+- Card includes unique sharing link
+- Friends click link → see comparison vs them
+- Friends invited to app
+- Analytics track shares (viral coefficient)
+
+---
+
+## Card Templates (Visual Library)
+
+```
+Available Templates:
+  • Modern Gradient (Blue, Green, Gold)
+  • Fire Animation (Streaks)
+  • Badge Gold (Club entries)
+  • Minimalist (Clean look)
+  • Dark Premium (Elite athletes)
+  • Rainbow (Diversity themes)
+```
+
+Each template can be customized:
+- Club colors/branding
+- Custom background photos
+- Athlete name positioning
+- Font selection
+
+---
+
+## Coach Perspective
+
+### Coach Can Create Custom Cards
+
+```
+Scenario: Coach celebrates team milestone
+
+Coach Action:
+  1. Click "Create Team Card"
+  2. Title: "Best Week Ever!"
+  3. Stats: "8 PRs, 5 club entries, 100% attendance"
+  4. Design: Select "Gold Premium"
+  5. Add team photo
+  6. Publish
+
+Result:
+  Card shared with entire team
+  Athletes can share to social media
+  XP bonus for sharing (+50 XP)
+```
+
+---
+
+## Analytics
+
+### Social Engagement Tracking
+
+```
+SOCIAL METRICS (Last 30 Days)
+═════════════════════════════════════════════
+
+Cards Generated:
+  PR Cards: 24 ✅
+  Club Entry: 8
+  Belt Promo: 3
+  Streak Milestones: 15
+  Total: 50 cards
+
+Sharing Activity:
+  Unique Shares: 38 (76% share rate)
+  WhatsApp: 20 shares
+  Instagram: 12 shares
+  Direct Friends: 6 shares
+
+Viral Metrics:
+  Views per share: 8 avg
+  Click-through rate: 35%
+  App Installs from links: 4
+  Friend invites accepted: 3
+
+Trending Cards (Most Shared):
+  1. "90-day streak" - 8 shares
+  2. "Snatch 145kg" - 6 shares
+  3. "Orange Belt" - 4 shares
+```
+
+---
+
+## Opt-In/Opt-Out
+
+Athletes can control:
+- [ ] Share PRs automatically
+- [ ] Share milestones automatically
+- [ ] Enable head-to-head comparisons
+- [ ] Which friends can see cards
+- [ ] Club visibility (public/private)
+- [ ] Anonymous sharing option
+
+**Default:** Athletes must opt-in to each share (not auto-posted)
+
+---
+
+## Data Storage
+
+```sql
+CREATE TABLE "SocialCard" (
+  "id" UUID PRIMARY KEY,
+  "athleteId" UUID,
+  "cardType" VARCHAR,       -- pr|club|belt|streak|challenge|custom
+  "title" VARCHAR,
+  "content" JSON,
+  "templateId" VARCHAR,
+  "generatedAt" TIMESTAMP,
+  "sharedAt" TIMESTAMP,
+  "shareCount" INT,
+  "viewCount" INT
+);
+
+CREATE TABLE "CardShare" (
+  "id" UUID PRIMARY KEY,
+  "cardId" UUID,
+  "platform" VARCHAR,       -- instagram|whatsapp|direct|link
+  "sharedBy" UUID,
+  "sharedAt" TIMESTAMP,
+  "views" INT,
+  "clicks" INT
+);
+```
+
+---
+
+## Integration Points
+
+**Feeds Into:**
+- **Notifications** → "Your PR card was shared X times!"
+- **Gamification** → XP for sharing (+50)
+- **Smart Coach** → Track social engagement as engagement metric
+
+**Receives From:**
+- **Session Log** → PR achievements
+- **Gamification** → Belt/club/streak milestones
+- **Club System** → Club entry thresholds
+
+---
+
+## Testing Checklist
+
+- [ ] PR card generates when session weight > old PR
+- [ ] Club entry card generates when threshold reached
+- [ ] Belt promotion card generates on belt unlock
+- [ ] Head-to-head card shows correct comparison
+- [ ] Sharing links work and track views
+- [ ] Analytics track shares per platform
+- [ ] Athlete can opt-in/opt-out
+- [ ] Coach can create custom cards
+- [ ] Card templates render correctly
+
+---
+
+**Generated:** 2026-04-10  
+**Source:** Extracted from social_engine.js  
+**Integration Status:** ✅ Complete (sharing + analytics)
+
+
+
+# 17. Golden Ratio Engine — Lift Ratio Tracking & Rewards
+
+**Purpose:** Track and reward "golden ratio" lift relationships (proportion improvements between lifts)
+
+**Status:** Gamification overlay + achievement tracking  
+**Update Frequency:** Per PR entry  
+**Performance:** O(1) ratio calculation
+
+---
+
+## Overview
+
+Golden Ratio tracks proportional improvements between related lifts:
+- **Snatch:** Should be 80% of Clean + Jerk
+- **Front Squat:** Should be 85% of Back Squat
+- **Back Squat:** Should be 135% of Snatch
+
+When these ratios improve, athletes earn XP and recognition.
+
+---
+
+## Target Ratios
+
+```
+Ratio Name         | Formula          | Target | Reward
+─────────────────────────────────────────────────────────
+Snatch Power       | Sn / (Sn + CJ)   | 0.45   | +150 XP
+Clean Power        | CJ / (Sn + CJ)   | 0.55   | +100 XP
+Squat Proportion   | FS / BS           | 0.85   | +150 XP
+Squat Dominance    | BS / Sn           | 1.35   | +100 XP
+Recovery Strength  | CJ / (Sn × 1.15)  | 0.95   | +100 XP
+```
+
+### Example: Snatch vs Clean & Jerk
+
+```
+Scenario 1: Balanced Athlete
+  Snatch: 100kg
+  Clean: 130kg
+  Ratio: 100/130 = 0.77 (good)
+  Target: 0.80
+  Status: Close to optimal
+
+Scenario 2: Snatch-Weak Athlete
+  Snatch: 80kg
+  Clean: 130kg
+  Ratio: 80/130 = 0.62 (too low)
+  Recommendation: Focus on Snatch technique/power
+  Training: Extra Snatch volume
+
+Scenario 3: Snatch-Strong Athlete
+  Snatch: 120kg
+  Clean: 130kg
+  Ratio: 120/130 = 0.92 (too high)
+  Recommendation: Focus on Clean strength
+  Training: Extra Clean + Jerk work
+```
+
+---
+
+## Tracking Algorithm
+
+### Per-Lift PR Entry
+
+```javascript
+async function processNewPR(athleteId, exerciseId, weight) {
+  // Get current PRs for all lifts
+  const prs = await getAthleteAllPRs(athleteId);
+  
+  // Calculate all ratios
+  const ratios = {
+    snatch_power: prs.snatch / (prs.snatch + prs.clean_jerk),
+    clean_power: prs.clean_jerk / (prs.snatch + prs.clean_jerk),
+    squat_prop: prs.front_squat / prs.back_squat,
+    squat_dom: prs.back_squat / prs.snatch,
+    recovery: prs.clean_jerk / (prs.snatch * 1.15)
+  };
+  
+  // Get previous ratios
+  const old_ratios = await getAthleteRatioHistory(athleteId, 1);
+  
+  // Check for improvements
+  for (const [ratio_name, new_value] of Object.entries(ratios)) {
+    const old_value = old_ratios[0][ratio_name];
+    const target = GOLDEN_RATIOS[ratio_name].target;
+    
+    // Check if ratio improved AND closer to target
+    if (hasImproved(old_value, new_value, target)) {
+      const xp = GOLDEN_RATIOS[ratio_name].reward;
+      const achievement = {
+        type: 'golden_ratio',
+        ratio: ratio_name,
+        old: old_value.toFixed(2),
+        new: new_value.toFixed(2),
+        improvement: (new_value - old_value).toFixed(2),
+        xp_earned: xp
+      };
+      
+      // Award XP + notify
+      await grantXP(athleteId, xp);
+      await createAchievement(athleteId, achievement);
+      await notifyAthlete(athleteId, `Golden Ratio improved: ${ratio_name}`);
+    }
+  }
+  
+  // Store ratio history
+  await storeRatioSnapshot(athleteId, ratios);
+}
+```
+
+### Improvement Detection
+
+```javascript
+function hasImproved(oldRatio, newRatio, target) {
+  // 1. Did the ratio change?
+  if (Math.abs(newRatio - oldRatio) < 0.01) return false;
+  
+  // 2. Did it move closer to target?
+  const oldDistance = Math.abs(oldRatio - target);
+  const newDistance = Math.abs(newRatio - target);
+  
+  return newDistance < oldDistance;
+}
+```
+
+---
+
+## Athlete Dashboard View
+
+### Golden Ratio Card
+
+```
+GOLDEN RATIOS — Your Proportions
+═════════════════════════════════════════════════════════
+
+┌─ Snatch Power: 0.79 → 0.80 ✅ IMPROVED ──────────────┐
+│ Your Snatch is 80% of (Snatch + Clean) = OPTIMAL     │
+│ Previous: 0.75 | Target: 0.80 | Change: +0.05       │
+│ +150 XP for this improvement!                         │
+└────────────────────────────────────────────────────────┘
+
+┌─ Front Squat / Back Squat: 0.78 (Target: 0.85) ──────┐
+│ Your FS is only 78% of BS. Need more Front Squat.    │
+│ Gap: 0.07 below target                               │
+│ Recommendation: Add 1-2 FS sessions/week             │
+└────────────────────────────────────────────────────────┘
+
+┌─ Back Squat / Snatch: 1.42 (Target: 1.35) ────────────┐
+│ Your BS is 42% stronger than your Snatch (good!)     │
+│ Status: Slightly above target (safe)                  │
+│ BS is your strength base — keep training it          │
+└────────────────────────────────────────────────────────┘
+
+Overall Golden Ratio Score: 82/100 ✅
+  2/3 ratios optimal, 1 slightly low. Keep balanced!
+```
+
+---
+
+## Coach Analytics
+
+### Team Golden Ratio Report
+
+```
+GOLDEN RATIO ANALYSIS — Team View
+═════════════════════════════════════════════════════════
+
+Maria:         82/100 ✅ All ratios balanced
+João:          65/100 ⚠️  Snatch weak (0.68, target 0.80)
+Kristina:      78/100 ✅ FS low (0.78, target 0.85)
+Helena:        71/100 ⚠️  Clean weak, Snatch too strong
+Carlos:        88/100 ✅ Near perfect proportions
+
+Team Insights:
+  → Weak point: Front Squat on average (0.81 vs 0.85 target)
+  → Recommendation: Add FS day to weekly programming
+  → Strong point: Back Squat is well-developed (avg 1.41)
+  → Follow-up: Help athletes develop proportional strength
+```
+
+---
+
+## Data Storage
+
+```sql
+CREATE TABLE "GoldenRatioSnapshot" (
+  "id" UUID PRIMARY KEY,
+  "athleteId" UUID,
+  "dateRecorded" DATE,
+  "snatchPower" DECIMAL,       -- Sn / (Sn + CJ)
+  "cleanPower" DECIMAL,        -- CJ / (Sn + CJ)
+  "squatProp" DECIMAL,         -- FS / BS
+  "squatDom" DECIMAL,          -- BS / Sn
+  "recoveryStr" DECIMAL,       -- CJ / (Sn × 1.15)
+  "overallScore" INT           -- 0-100
+);
+
+CREATE TABLE "GoldenRatioAchievement" (
+  "id" UUID PRIMARY KEY,
+  "athleteId" UUID,
+  "ratioType" VARCHAR,
+  "oldValue" DECIMAL,
+  "newValue" DECIMAL,
+  "targetValue" DECIMAL,
+  "improvementAmount" DECIMAL,
+  "xpEarned" INT,
+  "achievedAt" TIMESTAMP
+);
+```
+
+---
+
+## Integration Points
+
+**Feeds Into:**
+- **Gamification** → XP rewards (+150 for good ratios)
+- **Leaderboard** → Golden Ratio category ranking
+- **Coach Dashboard** → Team imbalance detection
+
+**Receives From:**
+- **RM Records** → All lift PRs
+- **Session Log** → New maxes detected
+
+---
+
+## Testing Checklist
+
+- [ ] Snatch power ratio calculates: Sn / (Sn + CJ)
+- [ ] Front Squat ratio: FS / BS targets 0.85
+- [ ] Back Squat dominance: BS / Sn targets 1.35
+- [ ] Improvement detection works (closer to target = +XP)
+- [ ] XP awarded only once per improvement
+- [ ] Dashboard displays all 5 ratios
+- [ ] Coach sees team average ratios
+- [ ] Historical tracking stores snapshots
+- [ ] Overall score (0-100) calculates correctly
+
+---
+
+**Generated:** 2026-04-10  
+**Source:** Extracted from golden_ratio_engine.js  
+**Integration Status:** ✅ Complete (XP rewards + tracking)
+
+
+
+
+# 18. Theme Engine — Visual Customization System
+
+**Purpose:** Manage light/dark/sport-specific visual themes for personalized UI experience
+
+**Status:** User preference system  
+**Update Frequency:** On change (real-time)  
+**Performance:** O(1) theme lookup + CSS injection
+
+---
+
+## Available Themes
+
+### Classic (Default)
+
+```json
+{
+  "code": "classic",
+  "name": "Holy Oly Classic",
+  "isPremium": false,
+  "colors": {
+    "bg": "#0B1326",
+    "primary": "#22C55E",
+    "accent": "#22C55E",
+    "text": "#FFFFFF",
+    "border": "#1E293B"
+  },
+  "description": "El estilo original. Limpio, funcional y enfocado."
+}
+```
+
+### Dark Themes
+
+**Arctic Chill (Cold)**
+```
+Primary: #14B8A6 (Turquoise)
+Accent: #14B8A6
+Feeling: Cool, focused
+```
+
+**Inferno (Fire)**
+```
+Primary: #84CC16 (Lime)
+Accent: #84CC16
+Feeling: Energetic, intense
+```
+
+### Premium Themes
+
+**Olympic Gold** 💎
+```json
+{
+  "code": "lux",
+  "name": "Olympic Gold",
+  "isPremium": true,
+  "colors": {
+    "primary": "#FACC15",
+    "accent": "#FACC15",
+    "secondary": "#0081C8"
+  },
+  "description": "Edición limitada de lujo. Solo para campeones."
+}
+```
+
+**Carbon Stealth** 💎
+```json
+{
+  "code": "carbon",
+  "name": "Carbon Stealth",
+  "isPremium": true,
+  "colors": {
+    "primary": "#B4C5FF",
+    "accent": "#B4C5FF"
+  },
+  "description": "Diseño industrial minimalista inspirado en fibra de carbono."
+}
+```
+
+**Cyber Neon** 💎
+```json
+{
+  "code": "cyber",
+  "name": "Cyber Neon",
+  "isPremium": true,
+  "colors": {
+    "primary": "#22D3EE",
+    "accent": "#22D3EE"
+  },
+  "description": "Estética futurista con luces de neón."
+}
+```
+
+---
+
+## Theme Selection
+
+### Athlete Changes Theme
+
+```
+Settings → Appearance → Select Theme
+
+[Classic]  [Arctic]  [Inferno]  [Olympic 💎]  [Carbon 💎]  [Cyber 💎]
+
+Current: Classic ✓
+```
+
+### Implementation
+
+```javascript
+async function updateUserTheme(userId, themeCode) {
+  // Validate theme exists
+  const theme = await prisma.theme.findUnique({ where: { code: themeCode } });
+  if (!theme) throw new Error("Theme not found");
+  
+  // Check premium access if theme is premium
+  if (theme.isPremium) {
+    const hasPremium = await userHasPremium(userId);
+    if (!hasPremium) throw new Error("Premium required");
+  }
+  
+  // Update user preference
+  await prisma.user.update({
+    where: { id: userId },
+    data: { themeCode }
+  });
+  
+  // Store in user preferences cache
+  await cache.set(`theme:${userId}`, themeCode);
+  
+  return { success: true, theme: themeCode };
+}
+```
+
+---
+
+## Frontend Application
+
+### CSS Variables Injection
+
+```javascript
+// frontend/src/App.jsx
+
+function App() {
+  const { user } = useAuth();
+  const theme = useTheme(user.themeCode);
+  
+  useEffect(() => {
+    // Set CSS variables on root
+    const root = document.documentElement;
+    root.style.setProperty('--color-bg', theme.colors.bg);
+    root.style.setProperty('--color-primary', theme.colors.primary);
+    root.style.setProperty('--color-accent', theme.colors.accent);
+    root.style.setProperty('--color-text', theme.colors.text);
+    root.style.setProperty('--color-border', theme.colors.border);
+  }, [theme]);
+  
+  return (
+    <div className="app">
+      {/* All components use CSS variables */}
+    </div>
+  );
+}
+```
+
+### CSS Example
+
+```css
+/* Global styles use CSS variables */
+:root {
+  --color-bg: #0B1326;
+  --color-primary: #22C55E;
+  --color-accent: #22C55E;
+  --color-text: #FFFFFF;
+  --color-border: #1E293B;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+.button-primary {
+  background-color: var(--color-primary);
+  color: var(--color-text);
+}
+
+.card {
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg);
+}
+```
+
+---
+
+## Theme Data Structure
+
+```sql
+CREATE TABLE "Theme" (
+  "id" UUID PRIMARY KEY,
+  "code" VARCHAR UNIQUE,        -- "classic", "arctic", "lux", etc.
+  "name" VARCHAR,
+  "nameEs" VARCHAR,
+  "description" TEXT,
+  "isPremium" BOOLEAN,
+  "sortOrder" INT,
+  
+  "bgColor" VARCHAR,            -- Hex color code
+  "primaryColor" VARCHAR,
+  "accentColor" VARCHAR,
+  "secondaryColor" VARCHAR,
+  "textColor" VARCHAR,
+  "borderColor" VARCHAR,
+  "successColor" VARCHAR,
+  "errorColor" VARCHAR,
+  "warningColor" VARCHAR,
+  
+  "createdAt" TIMESTAMP
+);
+```
+
+---
+
+## User Preference Storage
+
+```sql
+CREATE TABLE "UserPreference" (
+  "id" UUID PRIMARY KEY,
+  "userId" UUID UNIQUE,
+  "themeCode" VARCHAR,         -- References Theme.code
+  "fontSize" VARCHAR,          -- "small" | "normal" | "large"
+  "contrast" VARCHAR,          -- "normal" | "high"
+  "reducedMotion" BOOLEAN,
+  "language" VARCHAR,          -- "es" | "en" | "pt"
+  "updatedAt" TIMESTAMP
+);
+```
+
+---
+
+## Premium Theme Unlock
+
+### Purchase Flow
+
+```
+User selects premium theme → Needs premium subscription
+  ↓
+System shows: "Unlock with Premium ($2.99/month)"
+  ↓
+User taps purchase → Stripe checkout
+  ↓
+Payment successful → Theme unlocked permanently
+  ↓
+CSS immediately updated, theme applied
+```
+
+### Subscription Validation
+
+```javascript
+async function canAccessTheme(userId, themeCode) {
+  const theme = await getTheme(themeCode);
+  
+  if (!theme.isPremium) return true;  // Free theme
+  
+  const subscription = await getUserActiveSubscription(userId);
+  return subscription && subscription.status === 'active';
+}
+```
+
+---
+
+## Analytics
+
+### Theme Adoption
+
+```
+THEME USAGE (Last 30 Days)
+═════════════════════════════════════════════
+
+Classic:      62% (default)
+Arctic Chill: 18%
+Inferno:      12%
+Olympic Gold:  5% (premium)
+Carbon:        2% (premium)
+Cyber Neon:    1% (premium)
+
+Premium Conversion: 8% of users
+Premium Revenue: $120/month
+Avg Premium Subscriber: $2.99/month
+```
+
+---
+
+## Accessibility Considerations
+
+### High Contrast Mode
+
+```json
+{
+  "code": "high_contrast",
+  "name": "High Contrast",
+  "colors": {
+    "bg": "#000000",
+    "primary": "#FFFF00",
+    "text": "#FFFFFF",
+    "border": "#FFFFFF"
+  },
+  "description": "Maximum contrast for visual accessibility."
+}
+```
+
+### Reduced Motion
+
+```javascript
+// If user has prefers-reduced-motion OS setting
+if (prefersReducedMotion) {
+  // Disable animations
+  document.documentElement.style.setProperty('--animation-duration', '0s');
+}
+```
+
+---
+
+## Integration Points
+
+**Feeds Into:**
+- **Frontend** → CSS variables applied globally
+- **Mobile App** → Theme applied on iOS/Android
+
+**Receives From:**
+- **User Preferences** → Theme selection
+- **Subscription Status** → Premium theme access
+
+---
+
+## Testing Checklist
+
+- [ ] Theme selection updates user preference
+- [ ] CSS variables inject correctly on theme change
+- [ ] Premium themes show lock icon for non-subscribers
+- [ ] Purchase flow integrates with Stripe
+- [ ] Theme persists across browser refresh
+- [ ] Mobile theme selection works
+- [ ] High contrast mode improves accessibility
+- [ ] Reduced motion setting respected
+- [ ] All 6 themes display correctly
+
+---
+
+**Generated:** 2026-04-10  
+**Source:** Extracted from theme_engine.js  
+**Integration Status:** ✅ Complete (user preferences + premium)
+
+
+
+# 19. Privacy Engine — Data Access Control
+
+**Purpose:** Manage what data coaches/athletes/admins can see based on access tiers
+
+**Status:** Core security system  
+**Update Frequency:** Per relationship change  
+**Performance:** O(1) permission lookup (cached)
+
+---
+
+## Overview
+
+Privacy Engine enforces data visibility based on 4 access tiers:
+1. **Solo** — Self only (no coach)
+2. **Coached** — Coach + self
+3. **Club** — Club members + coach + self
+4. **Admin** — All athletes (system)
+
+---
+
+## Access Tiers
+
+### Tier 1: Solo (Self Only)
+
+```json
+{
+  "tier": "solo",
+  "description": "Athlete trains alone, no coach",
+  "readable_fields": [
+    "metrics", "sessions", "readiness", "profile", "streaks", "xp", "achievements"
+  ],
+  "editable_fields": [
+    "metrics", "profile", "lifestyle_log", "password"
+  ],
+  "visible_screens": [
+    "dashboard", "metrics", "warmup", "session_log", "profile", "settings"
+  ],
+  "view_others": false
+}
+```
+
+### Tier 2: Coached (Coach + Self)
+
+```json
+{
+  "tier": "coached",
+  "description": "Athlete has one coach",
+  "coach_readable": [
+    "readiness", "metrics", "macrocycle", "sessions", "lifestyle", "pre_check", "adaptation_suggestions", "rpe", "video"
+  ],
+  "coach_editable": [
+    "macrocycle", "session_modifications", "alerts_created"
+  ],
+  "athlete_readable_from_coach": [
+    "coaching_notes", "program_assignments", "alerts"
+  ],
+  "visible_to_coach_screens": [
+    "athlete_dashboard", "metrics_detail", "session_history", "adaptation_log", "alerts"
+  ]
+}
+```
+
+**What Coach Can See:**
+```
+✅ Readiness & metrics
+✅ Training sessions (exercises, weights, RPE)
+✅ Macrocycle + periodization
+✅ Pre-session checks
+✅ Lifestyle factors
+✅ Adaptation decisions
+✅ Video recordings (if athlete uploads)
+❌ Personal messages (only coaching notes)
+❌ Billing information
+❌ Other athletes' data
+```
+
+### Tier 3: Club (Club Members)
+
+```json
+{
+  "tier": "club",
+  "description": "Athletes in same club can see limited peer data",
+  "peer_readable": [
+    "name", "belt", "club_achievements", "streak_days", "xp_rank", "shared_pr_cards"
+  ],
+  "peer_editable": [],
+  "hidden_from_peers": [
+    "readiness", "metrics", "sessions", "macrocycle", "lifestyle", "messages"
+  ]
+}
+```
+
+**What Club Members Can See:**
+```
+✅ Names
+✅ Belt levels
+✅ Shared PR cards (if athlete opts-in)
+✅ Club leaderboard rank
+✅ Streak counts
+✅ Club achievements
+❌ Actual sessions
+❌ Readiness data
+❌ Personal metrics
+❌ Macrocycle details
+```
+
+### Tier 4: Admin (System Wide)
+
+```json
+{
+  "tier": "admin",
+  "description": "System administrators only",
+  "admin_readable": [
+    "*"  // All data
+  ],
+  "admin_editable": [
+    "user_suspension", "data_export", "compliance_reports"
+  ]
+}
+```
+
+---
+
+## Implementation
+
+### Permission Check Function
+
+```javascript
+async function canViewField(viewerId, targetAthleteId, field) {
+  // Get relationship between viewer and athlete
+  const relationship = await getRelationship(viewerId, targetAthleteId);
+  
+  // Self can see everything
+  if (viewerId === targetAthleteId) return true;
+  
+  // Admin can see everything
+  if (userRole(viewerId) === 'admin') return true;
+  
+  // Check tier-based permissions
+  const tier = relationship.accessTier;
+  const permissions = TIER_PERMISSIONS[tier];
+  
+  return permissions.readable_fields.includes(field);
+}
+```
+
+### Middleware for API Routes
+
+```javascript
+// Express middleware
+const requireFieldAccess = (field) => {
+  return async (req, res, next) => {
+    const viewerId = req.user.id;
+    const targetAthleteId = req.params.athleteId;
+    
+    const hasAccess = await canViewField(viewerId, targetAthleteId, field);
+    
+    if (!hasAccess) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+    
+    next();
+  };
+};
+
+// Usage
+router.get('/athletes/:athleteId/metrics', 
+  requireFieldAccess('metrics'),
+  getAthleteMetrics
+);
+```
+
+---
+
+## Coach-Athlete Relationship
+
+### Invite Link Flow
+
+```
+1. Coach generates invite code (auto-generated, unique)
+2. Athlete gets code (email or manual entry)
+3. Athlete enters code in app
+4. System creates CoachAthlete relationship
+5. Access tier becomes "coached"
+6. Coach can now see athlete data
+```
+
+### Revoke Access
+
+```
+Coach clicks "Remove athlete" → relationship deleted
+  ↓
+Athlete loses access to coach dashboard
+  ↓
+Coach loses access to athlete data
+  ↓
+Sessions become coach-managed (coach can still see history)
+```
+
+---
+
+## Frontend Enforcement
+
+### Conditional Rendering
+
+```jsx
+// Example: Coach dashboard
+function AthleteCard({ athlete, viewer }) {
+  const canViewMetrics = checkPermission(viewer, athlete, 'metrics');
+  const canViewReadiness = checkPermission(viewer, athlete, 'readiness');
+  
+  return (
+    <div>
+      <h3>{athlete.name}</h3>
+      {canViewMetrics && <MetricsPanel athlete={athlete} />}
+      {canViewReadiness && <ReadinessGauge athlete={athlete} />}
+      {!canViewReadiness && <p>Hidden (privacy tier)</p>}
+    </div>
+  );
+}
+```
+
+---
+
+## Data Storage
+
+```sql
+CREATE TABLE "PrivacyTier" (
+  "id" UUID PRIMARY KEY,
+  "tierCode" VARCHAR UNIQUE,    -- "solo", "coached", "club", "admin"
+  "description" TEXT,
+  "readableFields" JSON,        -- Array of field names
+  "editableFields" JSON
+);
+
+CREATE TABLE "FieldPermission" (
+  "id" UUID PRIMARY KEY,
+  "field" VARCHAR,              -- "readiness", "metrics", "sessions", etc.
+  "tierCode" VARCHAR,
+  "readable" BOOLEAN,
+  "editable" BOOLEAN
+);
+
+CREATE TABLE "UserPrivacySettings" (
+  "id" UUID PRIMARY KEY,
+  "userId" UUID UNIQUE,
+  "currentTier" VARCHAR,
+  "shareClubAchievements" BOOLEAN,  -- Default true
+  "sharePRCards" BOOLEAN,           -- Default true
+  "shareLeaderboard" BOOLEAN,       -- Default true
+  "updatedAt" TIMESTAMP
+);
+```
+
+---
+
+## Compliance & GDPR
+
+### Data Export
+
+Athletes can request full data export:
+```
+Settings → Privacy → "Download My Data"
+  ↓
+System generates JSON file with all personal data
+  ↓
+File encrypted + sent to email
+  ↓
+Logged in audit trail
+```
+
+### Data Deletion
+
+```
+Settings → Privacy → "Delete My Account"
+  ↓
+Warning: "This cannot be undone"
+  ↓
+Schedule deletion (7-day grace period)
+  ↓
+After 7 days: Account and all associated data deleted
+  ↓
+Coach can still see historical sessions (for record-keeping)
+```
+
+---
+
+## Testing Checklist
+
+- [ ] Solo athlete can see own data, no coach access
+- [ ] Coach can see only "coached" tier fields
+- [ ] Club members see only shared fields (names, belts)
+- [ ] Admin access works for all data
+- [ ] Invite code creates correct relationship
+- [ ] Revoke access removes coach visibility
+- [ ] Field permissions cached correctly
+- [ ] Frontend hides restricted data
+- [ ] Data export generates JSON correctly
+- [ ] Deletion schedule works as expected
+
+---
+
+**Generated:** 2026-04-10  
+**Source:** Extracted from privacy_engine.js  
+**Integration Status:** ✅ Complete (tier enforcement + GDPR)
+
+
+
+# 20. Readiness Cache Service — Performance Optimization
+
+**Purpose:** Pre-calculate and store daily readiness to eliminate O(90) historical calculations, achieving O(1) lookup
+
+**Status:** Critical performance infrastructure  
+**Update Frequency:** Daily (00:30 UTC)  
+**Performance:** 500ms → 50ms per athlete (10x improvement)
+
+---
+
+## Problem Solved
+
+### Without Cache
+
+```javascript
+// Bad: O(90) calculation per request
+async function calculateReadiness(athleteId) {
+  const last90days = await getSessionHistory(athleteId, 90);  // DB query
+  const lastPRs = await getPRHistory(athleteId, 90);           // DB query
+  const lifestyle = await getLifestyleLog(athleteId, 90);      // DB query
+  
+  // Banister calculation on 90 days of data
+  let fitness = 0, fatigue = 0;
+  for (const session of last90days) {
+    fitness += calculateFitnessComponent(session);  // ~90 iterations
+    fatigue += calculateFatigueComponent(session);
+  }
+  
+  const readiness = ((fitness - fatigue) / fitness) * 100;
+  return readiness;  // 500ms total
+}
+```
+
+**Problem:** Every dashboard view hits database 3 times, calculates 90 days of data.
+
+### With Cache
+
+```javascript
+// Good: O(1) lookup
+async function getReadiness(athleteId, date) {
+  const cached = await cache.get(`readiness:${athleteId}:${date}`);
+  return cached;  // 50ms total
+}
+```
+
+**Solution:** Pre-calculate nightly, store in fast-access table.
+
+---
+
+## Daily Cron Job (00:30 UTC)
+
+```javascript
+async function recalculateAndCacheReadiness() {
+  const athletes = await prisma.athlete.findMany();
+  
+  for (const athlete of athletes) {
+    // 1. Calculate readiness for today
+    const readiness = await stressEngine.calculateReadiness(athlete.id);
+    
+    // 2. Get fitness & fatigue components
+    const { fitness, fatigue } = await stressEngine.getComponents(athlete.id);
+    
+    // 3. Get lifestyle impact
+    const lifestyleImpact = await lifestyleEngine.getDailyLoad(athlete.id);
+    
+    // 4. Store in cache table
+    await prisma.readinessCache.create({
+      data: {
+        athleteId: athlete.id,
+        date: new Date().toISOString().split('T')[0],
+        fitness: Math.round(fitness * 10) / 10,
+        fatigue: Math.round(fatigue * 10) / 10,
+        readiness: Math.round(readiness),
+        lifestyleImpact: Math.round(lifestyleImpact),
+        updatedAt: new Date()
+      }
+    });
+    
+    // 5. Cache in Redis for fast access
+    await redis.set(
+      `readiness:${athlete.id}:${today}`,
+      JSON.stringify({ readiness, fitness, fatigue }),
+      { EX: 86400 }  // Expire after 24 hours
+    );
+  }
+}
+```
+
+---
+
+## Database Schema
+
+```sql
+CREATE TABLE "readiness_cache" (
+  "id" UUID PRIMARY KEY,
+  "athlete_id" UUID NOT NULL,
+  "date" DATE NOT NULL,
+  "fitness" DECIMAL,        -- Current fitness (EMA 28-day)
+  "fatigue" DECIMAL,        -- Current fatigue (EMA 7-day)
+  "readiness" INT,          -- Final readiness 0-100
+  "lifestyle_impact" INT,   -- Lifestyle load impact
+  "updated_at" TIMESTAMP,
+  UNIQUE(athlete_id, date)
+);
+
+-- Index for fast queries
+CREATE INDEX idx_readiness_cache_athlete_date 
+  ON readiness_cache(athlete_id, date DESC);
+```
+
+---
+
+## API Usage
+
+### Dashboard Query (Fast)
+
+```javascript
+// Frontend: GET /api/athletes/me/readiness
+
+async function getReadinessDashboard(athleteId) {
+  // Simple lookup
+  const today = new Date().toISOString().split('T')[0];
+  const cached = await prisma.readinessCache.findUnique({
+    where: { athleteId_date: { athleteId, date: today } }
+  });
+  
+  if (!cached) {
+    // Fallback to calculation if somehow cache missed
+    const readiness = await stressEngine.calculateReadiness(athleteId);
+    return readiness;
+  }
+  
+  return {
+    readiness: cached.readiness,
+    fitness: cached.fitness,
+    fatigue: cached.fatigue,
+    lifestyleImpact: cached.lifestyle_impact,
+    lastUpdated: cached.updated_at
+  };
+}
+```
+
+### Historical Query (Fast)
+
+```javascript
+// Frontend: GET /api/athletes/me/readiness/history?days=30
+
+async function getReadinessHistory(athleteId, days = 30) {
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - days);
+  
+  const history = await prisma.readinessCache.findMany({
+    where: {
+      athleteId,
+      date: { gte: startDate }
+    },
+    orderBy: { date: 'asc' }
+  });
+  
+  return history;  // Database query, still fast (cached table scan)
+}
+```
+
+---
+
+## Redis Layer
+
+### Two-Tier Caching
+
+```
+Redis (In-Memory, <50ms)
+  ↓
+PostgreSQL Cache Table (Disk-backed, <100ms)
+  ↓
+Calculation Engine (Full compute, 500ms)
+```
+
+### Cache Key Structure
+
+```
+Key: readiness:{athlete_id}:{date}
+Value: { readiness: 65, fitness: 85, fatigue: 50 }
+TTL: 86400 seconds (24 hours)
+
+Example:
+  Key: readiness:uuid123:2026-04-10
+  Value: {"readiness":65,"fitness":85,"fatigue":50}
+```
+
+---
+
+## Cache Invalidation
+
+### When to Invalidate
+
+```
+Event                  → Action
+─────────────────────────────────────────
+Session completed      → Invalidate readiness for that day
+PR recorded            → Invalidate readiness for that day
+Lifestyle updated      → Invalidate readiness for that day
+Manual override        → Invalidate + recalculate
+```
+
+### Implementation
+
+```javascript
+// When something changes, invalidate cache
+async function invalidateReadinessCache(athleteId, date) {
+  // Remove from Redis
+  await redis.del(`readiness:${athleteId}:${date}`);
+  
+  // Mark as stale in DB (optional)
+  await prisma.readinessCache.updateMany({
+    where: { athleteId, date },
+    data: { updatedAt: new Date() }
+  });
+}
+
+// Example: After session completion
+async function onSessionCompleted(athleteId, sessionId) {
+  const session = await getSession(sessionId);
+  
+  // Update readiness
+  const newReadiness = await recalculateReadiness(athleteId);
+  
+  // Invalidate cache for today
+  const today = new Date().toISOString().split('T')[0];
+  await invalidateReadinessCache(athleteId, today);
+}
+```
+
+---
+
+## Fallback Strategy
+
+### If Cache Missing
+
+```javascript
+async function getReadinessSafe(athleteId, date) {
+  // Try Redis first
+  let cached = await redis.get(`readiness:${athleteId}:${date}`);
+  if (cached) return JSON.parse(cached);
+  
+  // Try database cache table
+  cached = await prisma.readinessCache.findUnique({
+    where: { athleteId_date: { athleteId, date } }
+  });
+  if (cached) {
+    // Repopulate Redis
+    await redis.set(
+      `readiness:${athleteId}:${date}`,
+      JSON.stringify(cached),
+      { EX: 86400 }
+    );
+    return cached;
+  }
+  
+  // Calculate fresh (rare, shouldn't happen with good cron)
+  const readiness = await stressEngine.calculateReadiness(athleteId);
+  return readiness;
+}
+```
+
+---
+
+## Monitoring
+
+### Cache Hit Rate
+
+```
+READINESS CACHE METRICS
+═════════════════════════════════════════
+
+Total Requests:        10,500/day
+Redis Hits:            9,876 (94%)
+DB Hits:               500 (5%)
+Cache Misses:          124 (1%)
+Avg Response Time:     52ms (was 500ms)
+
+Performance Improvement: 10x faster ✅
+Cache Efficiency:       99% hit rate ✅
+```
+
+---
+
+## Data Storage
+
+```sql
+-- Main cache table (shown above)
+
+-- Optional: Historical snapshots (archive)
+CREATE TABLE "readiness_cache_archive" (
+  "id" UUID PRIMARY KEY,
+  "athlete_id" UUID,
+  "date" DATE,
+  "fitness" DECIMAL,
+  "fatigue" DECIMAL,
+  "readiness" INT,
+  "archived_at" TIMESTAMP  -- Moved from cache after 90 days
+);
+```
+
+---
+
+## Testing Checklist
+
+- [ ] Cron job runs daily at 00:30 UTC
+- [ ] All athletes get readiness calculated
+- [ ] Values stored in readiness_cache table
+- [ ] Redis key-value format correct
+- [ ] Dashboard query returns < 100ms
+- [ ] History query returns sorted data
+- [ ] Cache invalidation works on session completion
+- [ ] Fallback calculation works if cache missing
+- [ ] Cache hit rate > 95%
+- [ ] Monitoring tracks metrics
+
+---
+
+**Generated:** 2026-04-10  
+**Source:** Extracted from readiness_cache_service.js  
+**Integration Status:** ✅ Complete (2-tier caching + fallback)
+
+
+
+# 21. Leaderboard Cache Service — Ranking Performance Optimization
+
+**Purpose:** Pre-calculate and store global + club rankings to eliminate O(n log n) sorting, achieving O(1) lookup
+
+**Status:** Critical performance infrastructure  
+**Update Frequency:** Daily (01:00 UTC, after readiness cache)  
+**Performance:** 3000ms → 100ms leaderboard load (30x improvement)
+
+---
+
+## Problem Solved
+
+### Without Cache
+
+```javascript
+// Bad: O(n log n) calculation per request
+async function generateLeaderboard(clubId) {
+  // Get all athletes in club
+  const athletes = await prisma.athlete.findMany({
+    where: { clubId },
+    include: { RMRecords, sessionHistory }
+  });
+  
+  // Calculate metrics for each athlete
+  const rankings = athletes.map(athlete => ({
+    athleteId: athlete.id,
+    name: athlete.name,
+    olyIndex: calculateOLYIndex(athlete),      // Per-athlete calc
+    xp: calculateTotalXP(athlete),              // Per-athlete calc
+    streak: getCurrentStreak(athlete),          // Per-athlete calc
+    weightCategory: getWeightCategory(athlete)
+  }));
+  
+  // Sort by OLY Index descending  O(n log n)
+  rankings.sort((a, b) => b.olyIndex - a.olyIndex);
+  
+  // Add ranks
+  rankings.forEach((r, i) => r.rank = i + 1);
+  
+  return rankings;  // 3000ms total (n=1000 athletes)
+}
+```
+
+**Problem:** Every leaderboard view recalculates all metrics for all athletes, sorts them.
+
+### With Cache
+
+```javascript
+// Good: O(1) lookup
+async function getLeaderboard(clubId, type = 'oly_index') {
+  const cached = await prisma.leaderboardCache.findMany({
+    where: { clubId, leaderboardType: type },
+    orderBy: { rank: 'asc' },
+    take: 100  // Top 100
+  });
+  
+  return cached;  // 100ms total (simple DB query)
+}
+```
+
+**Solution:** Pre-calculate and sort nightly, store ranked results.
+
+---
+
+## Daily Cron Job (01:00 UTC)
+
+```javascript
+async function recalculateAndCacheLeaderboards() {
+  const clubs = await prisma.club.findMany();
+  
+  for (const club of clubs) {
+    // Get all athletes in club
+    const athletes = await prisma.athlete.findMany({
+      where: { clubId: club.id }
+    });
+    
+    // Calculate metrics
+    const athleteMetrics = await Promise.all(
+      athletes.map(async (athlete) => ({
+        athleteId: athlete.id,
+        name: athlete.name,
+        club Id: club.id,
+        olyIndex: await olyIndexEngine.calculate(athlete.id),
+        xp: await gamificationEngine.getTotalXP(athlete.id),
+        streak: await streakEngine.getCurrentStreak(athlete.id),
+        goldenRatio: await goldenRatioEngine.getScore(athlete.id),
+        weightCategory: athlete.weightCategory
+      }))
+    );
+    
+    // Generate multiple leaderboard types
+    
+    // 1. OLY Index Leaderboard
+    const olyRanked = athleteMetrics
+      .sort((a, b) => b.olyIndex - a.olyIndex)
+      .map((entry, rank) => ({ ...entry, rank: rank + 1 }));
+    
+    await storeLeaderboardType(club.id, 'oly_index', olyRanked);
+    
+    // 2. XP Leaderboard
+    const xpRanked = athleteMetrics
+      .sort((a, b) => b.xp - a.xp)
+      .map((entry, rank) => ({ ...entry, rank: rank + 1 }));
+    
+    await storeLeaderboardType(club.id, 'xp', xpRanked);
+    
+    // 3. Streak Leaderboard
+    const streakRanked = athleteMetrics
+      .sort((a, b) => b.streak - a.streak)
+      .map((entry, rank) => ({ ...entry, rank: rank + 1 }));
+    
+    await storeLeaderboardType(club.id, 'streak', streakRanked);
+    
+    // 4. Golden Ratio Leaderboard
+    const ratioRanked = athleteMetrics
+      .sort((a, b) => b.goldenRatio - a.goldenRatio)
+      .map((entry, rank) => ({ ...entry, rank: rank + 1 }));
+    
+    await storeLeaderboardType(club.id, 'golden_ratio', ratioRanked);
+    
+    // 5. Weight Category Leaderboards
+    const categories = ['55kg', '61kg', '67kg', '73kg', '81kg', '89kg', '96kg', '102kg', '109kg+'];
+    for (const category of categories) {
+      const categoryAthletes = athleteMetrics.filter(a => a.weightCategory === category);
+      const categoryRanked = categoryAthletes
+        .sort((a, b) => b.olyIndex - a.olyIndex)
+        .map((entry, rank) => ({ ...entry, rank: rank + 1 }));
+      
+      await storeLeaderboardType(club.id, `oly_index_${category}`, categoryRanked);
+    }
+  }
+  
+  // Also generate GLOBAL leaderboards (across all clubs)
+  await generateGlobalLeaderboards();
+}
+
+async function storeLeaderboardType(clubId, type, rankedEntries) {
+  // Clear old leaderboard
+  await prisma.leaderboardCache.deleteMany({
+    where: { clubId, leaderboardType: type }
+  });
+  
+  // Store new ranked entries
+  for (const entry of rankedEntries) {
+    await prisma.leaderboardCache.create({
+      data: {
+        clubId,
+        leaderboardType: type,
+        athleteId: entry.athleteId,
+        rank: entry.rank,
+        name: entry.name,
+        xp: entry.xp,
+        weeklyGain: await getWeeklyXPGain(entry.athleteId),
+        streakDays: entry.streak,
+        olyIndex: entry.olyIndex,
+        updatedAt: new Date()
+      }
+    });
+  }
+  
+  // Cache in Redis for ultra-fast reads
+  const topRanked = rankedEntries.slice(0, 100);
+  await redis.set(
+    `leaderboard:${clubId}:${type}`,
+    JSON.stringify(topRanked),
+    { EX: 86400 }  // 24-hour TTL
+  );
+}
+```
+
+---
+
+## Database Schema
+
+```sql
+CREATE TABLE "leaderboard_cache" (
+  "id" UUID PRIMARY KEY,
+  "club_id" UUID NOT NULL,
+  "leaderboard_type" VARCHAR,   -- "oly_index", "xp", "streak", etc.
+  "athlete_id" UUID NOT NULL,
+  "rank" INT,                   -- 1, 2, 3, ...
+  "name" VARCHAR,
+  "xp" INT,
+  "weekly_gain" INT,            -- XP gained this week
+  "streak_days" INT,
+  "oly_index" DECIMAL,
+  "updated_at" TIMESTAMP,
+  UNIQUE(club_id, leaderboard_type, athlete_id)
+);
+
+-- Indexes for fast queries
+CREATE INDEX idx_leaderboard_club_type_rank 
+  ON leaderboard_cache(club_id, leaderboard_type, rank);
+```
+
+---
+
+## Leaderboard Types
+
+### 1. OLY Index Leaderboard
+
+```json
+{
+  "leaderboard_type": "oly_index",
+  "club_id": "uuid",
+  "entries": [
+    {
+      "rank": 1,
+      "athlete_name": "Kristina",
+      "oly_index": 512.3,
+      "bodyweight_kg": 64,
+      "snatch": 110,
+      "clean_jerk": 142,
+      "total": 252
+    },
+    {
+      "rank": 2,
+      "athlete_name": "João",
+      "oly_index": 496.5,
+      "bodyweight_kg": 85,
+      "snatch": 140,
+      "clean_jerk": 175,
+      "total": 315
+    }
+  ]
+}
+```
+
+### 2. XP Leaderboard (Weekly)
+
+```json
+{
+  "leaderboard_type": "xp",
+  "week": 14,
+  "entries": [
+    {
+      "rank": 1,
+      "athlete_name": "Maria",
+      "xp_total": 45230,
+      "weekly_gain": 425,
+      "streak_days": 22
+    }
+  ]
+}
+```
+
+### 3. Streak Leaderboard
+
+```json
+{
+  "leaderboard_type": "streak",
+  "entries": [
+    {
+      "rank": 1,
+      "athlete_name": "Helena",
+      "streak_days": 90,
+      "total_sessions": 90,
+      "last_trained": "2026-04-10"
+    }
+  ]
+}
+```
+
+### 4. Weight Category Leaderboards
+
+```
+oly_index_55kg    (55kg or under)
+oly_index_61kg    (55-61kg)
+oly_index_67kg    (61-67kg)
+... etc
+oly_index_109kg+  (over 102kg)
+```
+
+---
+
+## API Usage
+
+### Club Leaderboard (Fast)
+
+```javascript
+// GET /api/clubs/{clubId}/leaderboard?type=oly_index
+
+async function getClubLeaderboard(clubId, type = 'oly_index', limit = 100) {
+  // Try Redis first (< 50ms)
+  let cached = await redis.get(`leaderboard:${clubId}:${type}`);
+  if (cached) return JSON.parse(cached);
+  
+  // Fall back to database cache (< 100ms)
+  const leaderboard = await prisma.leaderboardCache.findMany({
+    where: { clubId, leaderboardType: type },
+    orderBy: { rank: 'asc' },
+    take: limit
+  });
+  
+  return leaderboard;
+}
+```
+
+### Global Leaderboard (Fast)
+
+```javascript
+// GET /api/leaderboard/global?type=oly_index
+
+async function getGlobalLeaderboard(type = 'oly_index', limit = 100) {
+  // Always cached (pre-calculated globally)
+  const leaderboard = await prisma.leaderboardCache.findMany({
+    where: { 
+      clubId: null,  // null = global
+      leaderboardType: type 
+    },
+    orderBy: { rank: 'asc' },
+    take: limit
+  });
+  
+  return leaderboard;
+}
+```
+
+---
+
+## Cache Invalidation
+
+### Invalidate When
+
+```
+Event                   → Affected Leaderboards
+─────────────────────────────────────────────────
+XP gained (session)     → xp, weekly_gain
+Streak updated          → streak
+OLY Index improved      → oly_index, weight_category
+Athlete joins club      → club leaderboards
+Athlete leaves club     → club leaderboards
+```
+
+### Implementation
+
+```javascript
+async function invalidateLeaderboards(athleteId, types = ['all']) {
+  const athlete = await getAthlete(athleteId);
+  
+  // Remove from Redis
+  for (const type of types) {
+    await redis.del(`leaderboard:${athlete.clubId}:${type}`);
+  }
+  
+  // Mark as stale in DB (optional, will recalculate next cron)
+}
+
+// Example: After session completed
+async function onSessionCompleted(athleteId) {
+  // ...
+  
+  // Invalidate leaderboards that athlete affects
+  await invalidateLeaderboards(athleteId, [
+    'xp', 'streak', 'oly_index'
+  ]);
+}
+```
+
+---
+
+## Monitoring
+
+### Leaderboard Performance
+
+```
+LEADERBOARD CACHE METRICS
+═════════════════════════════════════════
+
+Total Requests:        25,000/day
+Redis Hits:            24,500 (98%)
+DB Hits:               450 (2%)
+Cache Misses:          50 (0.2%)
+Avg Response Time:     45ms (was 3000ms)
+
+Performance Improvement: 67x faster ✅
+Cache Efficiency:       99.8% hit rate ✅
+
+Leaderboard Types Cached:
+  • OLY Index: 1,250 entries
+  • XP: 1,250 entries
+  • Streak: 1,250 entries
+  • Golden Ratio: 1,250 entries
+  • 9 Weight Categories: 9,000 entries
+  Total: 13,000 cached entries
+```
+
+---
+
+## Testing Checklist
+
+- [ ] Cron calculates all leaderboard types
+- [ ] Ranks assigned correctly (1, 2, 3...)
+- [ ] OLY Index sorted descending
+- [ ] XP sorted by weekly gain
+- [ ] Streak sorted by days
+- [ ] Weight category leaderboards filtered correctly
+- [ ] Global leaderboards generated
+- [ ] Redis cache populated
+- [ ] API queries return < 100ms
+- [ ] Invalidation works on metric changes
+- [ ] Cache hit rate > 99%
+
+---
+
+**Generated:** 2026-04-10  
+**Source:** Extracted from leaderboard_cache_service.js  
+**Integration Status:** ✅ Complete (multi-type ranking + caching)
+
+
+

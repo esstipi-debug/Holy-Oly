@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>C1 — Command Center Coach</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --color-bg: #07070F;
+      --color-surface: #111118;
+      --color-surface2: #1A1A26;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0D0D18;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 40px 20px;
+      font-family: 'Inter', system-ui, sans-serif;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+    .phone {
+      width: 390px;
+      background: var(--color-bg);
+      border-radius: 44px;
+      border: 2px solid #2a2a3a;
+      overflow: hidden;
+      box-shadow: 0 0 80px rgba(99,102,241,0.12), 0 0 0 1px #1e1e30;
+      display: flex;
+      flex-direction: column;
+    }
+    .phone-label {
+      width: 390px;
+      text-align: center;
+      margin-bottom: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #475569;
+    }
+    .status-bar {
+      height: 44px;
+      background: var(--color-bg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      flex-shrink: 0;
+    }
+    .scroll-area {
+      overflow-y: auto;
+      scrollbar-width: none;
+      padding-bottom: 20px;
+    }
+    .scroll-area::-webkit-scrollbar { display: none; }
+    .bottom-nav {
+      height: 76px;
+      background: #0E0E1C;
+      border-top: 1px solid #1e1e30;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding-bottom: 12px;
+      flex-shrink: 0;
+    }
+    .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; }
+    .nav-label { font-size: 10px; color: #475569; }
+    .nav-label.active { color: #6366f1; }
+
+    /* Athlete card */
+    .athlete-card {
+      background: #111118;
+      border: 1px solid #1e1e30;
+      border-radius: 16px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    .athlete-card:hover { border-color: #3f3f60; }
+    .athlete-card.danger { border-left: 3px solid #EF4444; }
+    .athlete-card.warning { border-left: 3px solid #EAB308; }
+    .athlete-card.absent  { border-left: 3px solid #475569; }
+    .athlete-card.pulse   { border-left: 3px solid #8B5CF6; }
+
+    .readiness-dot {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 900;
+      flex-shrink: 0;
+    }
+    .dot-red    { background: #2a0a0a; border: 2px solid #EF4444; color: #f87171; }
+    .dot-yellow { background: #1c1500; border: 2px solid #EAB308; color: #fbbf24; }
+    .dot-green  { background: #0d1f12; border: 2px solid #22C55E; color: #4ade80; }
+    .dot-grey   { background: #1a1a28; border: 2px solid #475569; color: #64748b; }
+
+    .status-chip {
+      font-size: 9px; font-weight: 700;
+      padding: 2px 7px; border-radius: 20px;
+      letter-spacing: .04em; text-transform: uppercase;
+    }
+    .chip-overreaching { background: #450a0a; color: #f87171; border: 1px solid #7f1d1d; }
+    .chip-peaking      { background: #0d2718; color: #4ade80; border: 1px solid #14532d; }
+    .chip-maturity     { background: #001e20; color: #06B6D4; border: 1px solid #0e4c56; }
+    .chip-absent       { background: #1a1a28; color: #64748b; border: 1px solid #2a2a3a; }
+    .chip-trial        { background: #1e1b4b; color: #a78bfa; border: 1px solid #3730a3; }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      padding: 0 24px;
+    }
+    .section-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    }
+    .section-title {
+      font-size: 11px; font-weight: 700;
+      letter-spacing: .08em; text-transform: uppercase;
+      flex: 1;
+    }
+    .section-count {
+      font-size: 11px; font-weight: 700;
+      padding: 2px 8px; border-radius: 20px;
+    }
+    .count-red    { background: #2a0a0a; color: #f87171; }
+    .count-yellow { background: #1c1500; color: #fbbf24; }
+    .count-grey   { background: #1a1a28; color: #64748b; }
+    .count-purple { background: #1e1b4b; color: #a78bfa; }
+
+    /* Intervention modal */
+    .modal-overlay {
+      position: absolute; inset: 0;
+      background: rgba(7,7,15,.85);
+      backdrop-filter: blur(4px);
+      display: flex; align-items: flex-end;
+      z-index: 20;
+    }
+    .modal-card {
+      background: #0E0E1C;
+      border: 1px solid #1e1e30;
+      border-radius: 28px 28px 0 0;
+      padding: 24px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════
+     VISTA 1: Command Center Principal
+     ═══════════════════════════════════════════════════════ -->
+<div>
+  <p class="phone-label">C1 — Command Center</p>
+  <div class="phone" style="min-height:820px;">
+    <div class="status-bar">
+      <span style="font-size:12px;color:#94a3b8;font-weight:600;">9:41</span>
+      <span style="font-size:12px;color:#94a3b8;font-weight:600;">92%</span>
+    </div>
+
+    <div class="scroll-area">
+
+      <!-- Header coach -->
+      <div style="padding:8px 24px 14px;display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <p style="font-size:13px;color:#64748b;">Panel de control</p>
+          <p style="font-size:20px;font-weight:800;color:#f1f5f9;letter-spacing:-.02em;">Coach Ramírez</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button style="background:#111118;border:1px solid #3730a3;border-radius:12px;padding:8px 12px;color:#818cf8;font-size:12px;font-weight:700;cursor:pointer;">+ Atleta</button>
+          <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8B5CF6);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:white;">R</div>
+        </div>
+      </div>
+
+      <!-- Global stats strip -->
+      <div style="padding:0 24px 16px;">
+        <div style="background:#111118;border:1px solid #1e1e30;border-radius:16px;padding:12px 16px;display:flex;justify-content:space-around;">
+          <div style="text-align:center;">
+            <p style="font-size:20px;font-weight:900;color:#f1f5f9;">45</p>
+            <p style="font-size:10px;color:#64748b;">Atletas</p>
+          </div>
+          <div style="width:1px;background:#1e1e30;"></div>
+          <div style="text-align:center;">
+            <p style="font-size:20px;font-weight:900;color:#818cf8;">12</p>
+            <p style="font-size:10px;color:#64748b;">Premium</p>
+          </div>
+          <div style="width:1px;background:#1e1e30;"></div>
+          <div style="text-align:center;">
+            <p style="font-size:20px;font-weight:900;color:#a78bfa;">33</p>
+            <p style="font-size:10px;color:#64748b;">Trial</p>
+          </div>
+          <div style="width:1px;background:#1e1e30;"></div>
+          <div style="text-align:center;">
+            <p style="font-size:20px;font-weight:900;color:#22C55E;">94%</p>
+            <p style="font-size:10px;color:#64748b;">Longevidad</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ───── 🔴 Riesgo Alto ───── -->
+      <div style="margin-bottom:14px;">
+        <div class="section-head">
+          <div class="section-dot" style="background:#EF4444;"></div>
+          <span class="section-title" style="color:#f87171;">Riesgo Alto — Intervención</span>
+          <span class="section-count count-red">3</span>
+        </div>
+        <div style="padding:0 24px;display:flex;flex-direction:column;gap:8px;">
+
+          <div class="athlete-card danger">
+            <div style="width:38px;height:38px;border-radius:50%;background:#1c0a0a;border:2px solid #EF4444;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#f87171;flex-shrink:0;">J</div>
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+                <p style="font-size:13px;font-weight:700;color:#f1f5f9;">Juan Pérez</p>
+                <span class="status-chip chip-overreaching">Overreaching</span>
+              </div>
+              <p style="font-size:11px;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">😴 4h sueño · 🦵 Dolor rodilla · Snatch 100kg</p>
+            </div>
+            <div class="readiness-dot dot-red">22</div>
+          </div>
+
+          <div class="athlete-card danger">
+            <div style="width:38px;height:38px;border-radius:50%;background:#1c0a0a;border:2px solid #EF4444;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#f87171;flex-shrink:0;">M</div>
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+                <p style="font-size:13px;font-weight:700;color:#f1f5f9;">María Torres</p>
+                <span class="status-chip chip-overreaching">Riesgo Alto</span>
+              </div>
+              <p style="font-size:11px;color:#94a3b8;">⚠️ Ignoró Injury Shield x3 · Fatiga crónica</p>
+            </div>
+            <div class="readiness-dot dot-red">31</div>
+          </div>
+
+          <div class="athlete-card danger">
+            <div style="width:38px;height:38px;border-radius:50%;background:#1c0a0a;border:2px solid #EF4444;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#f87171;flex-shrink:0;">C</div>
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+                <p style="font-size:13px;font-weight:700;color:#f1f5f9;">Carlos Vega</p>
+                <span class="status-chip chip-trial">Trial d.38</span>
+              </div>
+              <p style="font-size:11px;color:#94a3b8;">📉 RPE 10 en 4 series · Por encima del plan</p>
+            </div>
+            <div class="readiness-dot dot-red">28</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ───── 🟡 Riesgo Moderado ───── -->
+      <div style="margin-bottom:14px;">
+        <div class="section-head">
+          <div class="section-dot" style="background:#EAB308;"></div>
+          <span class="section-title" style="color:#fbbf24;">Riesgo Moderado</span>
+          <span class="section-count count-yellow">5</span>
+        </div>
+        <div style="padding:0 24px;display:flex;flex-direction:column;gap:8px;">
+
+          <div class="athlete-card warning">
+            <div style="width:38px;height:38px;border-radius:50%;background:#1c1500;border:2px solid #EAB308;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fbbf24;flex-shrink:0;">L</div>
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+                <p style="font-size:13px;font-weight:700;color:#f1f5f9;">Luisa Mendez</p>
+                <span class="status-chip chip-peaking">Peaking</span>
+              </div>
+              <p style="font-size:11px;color:#94a3b8;">Fase Lútea · Carga ajustada -10%</p>
+            </div>
+            <div class="readiness-dot dot-yellow">52</div>
+          </div>
+
+          <div class="athlete-card warning" style="opacity:.6;">
+            <div style="width:38px;height:38px;border-radius:50%;background:#1c1500;border:2px solid #EAB308;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fbbf24;flex-shrink:0;">+4</div>
+            <div style="flex:1;">
+              <p style="font-size:12px;color:#94a3b8;">4 atletas más en monitoreo</p>
+            </div>
+            <span style="font-size:11px;color:#475569;border:1px solid #2a2a3a;border-radius:8px;padding:3px 8px;">Ver →</span>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ───── ⚪ Ausentes ───── -->
+      <div style="margin-bottom:14px;">
+        <div class="section-head">
+          <div class="section-dot" style="background:#475569;"></div>
+          <span class="section-title" style="color:#94a3b8;">Ausentes / Sin Racha</span>
+          <span class="section-count count-grey">4</span>
+        </div>
+        <div style="padding:0 24px;display:flex;flex-direction:column;gap:8px;">
+          <div class="athlete-card absent">
+            <div style="width:38px;height:38px;border-radius:50%;background:#1a1a28;border:2px solid #475569;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#64748b;flex-shrink:0;">P</div>
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+                <p style="font-size:13px;font-weight:700;color:#f1f5f9;">Pedro Silva</p>
+                <span class="status-chip chip-absent">3 días ausente</span>
+              </div>
+              <p style="font-size:11px;color:#94a3b8;">Racha rota · Último login: hace 3 días</p>
+            </div>
+            <div class="readiness-dot dot-grey">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ───── 🫀 Pulse Engine ───── -->
+      <div style="margin-bottom:20px;">
+        <div class="section-head">
+          <div class="section-dot" style="background:#8B5CF6;"></div>
+          <span class="section-title" style="color:#a78bfa;">Prescripción Pulse</span>
+          <span class="section-count count-purple">3</span>
+        </div>
+        <div style="padding:0 24px;">
+          <div style="background:#0f0c1e;border:1px solid #3730a3;border-radius:16px;padding:14px;">
+            <p style="font-size:12px;color:#94a3b8;margin-bottom:10px;">3 atletas necesitan bloque anaeróbico esta semana para mejorar OLY Index</p>
+            <p style="font-size:11px;color:#818cf8;margin-bottom:12px;">Protocolo IA: AirBike · 5 × 30s/30s</p>
+            <div style="display:flex;gap:-8px;margin-bottom:12px;">
+              <div style="width:28px;height:28px;border-radius:50%;background:#1e1b4b;border:2px solid #07070F;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#a78bfa;">M</div>
+              <div style="width:28px;height:28px;border-radius:50%;background:#1e1b4b;border:2px solid #07070F;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#a78bfa;margin-left:-8px;">P</div>
+              <div style="width:28px;height:28px;border-radius:50%;background:#1e1b4b;border:2px solid #07070F;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#a78bfa;margin-left:-8px;">L</div>
+            </div>
+            <button style="width:100%;background:linear-gradient(135deg,#1e1b4b,#2e1b6b);border:1px solid #4f46e5;border-radius:12px;padding:11px;color:#a78bfa;font-size:13px;font-weight:700;cursor:pointer;">
+              ⚡ Aprobar e Inyectar en calendarios
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end scroll -->
+
+    <!-- Bottom Nav Coach -->
+    <div class="bottom-nav">
+      <div class="nav-item">
+        <svg width="22" height="22" fill="none" stroke="#6366f1" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <span class="nav-label active">Panel</span>
+      </div>
+      <div class="nav-item">
+        <svg width="22" height="22" fill="none" stroke="#475569" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4"/><path d="M16 11l2 2 4-4"/></svg>
+        <span class="nav-label">Ajustes</span>
+      </div>
+      <div class="nav-item">
+        <svg width="22" height="22" fill="none" stroke="#475569" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span class="nav-label">Equipo</span>
+      </div>
+      <div class="nav-item">
+        <svg width="22" height="22" fill="none" stroke="#475569" stroke-width="2" viewBox="0 0 24 24"><path d="M3 20l4-8 4 4 4-6 4 10"/></svg>
+        <span class="nav-label">Stats</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     VISTA 2: Modal de Intervención (Juan Pérez)
+     ═══════════════════════════════════════════════════════ -->
+<div>
+  <p class="phone-label">C2 — Risk Intervention Modal</p>
+  <div class="phone" style="min-height:820px;position:relative;">
+    <div class="status-bar">
+      <span style="font-size:12px;color:#94a3b8;font-weight:600;">9:43</span>
+      <span style="font-size:12px;color:#94a3b8;font-weight:600;">92%</span>
+    </div>
+
+    <!-- Blurred background (Command Center) -->
+    <div style="padding:24px;filter:blur(2px);opacity:.4;">
+      <p style="font-size:20px;font-weight:800;color:#f1f5f9;">Coach Ramírez</p>
+      <p style="font-size:13px;color:#475569;margin-top:20px;">Panel de control activo...</p>
+    </div>
+
+    <!-- Modal overlay -->
+    <div class="modal-overlay">
+      <div class="modal-card">
+        <!-- Handle -->
+        <div style="width:36px;height:4px;background:#2a2a3a;border-radius:2px;margin:0 auto 20px;"></div>
+
+        <!-- Athlete header -->
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <div style="width:48px;height:48px;border-radius:50%;background:#1c0a0a;border:2px solid #EF4444;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#f87171;flex-shrink:0;">J</div>
+          <div>
+            <p style="font-size:16px;font-weight:800;color:#f1f5f9;">Juan Pérez</p>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:2px;">
+              <div style="width:8px;height:8px;border-radius:50%;background:#EF4444;"></div>
+              <span style="font-size:11px;color:#f87171;font-weight:700;">Riesgo Alto · 22/100 Readiness</span>
+            </div>
+          </div>
+          <div style="margin-left:auto;background:#2a0a0a;border:1px solid #7f1d1d;border-radius:12px;padding:6px 10px;">
+            <span style="font-size:20px;font-weight:900;color:#EF4444;line-height:1;">22</span>
+          </div>
+        </div>
+
+        <!-- Diagnosis -->
+        <div style="background:#0f0f18;border:1px solid #1e1e30;border-radius:14px;padding:12px;margin-bottom:14px;">
+          <p style="font-size:11px;font-weight:700;color:#475569;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;">Diagnóstico rápido</p>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:14px;">😴</span>
+              <span style="font-size:12px;color:#f87171;">Solo 4h de sueño reportado</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:14px;">🦵</span>
+              <span style="font-size:12px;color:#fbbf24;">Dolor de rodilla (nivel 3/5)</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:14px;">📈</span>
+              <span style="font-size:12px;color:#94a3b8;">Sesión programada: <strong style="color:#f1f5f9;">Snatch 100kg × 5×3</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- IA suggestion -->
+        <div style="background:#0a1820;border:1px solid #0e4c56;border-radius:14px;padding:12px;margin-bottom:16px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+            <span style="font-size:12px;">🤖</span>
+            <span style="font-size:11px;font-weight:700;color:#06B6D4;letter-spacing:.06em;text-transform:uppercase;">Sugerencia IA</span>
+          </div>
+          <p style="font-size:12px;color:#94a3b8;">Cambiar Snatch → <strong style="color:#f1f5f9;">Power Snatch</strong> · Reducir carga <strong style="color:#06B6D4;">-15%</strong> (85kg) · Eliminar series 4 y 5</p>
+        </div>
+
+        <!-- Action buttons -->
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <button style="width:100%;background:linear-gradient(135deg,#064e3b,#065f46);border:1px solid #059669;border-radius:14px;padding:13px;color:#34d399;font-size:14px;font-weight:800;cursor:pointer;">
+            ✅ Aplicar Adaptación Sugerida
+          </button>
+          <div style="display:flex;gap:8px;">
+            <button style="flex:1;background:#111118;border:1px solid #1e1e30;border-radius:12px;padding:11px;color:#94a3b8;font-size:12px;font-weight:700;cursor:pointer;">
+              💤 Asignar Recuperación Activa
+            </button>
+            <button style="flex:1;background:#111118;border:1px solid #1e1e30;border-radius:12px;padding:11px;color:#94a3b8;font-size:12px;font-weight:700;cursor:pointer;">
+              🔍 Ver perfil completo
+            </button>
+          </div>
+          <button style="width:100%;background:transparent;border:none;padding:8px;color:#475569;font-size:12px;cursor:pointer;">
+            Ignorar por ahora
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     VISTA 3: Adjustment Hub (1-Tap Bulk)
+     ═══════════════════════════════════════════════════════ -->
+<div>
+  <p class="phone-label">C3 — Adjustment Hub</p>
+  <div class="phone" style="min-height:680px;">
+    <div class="status-bar">
+      <span style="font-size:12px;color:#94a3b8;font-weight:600;">9:45</span>
+      <span style="font-size:12px;color:#94a3b8;font-weight:600;">92%</span>
+    </div>
+    <div class="scroll-area" style="padding:16px 24px;">
+
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+        <div style="width:32px;height:32px;background:#1a1a28;border:1px solid #2a2a3a;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:14px;cursor:pointer;">←</div>
+        <div>
+          <p style="font-size:17px;font-weight:800;color:#f1f5f9;">Ajustes Pendientes</p>
+          <p style="font-size:12px;color:#64748b;">7 sugerencias de la IA</p>
+        </div>
+      </div>
+
+      <!-- Bulk approve -->
+      <div style="background:linear-gradient(135deg,#064e3b,#0d2718);border:1px solid #059669;border-radius:16px;padding:14px;margin-bottom:16px;display:flex;align-items:center;gap:12px;">
+        <span style="font-size:22px;">⚡</span>
+        <div style="flex:1;">
+          <p style="font-size:13px;font-weight:700;color:#34d399;">Aprobar todas las sugerencias de seguridad</p>
+          <p style="font-size:11px;color:#4ade80;">5 adaptaciones por baja readiness</p>
+        </div>
+        <button style="background:#059669;border:none;border-radius:10px;padding:8px 12px;color:white;font-size:12px;font-weight:700;cursor:pointer;">Aplicar</button>
+      </div>
+
+      <!-- Individual cards (swipeable) -->
+      <p style="font-size:11px;color:#475569;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;">Revisar una por una</p>
+
+      <div style="display:flex;flex-direction:column;gap:10px;">
+
+        <div style="background:#111118;border:1px solid #1e1e30;border-radius:16px;padding:14px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <div style="width:32px;height:32px;border-radius:50%;background:#1c0a0a;border:1.5px solid #EF4444;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#f87171;">J</div>
+            <div style="flex:1;">
+              <p style="font-size:13px;font-weight:700;color:#f1f5f9;">Juan Pérez</p>
+              <p style="font-size:11px;color:#94a3b8;">Snatch → Power Snatch · -15% carga</p>
+            </div>
+            <div style="background:#2a0a0a;border:1px solid #7f1d1d;border-radius:8px;padding:3px 8px;">
+              <span style="font-size:11px;color:#f87171;">Riesgo: 78</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button style="flex:1;background:#064e3b;border:1px solid #059669;border-radius:10px;padding:9px;color:#34d399;font-size:12px;font-weight:700;cursor:pointer;">✅ Aprobar</button>
+            <button style="flex:1;background:#111118;border:1px solid #2a2a3a;border-radius:10px;padding:9px;color:#64748b;font-size:12px;font-weight:700;cursor:pointer;">👁 Ver más</button>
+            <button style="flex:1;background:#111118;border:1px solid #2a2a3a;border-radius:10px;padding:9px;color:#64748b;font-size:12px;font-weight:700;cursor:pointer;">✗ Ignorar</button>
+          </div>
+        </div>
+
+        <div style="background:#111118;border:1px solid #1e1e30;border-radius:16px;padding:14px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <div style="width:32px;height:32px;border-radius:50%;background:#1c1500;border:1.5px solid #EAB308;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fbbf24;">L</div>
+            <div style="flex:1;">
+              <p style="font-size:13px;font-weight:700;color:#f1f5f9;">Luisa Mendez</p>
+              <p style="font-size:11px;color:#94a3b8;">Carga general -10% · Fase lútea activa</p>
+            </div>
+            <div style="background:#1c1500;border:1px solid #713f12;border-radius:8px;padding:3px 8px;">
+              <span style="font-size:11px;color:#fbbf24;">Riesgo: 52</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button style="flex:1;background:#064e3b;border:1px solid #059669;border-radius:10px;padding:9px;color:#34d399;font-size:12px;font-weight:700;cursor:pointer;">✅ Aprobar</button>
+            <button style="flex:1;background:#111118;border:1px solid #2a2a3a;border-radius:10px;padding:9px;color:#64748b;font-size:12px;font-weight:700;cursor:pointer;">👁 Ver más</button>
+            <button style="flex:1;background:#111118;border:1px solid #2a2a3a;border-radius:10px;padding:9px;color:#64748b;font-size:12px;font-weight:700;cursor:pointer;">✗ Ignorar</button>
+          </div>
+        </div>
+
+        <div style="background:#111118;border:1px solid #1e1e30;border-radius:16px;padding:14px;opacity:.5;">
+          <p style="font-size:12px;color:#64748b;text-align:center;">+ 5 sugerencias más...</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<a href="index.html" style="position:fixed;top:20px;left:20px;background:#1e1e30;color:#94a3b8;font-size:13px;padding:8px 14px;border-radius:10px;text-decoration:none;border:1px solid #2a2a3a;z-index:99;">← Volver</a>
+
+</body>
+</html>

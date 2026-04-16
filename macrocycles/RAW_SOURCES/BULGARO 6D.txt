@@ -1,0 +1,113 @@
+PARÁMETROS CLAVE DEL PROGRAMA
+
+    Sistema / Escuela: Búlgaro (Enfoque: Especificidad Máxima, Intensidad Extrema, Frecuencia).
+
+    Duración: 12 Semanas (Estructura cíclica para salida competitiva, aunque el sistema suele ser continuo ).
+
+    Frecuencia: 6 Días / Semana (Alta densidad).
+
+    Intensidad Media (IMR): 90% - 100% (Daily Maxing).
+
+    Volumen Mensual Objetivo: 500 - 900 repeticiones (Volumen alto a través de frecuencia, no de reps por set).
+
+    Filosofía de Carga: "Daily Max" (DM). No se busca un récord personal (PR) cada día, sino el máximo técnico posible para ese día específico.
+
+    Selección de Ejercicios: Minimalista. Snatch, Clean & Jerk, Front Squat, Back Squat (ocasional). Sin accesorios "fluff".
+
+    Estructura de Deload: 3:1 (3 semanas duras : 1 descarga relativa).
+
+🟢 MES 1: ADAPTACIÓN A LA FRECUENCIA
+
+Objetivo: Adaptar el SNC a levantar >90% seis días a la semana. Estructura: Alternancia entre días de "Máximo Clasico" y días de "Potencia/Back Squat" para gestionar la fatiga inicial.
+SEMANA 1 (Introducción - Daily Max Intro)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA)
+LUN	MAX	Snatch: Ramp to 1RM, luego 2x1 @ 90%	C&J: Ramp to 1RM, luego 2x1 @ 90%	Front Squat: Ramp to 1RM, 2x2 @ 90%
+MAR	VAR	Power Snatch: Ramp to 1RM	Power Clean + Jerk: Ramp to 1RM	Back Squat: 3x3 @ 80%
+MIE	MAX	Snatch: Ramp to 1RM, luego 2x1 @ 90%	C&J: Ramp to 1RM, luego 2x1 @ 90%	Front Squat: Ramp to 1RM
+JUE	VAR	Power Snatch: Ramp to 1RM	Power Clean: Ramp to 1RM	Back Squat: 3x3 @ 80%
+VIE	MAX	Snatch: Ramp to 1RM, luego 3x1 @ 85%	C&J: Ramp to 1RM, luego 3x1 @ 85%	Front Squat: Ramp to 1RM
+SÁB	MAX	Snatch: Ramp to 1RM	C&J: Ramp to 1RM	Front Squat: Ramp to 1RM
+SEMANA 2 (Consolidación - Aumento Volumen Back-off)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA)
+LUN	MAX	Snatch: DM (Daily Max), 3x1 @ 90%	C&J: DM, 3x1 @ 90%	Front Squat: DM, 2x2 @ 90%
+MAR	VAR	Power Snatch: DM, 2x1 @ 90%	Power C&J: DM, 2x1 @ 90%	Back Squat: DM, 2x2 @ 85%
+MIE	MAX	Snatch: DM, 3x1 @ 90%	C&J: DM, 3x1 @ 90%	Front Squat: DM, 2x1 @ 95%
+JUE	VAR	Snatch: DM, 2x1 @ 85%	Power Clean: DM	Back Squat: 3x2 @ 85%
+VIE	MAX	Snatch: DM, 3x1 @ 90%	C&J: DM, 3x1 @ 90%	Front Squat: DM, 2x1 @ 90%
+SÁB	MAX	Snatch: DM	C&J: DM	Front Squat: DM
+SEMANA 3 (Choque - Alta Intensidad)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA)
+LUN	MAX	Snatch: DM, 2x1 @ 95%	C&J: DM, 2x1 @ 95%	Front Squat: DM, 1x1 @ 95%
+MAR	VAR	Snatch: DM	Power C&J: DM	Back Squat: DM
+MIE	MAX	Snatch: DM, 2x1 @ 92%	C&J: DM, 2x1 @ 92%	Front Squat: DM, 2x1 @ 90%
+JUE	VAR	Power Snatch: DM	C&J: DM	Back Squat: DM
+VIE	MAX	Snatch: DM, 3x1 @ 90%	C&J: DM, 3x1 @ 90%	Front Squat: DM
+SÁB	MAX	Snatch: DM	C&J: DM	Front Squat: DM
+SEMANA 4 (Descarga Activa - IMR 80-85%)
+
+Se reduce la intensidad máxima. No se busca el fallo. | DÍA | TIPO | SLOT 1 (ARRANQUE) | SLOT 2 (ENVIÓN) | SLOT 3 (FUERZA) | |:---:|:---:|:---|:---|:---| | LUN | MED | Snatch: Singles hasta 85% | C&J: Singles hasta 85% | Front Squat: Singles hasta 85% | | MAR | TEC | Power Snatch: 3x2 @ 70% | Power Clean: 3x2 @ 70% | Movilidad | | MIE | MED | Snatch: Singles hasta 85% | C&J: Singles hasta 85% | Front Squat: Singles hasta 85% | | JUE | TEC | Snatch: 3x2 @ 70% | C&J: 3x1 @ 70% | Sin Sentadilla | | VIE | MED | Snatch: Singles hasta 90% | C&J: Singles hasta 90% | Front Squat: Singles hasta 85% | | SÁB | OFF | Descanso Total | --- | --- |
+🟡 MES 2: ESPECIFICIDAD PURA (GRIND)
+
+Objetivo: La fase "oscura". Eliminar variantes Power. Todo es completo, todo es pesado. Foco: Resiliencia mental. Levantamientos fallidos deben repetirse si es técnicamente seguro.
+SEMANA 5 (Base - Volver al Max)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA)
+LUN	MAX	Snatch: DM, 2x1 @ 90%	C&J: DM, 2x1 @ 90%	Front Squat: DM
+MAR	MAX	Snatch: DM	C&J: DM	Back Squat: DM, 2x2 @ 90%
+MIE	MAX	Snatch: DM, 2x1 @ 90%	C&J: DM, 2x1 @ 90%	Front Squat: DM
+JUE	MED	Snatch: Singles hasta 90%	Clean & Jerk: Singles hasta 90%	Squat: 3x2 @ 85%
+VIE	MAX	Snatch: DM, 3x1 @ 85%	C&J: DM, 3x1 @ 85%	Front Squat: DM
+SÁB	MAX	Snatch: DM	C&J: DM	Front Squat: DM
+SEMANA 6 (Carga - Ondulación Intra-sesión)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA)
+LUN	MAX	Snatch: DM, -20kg (2x1), -10kg (2x1)	C&J: DM, -20kg (1x1), -10kg (1x1)	Front Squat: DM
+MAR	MAX	Snatch: DM	C&J: DM	Back Squat: DM
+MIE	MAX	Snatch: DM, Wave: 90%-95%-DM	C&J: DM	Front Squat: DM, 2x1 @ 95%
+JUE	MAX	Snatch: DM	C&J: DM	Back Squat: 2x2 @ 90%
+VIE	MAX	Snatch: DM	C&J: DM	Front Squat: DM
+SÁB	MAX	Snatch: DM (Intento PR)	C&J: DM (Intento PR)	Front Squat: DM
+SEMANA 7 (Choque - Sobrecarga)
+
+Volumen de back-off eliminado. Solo intentos máximos. | DÍA | TIPO | SLOT 1 (ARRANQUE) | SLOT 2 (ENVIÓN) | SLOT 3 (FUERZA) | |:---:|:---:|:---|:---|:---| | LUN | MAX | Snatch: DM (3 intentos al 95%+) | C&J: DM (3 intentos al 95%+) | Front Squat: DM | | MAR | MAX | Snatch: DM | C&J: DM | Back Squat: DM | | MIE | MAX | Snatch: DM | C&J: DM | Front Squat: DM | | JUE | MAX | Snatch: DM | C&J: DM | Back Squat: DM | | VIE | MAX | Snatch: DM | C&J: DM | Front Squat: DM | | SÁB | SIM | Simulacro Competición (100%+) | Simulacro Competición (100%+) | Front Squat: DM |
+SEMANA 8 (Descarga Profunda)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA)
+LUN	MED	Snatch: 3x1 @ 80%	C&J: 2x1 @ 80%	Front Squat: 2x1 @ 80%
+MAR	TEC	Power Snatch: 3x2 @ 70%	Movilidad	Sin Squat
+MIE	MED	Snatch: 3x1 @ 80%	C&J: 2x1 @ 80%	Front Squat: 2x1 @ 80%
+JUE	OFF	Descanso	---	---
+VIE	ACT	Snatch: 1x1 @ 85%	C&J: 1x1 @ 85%	Front Squat: 1x1 @ 85%
+SÁB	OFF	Descanso	---	---
+🔴 MES 3: PEAKING (COMPETICIÓN)
+
+Objetivo: Realización. Afilar el sistema nervioso para el día de prueba. Foco: Reducción ligera de frecuencia de sentadilla pesada para liberar piernas.
+SEMANA 9 (Intensidad 1)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA)
+LUN	MAX	Snatch: DM	C&J: DM	Front Squat: DM
+MAR	MED	Power Snatch: Max del día	Power Clean: Max del día	Back Squat: 2x2 @ 85%
+MIE	MAX	Snatch: DM	C&J: DM	Front Squat: DM
+JUE	MED	Snatch: Singles @ 85%	C&J: Singles @ 85%	Sin Squat
+VIE	MAX	Snatch: DM	C&J: DM	Front Squat: DM
+SÁB	MAX	Snatch: DM	C&J: DM	Squat: DM
+SEMANA 10 (Intensidad 2 - Pre-Peak)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA)
+LUN	MAX	Snatch: DM	C&J: DM	Front Squat: DM
+MAR	MED	Snatch: 80-85% singles	C&J: 80-85% singles	Back Squat: 1x1 Pesado
+MIE	MAX	Snatch: DM	C&J: DM	Front Squat: DM
+JUE	OFF	Descanso / Masaje	---	---
+VIE	MAX	Snatch: DM	C&J: DM	Front Squat: DM
+SÁB	MAX	Snatch: DM (Opening Attempt)	C&J: DM (Opening Attempt)	Front Squat: DM
+SEMANA 11 (Taper / Afilado)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA)
+LUN	MAX	Snatch: DM	C&J: DM	Front Squat: DM
+MAR	MED	Snatch: 85% Singles	C&J: 85% Singles	Sin Squat
+MIE	INT	Snatch: Hasta 90-92%	C&J: Hasta 90-92%	Front Squat: 1x1 @ 90%
+JUE	TEC	Power Snatch: 3x1 @ 70%	Movilidad	Visualización
+VIE	INT	Snatch: Hasta 90%	C&J: Hasta 90%	Sin Squat
+SÁB	OFF	Descanso Total	---	---
+SEMANA 12 (SEMANA DE COMPETENCIA)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA)
+LUN	ACT	Snatch: 60-70-80% (Singles)	C&J: 60-70-80% (Singles)	Front Squat: 2x1 @ 80%
+MAR	ACT	Snatch: 60-70-75% (Singles)	C&J: 60-70-75% (Singles)	Front Squat: 2x1 @ 70%
+MIE	TEC	Power Snatch: 3x2 @ 60%	Power Clean: 3x1 @ 60%	Movilidad
+JUE	OFF	Descanso Total	---	---
+VIE	ACT	Barra / Activación	Velocidad	Sin Carga
+SÁB	TEST	COMP SNATCH (1RM)	COMP C&J (1RM)	COMP SQUAT (1RM)

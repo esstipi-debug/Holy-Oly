@@ -1,0 +1,93 @@
+**Novicio**, diseñada para una frecuencia de **2 Días por Semana**.
+
+-----
+
+### 📋 GUÍA DE USO (IMPORTANTE)
+
+1.  **Frecuencia:** 2 Días (ej. Lunes y Jueves).
+2.  [cite_start]**Conteo de Reps:** Solo cuentan las repeticiones con **$\ge 55\%$ del 1RM**[cite: 446].
+      * *Todo lo anterior a ese peso es calentamiento general y no se anota en la planilla.*
+3.  **Calentamiento Estandarizado (Pre-Series):**
+      * [cite_start]Antes de las series indicadas abajo, realiza siempre: **Barra sola x 5, 40% x 5, 50% x 3**[cite: 550].
+4.  **Cálculo de Cargas:**
+      * Si no tienes 1RM real, usa un "1RM Estimado" conservador o RPE (Esfuerzo Percibido).
+      * **RPE 6:** Fácil, velocidad perfecta.
+      * **RPE 8:** Pesado, pero sin fallo.
+
+-----
+
+### 🗓️ MACROCICLO NOVICIO: 32 SESIONES (4 MESES)
+
+#### 🟢 MES 1: CIMENTACIÓN (Técnica / Hang)
+
+**Objetivo:** Aprender posiciones colgadas y fortalecer la espalda. [cite_start]**IMR: 60-62%**[cite: 453].
+
+| SESIÓN | SEM | FASE | EJERCICIO 1 (Técnico) | EJERCICIO 2 (Fuerza/Potencia) | EJERCICIO 3 (Estructural) | VOL (Reps) |
+| :---: | :---: | :---: | :--- | :--- | :--- | :---: |
+| **1** | 1 | Base | **Hang Power Snatch**<br>3x3 @ 60% | **Push Press**<br>3x5 @ 60% | **Back Squat**<br>3x5 @ 65% | \~24 |
+| **2** | 1 | Base | **Hang Power Clean**<br>3x3 @ 60% | **Snatch Deadlift**<br>3x3 @ 70% | **Front Squat**<br>3x4 @ 65% | \~21 |
+| **3** | 2 | Carga | **Hang Power Snatch**<br>4x3 @ 62% | **Push Press**<br>4x4 @ 63% | **Back Squat**<br>4x5 @ 68% | \~32 |
+| **4** | 2 | Carga | **Hang Power Clean**<br>4x3 @ 62% | **Snatch Deadlift**<br>3x3 @ 73% | **Front Squat**<br>4x4 @ 68% | \~28 |
+| **5** | 3 | Impacto| **Hang Power Snatch**<br>5x3 @ 65% | **Push Press**<br>4x4 @ 65% | **Back Squat**<br>4x4 @ 70% | \~35 |
+| **6** | 3 | Impacto| **Hang Power Clean**<br>5x3 @ 65% | **Snatch Deadlift**<br>3x3 @ 75% | **Front Squat**<br>4x3 @ 70% | \~30 |
+| **7** | 4 | **Descarga** | **Hang Power Snatch**<br>2x3 @ 55% | **Push Press**<br>2x4 @ 55% | **Back Squat**<br>2x4 @ 60% | **\~14** |
+| **8** | 4 | **Descarga** | **Hang Power Clean**<br>2x3 @ 55% | **Snatch Deadlift**<br>2x3 @ 60% | **Front Squat**<br>2x3 @ 60% | **\~12** |
+
+> [cite_start]**Nota Mes 1:** El volumen sube en semanas 2 y 3. En la semana 4 (Sesiones 7 y 8), el volumen cae drásticamente (-50%) para permitir recuperación[cite: 271, 461].
+
+-----
+
+#### 🟡 MES 2: DESARROLLO (Potencia / Floor)
+
+**Objetivo:** Pasar del colgado al suelo. Introducción de velocidad. [cite_start]**IMR: 64-66%**[cite: 464].
+
+| SESIÓN | SEM | FASE | EJERCICIO 1 (Técnico) | EJERCICIO 2 (Fuerza/Potencia) | EJERCICIO 3 (Estructural) | VOL (Reps) |
+| :---: | :---: | :---: | :--- | :--- | :--- | :---: |
+| **9** | 5 | Base | **Power Snatch**<br>3x3 @ 65% | **Power Clean + Jerk**<br>3x(2+1) @ 65% | **Back Squat**<br>3x5 @ 70% | \~27 |
+| **10** | 5 | Base | **Clean Pull**<br>3x3 @ 80% | **Press Militar**<br>3x5 @ 65% | **Overhead Squat**<br>3x4 @ 60% | \~24 |
+| **11** | 6 | Carga | **Power Snatch**<br>4x2 @ 70% | **Power Clean + Jerk**<br>4x(2+1) @ 70% | **Back Squat**<br>4x4 @ 75% | \~32 |
+| **12** | 6 | Carga | **Clean Pull**<br>4x3 @ 85% | **Press Militar**<br>4x4 @ 70% | **Overhead Squat**<br>3x3 @ 65% | \~28 |
+| **13** | 7 | Impacto| **Power Snatch**<br>5x2 @ 75% | **Power Clean + Jerk**<br>4x(1+1) @ 75% | **Back Squat**<br>3x3 @ 80% | \~27 |
+| **14** | 7 | Impacto| **Clean Pull**<br>4x2 @ 90% | **Press Militar**<br>4x3 @ 75% | **Overhead Squat**<br>3x3 @ 70% | \~23 |
+| **15** | 8 | **Descarga** | **Power Snatch**<br>3x2 @ 60% | **Power Jerk**<br>3x2 @ 60% | **Back Squat**<br>2x3 @ 60% | **\~15** |
+| **16** | 8 | **Descarga** | **Clean Pull**<br>3x2 @ 70% | **Press Militar**<br>2x3 @ 60% | **Plancha Abdominal**<br>3 series | **\~9** |
+
+-----
+
+#### 🔴 MES 3: INTENSIFICACIÓN (Fuerza / Complejos)
+
+**Objetivo:** Mover cargas más pesadas y mejorar la sentadilla. [cite_start]**IMR: 68-70%**[cite: 466].
+
+| SESIÓN | SEM | FASE | EJERCICIO 1 (Técnico) | EJERCICIO 2 (Fuerza/Potencia) | EJERCICIO 3 (Estructural) | VOL (Reps) |
+| :---: | :---: | :---: | :--- | :--- | :--- | :---: |
+| **17** | 9 | Carga | **Snatch (Full o Power)**<br>4x2 @ 70% | **Clean & Jerk**<br>3x(1+1) @ 70% | **Front Squat**<br>3x3 @ 75% | \~20 |
+| **18** | 9 | Carga | **Snatch Balance**<br>3x3 @ 65% | **Snatch Pull**<br>3x3 @ 90% | **Push Press**<br>3x4 @ 70% | \~27 |
+| **19** | 10 | Carga | **Snatch**<br>5x2 @ 75% | **Clean & Jerk**<br>4x(1+1) @ 75% | **Front Squat**<br>4x2 @ 80% | \~26 |
+| **20** | 10 | Carga | **Snatch Balance**<br>3x3 @ 70% | **Snatch Pull**<br>3x3 @ 95% | **Push Press**<br>4x3 @ 75% | \~30 |
+| **21** | 11 | Impacto| **Snatch**<br>4x1 @ 80% | **Clean & Jerk**<br>4x1 @ 80% | **Front Squat**<br>3x2 @ 85% | \~14 |
+| **22** | 11 | Impacto| **Snatch Balance**<br>3x2 @ 75% | **Snatch Pull**<br>3x2 @ 100% | **Push Press**<br>3x2 @ 80% | \~18 |
+| **23** | 12 | **Descarga** | **Snatch**<br>3x1 @ 65% | **Clean & Jerk**<br>3x1 @ 65% | **Front Squat**<br>2x2 @ 65% | **\~10** |
+| **24** | 12 | **Descarga** | **Snatch Balance**<br>2x2 @ 60% | **Snatch Pull**<br>2x2 @ 75% | **Push Press**<br>2x3 @ 60% | **\~10** |
+
+-----
+
+#### 🟣 MES 4: REALIZACIÓN (Pico / Test)
+
+**Objetivo:** Preparar el cuerpo para probar nuevos máximos. Tapering. [cite_start]**IMR: 72%+**[cite: 469].
+
+| SESIÓN | SEM | FASE | EJERCICIO 1 (Técnico) | EJERCICIO 2 (Fuerza/Potencia) | EJERCICIO 3 (Estructural) | VOL (Reps) |
+| :---: | :---: | :---: | :--- | :--- | :--- | :---: |
+| **25** | 13 | Intro | **Snatch**<br>3x1 @ 80% | **Clean & Jerk**<br>3x1 @ 80% | **Back Squat**<br>3x2 @ 80% | \~12 |
+| **26** | 13 | Intro | **Power Snatch**<br>3x2 @ 75% | **Jerk from Rack**<br>3x2 @ 75% | **Pull (Cualquiera)**<br>3x2 @ 90% | \~12 |
+| **27** | 14 | Pre-Comp| **Snatch**<br>3x1 @ 85% | **Clean & Jerk**<br>3x1 @ 85% | **Back Squat**<br>2x2 @ 85% | \~10 |
+| **28** | 14 | Pre-Comp| **Power Snatch**<br>3x1 @ 80% | **Jerk from Rack**<br>3x1 @ 80% | **Pull (Cualquiera)**<br>3x2 @ 95% | \~9 |
+| **29** | 15 | Taper | **Snatch**<br>3x1 @ 75% | **Clean & Jerk**<br>2x1 @ 75% | **Back Squat**<br>2x1 @ 70% | \~7 |
+| **30** | 15 | Taper | **Muscle Snatch**<br>3x2 @ 50% (Ligero) | **Movilidad / Core**<br>Libre | **Sin Pierna Pesada** | \~6 |
+| **31** | 16 | Activa | **Snatch**<br>3x1 @ 60% | **Clean & Jerk**<br>3x1 @ 60% | **Saltos al cajón**<br>3x3 | \~6 |
+| **32** | 16 | **TEST** | **TEST SNATCH**<br>Intentos al 90-95-100%+ | **TEST C\&J**<br>Intentos al 90-95-100%+ | **TEST SQUAT**<br>Opcional | **MAX** |
+
+### ⚠️ Notas Finales para el Entrenador/Atleta
+
+1.  **Rotación de Ejercicios:** Observa cómo las sentadillas rotan entre Back (Trasera) y Front (Frontal) cada mes, y los tirones pasan de Peso Muerto (Deadlift) a Jalones (Pulls) para cuidar la fatiga lumbar.
+2.  **Progresión:** Si el atleta falla una repetición técnica en las semanas de "Impacto", **reduce el peso un 5%** inmediatamente. [cite_start]La técnica es prioridad sobre el peso en el nivel novicio[cite: 454].
+3.  [cite_start]**Flexibilidad:** Si la Sesión 32 (Test) cae mal, se puede mover una semana antes o después, pero el "Taper" (reducción de carga en Sesiones 29-31) es obligatorio para rendir bien[cite: 469].

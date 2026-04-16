@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>B10 — Performance Deep Dive · Golden Ratio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #050510;
+      min-height: 100vh;
+      font-family: 'Inter', system-ui, sans-serif;
+      padding: 40px 20px 80px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+    .phone {
+      width: 390px;
+      min-height: 780px;
+      background: #07070F;
+      border-radius: 44px;
+      border: 2px solid #2a2a3a;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 0 1px #1a1a28;
+    }
+    .phone-label {
+      width: 390px; text-align: center; margin-bottom: 10px;
+      font-size: 11px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: #475569;
+    }
+    .status-bar {
+      height: 44px; background: #07070F;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px; flex-shrink: 0;
+    }
+    .scroll-area { flex:1; overflow-y:auto; scrollbar-width:none; padding-bottom:20px; }
+    .scroll-area::-webkit-scrollbar { display: none; }
+
+    /* Radar chart */
+    .radar-container {
+      position: relative;
+      width: 260px;
+      height: 260px;
+      margin: 0 auto;
+    }
+
+    /* Ratio row */
+    .ratio-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 0;
+      border-bottom: 1px solid #1e1e30;
+    }
+    .ratio-row:last-child { border-bottom: none; }
+    .ratio-bar-track {
+      flex: 1;
+      height: 6px;
+      background: #1e1e30;
+      border-radius: 3px;
+      position: relative;
+      overflow: visible;
+    }
+    .ratio-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      position: relative;
+      transition: width .5s ease;
+    }
+    /* Ideal zone marker */
+    .ideal-zone {
+      position: absolute;
+      top: -3px;
+      bottom: -3px;
+      background: rgba(34,197,94,.15);
+      border-left: 1px solid rgba(34,197,94,.4);
+      border-right: 1px solid rgba(34,197,94,.4);
+      border-radius: 2px;
+    }
+
+    /* Line chart */
+    .chart-container {
+      position: relative;
+      height: 100px;
+      overflow: hidden;
+    }
+
+    /* Streak grid (GitHub style) */
+    .streak-cell {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    /* Tab */
+    .tab {
+      flex: 1;
+      padding: 8px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all .15s;
+      letter-spacing: .03em;
+    }
+    .tab.active { background: #1e1b4b; color: #a78bfa; }
+    .tab:not(.active) { color: #475569; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     VISTA: Golden Ratio + Ratios numéricos
+═══════════════════════════════════════ -->
+<div>
+  <p class="phone-label">B10 — Mis Ratios · Golden Ratio Engine</p>
+  <div class="phone">
+    <div class="status-bar">
+      <span style="font-size:12px;color:#94a3b8;font-weight:600;">9:41</span>
+      <span style="font-size:12px;color:#94a3b8;font-weight:600;">87%</span>
+    </div>
+    <div class="scroll-area">
+      <div style="padding:16px 24px;">
+
+        <!-- Header -->
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+          <a href="B1_dashboard_atleta.html" style="width:32px;height:32px;background:#1a1a28;border:1px solid #2a2a3a;border-radius:8px;display:flex;align-items:center;justify-content:center;text-decoration:none;color:#94a3b8;font-size:14px;flex-shrink:0;">←</a>
+          <div>
+            <p style="font-size:18px;font-weight:800;color:#f1f5f9;letter-spacing:-.02em;">Mis Ratios</p>
+            <p style="font-size:11px;color:#64748b;">Balance & Golden Ratio Engine</p>
+          </div>
+        </div>
+
+        <!-- Tab selector -->
+        <div style="display:flex;gap:6px;background:#111118;border:1px solid #1e1e30;border-radius:14px;padding:4px;margin-bottom:20px;">
+          <div class="tab active">Radar</div>
+          <div class="tab">Detalle</div>
+          <div class="tab">Readiness</div>
+          <div class="tab">Racha</div>
+        </div>
+
+        <!-- ─── RADAR CHART (SVG) ─── -->
+        <div style="background:#111118;border:1px solid #1e1e30;border-radius:20px;padding:20px;margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <p style="font-size:11px;font-weight:700;color:#475569;letter-spacing:.08em;text-transform:uppercase;">Polígono de Proporciones</p>
+            <div style="display:flex;gap:8px;">
+              <div style="display:flex;align-items:center;gap:4px;">
+                <div style="width:8px;height:8px;border-radius:50%;background:#6366f1;"></div>
+                <span style="font-size:10px;color:#64748b;">Tú</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:4px;">
+                <div style="width:8px;height:8px;border-radius:50%;background:rgba(34,197,94,.4);"></div>
+                <span style="font-size:10px;color:#64748b;">Ideal</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- SVG Radar -->
+          <div class="radar-container">
+            <svg width="260" height="260" viewBox="-130 -130 260 260">
+              <!-- Background rings -->
+              <polygon points="0,-90 77.94,-45 77.94,45 0,90 -77.94,45 -77.94,-45" fill="none" stroke="#1e1e30" stroke-width="1"/>
+              <polygon points="0,-70 60.62,-35 60.62,35 0,70 -60.62,35 -60.62,-35" fill="none" stroke="#1e1e30" stroke-width="1"/>
+              <polygon points="0,-50 43.30,-25 43.30,25 0,50 -43.30,25 -43.30,-25" fill="none" stroke="#1e1e30" stroke-width="1"/>
+              <polygon points="0,-30 25.98,-15 25.98,15 0,30 -25.98,15 -25.98,-15" fill="none" stroke="#1e1e30" stroke-width="1"/>
+              <!-- Axes -->
+              <line x1="0" y1="0" x2="0" y2="-90" stroke="#1e1e30" stroke-width="1"/>
+              <line x1="0" y1="0" x2="77.94" y2="-45" stroke="#1e1e30" stroke-width="1"/>
+              <line x1="0" y1="0" x2="77.94" y2="45" stroke="#1e1e30" stroke-width="1"/>
+              <line x1="0" y1="0" x2="0" y2="90" stroke="#1e1e30" stroke-width="1"/>
+              <line x1="0" y1="0" x2="-77.94" y2="45" stroke="#1e1e30" stroke-width="1"/>
+              <line x1="0" y1="0" x2="-77.94" y2="-45" stroke="#1e1e30" stroke-width="1"/>
+
+              <!-- IDEAL polygon (target values at ~85% of max) -->
+              <!-- Sn/CJ=0.80, FS/BS=0.85, Pull/Push=1.0, CJ/BS=0.78, Sn/BS=0.62, FS/CJ=1.1 -->
+              <polygon
+                points="0,-78  67.55,-39  67.55,39  0,78  -67.55,39  -67.55,-39"
+                fill="rgba(34,197,94,.08)" stroke="rgba(34,197,94,.35)" stroke-width="1.5" stroke-dasharray="4,3"/>
+
+              <!-- USER polygon: Sn/CJ=0.839, FS/BS=0.862, Pull/Push=1.15, CJ/BS=0.772, Sn/BS=0.648, FS/CJ=1.116 -->
+              <!-- Normalized to 90 max: Sn/CJ=75.5, FS/BS=77.6, Pull/Push=81 ok, CJ/BS=69.5, Sn/BS=58.3, FS/CJ=90 -->
+              <polygon
+                points="0,-75.5  67.2,-34.8  71.1,41  0,69.5  -52.2,30  -62.3,-31"
+                fill="rgba(99,102,241,.2)" stroke="#6366f1" stroke-width="2"/>
+
+              <!-- User dots on vertices -->
+              <circle cx="0" cy="-75.5" r="4" fill="#6366f1"/>
+              <circle cx="67.2" cy="-34.8" r="4" fill="#6366f1"/>
+              <circle cx="71.1" cy="41" r="4" fill="#6366f1"/>
+              <circle cx="0" cy="69.5" r="4" fill="#6366f1"/>
+              <circle cx="-52.2" cy="30" r="4" fill="#F59E0B"/>
+              <circle cx="-62.3" cy="-31" r="4" fill="#6366f1"/>
+
+              <!-- Axis labels -->
+              <text x="0" y="-98" text-anchor="middle" font-size="9" fill="#94a3b8" font-weight="700">Sn / CJ</text>
+              <text x="90" y="-50" text-anchor="start" font-size="9" fill="#94a3b8" font-weight="700">FS / BS</text>
+              <text x="90" y="54" text-anchor="start" font-size="9" fill="#94a3b8" font-weight="700">Pull / CJ</text>
+              <text x="0" y="108" text-anchor="middle" font-size="9" fill="#94a3b8" font-weight="700">CJ / BS</text>
+              <text x="-90" y="54" text-anchor="end" font-size="9" fill="#F59E0B" font-weight="700">Sn / BS ⚠</text>
+              <text x="-90" y="-50" text-anchor="end" font-size="9" fill="#94a3b8" font-weight="700">FS / CJ</text>
+            </svg>
+          </div>
+
+          <!-- Alert for weak axis -->
+          <div style="background:#1c1200;border:1px solid #713f12;border-radius:12px;padding:10px 14px;display:flex;gap:10px;align-items:flex-start;margin-top:8px;">
+            <span style="font-size:14px;flex-shrink:0;">⚠️</span>
+            <div>
+              <p style="font-size:12px;font-weight:700;color:#fbbf24;margin-bottom:2px;">Sn/BS por debajo del ideal</p>
+              <p style="font-size:11px;color:#78350f;line-height:1.4;">Tu Arrancada (94kg) vs tu Sentadilla Trasera (145kg) = 0.648. El ideal es ≥0.65. Considera priorizar Snatch en las próximas semanas.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── RATIO DETAIL TABLE ─── -->
+        <div style="background:#111118;border:1px solid #1e1e30;border-radius:20px;padding:16px;margin-bottom:16px;">
+          <p style="font-size:11px;font-weight:700;color:#475569;letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px;">Detalle de Proporciones</p>
+
+          <!-- Sn / CJ -->
+          <div class="ratio-row">
+            <div style="width:100px;flex-shrink:0;">
+              <p style="font-size:12px;font-weight:700;color:#f1f5f9;">Sn / CJ</p>
+              <p style="font-size:10px;color:#64748b;">94 / 112</p>
+            </div>
+            <div style="flex:1;position:relative;">
+              <div class="ratio-bar-track">
+                <div class="ideal-zone" style="left:72%;width:12%;"></div>
+                <div class="ratio-bar-fill" style="width:83.9%;background:linear-gradient(90deg,#6366f1,#8B5CF6);"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-top:3px;">
+                <span style="font-size:9px;color:#475569;">0.60</span>
+                <span style="font-size:9px;color:#4ade80;">ideal: 0.80</span>
+                <span style="font-size:9px;color:#475569;">1.00</span>
+              </div>
+            </div>
+            <div style="width:48px;text-align:right;flex-shrink:0;">
+              <span style="font-size:13px;font-weight:800;color:#4ade80;">0.839</span>
+              <span style="display:block;font-size:9px;color:#4ade80;">✓ OK</span>
+            </div>
+          </div>
+
+          <!-- FS / BS -->
+          <div class="ratio-row">
+            <div style="width:100px;flex-shrink:0;">
+              <p style="font-size:12px;font-weight:700;color:#f1f5f9;">FS / BS</p>
+              <p style="font-size:10px;color:#64748b;">125 / 145</p>
+            </div>
+            <div style="flex:1;position:relative;">
+              <div class="ratio-bar-track">
+                <div class="ideal-zone" style="left:70%;width:15%;"></div>
+                <div class="ratio-bar-fill" style="width:86.2%;background:linear-gradient(90deg,#6366f1,#8B5CF6);"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-top:3px;">
+                <span style="font-size:9px;color:#475569;">0.60</span>
+                <span style="font-size:9px;color:#4ade80;">ideal: 0.85</span>
+                <span style="font-size:9px;color:#475569;">1.00</span>
+              </div>
+            </div>
+            <div style="width:48px;text-align:right;flex-shrink:0;">
+              <span style="font-size:13px;font-weight:800;color:#4ade80;">0.862</span>
+              <span style="display:block;font-size:9px;color:#4ade80;">✓ Ideal</span>
+            </div>
+          </div>
+
+          <!-- Sn / BS ⚠ -->
+          <div class="ratio-row">
+            <div style="width:100px;flex-shrink:0;">
+              <p style="font-size:12px;font-weight:700;color:#f1f5f9;">Sn / BS</p>
+              <p style="font-size:10px;color:#64748b;">94 / 145</p>
+            </div>
+            <div style="flex:1;position:relative;">
+              <div class="ratio-bar-track">
+                <div class="ideal-zone" style="left:65%;width:15%;"></div>
+                <div class="ratio-bar-fill" style="width:64.8%;background:linear-gradient(90deg,#d97706,#F59E0B);"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-top:3px;">
+                <span style="font-size:9px;color:#475569;">0.50</span>
+                <span style="font-size:9px;color:#4ade80;">ideal: ≥0.65</span>
+                <span style="font-size:9px;color:#475569;">0.90</span>
+              </div>
+            </div>
+            <div style="width:48px;text-align:right;flex-shrink:0;">
+              <span style="font-size:13px;font-weight:800;color:#F59E0B;">0.648</span>
+              <span style="display:block;font-size:9px;color:#F59E0B;">⚠ Bajo</span>
+            </div>
+          </div>
+
+          <!-- CJ / BS -->
+          <div class="ratio-row">
+            <div style="width:100px;flex-shrink:0;">
+              <p style="font-size:12px;font-weight:700;color:#f1f5f9;">CJ / BS</p>
+              <p style="font-size:10px;color:#64748b;">112 / 145</p>
+            </div>
+            <div style="flex:1;position:relative;">
+              <div class="ratio-bar-track">
+                <div class="ideal-zone" style="left:73%;width:12%;"></div>
+                <div class="ratio-bar-fill" style="width:77.2%;background:linear-gradient(90deg,#6366f1,#8B5CF6);"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-top:3px;">
+                <span style="font-size:9px;color:#475569;">0.60</span>
+                <span style="font-size:9px;color:#4ade80;">ideal: 0.78</span>
+                <span style="font-size:9px;color:#475569;">0.95</span>
+              </div>
+            </div>
+            <div style="width:48px;text-align:right;flex-shrink:0;">
+              <span style="font-size:13px;font-weight:800;color:#4ade80;">0.772</span>
+              <span style="display:block;font-size:9px;color:#4ade80;">✓ OK</span>
+            </div>
+          </div>
+
+          <!-- FS / CJ -->
+          <div class="ratio-row">
+            <div style="width:100px;flex-shrink:0;">
+              <p style="font-size:12px;font-weight:700;color:#f1f5f9;">FS / CJ</p>
+              <p style="font-size:10px;color:#64748b;">125 / 112</p>
+            </div>
+            <div style="flex:1;position:relative;">
+              <div class="ratio-bar-track">
+                <div class="ideal-zone" style="left:80%;width:20%;"></div>
+                <div class="ratio-bar-fill" style="width:100%;background:linear-gradient(90deg,#22C55E,#4ade80);"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-top:3px;">
+                <span style="font-size:9px;color:#475569;">0.90</span>
+                <span style="font-size:9px;color:#4ade80;">ideal: ≥1.10</span>
+                <span style="font-size:9px;color:#475569;">1.30</span>
+              </div>
+            </div>
+            <div style="width:48px;text-align:right;flex-shrink:0;">
+              <span style="font-size:13px;font-weight:800;color:#22C55E;">1.116</span>
+              <span style="display:block;font-size:9px;color:#22C55E;">✓ Ideal</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Golden Ratio XP rewards -->
+        <div style="background:#0d1820;border:1px solid #0e4c56;border-radius:20px;padding:16px;margin-bottom:16px;">
+          <p style="font-size:11px;font-weight:700;color:#06B6D4;letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px;">Golden Ratio Rewards</p>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:14px;">✅</span>
+                <p style="font-size:12px;color:#94a3b8;">FS/BS en zona ideal</p>
+              </div>
+              <span style="font-size:12px;font-weight:700;color:#4ade80;">+200 XP</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:14px;">🔒</span>
+                <p style="font-size:12px;color:#475569;">Sn/BS en zona ideal</p>
+              </div>
+              <span style="font-size:12px;font-weight:700;color:#475569;">+200 XP</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:14px;">✅</span>
+                <p style="font-size:12px;color:#94a3b8;">Todos los ratios >0.70</p>
+              </div>
+              <span style="font-size:12px;font-weight:700;color:#4ade80;">+500 XP</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Coach suggestion -->
+        <div style="background:#111118;border:1px solid #1e1e30;border-radius:16px;padding:14px;display:flex;gap:12px;align-items:flex-start;">
+          <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8B5CF6);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:white;flex-shrink:0;">R</div>
+          <div>
+            <p style="font-size:11px;font-weight:700;color:#f1f5f9;margin-bottom:4px;">Coach Ramírez</p>
+            <p style="font-size:12px;color:#64748b;line-height:1.5;">Tus FS/BS y FS/CJ están perfectos. Enfoquémonos en subir la Arrancada las próximas 4 semanas para mejorar el Sn/BS. Voy a ajustar el macro.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     VISTA 2: Readiness 28-Day Projection
+═══════════════════════════════════════ -->
+<div>
+  <p class="phone-label">B10b — Readiness · Proyección Banister</p>
+  <div class="phone" style="min-height:700px;">
+    <div class="status-bar">
+      <span style="font-size:12px;color:#94a3b8;font-weight:600;">9:41</span>
+      <span style="font-size:12px;color:#94a3b8;font-weight:600;">87%</span>
+    </div>
+    <div class="scroll-area">
+      <div style="padding:16px 24px;">
+
+        <!-- Header -->
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+          <a href="B1_dashboard_atleta.html" style="width:32px;height:32px;background:#1a1a28;border:1px solid #2a2a3a;border-radius:8px;display:flex;align-items:center;justify-content:center;text-decoration:none;color:#94a3b8;font-size:14px;flex-shrink:0;">←</a>
+          <div>
+            <p style="font-size:18px;font-weight:800;color:#f1f5f9;">Readiness & Proyección</p>
+            <p style="font-size:11px;color:#64748b;">Stress Engine · Modelo Banister</p>
+          </div>
+        </div>
+
+        <!-- Tab selector (active: Readiness) -->
+        <div style="display:flex;gap:6px;background:#111118;border:1px solid #1e1e30;border-radius:14px;padding:4px;margin-bottom:20px;">
+          <div class="tab">Radar</div>
+          <div class="tab">Detalle</div>
+          <div class="tab active">Readiness</div>
+          <div class="tab">Racha</div>
+        </div>
+
+        <!-- Current state cards -->
+        <div style="display:flex;gap:10px;margin-bottom:16px;">
+          <div style="flex:1;background:#0d1820;border:1px solid #0e4c56;border-radius:16px;padding:14px;text-align:center;">
+            <p style="font-size:10px;color:#06B6D4;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Fitness</p>
+            <p style="font-size:24px;font-weight:900;color:#06B6D4;line-height:1;">68.4</p>
+            <p style="font-size:10px;color:#475569;margin-top:2px;">EMA 28d ↑</p>
+          </div>
+          <div style="flex:1;background:#1a0a00;border:1px solid #713f12;border-radius:16px;padding:14px;text-align:center;">
+            <p style="font-size:10px;color:#F59E0B;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Fatiga</p>
+            <p style="font-size:24px;font-weight:900;color:#F59E0B;line-height:1;">42.1</p>
+            <p style="font-size:10px;color:#475569;margin-top:2px;">EMA 7d ↓</p>
+          </div>
+          <div style="flex:1;background:#0d1f12;border:1px solid #14532d;border-radius:16px;padding:14px;text-align:center;">
+            <p style="font-size:10px;color:#22C55E;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Readiness</p>
+            <p style="font-size:24px;font-weight:900;color:#22C55E;line-height:1;">78</p>
+            <p style="font-size:10px;color:#475569;margin-top:2px;">Hoy · Verde</p>
+          </div>
+        </div>
+
+        <!-- Line chart (SVG) -->
+        <div style="background:#111118;border:1px solid #1e1e30;border-radius:20px;padding:16px;margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <p style="font-size:11px;font-weight:700;color:#475569;letter-spacing:.08em;text-transform:uppercase;">Curva de Readiness · 90 días</p>
+            <div style="display:flex;gap:10px;">
+              <div style="display:flex;align-items:center;gap:4px;"><div style="width:8px;height:2px;background:#22C55E;border-radius:1px;"></div><span style="font-size:9px;color:#64748b;">Readiness</span></div>
+              <div style="display:flex;align-items:center;gap:4px;"><div style="width:8px;height:2px;background:#6366f1;border-radius:1px;stroke-dasharray:2,2;"></div><span style="font-size:9px;color:#64748b;">Proyección</span></div>
+            </div>
+          </div>
+
+          <!-- SVG Line Chart -->
+          <svg width="100%" viewBox="0 0 340 110" preserveAspectRatio="none" style="height:110px;">
+            <!-- Grid lines -->
+            <line x1="0" y1="22" x2="340" y2="22" stroke="#1e1e30" stroke-width="1"/>
+            <line x1="0" y1="55" x2="340" y2="55" stroke="#1e1e30" stroke-width="1"/>
+            <line x1="0" y1="88" x2="340" y2="88" stroke="#1e1e30" stroke-width="1"/>
+            <!-- Y labels -->
+            <text x="0" y="20" font-size="8" fill="#475569">100</text>
+            <text x="0" y="53" font-size="8" fill="#475569">50</text>
+            <text x="0" y="88" font-size="8" fill="#475569">0</text>
+            <!-- Zone areas -->
+            <rect x="20" y="22" width="320" height="33" fill="rgba(34,197,94,.05)"/>
+            <!-- Historical readiness curve (solid green) -->
+            <polyline
+              points="20,78 35,72 50,68 65,74 80,80 95,85 110,75 125,65 140,60 155,58 170,62 185,70 200,74 215,68 230,60 245,52 260,48 275,44 290,40 305,42 320,40"
+              fill="none" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- Projection (dashed indigo) -->
+            <polyline
+              points="320,40 330,36 340,33"
+              fill="none" stroke="#6366f1" stroke-width="2" stroke-dasharray="4,3" stroke-linecap="round"/>
+            <!-- Today marker -->
+            <circle cx="290" cy="40" r="4" fill="#22C55E" stroke="#07070F" stroke-width="2"/>
+            <line x1="290" y1="0" x2="290" y2="110" stroke="rgba(34,197,94,.3)" stroke-width="1" stroke-dasharray="3,3"/>
+            <text x="293" y="14" font-size="8" fill="#4ade80" font-weight="700">Hoy</text>
+            <!-- Area fill under curve -->
+            <polygon
+              points="20,88 20,78 35,72 50,68 65,74 80,80 95,85 110,75 125,65 140,60 155,58 170,62 185,70 200,74 215,68 230,60 245,52 260,48 275,44 290,40 320,40 320,88"
+              fill="url(#readinessGrad)" opacity=".3"/>
+            <defs>
+              <linearGradient id="readinessGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#22C55E" stop-opacity=".5"/>
+                <stop offset="100%" stop-color="#22C55E" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+          </svg>
+
+          <!-- X labels -->
+          <div style="display:flex;justify-content:space-between;padding:0 20px;margin-top:4px;">
+            <span style="font-size:9px;color:#475569;">−90d</span>
+            <span style="font-size:9px;color:#475569;">−60d</span>
+            <span style="font-size:9px;color:#475569;">−30d</span>
+            <span style="font-size:9px;color:#4ade80;font-weight:700;">Hoy</span>
+            <span style="font-size:9px;color:#6366f1;">+28d</span>
+          </div>
+
+          <!-- Tooltip example -->
+          <div style="margin-top:12px;background:#0d1820;border:1px solid #0e4c56;border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;">
+            <span style="font-size:11px;color:#64748b;">📅 Hoy · 15 Abr</span>
+            <span style="font-size:11px;font-weight:700;color:#22C55E;">Readiness: 78 · Verde</span>
+          </div>
+        </div>
+
+        <!-- Supercompensation window -->
+        <div style="background:#0d1820;border:1px solid #0e4c56;border-radius:16px;padding:14px;display:flex;gap:12px;align-items:flex-start;">
+          <span style="font-size:20px;flex-shrink:0;">🎯</span>
+          <div>
+            <p style="font-size:12px;font-weight:700;color:#06B6D4;margin-bottom:4px;">Ventana de supercompensación</p>
+            <p style="font-size:11px;color:#64748b;line-height:1.5;">Según el modelo Banister, tu pico de rendimiento proyectado es en <strong style="color:#f1f5f9;">7–9 días</strong>. Readiness estimado: <strong style="color:#22C55E;">85+</strong>. Ideal para intento de PR.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<a href="index.html" style="position:fixed;top:20px;left:20px;background:#1e1e30;color:#94a3b8;font-size:13px;padding:8px 14px;border-radius:10px;text-decoration:none;border:1px solid #2a2a3a;z-index:99;">← Volver</a>
+
+</body>
+</html>

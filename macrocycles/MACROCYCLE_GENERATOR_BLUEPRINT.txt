@@ -1,0 +1,1064 @@
+================================================================================
+MACROCYCLE GENERATOR BLUEPRINT
+Sistema Inteligente de Generacion de Macrociclos de Halterofilia
+================================================================================
+
+Archivo: extraction/macrocycles/MACROCYCLE_GENERATOR_BLUEPRINT.txt
+Fecha: 2026-04-11
+Escuelas cubiertas: Cubana, Rusa, Colombiana, Polaca, Bulgara, USA
+Proposito: Documento de extraccion para construir generador rule-based + ML
+
+================================================================================
+SECCION 0: MAPA DE OPORTUNIDADES ML vs REGLAS
+================================================================================
+
+Cada componente del generador se marca con:
+
+  [RULES]  = Logica deterministica, codificable con reglas fijas
+  [ML]     = Machine Learning mejora significativamente el resultado
+  [RAG]    = Retrieval-Augmented Generation (buscar en base de conocimiento)
+  [HYBRID] = Reglas base + ML para optimizar parametros
+
+RESUMEN EJECUTIVO:
+┌─────────────────────────────────────┬──────────┬─────────────────────────────┐
+│ COMPONENTE                          │ APPROACH │ JUSTIFICACION               │
+├─────────────────────────────────────┼──────────┼─────────────────────────────┤
+│ Estructura temporal (fases/semanas) │ [RULES]  │ Cada escuela define esto    │
+│ Onda de volumen (tonnage pattern)   │ [RULES]  │ Patron fijo por escuela     │
+│ Seleccion de ejercicios por fase    │ [RULES]  │ Pool definido en DNA        │
+│ Calculo sets x reps x %            │ [RULES]  │ Formulas fijas por escuela  │
+│ Personalizacion al atleta (1RMs)    │ [RULES]  │ Multiplicacion directa      │
+│ Validacion del macro generado       │ [RULES]  │ Constraints verificables    │
+├─────────────────────────────────────┼──────────┼─────────────────────────────┤
+│ Seleccionar CUAL escuela asignar    │ [ML]     │ Depende del perfil atleta   │
+│ Predecir resultado del macro        │ [ML]     │ Regression sobre historicos │
+│ Ajustar parametros intra-ciclo      │ [ML]     │ Feedback loop con readiness │
+│ Detectar sobreentrenamiento futuro  │ [ML]     │ Time series forecasting     │
+│ Optimizar tonnage wave por atleta   │ [ML]     │ Collaborative filtering     │
+├─────────────────────────────────────┼──────────┼─────────────────────────────┤
+│ Explicar POR QUE esta escuela       │ [RAG]    │ Buscar en docs de escuelas  │
+│ Sugerir variantes de ejercicios     │ [RAG]    │ Buscar en catalogo + papers │
+│ Coaching tips por fase              │ [RAG]    │ Pildoras contextuales       │
+│ Responder preguntas del coach       │ [RAG]    │ "Por que semana 3 baja?"    │
+├─────────────────────────────────────┼──────────┼─────────────────────────────┤
+│ Crear macrociclos NUEVOS (hybrid)   │ [HYBRID] │ Reglas base + GAN/optimize  │
+│ Ajustar descarga por respuesta      │ [HYBRID] │ Regla base + ML fine-tune   │
+│ Progresion inter-macrociclo         │ [HYBRID] │ Que macro sigue despues?    │
+└─────────────────────────────────────┴──────────┴─────────────────────────────┘
+
+
+================================================================================
+SECCION 1: DNA DE ESCUELAS — REGLAS EXTRAIDAS
+================================================================================
+
+Cada escuela tiene un "DNA" con 8 dimensiones:
+  1. Filosofia central (principio rector)
+  2. Estructura temporal (mesociclos, semanas, dias)
+  3. Patron de intensidad (como sube el %)
+  4. Patron de volumen (como cambia el tonnage)
+  5. Ejercicios permitidos y rotacion
+  6. Formato de sesion (slots, tipos de dia)
+  7. Reglas de progresion y descarga
+  8. Nivel minimo del atleta
+
+────────────────────────────────────────────────────────────────────────────────
+1.1 ESCUELA CUBANA
+────────────────────────────────────────────────────────────────────────────────
+
+FILOSOFIA: "Desarrollo progresivo por niveles, jerarquia de slots"
+FUENTE: Sistema cubano de halterofilia (5 planes por nivel)
+VARIANTES: Novicio 2d, Novicio 3d, Intermedio 5d, Avanzado 5d, Competidor 5d+dobles
+
+ESTRUCTURA TEMPORAL:
+  - Ciclo: 16 semanas (4 meses)
+  - Mesociclo: 4 semanas cada uno (4 meses)
+  - Patron semanal: 3x1 (3 semanas carga + 1 descarga)
+  - Fases: Cimentacion → Desarrollo → Intensificacion → Realizacion
+
+PATRON DE INTENSIDAD (IMR = Intensidad Media Relativa):
+  - Mes 1 (Cimentacion):  IMR 60-62% (novicio) / 70-72% (avanzado)
+  - Mes 2 (Desarrollo):   IMR 64-66% / 74-76%
+  - Mes 3 (Intensificacion): IMR 68-70% / 78-82%
+  - Mes 4 (Realizacion):  IMR 72%+ / 85-95%+
+
+  Dentro de cada mes (patron 3x1):
+    Sem 1 (Base):    IMR base
+    Sem 2 (Carga):   IMR + 2%
+    Sem 3 (Impacto):  IMR + 5%
+    Sem 4 (Descarga): IMR - 10% (caida dramatica)
+
+PATRON DE VOLUMEN:
+  - Sem 1: 100% volumen base
+  - Sem 2: 115-120% (sube sets o reps)
+  - Sem 3: 130-140% (pico de volumen)
+  - Sem 4: 50-60% (descarga, -50%)
+
+  Progresion entre meses: volumen BAJA mientras intensidad SUBE
+    Mes 1: ~35 reps/sesion
+    Mes 2: ~28 reps/sesion
+    Mes 3: ~20 reps/sesion
+    Mes 4: ~12 reps/sesion
+
+JERARQUIA DE SLOTS (CLAVE CUBANA):              [RULES]
+  Slot 1: ARRANQUE (Snatch y variantes)
+  Slot 2: ENVION (Clean & Jerk y variantes)
+  Slot 3: FUERZA (Squat, Pull, Press)
+
+  Regla: Siempre en ese orden. Nunca fuerza antes de tecnico.
+
+TIPOS DE DIA (para 5 dias/semana):              [RULES]
+  - LUN: VOL (35% carga semanal) — Volumen alto
+  - MAR: AUX (22%) — Auxiliares y variantes
+  - MIE: MED (30%) — Intensidad media
+  - JUE: TEC (15%) — Tecnico/recuperacion activa
+  - VIE: INT (28%) — Intensidad alta / test
+
+EJERCICIOS POR NIVEL:                            [RULES]
+  Novicio:
+    Slot 1: hang_power_snatch, power_snatch, muscle_snatch
+    Slot 2: hang_power_clean, power_clean_jerk, push_press
+    Slot 3: back_squat, front_squat, snatch_deadlift, overhead_squat
+
+  Intermedio (agrega):
+    Slot 1: + snatch, no_foot_snatch, block_snatch, snatch_balance
+    Slot 2: + clean_jerk, push_jerk, block_clean, jerk_dip
+    Slot 3: + clean_deadlift, snatch_high_pull, good_mornings
+
+  Avanzado (agrega):
+    Slot 1: + halting_snatch_dl, deficit_snatch_pull
+    Slot 2: + jerk_drive, jerk_recovery, behind_neck_jerk
+    Slot 3: + hip_thrust, box_jumps, pliometria
+
+  Competidor (agrega):
+    Doble turno: AM solo arranque, PM solo envion
+    Regla: UN SOLO GESTO TECNICO POR SESION
+
+REGLAS DE PROGRESION:                            [RULES]
+  - Intra-semana: sets suben (sem1: 4x3, sem2: 5x3, sem3: 6x3)
+  - Inter-mes: reps bajan (mes1: x3, mes2: x2, mes3: x1)
+  - Intensidad: +2-3% por semana dentro del mes
+  - Descarga: -50% volumen, -10% intensidad cada 4ta semana
+  - Si falla: No especificado (coach decide)
+
+NIVEL MINIMO: novice (tiene plan de 2 dias)
+
+--- ML OPPORTUNITY ---                           [ML]
+  DONDE: Seleccionar cual nivel cubano asignar al atleta
+  INPUT: meses_entrenando, compliance_rate, pr_progression_rate
+  OUTPUT: nivel recomendado (novicio_2d, novicio_3d, int_5d, avanzado, competidor)
+  MODELO: Decision Tree / Random Forest
+  DATOS NECESARIOS: 50+ atletas con historial de progresion
+
+  DONDE: Ajustar el patron 3x1 a la respuesta individual
+  INPUT: readiness_post_semana_carga, rpe_divergence, sleep_avg
+  OUTPUT: descarga en semana 3 o semana 4? duracion descarga?
+  MODELO: Logistic Regression
+  DATOS NECESARIOS: 100+ ciclos completados
+
+--- RAG OPPORTUNITY ---                          [RAG]
+  DONDE: Explicar al coach por que se eligio este nivel
+  QUERY: "Este atleta lleva 8 meses, compliance 90%, PR +15kg en 6 meses"
+  RETRIEVE: Documentacion cubana sobre criterios de nivel
+  GENERATE: "Recomendamos Avanzado 5d porque..."
+
+
+────────────────────────────────────────────────────────────────────────────────
+1.2 ESCUELA RUSA
+────────────────────────────────────────────────────────────────────────────────
+
+FILOSOFIA: "La variabilidad aguda de carga es mas efectiva que progresion lineal"
+FUENTE: Lev Matveyev + Arkady Vorobyev
+VARIANTES: 5 dias (intermedio), 6 dias (avanzado/competidor)
+
+ESTRUCTURA TEMPORAL:
+  - Ciclo: 16 semanas (4 mesociclos de 4 semanas)
+  - Mesociclos: Hipertrofia → Fuerza Basica → Fuerza/Potencia → Peaking
+  - Patron semanal: Onda rusa de 4 semanas
+
+PATRON DE INTENSIDAD:                           [RULES]
+  Mesociclo 1 (Hipertrofia):   IMR 65-70%
+  Mesociclo 2 (Fuerza Basica): IMR 75-80%
+  Mesociclo 3 (Fuerza/Potencia): IMR 85-90%
+  Mesociclo 4 (Peaking):       IMR 92-100%+
+
+  Variante 6 dias (avanzado):
+  Mesociclo 1: IMR 68-72%
+  Mesociclo 2: IMR 78-82%
+  Mesociclo 3: IMR 88-92%
+  Mesociclo 4: IMR 95-102%
+
+ONDA RUSA DE VOLUMEN (LA CLAVE):                [RULES]
+  Semana 1: 100% tonnage (DOBLE — maximo volumen)
+  Semana 2: 90% tonnage (mantenimiento)
+  Semana 3: 60% tonnage ("cae como roca")
+  Semana 4: 45% tonnage (deload profundo)
+
+  Variante 6 dias:
+  Semana 1: 100% + doble frecuencia
+  Semana 2: 95% + intensidad sostenida
+  Semana 3: 65% + tecnica refinada
+  Semana 4: 40% + recuperacion profunda
+
+ROTACION DE GRUPOS (5 dias):                     [RULES]
+  Dia 1: Grupo A — Snatch (principal, auxiliar, estructural)
+  Dia 2: Grupo B — Clean (principal, auxiliar, estructural)
+  Dia 3: Grupo C — Pulls (snatch pull, clean pull, deadlift)
+  Dia 4: Grupo D — Squats (back, front, pause, box)
+  Dia 5: Grupo E — Overhead (jerk, push press, military)
+
+  Variante 6 dias (agrega):
+  Dia 6: Grupo F — Accesorios (muscle snatch/clean, holds, mobility)
+  + 2 dobles opcionales (AM/PM)
+
+EJERCICIOS POR GRUPO + FASE:                    [RULES]
+  Grupo A (Snatch):
+    Hipertrofia:   hang_snatch (principal), snatch_pull (aux), overhead_squat (est)
+    Fuerza:        snatch (principal), snatch_pull @ 95% (aux), snatch_balance (est)
+    Potencia:      snatch (principal), deficit_snatch_pull (aux), drop_snatch (est)
+    Peaking:       snatch singles (principal), speed_pull (aux), competition_sim (est)
+
+  Grupo B (Clean):
+    Hipertrofia:   power_clean (principal), clean_pull (aux), front_squat (est)
+    Fuerza:        clean_jerk (principal), clean_pull @ 95% (aux), front_squat (est)
+    Potencia:      clean_jerk (principal), deficit_clean_pull (aux), jerk_balance (est)
+    Peaking:       clean_jerk singles, speed_pull, competition_sim
+
+  Grupo C (Pulls):
+    Hipertrofia:   snatch_deadlift 6x5, high_pull 4x5, romanian_dl 4x6
+    Fuerza:        deficit_snatch_pull 6x3, clean_deadlift 4x3, bent_rows 4x4
+    Potencia:      speed_pulls 5x2 @ 100%+, shrugs, power_work
+    Peaking:       minimal pulls, technique focus
+
+  Grupo D (Squats):
+    Hipertrofia:   back_squat 6x6, bulgarian_split, walking_lunges
+    Fuerza:        back_squat 6x4, pause_front_squat, bulgarian_split
+    Potencia:      back_squat 5x2, front_squat 4x2, box_squats
+    Peaking:       back_squat 3x1, front_squat 2x1
+
+  Grupo E (Overhead):
+    Hipertrofia:   push_press 6x5, jerk_from_rack 4x4, military_press 4x6
+    Fuerza:        jerk_from_rack 6x2, push_press 5x3, military_press 4x3
+    Potencia:      split_jerk 5x1, push_press 4x2, behind_neck_jerk
+    Peaking:       jerk singles, light technique
+
+PRESCRIPCION (sets x reps por mesociclo + tonnage): [RULES]
+
+  tonnage_factor = onda_rusa[semana % 4]  // [1.0, 0.9, 0.6, 0.45]
+
+  Hipertrofia:
+    principal: { sets: round(6 * tonnage), reps: 5 }
+    auxiliar:  { sets: round(4 * tonnage), reps: 5 }
+    estructural: { sets: round(4 * tonnage), reps: 6 }
+
+  Fuerza:
+    principal: { sets: round(6 * tonnage), reps: 3 }
+    auxiliar:  { sets: round(5 * tonnage), reps: 3 }
+    estructural: { sets: round(4 * tonnage), reps: 4 }
+
+  Potencia:
+    principal: { sets: round(5 * tonnage), reps: 2 }
+    auxiliar:  { sets: round(4 * tonnage), reps: 2 }
+    estructural: { sets: round(3 * tonnage), reps: 3 }
+
+  Peaking:
+    principal: { sets: round(4 * tonnage), reps: 1 }
+    auxiliar:  { sets: round(3 * tonnage), reps: 2 }
+    estructural: { sets: round(2 * tonnage), reps: 2 }
+
+--- ML OPPORTUNITY ---                           [ML]
+  DONDE: Optimizar la onda rusa por atleta
+  INPUT: readiness_diaria[], compliance[], rpe_reported[], sleep[]
+  OUTPUT: tonnage_wave optimizada (ej: [1.0, 0.85, 0.55, 0.40] para atleta X)
+  MODELO: Bayesian Optimization / Gaussian Process
+  DATOS: 200+ semanas de datos de multiples atletas
+  IMPACTO: Alto — la onda rusa es el corazon del sistema, optimizarla = 10-20% mejor resultado
+
+  DONDE: Predecir cuando saltar de mesociclo
+  INPUT: rpe_trend, pr_velocity, fatigue_accumulated
+  OUTPUT: "listo para fuerza" / "necesita 1 semana mas de hipertrofia"
+  MODELO: Time Series Classification (LSTM o XGBoost)
+  DATOS: 100+ transiciones de mesociclo documentadas
+
+--- RAG OPPORTUNITY ---                          [RAG]
+  DONDE: "Por que mi atleta esta en semana de 60% tonnage?"
+  RETRIEVE: Documentacion Vorobyev sobre supercompensacion
+  GENERATE: "La semana 3 reduce volumen para permitir supercompensacion.
+             Tu atleta acumulo X tonnage en semanas 1-2, necesita esta descarga
+             para que el cuerpo se adapte antes de la siguiente onda."
+
+
+────────────────────────────────────────────────────────────────────────────────
+1.3 ESCUELA COLOMBIANA
+────────────────────────────────────────────────────────────────────────────────
+
+FILOSOFIA: "Piernas Primero, Intensidad Despues" — Metodo Maria Urrutia
+FUENTE: Escuela colombiana (Maria Urrutia, medalla oro Sydney 2000)
+VARIANTES: 4d, 5d, 6d
+
+ESTRUCTURA TEMPORAL:
+  - Ciclo: 24 semanas (6 meses) — el mas largo
+  - 4 Fases:
+    Preparatorio General (8 sem): Volumen extremo piernas
+    Preparatorio Especial (8 sem): Balance tecnica-fuerza
+    Precompetencia (4 sem): Intensidad maxima, reduccion volumen
+    Realizacion (4 sem): Peak absoluto
+
+PATRON DE INTENSIDAD:                           [RULES]
+  Fase 1 (Prep General):  IMR 58-64%
+  Fase 2 (Prep Especial): IMR 65-70%
+  Fase 3 (Precompetencia): IMR 72-80%
+  Fase 4 (Realizacion):   IMR 82-100%+
+
+PATRON DE VOLUMEN (EXTREMO):                    [RULES]
+  LA REGLA UNICA COLOMBIANA: Volumen de cuclillas
+
+  Fase 1: 400-527 reps cuclillas/semana (RECORD METODOLOGICO)
+  Fase 2: 250-350 reps cuclillas/semana
+  Fase 3: 50-150 reps cuclillas/semana
+  Fase 4: 0-10 reps cuclillas/semana (ELIMINACION TOTAL)
+
+  Total ciclo: ~6,500 reps cuclillas en preparacion → 0 en competencia
+
+  Patron semanal (dentro de cada fase):
+    Semana 1-3: Carga progresiva (sube 10-15% por semana)
+    Semana 4: Descarga (-40-50%)
+
+EJERCICIOS POR FASE:                             [RULES]
+  Fase 1 (Prep General):
+    Tecnico: hang_power_snatch, hang_power_clean, power_jerk (BAJO %)
+    Piernas CORE: back_squat 8x6, front_squat 7x6 (VOLUMEN BRUTAL)
+    Piernas SEC: walking_lunges, bulgarian_split, step_ups, lateral_lunges
+
+  Fase 2 (Prep Especial):
+    Tecnico: power_snatch, power_clean_jerk (sube intensidad)
+    Piernas: back_squat 5x4, front_squat 5x3 (baja volumen)
+    Jerk: split_jerk, push_jerk (aparece con fuerza)
+
+  Fase 3 (Precompetencia):
+    Tecnico: snatch, clean_jerk (movimientos completos)
+    Piernas: back_squat 3x2, front_squat 2x2 (minimo)
+    Test: singles competitivos
+
+  Fase 4 (Realizacion):
+    Solo: snatch, clean_jerk (singles @ 95%+)
+    Piernas: CERO (la fuerza YA esta construida)
+    Focus: mental, recovery, peaking
+
+REGLA CLAVE: Correlacion directa fuerza piernas = exito jerk [RULES]
+  back_squat_volume * 0.7 = estimacion de fuerza de jerk
+  Si BS < 1.5x CJ, hay deficit de piernas → mas volumen
+
+--- ML OPPORTUNITY ---                           [ML]
+  DONDE: Determinar cuanto volumen de cuclillas necesita este atleta
+  INPUT: current_bs_1rm, current_cj_1rm, bs_cj_ratio, body_weight, age
+  OUTPUT: squat_reps_per_week_target (ej: 420 para este atleta, 380 para otro)
+  MODELO: Linear Regression / Random Forest
+  DATOS: ratio BS/CJ vs resultado competitivo de 50+ atletas
+  IMPACTO: Muy alto — sobreentrenar piernas = lesion, subentrenar = no hay jerk
+
+  DONDE: Predecir cuando la reduccion de volumen debe empezar
+  INPUT: fatigue_trend, squat_1rm_trend, jerk_performance
+  OUTPUT: "empezar reduccion en semana X" (en vez del fijo semana 9)
+  MODELO: Time Series Regression
+  DATOS: Curvas de fatiga/performance de atletas que completaron ciclo colombiano
+
+
+────────────────────────────────────────────────────────────────────────────────
+1.4 ESCUELA POLACA
+────────────────────────────────────────────────────────────────────────────────
+
+FILOSOFIA: "Tecnica antes peso, progresion cauta" — Zygmunt Smalcerz (1972 Olympic Champion)
+FUENTE: Escuela polaca de halterofilia
+VARIANTES: 4d, 5d
+
+ESTRUCTURA TEMPORAL:
+  - Ciclo: 6 semanas (el mas CORTO — ideal para principiantes)
+  - 3 Fases de 2 semanas:
+    Fase 1 (Reps Altas):  semanas 1-2
+    Fase 2 (Reps Medias): semanas 3-4
+    Fase 3 (Singles):     semanas 5-6
+
+PATRON DE INTENSIDAD:                           [RULES]
+  Fase 1: IMR 70-75%
+  Fase 2: IMR 80-85%
+  Fase 3: IMR 90-95%
+
+  REGLA UNICA POLACA: +2.5kg cada semana (INVARIABLE, AUTOMATICO)
+  Semana 1: 70%, Semana 2: 72.5%, Semana 3: 80%, etc.
+
+PATRON DE VOLUMEN:                              [RULES]
+  Fase 1: 66-72 reps/sesion (reps altas: 4x6, 3x8)
+  Fase 2: 36-47 reps/sesion (reps medias: 4x4, 4x3)
+  Fase 3: 8-16 reps/sesion (singles: 5x1, 3x1)
+
+  Volumen cae linealmente mientras intensidad sube
+
+EJERCICIOS:                                      [RULES]
+  Dia 1: snatch + clean_jerk + front_squat
+  Dia 2: power_snatch + power_clean + back_squat
+  Dia 3: hang_snatch + jerk_from_rack + overhead_squat
+  Dia 4: snatch_balance + clean_pull + push_press
+
+  Siempre los mismos ejercicios, solo cambian sets/reps/%.
+  Variacion MINIMA — la simplicidad ES la filosofia.
+
+REGLAS DE PROGRESION:                            [RULES]
+  1. +2.5kg por semana (automatico)
+  2. BACKOFF RULE: Si fallas una serie → reduce al 80% la siguiente sesion
+  3. Reps bajan cada 2 semanas: 6→4→1
+  4. NO hay descarga formal (ciclo de 6 semanas es corto)
+
+NIVEL MINIMO: novice (el mas accesible)
+RIESGO DE LESION: bajo (progresion conservadora)
+
+--- ML OPPORTUNITY ---                           [ML]
+  DONDE: Ajustar el +2.5kg por semana al atleta
+  INPUT: rpe_reported[], bar_speed_if_available, pr_history
+  OUTPUT: incremento_semanal optimo (tal vez +1.5kg para mujer de 55kg, +3kg para hombre de 105kg)
+  MODELO: Linear Regression simple
+  DATOS: 30+ ciclos polacos completados
+  IMPACTO: Medio — evita estancamiento o progresion demasiado agresiva
+
+  DONDE: Predecir si necesita backoff antes de que falle
+  INPUT: rpe_last_3_sessions, sleep_avg, readiness_trend
+  OUTPUT: probabilidad_de_fallo en proxima sesion
+  MODELO: Logistic Regression
+  DATOS: 100+ sesiones con datos de RPE + exito/fallo
+
+
+────────────────────────────────────────────────────────────────────────────────
+1.5 ESCUELA BULGARA
+────────────────────────────────────────────────────────────────────────────────
+
+FILOSOFIA: "Intensidad maxima diaria es principio absoluto" — Ivan Abadjiev
+FUENTE: Daily Maxing System bulgaro
+VARIANTES: 6 dias x 2-4 sesiones diarias
+
+ESTRUCTURA TEMPORAL:
+  - Ciclo: 4 semanas (ultra-corto, se repite)
+  - Semanas:
+    Sem 1: Establishment (establecer daily maxing)
+    Sem 2: Intensification (buscar PRs)
+    Sem 3: Peak Maxing (PR hunting)
+    Sem 4: Deload (recuperacion)
+
+PATRON DE INTENSIDAD:                           [RULES]
+  SIEMPRE >= 95% del 1RM
+  Sem 1: 95%+
+  Sem 2: 95-100%
+  Sem 3: 95-110% (hunting PRs)
+  Sem 4: 70% (unico momento que baja)
+
+  FLAT HIGH — no hay progresion gradual, siempre arriba
+
+PATRON DE VOLUMEN:                              [RULES]
+  ~85 reps @ 95%+ por semana (constante)
+  3 sesiones por dia:
+    S1 (08:00-08:30): Movimiento olimpico max
+    S2 (09:00-09:30): Squat max
+    S3 (17:00-17:45): Pull heavy o tecnica
+
+  Sesion = 20-30 min MAX (no mas)
+  Reps por sesion: 3-5 intentos maximos
+
+EJERCICIOS:                                      [RULES]
+  POOL MINIMO (solo 4):
+    snatch, clean_jerk, front_squat, back_squat
+
+  Variantes PROHIBIDAS: nada de muscle snatch, push press, accesorios
+  Pulls solo en S3 vespertina: snatch_pull, clean_pull @ 100-120%
+
+  Rotacion diaria:
+    LUN: snatch max → front_squat max → snatch pull
+    MAR: clean_jerk max → back_squat max → clean pull
+    MIE: snatch max → front_squat max → tecnica ligera
+    JUE: clean_jerk max → back_squat max → clean pull
+    VIE: snatch max → front_squat max → competition sim
+    SAB: clean_jerk max → back_squat max → heavy pull test
+
+PROTOCOLO DE MAXING:                             [RULES]
+  1. Build to max: subir gradualmente hasta max del dia
+  2. 3-5 intentos @ 95%+ (solo estos cuentan)
+  3. Si fallas 2 intentos seguidos → parar, pasar a siguiente sesion
+  4. NO hay calentamiento formal largo (barra → 60% → 80% → 95% rapido)
+
+REQUISITOS:                                      [RULES]
+  Nivel: ELITE ONLY
+  Recovery: masaje, sauna, ice baths OBLIGATORIOS
+  Nutricion: surplus calorico, 2g/kg proteina
+  Sueno: 9+ horas
+
+  WARNING: Este sistema destruye a novatos. Solo atletas con 3+ anos.
+
+--- ML OPPORTUNITY ---                           [ML]
+  DONDE: Predecir el "max del dia" antes de que el atleta empiece
+  INPUT: readiness, sleep, previous_day_max, fatigue_accumulated
+  OUTPUT: predicted_daily_max (ej: "hoy tu snatch max sera ~97kg, no intentes 105kg")
+  MODELO: Gradient Boosting / XGBoost
+  DATOS: 500+ sesiones bulgaro con max diarios registrados
+  IMPACTO: MUY ALTO — evita lesiones, optimiza intentos
+
+  DONDE: Determinar si el atleta puede tolerar este sistema
+  INPUT: training_age_months, injury_history, recovery_quality, compliance_rate
+  OUTPUT: can_use_bulgarian (true/false), risk_score
+  MODELO: Classification (Random Forest)
+  DATOS: Historiales de atletas que probaron bulgaro (exito vs lesion/burnout)
+
+
+────────────────────────────────────────────────────────────────────────────────
+1.6 ESCUELA USA (AMERICANA)
+────────────────────────────────────────────────────────────────────────────────
+
+FILOSOFIA: "Hybrid Strength + Olympic Lifting" — USAW / Catalyst Athletics / Cal Strength
+FUENTE: No existe archivo fuente en el repositorio. Disenar basado en metodologia americana.
+NOTA: Esta escuela debe CREARSE. No hay datos raw en /extraction/macrocycles/RAW_SOURCES/
+
+ESTRUCTURA TEMPORAL (propuesta basada en USAW):
+  - Ciclo: 12 semanas (3 bloques de 4 semanas)
+  - Bloque 1: General Strength (squat/pull focus)
+  - Bloque 2: Olympic Specificity (competition lifts)
+  - Bloque 3: Peaking & Testing
+
+PATRON DE INTENSIDAD:                           [RULES]
+  Bloque 1: IMR 70-78%
+  Bloque 2: IMR 80-88%
+  Bloque 3: IMR 90-95%+
+
+CARACTERISTICAS AMERICANAS UNICAS:              [RULES]
+  1. ACCESSORY WORK pesado (bench press, rows, curls — no existe en otras escuelas)
+  2. RPE-based autoregulation (no % fijos estrictos)
+  3. Squat emphasis (heavy squats 3x/week)
+  4. Competition lift frequency: 2-3x/week (vs 5-6 en bulgara)
+  5. CrossFit transfer elements (box jumps, conditioning)
+  6. Flexible scheduling (atleta elige dias)
+
+DISTRIBUCION SEMANAL (4 dias):                   [RULES]
+  Dia 1: Snatch focus + Back Squat heavy
+  Dia 2: Clean & Jerk focus + Front Squat
+  Dia 3: Power variants + Accessory
+  Dia 4: Competition simulation + Light technique
+
+EJERCICIOS:                                      [RULES]
+  Olimpicos: snatch, clean_jerk, power_snatch, power_clean, hang variants
+  Squats: back_squat, front_squat, overhead_squat
+  Pulls: snatch_pull, clean_pull, romanian_dl
+  Accesorios: bench_press, pendlay_row, pull_ups, dips, hip_thrust
+  Conditioning: box_jumps, kettlebell_swings (optional)
+
+--- ML OPPORTUNITY ---                           [ML]
+  DONDE: Auto-regular intensidad por RPE
+  INPUT: rpe_reported, bar_speed, readiness, fatigue_level
+  OUTPUT: adjusted_intensity_for_next_set (ej: "sube a 82%" o "baja a 75%")
+  MODELO: Reinforcement Learning (simple policy gradient)
+  DATOS: RPE vs resultado de 200+ sesiones
+  IMPACTO: Alto — la autorregulacion es la esencia del metodo americano
+
+  DONDE: Personalizar el split (cuantos dias, que ejercicios accesorios)
+  INPUT: athlete_goals, available_days, weak_points, injury_history
+  OUTPUT: customized_weekly_split
+  MODELO: Recommendation System (collaborative filtering)
+  DATOS: 100+ atletas con diferentes splits y resultados
+
+--- RAG OPPORTUNITY ---                          [RAG]
+  DONDE: Seleccionar accesorios apropiados
+  QUERY: "Atleta con jerk debil, clean fuerte, 3 anos entrenando"
+  RETRIEVE: Catalogo de accesorios + papers sobre transferencia
+  GENERATE: "Agrega jerk_dip 4x3@90%, push_press 4x5@75% porque..."
+
+
+================================================================================
+SECCION 2: COMPONENTES DE CODIGO — QUE CONSTRUIR
+================================================================================
+
+────────────────────────────────────────────────────────────────────────────────
+2.1 RULE ENGINE (v1 — Primera iteracion)
+────────────────────────────────────────────────────────────────────────────────
+
+Ubicacion: backend/src/services/macrocycle-generator/
+
+ARCHIVOS:                                        [RULES]
+
+  index.js                    — API publica
+  │
+  ├── school-dna/
+  │   ├── _base.js            — Clase base SchoolDNA con interface comun
+  │   ├── cuban.js            — DNA cubano (5 niveles)
+  │   ├── russian.js          — DNA ruso (5d + 6d)
+  │   ├── colombian.js        — DNA colombiano (4d, 5d, 6d)
+  │   ├── polish.js           — DNA polaco (4d, 5d)
+  │   ├── bulgarian.js        — DNA bulgaro (6d x multi-sesion)
+  │   └── american.js         — DNA americano (3-5d, RPE-based)
+  │
+  ├── generators/
+  │   ├── cycle-builder.js    — Orquesta la generacion completa
+  │   ├── phase-builder.js    — Genera 1 mesociclo/fase
+  │   ├── week-builder.js     — Genera 1 semana (aplica tonnage wave)
+  │   └── session-builder.js  — Genera 1 sesion (selecciona ejercicios, calcula rx)
+  │
+  ├── patterns/
+  │   ├── tonnage-waves.js    — Ondas de volumen (rusa, cubana flat, etc.)
+  │   ├── intensity-curves.js — Curvas de intensidad por escuela
+  │   └── rep-schemes.js      — Esquemas de reps por fase
+  │
+  ├── exercise-pool.js        — Catalogo de ejercicios con metadata
+  ├── personalizer.js         — Adapta pesos al atleta (1RMs, BW)
+  └── validator.js            — Valida macro generado contra reglas
+
+PSEUDOCODIGO cycle-builder.js:
+
+  function generateMacrocycle(schoolId, athlete, config) {
+    const dna = loadSchoolDNA(schoolId);         // [RULES]
+    const phases = dna.getPhases(config);         // [RULES]
+    const sessions = [];
+
+    for (const phase of phases) {
+      for (let week = 1; week <= phase.weeks; week++) {
+        const tonnage = dna.getTonnageFactor(week);  // [RULES]
+        const weekSessions = generateWeek(
+          dna, phase, week, tonnage, athlete       // [RULES]
+        );
+        sessions.push(...weekSessions);
+      }
+    }
+
+    validate(sessions, dna.rules);                // [RULES]
+    return { school: schoolId, sessions, phases, totalWeeks: sum(phases.weeks) };
+  }
+
+PSEUDOCODIGO session-builder.js:
+
+  function generateSession(dna, phase, dayType, tonnageFactor, athlete) {
+    // 1. Seleccionar ejercicios segun escuela + dia
+    const exercises = dna.selectExercises(phase, dayType);  // [RULES]
+
+    // 2. Calcular prescription
+    const rx = exercises.map(ex => {
+      const base = dna.getPrescription(phase, ex.category);  // [RULES]
+      return {
+        name: ex.name,
+        sets: Math.round(base.sets * tonnageFactor),          // [RULES]
+        reps: base.reps,
+        intensityPct: dna.getIntensity(phase, ex.category),   // [RULES]
+        weightKg: Math.round(athlete[ex.rmField] * intensity / 100 * 2) / 2  // round to 0.5kg
+      };
+    });
+
+    return { exercises: rx, tonnageFactor, dayType, phase: phase.name };
+  }
+
+
+────────────────────────────────────────────────────────────────────────────────
+2.2 ML LAYER (v2 — Segunda iteracion)
+────────────────────────────────────────────────────────────────────────────────
+
+Ubicacion: backend/src/services/macrocycle-ml/       [ML]
+
+MODELOS A IMPLEMENTAR (en orden de prioridad):
+
+MODELO 1: SchoolRecommender                     [ML]
+  Proposito: "Cual escuela le conviene a este atleta?"
+  Tipo: Classification (Multi-class)
+  Algoritmo: XGBoost o Random Forest
+
+  Features:
+    - training_age_months (int)
+    - body_weight (float)
+    - snatch_1rm (float)
+    - cj_1rm (float)
+    - bs_1rm (float)
+    - available_days_per_week (int: 2-6)
+    - goal (enum: hypertrophy, strength, competition, general)
+    - injury_history_count (int)
+    - compliance_rate_last_90d (float: 0-1)
+    - recovery_quality (enum: low, medium, high, elite)
+
+  Labels: cuban_nov, cuban_int, cuban_adv, russian_5d, russian_6d,
+          colombian, polish, bulgarian, american
+
+  Training Data Necesaria: 200+ registros (atleta + escuela + resultado)
+
+  Output:
+    {
+      recommended_school: "russian_5d",
+      confidence: 0.82,
+      alternatives: [
+        { school: "cuban_int", confidence: 0.71 },
+        { school: "polish", confidence: 0.65 }
+      ],
+      reasoning: "Athlete has 18 months training, 5 days available,
+                  intermediate strength ratios"  // [RAG]
+    }
+
+  Archivo: school_recommender.py (o .js con ONNX runtime)
+  Entrenamiento: Offline, re-train mensual con nuevos datos
+
+
+MODELO 2: TonnageOptimizer                      [ML]
+  Proposito: "La onda [100,90,60,45] es optima para ESTE atleta?"
+  Tipo: Bayesian Optimization
+  Algoritmo: Gaussian Process con Expected Improvement
+
+  Parametros a optimizar:
+    - wave[0]: semana 1 factor (0.8-1.2)
+    - wave[1]: semana 2 factor (0.6-1.0)
+    - wave[2]: semana 3 factor (0.3-0.8)
+    - wave[3]: semana 4 factor (0.2-0.6)
+
+  Objective Function:
+    maximize: pr_gained + compliance_rate - injury_risk
+
+  Constraints:
+    - wave[0] > wave[1] > wave[2] > wave[3]  (siempre descendente)
+    - sum(wave) entre 2.0 y 3.5 (no demasiado ni poco)
+
+  Training Data: 500+ semanas de training con resultados
+
+  Output:
+    {
+      optimized_wave: [1.05, 0.85, 0.55, 0.40],
+      expected_improvement: "+8% vs onda estandar",
+      confidence: 0.74
+    }
+
+  Archivo: tonnage_optimizer.py
+  Entrenamiento: Online (se actualiza con cada semana completada)
+
+
+MODELO 3: OvertrainingPredictor                 [ML]
+  Proposito: "Este atleta va a sobreentrenarse en X semanas?"
+  Tipo: Time Series Forecasting
+  Algoritmo: LSTM o Prophet (Facebook)
+
+  Input Sequence (ultimas 4 semanas):
+    [
+      { week: 1, tonnage: 8500, readiness: 72, sleep: 7.2, rpe_avg: 7.5 },
+      { week: 2, tonnage: 7800, readiness: 65, sleep: 6.8, rpe_avg: 8.0 },
+      { week: 3, tonnage: 9200, readiness: 55, sleep: 6.5, rpe_avg: 8.5 },
+      { week: 4, tonnage: 5000, readiness: 48, sleep: 7.0, rpe_avg: 7.0 }
+    ]
+
+  Output:
+    {
+      overtraining_risk_next_2w: 0.73,  // 73% riesgo
+      recommended_action: "extend_deload",
+      predicted_readiness_if_continue: [42, 35, 28],  // sigue bajando
+      predicted_readiness_if_deload: [55, 62, 70]       // se recupera
+    }
+
+  Archivo: overtraining_predictor.py
+  Entrenamiento: Batch, re-train semanal
+
+
+MODELO 4: DailyMaxPredictor (solo para Bulgara) [ML]
+  Proposito: "Cual sera tu max de hoy?"
+  Tipo: Regression
+  Algoritmo: XGBoost
+
+  Features:
+    - readiness (float: 0-100)
+    - sleep_hours (float)
+    - previous_day_max (float: kg)
+    - days_since_deload (int)
+    - fatigue_7d_ema (float)
+    - day_of_week (int: 1-6)
+    - snatch_vs_cj (binary)
+
+  Output:
+    {
+      predicted_max_kg: 97.5,
+      confidence_interval: [94, 101],
+      recommendation: "Build to 95kg, attempt 97.5kg if feeling good"
+    }
+
+  Archivo: daily_max_predictor.py
+  Entrenamiento: Online (se actualiza con cada sesion)
+
+
+────────────────────────────────────────────────────────────────────────────────
+2.3 RAG LAYER (v3 — Tercera iteracion)
+────────────────────────────────────────────────────────────────────────────────
+
+Ubicacion: backend/src/services/macrocycle-rag/      [RAG]
+
+ARQUITECTURA RAG:
+
+  Documento Store:
+    - Todos los archivos de /extraction/macrocycles/RAW_SOURCES/ (19 archivos)
+    - Documentacion de escuelas (filosofias, reglas, papers)
+    - Catalogo de ejercicios con explicaciones
+    - Historiales de entrenamiento anonimizados
+
+  Embedding Model: all-MiniLM-L6-v2 (384 dims, rapido, local)
+    o text-embedding-3-small de OpenAI (1536 dims, mas preciso)
+
+  Vector Store: SQLite con extension VSS (local)
+    o pgvector en PostgreSQL (ya tienes Postgres)
+
+  LLM para generation: Claude Haiku (rapido, barato)
+    o Llama 3 8B local si quieres zero-cost
+
+CASOS DE USO RAG:
+
+  CASO 1: "Por que esta escuela?"
+    Query: "Por que le asignaste escuela rusa a mi atleta?"
+    → Retrieve: DNA ruso + perfil atleta + docs sobre ondulacion
+    → Generate: Explicacion personalizada con datos del atleta
+
+  CASO 2: "Que ejercicio alternativo?"
+    Query: "Mi atleta no puede hacer overhead squat por movilidad"
+    → Retrieve: Catalogo de ejercicios + substitution chains + papers
+    → Generate: "Sustituye por snatch balance o behind neck press porque..."
+
+  CASO 3: "Coaching tip por fase"
+    Query: "Mi atleta esta en semana 3 de onda rusa (60% tonnage)"
+    → Retrieve: Vorobyev sobre supercompensacion + docs cubanos sobre descarga
+    → Generate: "Esta semana es CRITICA para la supercompensacion. No agregues
+                 volumen extra. Focus en recovery, 8h sueno, nutricion..."
+
+  CASO 4: "Que macro sigue despues?"
+    Query: "Atleta acaba de terminar ciclo polaco de 6 semanas"
+    → Retrieve: Progresion entre escuelas + historial del atleta
+    → Generate: "Despues de un ciclo polaco (lineal), recomiendo ruso
+                 (ondulatorio) para estimular diferente. El atleta tiene
+                 base suficiente para manejar la variabilidad."
+
+IMPLEMENTACION MINIMA:
+
+  // rag-service.js
+  const { embed, search, generate } = require('./rag-utils');
+
+  async function explainMacrocycle(athleteId, macrocycleId, question) {
+    // 1. Embed la pregunta
+    const queryVector = await embed(question);              // [RAG]
+
+    // 2. Buscar documentos relevantes
+    const docs = await search(queryVector, {                // [RAG]
+      collections: ['school_docs', 'exercise_catalog'],
+      topK: 5
+    });
+
+    // 3. Contexto del atleta
+    const athlete = await getAthleteProfile(athleteId);
+    const macro = await getMacrocycle(macrocycleId);
+
+    // 4. Generar respuesta
+    const response = await generate({                       // [RAG]
+      system: "Eres un coach experto en halterofilia.",
+      context: docs.map(d => d.content).join('\n'),
+      athleteProfile: JSON.stringify(athlete),
+      currentMacro: JSON.stringify(macro),
+      question: question
+    });
+
+    return response;
+  }
+
+
+================================================================================
+SECCION 3: CATALOGO DE EJERCICIOS (POOL UNIVERSAL)
+================================================================================
+
+Todos los ejercicios usados por las 6 escuelas, con metadata:    [RULES]
+
+OLIMPICOS:
+  snatch                    | complexity: 9  | cns: 10 | rm_field: snatch1RM
+  clean_jerk                | complexity: 9  | cns: 10 | rm_field: cj1RM
+  power_snatch              | complexity: 7  | cns: 8  | rm_field: snatch1RM * 0.82
+  power_clean               | complexity: 7  | cns: 8  | rm_field: cj1RM * 0.85
+  hang_snatch               | complexity: 7  | cns: 7  | rm_field: snatch1RM * 0.78
+  hang_clean                | complexity: 7  | cns: 7  | rm_field: cj1RM * 0.80
+  hang_power_snatch         | complexity: 6  | cns: 6  | rm_field: snatch1RM * 0.72
+  hang_power_clean          | complexity: 6  | cns: 6  | rm_field: cj1RM * 0.75
+  muscle_snatch             | complexity: 4  | cns: 4  | rm_field: snatch1RM * 0.55
+  muscle_clean              | complexity: 4  | cns: 4  | rm_field: cj1RM * 0.55
+  block_snatch              | complexity: 7  | cns: 7  | rm_field: snatch1RM * 0.80
+  block_clean               | complexity: 7  | cns: 7  | rm_field: cj1RM * 0.82
+  no_foot_snatch            | complexity: 8  | cns: 7  | rm_field: snatch1RM * 0.75
+
+JERKS:
+  split_jerk                | complexity: 7  | cns: 8  | rm_field: cj1RM * 0.95
+  push_jerk                 | complexity: 6  | cns: 7  | rm_field: cj1RM * 0.90
+  push_press                | complexity: 4  | cns: 5  | rm_field: cj1RM * 0.70
+  jerk_from_rack            | complexity: 7  | cns: 8  | rm_field: cj1RM * 0.95
+  behind_neck_jerk          | complexity: 6  | cns: 6  | rm_field: cj1RM * 0.75
+  jerk_balance              | complexity: 5  | cns: 4  | rm_field: cj1RM * 0.50
+  jerk_dip                  | complexity: 3  | cns: 5  | rm_field: cj1RM * 1.05
+  jerk_drive                | complexity: 3  | cns: 6  | rm_field: cj1RM * 1.10
+  jerk_recovery             | complexity: 5  | cns: 5  | rm_field: cj1RM * 0.75
+
+SQUATS:
+  back_squat                | complexity: 5  | cns: 7  | rm_field: bs1RM
+  front_squat               | complexity: 5  | cns: 6  | rm_field: bs1RM * 0.85
+  overhead_squat            | complexity: 7  | cns: 5  | rm_field: snatch1RM * 0.75
+  pause_back_squat          | complexity: 5  | cns: 7  | rm_field: bs1RM * 0.90
+  pause_front_squat         | complexity: 5  | cns: 6  | rm_field: bs1RM * 0.80
+  box_squat                 | complexity: 4  | cns: 5  | rm_field: bs1RM * 0.75
+
+PULLS:
+  snatch_pull               | complexity: 4  | cns: 6  | rm_field: snatch1RM * 1.10
+  clean_pull                | complexity: 4  | cns: 6  | rm_field: cj1RM * 1.10
+  snatch_deadlift           | complexity: 3  | cns: 5  | rm_field: snatch1RM * 1.20
+  clean_deadlift            | complexity: 3  | cns: 5  | rm_field: cj1RM * 1.20
+  deficit_snatch_pull       | complexity: 4  | cns: 7  | rm_field: snatch1RM * 1.00
+  snatch_high_pull          | complexity: 5  | cns: 6  | rm_field: snatch1RM * 0.90
+  romanian_dl               | complexity: 3  | cns: 4  | rm_field: bs1RM * 0.65
+
+TECHNIQUE:
+  snatch_balance            | complexity: 6  | cns: 4  | rm_field: snatch1RM * 0.65
+  drop_snatch               | complexity: 5  | cns: 3  | rm_field: snatch1RM * 0.50
+  tall_snatch               | complexity: 4  | cns: 2  | rm_field: barbell_only
+  tall_clean                | complexity: 4  | cns: 2  | rm_field: barbell_only
+  sots_press                | complexity: 6  | cns: 3  | rm_field: barbell_only
+
+ACCESORIOS (solo USA + Rusa):
+  military_press            | complexity: 3  | cns: 4  | rm_field: cj1RM * 0.45
+  bench_press               | complexity: 3  | cns: 4  | rm_field: estimated
+  pendlay_row               | complexity: 3  | cns: 3  | rm_field: estimated
+  good_mornings             | complexity: 2  | cns: 3  | rm_field: bs1RM * 0.40
+  hip_thrust                | complexity: 2  | cns: 3  | rm_field: bs1RM * 0.60
+  bulgarian_split_squat     | complexity: 3  | cns: 4  | rm_field: bs1RM * 0.40
+  walking_lunges            | complexity: 2  | cns: 3  | rm_field: bs1RM * 0.30
+  box_jumps                 | complexity: 2  | cns: 3  | rm_field: bodyweight
+
+
+================================================================================
+SECCION 4: TABLA COMPARATIVA DE ESCUELAS
+================================================================================
+
+                    CUBANA    RUSA     COLOMBIANA  POLACA   BULGARA   USA
+                    ──────    ────     ──────────  ──────   ───────   ───
+Duracion ciclo      16 sem    16 sem   24 sem      6 sem    4 sem     12 sem
+Dias/semana         2-5       5-6      4-6         4-5      6         3-5
+Sesiones/dia        1-2       1-2      1           1        2-4       1
+Min x sesion        60-90     90-120   90          60-90    20-30     75-90
+Intensidad min      55%       65%      58%         70%      95%       70%
+Intensidad max      95%+      100%+    100%+       95%      110%      95%
+Patron volumen      3x1 wave  onda 4s  extremo→0   lineal   flat      block
+Patron intensidad   progresiv progres  progresiv   lineal   flat high undulat
+Nivel minimo        novice    inter    inter       novice   elite     inter
+Riesgo lesion       bajo      medio    medio       bajo     alto      bajo
+Ejercicios pool     15-25     20-30    15-20       10-12    4         25-35
+Accesorios          algunos   si       pocos       pocos    CERO      muchos
+Descarga            c/4 sem   c/4 sem  c/4 sem     no       c/4 sem   c/4 sem
+Filosofia           progresiv variabil piernas     lineal   max diario RPE
+
+
+================================================================================
+SECCION 5: PLAN DE IMPLEMENTACION
+================================================================================
+
+FASE 1 (v1.0): RULE ENGINE PURO                 [RULES]
+  Semana 1-2:
+    - Crear school-dna/ para las 6 escuelas
+    - Crear generators/ (cycle, phase, week, session builders)
+    - Crear exercise-pool.js con catalogo completo
+    - Crear personalizer.js (1RMs → kg)
+    - Crear validator.js (reglas de sanidad)
+    - Tests unitarios para cada escuela (genera macro → valida reglas)
+
+  Semana 3:
+    - Integrar con macrocycle_service.js existente
+    - Endpoint: POST /api/macrocycle/generate
+    - Frontend: Pantalla de seleccion de escuela
+    - Guardar macro generado en BD (mismas tablas existentes)
+
+FASE 2 (v2.0): ML MODELS                        [ML]
+  Mes 2-3:
+    - Instrumentar: recopilar datos de resultado por macro asignado
+    - SchoolRecommender (XGBoost, Python script, exportar a ONNX)
+    - TonnageOptimizer (Bayesian, Python, API interna)
+    - OvertrainingPredictor (LSTM/Prophet, Python, cron diario)
+
+  Infraestructura ML:
+    - Python microservice (FastAPI) corriendo junto al backend Node
+    - O: modelo ONNX embebido en Node.js (onnxruntime-node)
+    - Cron: re-train semanal/mensual
+    - Almacenamiento: modelos en /backend/ml-models/*.onnx
+
+FASE 3 (v3.0): RAG INTELLIGENCE                 [RAG]
+  Mes 4-5:
+    - Vectorizar todos los docs de /extraction/macrocycles/
+    - Implementar pgvector en PostgreSQL existente
+    - RAG service con Claude Haiku (barato) o Llama local
+    - UI: "Preguntale al coach" en pantalla de macrociclo
+    - Coaching tips automaticos por fase
+
+
+================================================================================
+SECCION 6: DATOS NECESARIOS PARA ML
+================================================================================
+
+TABLA DE RECOPILACION (agregar al schema):       [ML]
+
+  CREATE TABLE macrocycle_result (
+    id UUID PRIMARY KEY,
+    athlete_id UUID REFERENCES athlete(id),
+    macrocycle_id UUID,
+    school VARCHAR,                    -- 'russian_5d', 'cuban_int', etc.
+
+    -- Input (estado al inicio)
+    start_snatch_1rm DECIMAL,
+    start_cj_1rm DECIMAL,
+    start_bs_1rm DECIMAL,
+    start_body_weight DECIMAL,
+    start_readiness DECIMAL,
+    training_age_months INT,
+
+    -- Output (resultado al final)
+    end_snatch_1rm DECIMAL,
+    end_cj_1rm DECIMAL,
+    end_bs_1rm DECIMAL,
+    snatch_gained DECIMAL,             -- end - start
+    cj_gained DECIMAL,
+
+    -- Process metrics
+    compliance_rate DECIMAL,           -- sesiones completadas / planificadas
+    avg_rpe DECIMAL,
+    avg_readiness DECIMAL,
+    injury_count INT,
+    weeks_completed INT,
+    dropped_out BOOLEAN,               -- abandono antes de terminar?
+    dropout_week INT,
+
+    -- Satisfaction
+    athlete_satisfaction INT,          -- 1-10
+    coach_satisfaction INT,            -- 1-10
+    would_repeat BOOLEAN,
+
+    completed_at TIMESTAMPTZ
+  );
+
+MINIMO VIABLE:
+  - 50 registros: SchoolRecommender empieza a funcionar
+  - 200 registros: TonnageOptimizer tiene datos suficientes
+  - 500 registros: OvertrainingPredictor es confiable
+
+COMO RECOPILAR:
+  1. Al asignar macro → guardar snapshot de 1RMs (start_*)
+  2. Al completar macro → guardar snapshot final (end_*)
+  3. Cron semanal → calcular compliance, avg_rpe, avg_readiness
+  4. Survey al atleta/coach → satisfaction, would_repeat
+
+
+================================================================================
+FIN DEL BLUEPRINT
+================================================================================
+
+RESUMEN:
+  - 6 escuelas documentadas con DNA completo
+  - 60+ ejercicios en catalogo universal
+  - 4 modelos ML definidos con features/labels/datos necesarios
+  - 4 casos RAG con arquitectura de implementacion
+  - Plan de 3 fases (Rules → ML → RAG)
+
+ARCHIVOS FUENTE (RAW):
+  extraction/macrocycles/RAW_SOURCES/BULGARO 6D.txt
+  extraction/macrocycles/RAW_SOURCES/RUSO 5D.txt
+  extraction/macrocycles/RAW_SOURCES/COLOMBIANO 5D.txt
+  extraction/macrocycles/RAW_SOURCES/POLACO 4D.txt
+  extraction/macrocycles/RAW_SOURCES/Cubano Novicio 2 d.txt
+  extraction/macrocycles/RAW_SOURCES/Cubano -Novicio 3 d.txt
+  extraction/macrocycles/RAW_SOURCES/cubano int 5 d.txt
+  extraction/macrocycles/RAW_SOURCES/cubano competidor.txt
+  extraction/macrocycles/RAW_SOURCES/Cubano-avanzado 5 d.txt
+  (USA: NO existe fuente — crear desde metodologia USAW/Catalyst)

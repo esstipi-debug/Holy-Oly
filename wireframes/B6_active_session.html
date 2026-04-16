@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>B6 — Sesión Activa</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --color-bg: #07070F;
+      --color-surface: #111118;
+      --color-surface2: #1A1A26;
+      --color-primary: #22C55E;
+      --color-gold: #F59E0B;
+      --color-cyan: #06B6D4;
+      --color-danger: #EF4444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0D0D18;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 40px 20px;
+      font-family: 'Inter', system-ui, sans-serif;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+    .phone {
+      width: 390px;
+      background: var(--color-bg);
+      border-radius: 44px;
+      border: 2px solid #2a2a3a;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 0 80px rgba(99,102,241,0.12), 0 0 0 1px #1e1e30;
+      display: flex;
+      flex-direction: column;
+    }
+    .phone-label {
+      width: 390px;
+      text-align: center;
+      margin-bottom: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #475569;
+    }
+    .status-bar {
+      height: 44px;
+      background: var(--color-bg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      flex-shrink: 0;
+    }
+    .scroll-area {
+      overflow-y: auto;
+      scrollbar-width: none;
+      padding-bottom: 20px;
+    }
+    .scroll-area::-webkit-scrollbar { display: none; }
+
+    /* Set row */
+    .set-row {
+      display: grid;
+      grid-template-columns: 32px 1fr 1fr 40px;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 0;
+      border-bottom: 1px solid #1a1a28;
+    }
+    .set-row:last-child { border-bottom: none; }
+    .set-num { font-size: 12px; color: #475569; font-weight: 700; text-align: center; }
+    .set-input {
+      background: #1a1a28;
+      border: 1px solid #2a2a3a;
+      border-radius: 10px;
+      padding: 10px 12px;
+      color: #f1f5f9;
+      font-size: 15px;
+      font-weight: 700;
+      text-align: center;
+      outline: none;
+    }
+    .set-input.active {
+      border-color: #22C55E;
+      background: #0f2318;
+      box-shadow: 0 0 0 2px rgba(34,197,94,.15);
+    }
+    .set-input.done {
+      border-color: #1e3a24;
+      background: #0d1f12;
+      color: #4ade80;
+    }
+    .check-btn {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      background: #1a1a28;
+      border: 1.5px solid #2a2a3a;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .check-btn.done {
+      background: #14532d;
+      border-color: #22C55E;
+    }
+
+    /* PR flash */
+    .pr-flash {
+      background: linear-gradient(135deg, #78350f, #92400e);
+      border: 1px solid #F59E0B;
+      border-radius: 12px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 8px rgba(245,158,11,.3); }
+      50% { box-shadow: 0 0 24px rgba(245,158,11,.7); }
+    }
+
+    /* RPE Modal */
+    .rpe-modal {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      background: #0E0E1C;
+      border-top: 1px solid #1e1e30;
+      border-radius: 24px 24px 0 0;
+      padding: 20px 24px 32px;
+      z-index: 10;
+    }
+    .rpe-pill {
+      flex: 1;
+      padding: 10px 4px;
+      border-radius: 10px;
+      background: #1a1a28;
+      border: 1.5px solid #2a2a3a;
+      font-size: 13px;
+      font-weight: 700;
+      color: #64748b;
+      text-align: center;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .rpe-pill:hover { border-color: #22C55E; color: #4ade80; background: #0f2318; }
+    .rpe-pill.selected { border-color: #22C55E; color: #4ade80; background: #0f2318; }
+    .rpe-pill.high { border-color: #EF4444 !important; color: #f87171 !important; background: #2a0a0a !important; }
+
+    /* Injury Shield modal */
+    .shield-modal {
+      position: absolute;
+      inset: 0;
+      background: rgba(7,7,15,.9);
+      display: flex;
+      align-items: flex-end;
+      z-index: 20;
+      backdrop-filter: blur(4px);
+    }
+    .shield-card {
+      background: #0E0E1C;
+      border: 1px solid #1e1e30;
+      border-radius: 28px 28px 0 0;
+      padding: 24px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════
+     ESTADO 1: B2 Pre-Check (5 Sliders)
+     ═══════════════════════════════════════════════════════ -->
+<div>
+  <p class="phone-label">B2 — Pre-Check</p>
+  <div class="phone" style="min-height:680px;">
+    <div class="status-bar">
+      <span style="font-size:12px;color:#94a3b8;font-weight:600;">9:41</span>
+      <span style="font-size:12px;color:#94a3b8;font-weight:600;">87%</span>
+    </div>
+    <div class="scroll-area" style="padding:20px 24px;">
+      <!-- Header -->
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+        <a href="B1_dashboard_atleta.html" style="width:36px;height:36px;background:#1a1a28;border:1px solid #2a2a3a;border-radius:10px;display:flex;align-items:center;justify-content:center;text-decoration:none;color:#94a3b8;font-size:16px;">←</a>
+        <div>
+          <p style="font-size:18px;font-weight:800;color:#f1f5f9;">Check-in diario</p>
+          <p style="font-size:12px;color:#64748b;">¿Cómo te sientes hoy?</p>
+        </div>
+      </div>
+
+      <!-- Risk score placeholder -->
+      <div style="background:#111118;border:1px solid #1e1e30;border-radius:20px;padding:16px;margin-bottom:20px;text-align:center;">
+        <p style="font-size:11px;color:#475569;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;">Riesgo calculado</p>
+        <p style="font-size:36px;font-weight:900;color:#22C55E;line-height:1;">18</p>
+        <p style="font-size:11px;color:#4ade80;margin-top:2px;">VERDE · Sin adaptaciones</p>
+      </div>
+
+      <!-- Sliders -->
+      <div style="display:flex;flex-direction:column;gap:20px;">
+
+        <!-- Slider item -->
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+            <span style="font-size:13px;font-weight:600;color:#f1f5f9;">🧠 Coordinación</span>
+            <span style="font-size:13px;font-weight:700;color:#22C55E;">4/5</span>
+          </div>
+          <div style="height:6px;background:#1e1e30;border-radius:3px;position:relative;">
+            <div style="width:80%;height:100%;background:linear-gradient(90deg,#22C55E,#4ade80);border-radius:3px;"></div>
+            <div style="position:absolute;top:50%;left:80%;transform:translate(-50%,-50%);width:16px;height:16px;background:#22C55E;border-radius:50%;border:2px solid #07070F;"></div>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+            <span style="font-size:13px;font-weight:600;color:#f1f5f9;">😴 Fatiga</span>
+            <span style="font-size:13px;font-weight:700;color:#4ade80;">2/5</span>
+          </div>
+          <div style="height:6px;background:#1e1e30;border-radius:3px;position:relative;">
+            <div style="width:40%;height:100%;background:linear-gradient(90deg,#22C55E,#4ade80);border-radius:3px;"></div>
+            <div style="position:absolute;top:50%;left:40%;transform:translate(-50%,-50%);width:16px;height:16px;background:#4ade80;border-radius:50%;border:2px solid #07070F;"></div>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+            <span style="font-size:13px;font-weight:600;color:#f1f5f9;">💪 Dolor muscular</span>
+            <span style="font-size:13px;font-weight:700;color:#4ade80;">1/5</span>
+          </div>
+          <div style="height:6px;background:#1e1e30;border-radius:3px;position:relative;">
+            <div style="width:20%;height:100%;background:linear-gradient(90deg,#22C55E,#4ade80);border-radius:3px;"></div>
+            <div style="position:absolute;top:50%;left:20%;transform:translate(-50%,-50%);width:16px;height:16px;background:#4ade80;border-radius:50%;border:2px solid #07070F;"></div>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+            <span style="font-size:13px;font-weight:600;color:#f1f5f9;">🎯 Enfoque mental</span>
+            <span style="font-size:13px;font-weight:700;color:#22C55E;">4/5</span>
+          </div>
+          <div style="height:6px;background:#1e1e30;border-radius:3px;position:relative;">
+            <div style="width:80%;height:100%;background:linear-gradient(90deg,#22C55E,#4ade80);border-radius:3px;"></div>
+            <div style="position:absolute;top:50%;left:80%;transform:translate(-50%,-50%);width:16px;height:16px;background:#22C55E;border-radius:50%;border:2px solid #07070F;"></div>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+            <span style="font-size:13px;font-weight:600;color:#f1f5f9;">🌙 Calidad de sueño</span>
+            <span style="font-size:13px;font-weight:700;color:#22C55E;">4/5</span>
+          </div>
+          <div style="height:6px;background:#1e1e30;border-radius:3px;position:relative;">
+            <div style="width:80%;height:100%;background:linear-gradient(90deg,#22C55E,#4ade80);border-radius:3px;"></div>
+            <div style="position:absolute;top:50%;left:80%;transform:translate(-50%,-50%);width:16px;height:16px;background:#22C55E;border-radius:50%;border:2px solid #07070F;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTAs -->
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:28px;">
+        <button style="width:100%;background:linear-gradient(135deg,#16a34a,#15803d);color:white;font-size:15px;font-weight:800;padding:14px;border-radius:14px;border:none;cursor:pointer;">
+          Analizar Riesgo →
+        </button>
+        <button style="width:100%;background:transparent;color:#475569;font-size:13px;font-weight:600;padding:10px;border-radius:14px;border:1px solid #2a2a3a;cursor:pointer;">
+          Skip Check-in <span style="font-size:10px;color:#374151;">(desactiva protección de lesiones)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     ESTADO 2: B6 Logging Activo
+     ═══════════════════════════════════════════════════════ -->
+<div>
+  <p class="phone-label">B6 — Logging Activo</p>
+  <div class="phone" style="min-height:780px; position:relative;">
+    <div class="status-bar">
+      <span style="font-size:12px;color:#94a3b8;font-weight:600;">9:58</span>
+      <span style="font-size:12px;color:#94a3b8;font-weight:600;">84%</span>
+    </div>
+    <div class="scroll-area" style="padding:16px 24px;">
+
+      <!-- Progress bar: Ej 1 de 5 -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+        <a href="B1_dashboard_atleta.html" style="width:32px;height:32px;background:#1a1a28;border:1px solid #2a2a3a;border-radius:8px;display:flex;align-items:center;justify-content:center;text-decoration:none;color:#94a3b8;font-size:14px;flex-shrink:0;">←</a>
+        <div style="flex:1;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+            <span style="font-size:11px;color:#64748b;font-weight:600;">Ejercicio 1 de 5</span>
+            <span style="font-size:11px;color:#64748b;">20%</span>
+          </div>
+          <div style="height:4px;background:#1e1e30;border-radius:2px;">
+            <div style="width:20%;height:100%;background:#22C55E;border-radius:2px;"></div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:#475569;font-weight:600;">⏱ 34:12</div>
+      </div>
+
+      <!-- Exercise header -->
+      <div style="background:#111118;border:1px solid #1e1e30;border-radius:20px;padding:16px;margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div>
+            <p style="font-size:11px;color:#475569;font-weight:700;letter-spacing:.06em;text-transform:uppercase;">Arrancada</p>
+            <p style="font-size:22px;font-weight:900;color:#f1f5f9;line-height:1.1;">5 × 3</p>
+            <p style="font-size:13px;color:#4ade80;margin-top:4px;">Objetivo: 80 kg <span style="color:#475569;">(85% 1RM)</span></p>
+          </div>
+          <div style="text-align:right;">
+            <p style="font-size:10px;color:#475569;font-weight:700;">1RM actual</p>
+            <p style="font-size:18px;font-weight:800;color:#F59E0B;">94 kg</p>
+          </div>
+        </div>
+
+        <!-- Warmup button -->
+        <button style="width:100%;margin-top:12px;background:#0f0f1e;border:1px solid #3730a3;border-radius:10px;padding:10px;color:#818cf8;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+          🔥 Generar Calentamiento Inteligente
+        </button>
+      </div>
+
+      <!-- PR Flash -->
+      <div class="pr-flash" style="margin-bottom:16px;">
+        <span style="font-size:24px;">⭐</span>
+        <div>
+          <p style="font-size:12px;font-weight:800;color:#F59E0B;letter-spacing:.06em;">¡NUEVO PR DETECTADO!</p>
+          <p style="font-size:11px;color:#fbbf24;">Serie 3 · 82 kg × 3 reps</p>
+        </div>
+        <span style="font-size:18px;margin-left:auto;">🏆</span>
+      </div>
+
+      <!-- Column headers -->
+      <div style="display:grid;grid-template-columns:32px 1fr 1fr 40px;gap:8px;padding:0 0 6px;border-bottom:1px solid #1e1e30;margin-bottom:4px;">
+        <span style="font-size:10px;color:#475569;font-weight:700;text-align:center;">SER</span>
+        <span style="font-size:10px;color:#475569;font-weight:700;text-align:center;">PESO (kg)</span>
+        <span style="font-size:10px;color:#475569;font-weight:700;text-align:center;">REPS</span>
+        <span></span>
+      </div>
+
+      <!-- Sets -->
+      <div class="set-row">
+        <span class="set-num">1</span>
+        <div class="set-input done" style="padding:10px 12px;">60</div>
+        <div class="set-input done" style="padding:10px 12px;">3</div>
+        <div class="check-btn done">
+          <svg width="16" height="16" fill="none" stroke="#22C55E" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+      </div>
+      <div class="set-row">
+        <span class="set-num">2</span>
+        <div class="set-input done" style="padding:10px 12px;">72</div>
+        <div class="set-input done" style="padding:10px 12px;">3</div>
+        <div class="check-btn done">
+          <svg width="16" height="16" fill="none" stroke="#22C55E" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+      </div>
+      <div class="set-row">
+        <span class="set-num" style="color:#F59E0B;">3</span>
+        <div class="set-input done" style="padding:10px 12px;border-color:#F59E0B;background:#1c1200;color:#fbbf24;">82</div>
+        <div class="set-input done" style="padding:10px 12px;border-color:#F59E0B;background:#1c1200;color:#fbbf24;">3</div>
+        <div class="check-btn done" style="background:#2d1800;border-color:#F59E0B;">
+          <svg width="16" height="16" fill="none" stroke="#F59E0B" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+      </div>
+      <div class="set-row">
+        <span class="set-num">4</span>
+        <div class="set-input active">80</div>
+        <div class="set-input active" style="color:#475569;">—</div>
+        <div class="check-btn">
+          <svg width="16" height="16" fill="none" stroke="#475569" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+      </div>
+      <div class="set-row">
+        <span class="set-num">5</span>
+        <div class="set-input" style="color:#2a2a3a;">—</div>
+        <div class="set-input" style="color:#2a2a3a;">—</div>
+        <div class="check-btn"></div>
+      </div>
+
+      <!-- Add set -->
+      <button style="width:100%;margin-top:12px;background:transparent;border:1px dashed #2a2a3a;border-radius:10px;padding:10px;color:#475569;font-size:12px;font-weight:600;cursor:pointer;">
+        + Agregar serie extra
+      </button>
+
+      <!-- Nav next -->
+      <div style="margin-top:20px;display:flex;gap:10px;">
+        <button style="flex:1;background:#1a1a28;border:1px solid #2a2a3a;border-radius:14px;padding:13px;color:#64748b;font-size:13px;font-weight:700;cursor:pointer;">
+          Anterior
+        </button>
+        <button style="flex:2;background:linear-gradient(135deg,#16a34a,#15803d);border:none;border-radius:14px;padding:13px;color:white;font-size:14px;font-weight:800;cursor:pointer;">
+          Siguiente ejercicio →
+        </button>
+      </div>
+
+    </div>
+
+    <!-- RPE Modal (bottom sheet) -->
+    <div class="rpe-modal">
+      <div style="width:36px;height:4px;background:#2a2a3a;border-radius:2px;margin:0 auto 16px;"></div>
+      <p style="font-size:15px;font-weight:800;color:#f1f5f9;margin-bottom:4px;">¿RPE de este bloque?</p>
+      <p style="font-size:12px;color:#64748b;margin-bottom:16px;">Esfuerzo percibido — 1 (muy fácil) a 10 (al límite)</p>
+      <div style="display:flex;gap:6px;margin-bottom:16px;">
+        <div class="rpe-pill">1</div>
+        <div class="rpe-pill">2</div>
+        <div class="rpe-pill">3</div>
+        <div class="rpe-pill">4</div>
+        <div class="rpe-pill">5</div>
+        <div class="rpe-pill selected">6</div>
+        <div class="rpe-pill">7</div>
+        <div class="rpe-pill high">8</div>
+        <div class="rpe-pill high">9</div>
+        <div class="rpe-pill high">10</div>
+      </div>
+      <button style="width:100%;background:linear-gradient(135deg,#16a34a,#15803d);color:white;font-size:14px;font-weight:800;padding:13px;border-radius:14px;border:none;cursor:pointer;">
+        Guardar RPE 6 →
+      </button>
+      <button style="width:100%;background:transparent;color:#475569;font-size:12px;font-weight:600;padding:9px;border-radius:14px;border:none;cursor:pointer;margin-top:6px;">
+        Skip RPE (coach asume RPE planeado)
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     ESTADO 3: Victory Screen — Smart Victory
+     ═══════════════════════════════════════════════════════ -->
+<div>
+  <p class="phone-label">B7/B8 — Victory Screen</p>
+  <div class="phone" style="min-height:780px; background: #060612;">
+    <div class="status-bar" style="background:#060612;">
+      <span style="font-size:12px;color:#94a3b8;font-weight:600;">10:41</span>
+      <span style="font-size:12px;color:#94a3b8;font-weight:600;">81%</span>
+    </div>
+    <div class="scroll-area" style="padding:24px;">
+
+      <!-- Tabs PR / Smart -->
+      <div style="display:flex;gap:8px;margin-bottom:24px;">
+        <div style="flex:1;background:#0f0a00;border:1px solid #F59E0B;border-radius:10px;padding:8px;text-align:center;cursor:pointer;">
+          <span style="font-size:11px;font-weight:700;color:#F59E0B;">⭐ Epic PR</span>
+        </div>
+        <div style="flex:1;background:#001e20;border:1px solid #06B6D4;border-radius:10px;padding:8px;text-align:center;cursor:pointer;">
+          <span style="font-size:11px;font-weight:700;color:#06B6D4;">🛡️ Smart Victory</span>
+        </div>
+      </div>
+
+      <!-- ── SMART VICTORY (mostrando este estado) ── -->
+      <div style="text-align:center;margin-bottom:20px;">
+        <!-- Pixel art avatar placeholder -->
+        <div style="width:120px;height:120px;margin:0 auto 12px;background:linear-gradient(135deg,#001e20,#003344);border:2px solid #06B6D4;border-radius:20px;display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 0 32px rgba(6,182,212,.3);">
+          <span style="font-size:56px;">🛡️</span>
+          <!-- cyan glow pulses -->
+          <div style="position:absolute;inset:-8px;border:1px solid rgba(6,182,212,.2);border-radius:24px;animation:pulse 2s ease-in-out infinite;"></div>
+        </div>
+        <p style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#06B6D4;margin-bottom:4px;">LONGEVITY PROTOCOL</p>
+        <p style="font-size:18px;font-weight:900;color:#f1f5f9;line-height:1.2;">Hoy ganaste la batalla<br>contra tu ego.</p>
+        <p style="font-size:12px;color:#64748b;margin-top:6px;">Tu yo de la próxima semana te lo agradecerá.</p>
+      </div>
+
+      <!-- Stats cards -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+        <div style="background:#0d1f12;border:1px solid #14532d;border-radius:16px;padding:14px;text-align:center;">
+          <p style="font-size:10px;color:#4ade80;font-weight:700;letter-spacing:.06em;text-transform:uppercase;">Daño Evitado</p>
+          <p style="font-size:24px;font-weight:900;color:#22C55E;">+18%</p>
+          <p style="font-size:10px;color:#4ade80;">Recuperación mañana</p>
+        </div>
+        <div style="background:#001e20;border:1px solid #0e4c56;border-radius:16px;padding:14px;text-align:center;">
+          <p style="font-size:10px;color:#06B6D4;font-weight:700;letter-spacing:.06em;text-transform:uppercase;">Adherencia</p>
+          <p style="font-size:24px;font-weight:900;color:#06B6D4;">100%</p>
+          <p style="font-size:10px;color:#06B6D4;">Sesión inteligente</p>
+        </div>
+      </div>
+
+      <!-- XP panel -->
+      <div style="background:#111118;border:1px solid #1e1e30;border-radius:16px;padding:14px;margin-bottom:16px;">
+        <p style="font-size:11px;color:#475569;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;">XP Ganada</p>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:13px;color:#94a3b8;">Sesión completada</span>
+            <span style="font-size:13px;font-weight:700;color:#4ade80;">+100 XP</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:13px;color:#94a3b8;">🛡️ Damage Control</span>
+            <span style="font-size:13px;font-weight:700;color:#06B6D4;">+200 XP</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:13px;color:#94a3b8;">🔥 Racha 14 días</span>
+            <span style="font-size:13px;font-weight:700;color:#f97316;">+50 XP</span>
+          </div>
+          <div style="border-top:1px solid #1e1e30;padding-top:8px;margin-top:2px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:14px;font-weight:800;color:#f1f5f9;">Total</span>
+            <span style="font-size:18px;font-weight:900;color:#4ade80;">+350 XP</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Share -->
+      <button style="width:100%;background:linear-gradient(135deg,#0e4c56,#004d55);border:1px solid #06B6D4;border-radius:14px;padding:14px;color:#06B6D4;font-size:14px;font-weight:800;cursor:pointer;margin-bottom:10px;">
+        🛡️ Compartir Smart Card
+      </button>
+      <button style="width:100%;background:transparent;color:#475569;font-size:13px;font-weight:600;padding:10px;border-radius:14px;border:1px solid #1e1e30;cursor:pointer;">
+        Finalizar y volver al inicio
+      </button>
+
+    </div>
+  </div>
+</div>
+
+<a href="index.html" style="position:fixed;top:20px;left:20px;background:#1e1e30;color:#94a3b8;font-size:13px;padding:8px 14px;border-radius:10px;text-decoration:none;border:1px solid #2a2a3a;z-index:99;">← Volver</a>
+
+</body>
+</html>

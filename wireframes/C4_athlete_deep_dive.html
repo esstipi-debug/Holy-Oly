@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>C4 · Athlete Deep Dive 360° — Coach View</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background: #07070F; font-family: 'Inter', system-ui, sans-serif; }
+
+    /* Phone shell */
+    .phone {
+      width: 390px;
+      min-height: 844px;
+      background: #0D0D1A;
+      border-radius: 48px;
+      border: 2px solid #1e1e3a;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 32px 80px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.06);
+    }
+    .phone-inner { padding: 0 0 80px 0; overflow-y: auto; max-height: 844px; }
+    .phone-inner::-webkit-scrollbar { display: none; }
+
+    /* Status bar */
+    .status-bar {
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      font-size: 12px;
+      color: #9ca3af;
+      flex-shrink: 0;
+    }
+
+    /* Bottom nav */
+    .bottom-nav {
+      position: sticky;
+      bottom: 0;
+      background: rgba(13,13,26,0.97);
+      border-top: 1px solid #1e1e3a;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0 14px;
+      z-index: 10;
+    }
+    .nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 9px; color: #4b5563; }
+    .nav-item.active { color: #6366f1; }
+    .nav-icon { font-size: 18px; }
+
+    /* Risk badge */
+    .risk-green  { background: rgba(34,197,94,.15);  color: #4ade80;  border: 1px solid rgba(34,197,94,.3); }
+    .risk-yellow { background: rgba(234,179,8,.15);  color: #facc15;  border: 1px solid rgba(234,179,8,.3); }
+    .risk-orange { background: rgba(249,115,22,.15); color: #fb923c;  border: 1px solid rgba(249,115,22,.3); }
+    .risk-red    { background: rgba(239,68,68,.15);  color: #f87171;  border: 1px solid rgba(239,68,68,.3); }
+
+    /* Tab */
+    .tab-btn { padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 600; color: #6b7280; cursor: pointer; transition: all .2s; border: 1px solid transparent; }
+    .tab-btn.active { background: rgba(99,102,241,.2); color: #818cf8; border-color: rgba(99,102,241,.4); }
+
+    /* Metric card */
+    .metric-card { background: #111127; border: 1px solid #1e1e3a; border-radius: 16px; padding: 14px; }
+
+    /* Progress bar */
+    .prog-bar { background: #1e1e3a; border-radius: 9999px; height: 6px; overflow: hidden; }
+    .prog-fill { height: 100%; border-radius: 9999px; transition: width .8s; }
+
+    /* Correlation point */
+    .corr-point { width: 10px; height: 10px; border-radius: 50%; position: absolute; transform: translate(-50%, -50%); cursor: pointer; }
+
+    /* Slider */
+    .ratio-slider { -webkit-appearance: none; width: 100%; height: 4px; border-radius: 4px; background: #1e1e3a; outline: none; }
+    .ratio-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: #6366f1;
+      border: 2px solid #818cf8;
+      cursor: pointer;
+    }
+
+    /* Timeline dot */
+    .timeline-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+
+    /* Glow */
+    .glow-indigo { box-shadow: 0 0 18px rgba(99,102,241,.35); }
+    .glow-green  { box-shadow: 0 0 18px rgba(34,197,94,.3);  }
+    .glow-red    { box-shadow: 0 0 18px rgba(239,68,68,.3);  }
+
+    /* Annotation pulse */
+    @keyframes pulsePin { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.4); opacity: .7; } }
+    .pulse-pin { animation: pulsePin 1.8s ease-in-out infinite; }
+  </style>
+</head>
+<body class="min-h-screen p-8">
+
+  <!-- Header -->
+  <div class="text-center mb-10">
+    <div class="inline-flex items-center gap-2 bg-indigo-900/20 border border-indigo-500/30 rounded-full px-4 py-1.5 mb-4">
+      <span class="text-indigo-400 text-xs font-bold uppercase tracking-widest">Wireframe C4 · Coach View</span>
+    </div>
+    <h1 class="text-3xl font-black text-white mb-2">Athlete Deep Dive 360°</h1>
+    <p class="text-slate-400 text-sm max-w-2xl mx-auto">Diagnóstico completo del atleta — Stress/Lifestyle correlation · Radar editable · Historial de adaptaciones · Smart Coach alerts</p>
+  </div>
+
+  <!-- Layout: 2 phones side by side -->
+  <div class="flex justify-center items-start gap-8 flex-wrap">
+
+    <!-- ══════════════════════════════════════
+         PHONE 1 — Overview + Correlation Chart
+         ══════════════════════════════════════ -->
+    <div>
+      <p class="text-center text-slate-500 text-xs font-bold uppercase tracking-widest mb-4">Vista 1 · Stress / Lifestyle</p>
+      <div class="phone">
+        <div class="phone-inner">
+          <!-- Status bar -->
+          <div class="status-bar">
+            <span>9:41</span>
+            <span class="text-slate-600">🔴 Coach · Premium</span>
+            <span>●●●</span>
+          </div>
+
+          <!-- Back nav -->
+          <div class="flex items-center gap-3 px-5 pb-3">
+            <button class="text-slate-400 text-lg">←</button>
+            <span class="text-slate-400 text-xs">Mi Equipo</span>
+          </div>
+
+          <!-- Athlete header card -->
+          <div class="mx-5 mb-4 bg-gradient-to-r from-indigo-900/30 to-purple-900/20 border border-indigo-500/30 rounded-2xl p-4 glow-indigo">
+            <div class="flex items-start justify-between mb-3">
+              <div class="flex items-center gap-3">
+                <!-- Avatar -->
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-black text-lg">M</div>
+                <div>
+                  <h2 class="text-white font-bold text-base">Mariana López</h2>
+                  <p class="text-slate-400 text-xs">Programa Colombiano 5D · Semana 8/20</p>
+                </div>
+              </div>
+              <!-- Smart Coach badge -->
+              <span class="text-xs font-bold px-2 py-1 rounded-lg risk-red">🚨 Atención</span>
+            </div>
+
+            <!-- Key metrics row -->
+            <div class="grid grid-cols-4 gap-2">
+              <div class="text-center">
+                <p class="text-xs text-slate-500 mb-0.5">Readiness</p>
+                <p class="text-white font-black text-base">58</p>
+                <p class="text-xs text-yellow-400">↓ -14</p>
+              </div>
+              <div class="text-center">
+                <p class="text-xs text-slate-500 mb-0.5">OLY Index</p>
+                <p class="text-white font-black text-base">7.4</p>
+                <p class="text-xs text-slate-500">sin cambio</p>
+              </div>
+              <div class="text-center">
+                <p class="text-xs text-slate-500 mb-0.5">Wise Score</p>
+                <p class="text-white font-black text-base">847</p>
+                <p class="text-xs text-green-400">↑ +23</p>
+              </div>
+              <div class="text-center">
+                <p class="text-xs text-slate-500 mb-0.5">Racha</p>
+                <p class="text-white font-black text-base">15🔥</p>
+                <p class="text-xs text-slate-500">días</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabs -->
+          <div class="flex gap-2 px-5 mb-4 overflow-x-auto">
+            <button class="tab-btn active" onclick="setTab(this,'corr')">📊 Correlación</button>
+            <button class="tab-btn" onclick="setTab(this,'adaptation')">⚡ Adaptaciones</button>
+            <button class="tab-btn" onclick="setTab(this,'timeline')">📅 Historia</button>
+          </div>
+
+          <!-- ─── TAB: Correlación ─── -->
+          <div id="tab-corr" class="px-5">
+
+            <!-- Smart Coach Alert -->
+            <div class="bg-red-900/20 border border-red-500/40 rounded-2xl p-4 mb-4">
+              <div class="flex items-start gap-3">
+                <span class="text-2xl">🤖</span>
+                <div>
+                  <p class="text-red-400 font-bold text-xs mb-1">Smart Coach · Alerta</p>
+                  <p class="text-slate-300 text-xs leading-relaxed">Readiness cayó 14 pts en 3 días. Correlación con <strong class="text-yellow-400">estrés laboral alto (Lifestyle 8/10)</strong> + sueño &lt;6h. Riesgo de sobreentrenamiento. Recomienda: reducir carga 20% esta semana.</p>
+                </div>
+              </div>
+              <div class="flex gap-2 mt-3">
+                <button class="flex-1 text-xs font-bold py-2 rounded-xl bg-indigo-600 text-white">Aplicar reducción</button>
+                <button class="flex-1 text-xs font-bold py-2 rounded-xl bg-slate-700 text-slate-300">Ver detalles</button>
+              </div>
+            </div>
+
+            <!-- Section title -->
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Correlación Stress / Lifestyle · 28 días</p>
+
+            <!-- Correlation Scatter Chart (SVG) -->
+            <div class="metric-card mb-4">
+              <div class="flex items-center justify-between mb-3">
+                <p class="text-xs text-slate-400">Readiness vs Lifestyle Score</p>
+                <span class="text-xs text-indigo-400 font-bold">r = −0.74</span>
+              </div>
+              <div class="relative" style="height:200px;">
+                <svg width="100%" height="200" viewBox="0 0 340 200">
+                  <!-- Grid -->
+                  <defs>
+                    <pattern id="grid" width="34" height="40" patternUnits="userSpaceOnUse">
+                      <path d="M 34 0 L 0 0 0 40" fill="none" stroke="#1e1e3a" stroke-width="0.5"/>
+                    </pattern>
+                  </defs>
+                  <rect width="340" height="200" fill="url(#grid)" opacity=".6"/>
+
+                  <!-- Axes labels -->
+                  <text x="170" y="196" fill="#4b5563" font-size="9" text-anchor="middle">Lifestyle Score (1-10)</text>
+                  <text x="8" y="100" fill="#4b5563" font-size="9" text-anchor="middle" transform="rotate(-90 8 100)">Readiness</text>
+
+                  <!-- Regression line (negative correlation) -->
+                  <line x1="20" y1="30" x2="320" y2="170" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="4 3" opacity=".5"/>
+
+                  <!-- Data points — last 28 sessions
+                       x = Lifestyle(1-10) mapped to px: 20+(lifestyle-1)*(300/9)
+                       y = Readiness(0-100) mapped: 180-(readiness/100)*160 -->
+                  <!-- Green zone (low lifestyle stress = high readiness) -->
+                  <circle cx="45"  cy="45"  r="5" fill="#4ade80" opacity=".8"/>
+                  <circle cx="65"  cy="50"  r="5" fill="#4ade80" opacity=".8"/>
+                  <circle cx="55"  cy="35"  r="5" fill="#4ade80" opacity=".8"/>
+                  <circle cx="80"  cy="60"  r="5" fill="#4ade80" opacity=".8"/>
+                  <circle cx="70"  cy="42"  r="5" fill="#4ade80" opacity=".8"/>
+                  <circle cx="50"  cy="55"  r="5" fill="#86efac" opacity=".7"/>
+
+                  <!-- Mid zone -->
+                  <circle cx="140" cy="88"  r="5" fill="#facc15" opacity=".8"/>
+                  <circle cx="160" cy="95"  r="5" fill="#facc15" opacity=".8"/>
+                  <circle cx="150" cy="80"  r="5" fill="#facc15" opacity=".8"/>
+                  <circle cx="175" cy="100" r="5" fill="#facc15" opacity=".8"/>
+                  <circle cx="130" cy="75"  r="5" fill="#facc15" opacity=".7"/>
+
+                  <!-- Red zone (high lifestyle stress = low readiness) -->
+                  <circle cx="240" cy="130" r="5" fill="#f87171" opacity=".8"/>
+                  <circle cx="260" cy="142" r="5" fill="#f87171" opacity=".8"/>
+                  <circle cx="275" cy="150" r="5" fill="#f87171" opacity=".8"/>
+                  <circle cx="255" cy="125" r="5" fill="#f87171" opacity=".8"/>
+                  <circle cx="285" cy="158" r="5" fill="#fb923c" opacity=".8"/>
+
+                  <!-- TODAY marker (highlighted) -->
+                  <circle cx="290" cy="155" r="7" fill="none" stroke="#f87171" stroke-width="2"/>
+                  <circle cx="290" cy="155" r="4" fill="#f87171"/>
+                  <text x="295" y="148" fill="#f87171" font-size="8" font-weight="bold">HOY</text>
+
+                  <!-- Axis ticks -->
+                  <text x="20"  y="188" fill="#6b7280" font-size="8" text-anchor="middle">1</text>
+                  <text x="87"  y="188" fill="#6b7280" font-size="8" text-anchor="middle">3</text>
+                  <text x="154" y="188" fill="#6b7280" font-size="8" text-anchor="middle">5</text>
+                  <text x="221" y="188" fill="#6b7280" font-size="8" text-anchor="middle">7</text>
+                  <text x="288" y="188" fill="#6b7280" font-size="8" text-anchor="middle">9</text>
+                  <text x="14" y="45"  fill="#6b7280" font-size="8" text-anchor="end">85</text>
+                  <text x="14" y="100" fill="#6b7280" font-size="8" text-anchor="end">60</text>
+                  <text x="14" y="160" fill="#6b7280" font-size="8" text-anchor="end">35</text>
+                </svg>
+              </div>
+              <p class="text-xs text-slate-600 mt-1 text-center">Correlación negativa fuerte: más estrés vital → menos readiness</p>
+            </div>
+
+            <!-- Lifestyle breakdown -->
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Breakdown Lifestyle · Hoy</p>
+            <div class="space-y-2.5 mb-4">
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="text-slate-400">💼 Estrés Laboral</span>
+                  <span class="text-red-400 font-bold">8/10</span>
+                </div>
+                <div class="prog-bar"><div class="prog-fill bg-red-500" style="width:80%"></div></div>
+              </div>
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="text-slate-400">😴 Calidad Sueño</span>
+                  <span class="text-orange-400 font-bold">4/10</span>
+                </div>
+                <div class="prog-bar"><div class="prog-fill bg-orange-500" style="width:40%"></div></div>
+              </div>
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="text-slate-400">🚌 Transporte/Commute</span>
+                  <span class="text-yellow-400 font-bold">6/10</span>
+                </div>
+                <div class="prog-bar"><div class="prog-fill bg-yellow-500" style="width:60%"></div></div>
+              </div>
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="text-slate-400">🍽️ Nutrición</span>
+                  <span class="text-green-400 font-bold">7/10</span>
+                </div>
+                <div class="prog-bar"><div class="prog-fill bg-green-500" style="width:70%"></div></div>
+              </div>
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="text-slate-400">🧘 Recuperación Activa</span>
+                  <span class="text-slate-400 font-bold">3/10</span>
+                </div>
+                <div class="prog-bar"><div class="prog-fill bg-slate-500" style="width:30%"></div></div>
+              </div>
+            </div>
+
+            <!-- RPE accuracy chip -->
+            <div class="metric-card mb-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-xs text-slate-400 mb-1">Precisión RPE (últimas 10 sesiones)</p>
+                  <p class="text-white font-bold text-sm">Δ promedio <span class="text-green-400">±0.6</span></p>
+                  <p class="text-slate-600 text-xs">Diferencia entre RPE percibido vs predicho · ideal &lt;1.0</p>
+                </div>
+                <div class="w-12 h-12 rounded-full border-2 border-green-400 flex items-center justify-center">
+                  <span class="text-green-400 font-black text-sm">✓</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <!-- end tab-corr -->
+
+          <!-- ─── TAB: Adaptaciones (hidden) ─── -->
+          <div id="tab-adaptation" class="px-5 hidden">
+            <div class="space-y-3">
+              <div class="metric-card">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs text-slate-400 font-bold">Esta semana · Sem 8</span>
+                  <span class="text-xs risk-yellow px-2 py-0.5 rounded-lg">2 pendientes</span>
+                </div>
+                <div class="space-y-2">
+                  <div class="flex items-center gap-3 py-2 border-b border-slate-800">
+                    <span class="text-yellow-400 text-base">⚠️</span>
+                    <div class="flex-1">
+                      <p class="text-white text-xs font-bold">Snatch → Snatch Pull</p>
+                      <p class="text-slate-500 text-xs">Risk 72 · Fatiga acumulada</p>
+                    </div>
+                    <button class="text-xs bg-green-600 text-white px-3 py-1.5 rounded-lg font-bold">✓</button>
+                    <button class="text-xs bg-slate-700 text-slate-300 px-2 py-1.5 rounded-lg">✕</button>
+                  </div>
+                  <div class="flex items-center gap-3 py-2">
+                    <span class="text-orange-400 text-base">🔄</span>
+                    <div class="flex-1">
+                      <p class="text-white text-xs font-bold">Reducir volumen −20%</p>
+                      <p class="text-slate-500 text-xs">Readiness 58 · Lifestyle 8/10</p>
+                    </div>
+                    <button class="text-xs bg-green-600 text-white px-3 py-1.5 rounded-lg font-bold">✓</button>
+                    <button class="text-xs bg-slate-700 text-slate-300 px-2 py-1.5 rounded-lg">✕</button>
+                  </div>
+                </div>
+              </div>
+              <div class="metric-card">
+                <p class="text-xs text-slate-400 font-bold mb-2">Historial de adaptaciones</p>
+                <div class="space-y-1.5">
+                  <div class="flex items-center gap-2 text-xs">
+                    <span class="w-2 h-2 rounded-full bg-green-400 flex-shrink-0"></span>
+                    <span class="text-slate-400">Sem 7 — Aceptó −15% back squat</span>
+                    <span class="text-green-400 ml-auto">+200 XP</span>
+                  </div>
+                  <div class="flex items-center gap-2 text-xs">
+                    <span class="w-2 h-2 rounded-full bg-slate-600 flex-shrink-0"></span>
+                    <span class="text-slate-500">Sem 6 — Ignoró adaptación Pull</span>
+                    <span class="text-slate-600 ml-auto">0 XP</span>
+                  </div>
+                  <div class="flex items-center gap-2 text-xs">
+                    <span class="w-2 h-2 rounded-full bg-green-400 flex-shrink-0"></span>
+                    <span class="text-slate-400">Sem 5 — Aceptó semana descarga</span>
+                    <span class="text-green-400 ml-auto">+200 XP</span>
+                  </div>
+                  <div class="flex items-center gap-2 text-xs">
+                    <span class="w-2 h-2 rounded-full bg-green-400 flex-shrink-0"></span>
+                    <span class="text-slate-400">Sem 4 — Aceptó Sn→Sn Grip</span>
+                    <span class="text-green-400 ml-auto">+200 XP</span>
+                  </div>
+                </div>
+                <div class="mt-3 pt-3 border-t border-slate-800 flex justify-between text-xs">
+                  <span class="text-slate-500">Tasa aceptación:</span>
+                  <span class="text-green-400 font-bold">75%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ─── TAB: Historia (hidden) ─── -->
+          <div id="tab-timeline" class="px-5 hidden">
+            <div class="space-y-3">
+              <!-- Week summary cards -->
+              <div class="metric-card">
+                <p class="text-xs text-slate-400 font-bold mb-3">Últimas 4 semanas</p>
+                <div class="space-y-3">
+                  <div class="flex gap-3">
+                    <div class="w-8 text-center">
+                      <div class="w-8 h-8 rounded-xl bg-indigo-900/40 border border-indigo-500/30 flex items-center justify-center text-xs font-bold text-indigo-400">8</div>
+                    </div>
+                    <div class="flex-1">
+                      <div class="flex justify-between items-center mb-1">
+                        <p class="text-white text-xs font-bold">Semana 8 · En curso</p>
+                        <span class="text-xs risk-red px-2 py-0.5 rounded-lg">Alerta</span>
+                      </div>
+                      <p class="text-slate-500 text-xs">Readiness 58 · 2 adaptaciones pendientes · Lifestyle alto</p>
+                    </div>
+                  </div>
+                  <div class="flex gap-3">
+                    <div class="w-8 text-center">
+                      <div class="w-8 h-8 rounded-xl bg-green-900/20 border border-green-500/20 flex items-center justify-center text-xs font-bold text-green-400">7</div>
+                    </div>
+                    <div class="flex-1">
+                      <div class="flex justify-between items-center mb-1">
+                        <p class="text-white text-xs font-bold">Semana 7 · Completada</p>
+                        <span class="text-xs risk-green px-2 py-0.5 rounded-lg">OK</span>
+                      </div>
+                      <p class="text-slate-500 text-xs">5/5 sesiones · Aceptó 1 adaptación · Readiness avg 72</p>
+                    </div>
+                  </div>
+                  <div class="flex gap-3">
+                    <div class="w-8 text-center">
+                      <div class="w-8 h-8 rounded-xl bg-yellow-900/20 border border-yellow-500/20 flex items-center justify-center text-xs font-bold text-yellow-400">6</div>
+                    </div>
+                    <div class="flex-1">
+                      <div class="flex justify-between items-center mb-1">
+                        <p class="text-white text-xs font-bold">Semana 6 · Completada</p>
+                        <span class="text-xs risk-yellow px-2 py-0.5 rounded-lg">Irregular</span>
+                      </div>
+                      <p class="text-slate-500 text-xs">4/5 sesiones · Ignoró adaptación Pull · Readiness avg 66</p>
+                    </div>
+                  </div>
+                  <div class="flex gap-3">
+                    <div class="w-8 text-center">
+                      <div class="w-8 h-8 rounded-xl bg-green-900/20 border border-green-500/20 flex items-center justify-center text-xs font-bold text-green-400">5</div>
+                    </div>
+                    <div class="flex-1">
+                      <div class="flex justify-between items-center mb-1">
+                        <p class="text-white text-xs font-bold">Semana 5 · Descarga</p>
+                        <span class="text-xs risk-green px-2 py-0.5 rounded-lg">Excelente</span>
+                      </div>
+                      <p class="text-slate-500 text-xs">5/5 sesiones · Aceptó descarga · Readiness rebote a 81</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom nav -->
+          <div class="bottom-nav">
+            <div class="nav-item"><span class="nav-icon">⚡</span><span>Hub</span></div>
+            <div class="nav-item active"><span class="nav-icon">👥</span><span>Equipo</span></div>
+            <div class="nav-item"><span class="nav-icon">📊</span><span>Stats</span></div>
+            <div class="nav-item"><span class="nav-icon">👤</span><span>Perfil</span></div>
+          </div>
+        </div><!-- /phone-inner -->
+      </div><!-- /phone -->
+    </div>
+
+    <!-- ══════════════════════════════════════
+         PHONE 2 — Golden Ratio Editable (Coach)
+         ══════════════════════════════════════ -->
+    <div>
+      <p class="text-center text-slate-500 text-xs font-bold uppercase tracking-widest mb-4">Vista 2 · Radar Editable + Metas</p>
+      <div class="phone">
+        <div class="phone-inner">
+          <!-- Status bar -->
+          <div class="status-bar">
+            <span>9:41</span>
+            <span class="text-slate-600">🔴 Coach · Premium</span>
+            <span>●●●</span>
+          </div>
+
+          <!-- Athlete mini header -->
+          <div class="flex items-center gap-3 px-5 pb-4">
+            <button class="text-slate-400 text-lg">←</button>
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-black text-sm">M</div>
+            <div>
+              <p class="text-white font-bold text-sm">Mariana López</p>
+              <p class="text-slate-500 text-xs">Ratios & Metas del Coach</p>
+            </div>
+            <button class="ml-auto text-xs bg-indigo-600 text-white px-3 py-1.5 rounded-lg font-bold">Guardar</button>
+          </div>
+
+          <!-- Editable radar section -->
+          <div class="px-5 mb-4">
+            <div class="flex items-center justify-between mb-3">
+              <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Radar Golden Ratio</p>
+              <div class="flex gap-2 text-xs">
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-indigo-400 inline-block"></span><span class="text-slate-400">Atleta</span></span>
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-yellow-400 inline-block"></span><span class="text-slate-400">Meta Coach</span></span>
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-400 inline-block" style="border-style:dashed"></span><span class="text-slate-400">Ideal</span></span>
+              </div>
+            </div>
+
+            <!-- SVG Hexagonal Radar (editable version) -->
+            <div class="metric-card mb-4">
+              <svg width="100%" height="240" viewBox="-10 -10 340 260">
+                <defs>
+                  <radialGradient id="radarGrad" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#6366f1" stop-opacity=".15"/>
+                    <stop offset="100%" stop-color="#6366f1" stop-opacity=".03"/>
+                  </radialGradient>
+                  <radialGradient id="goalGrad" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#eab308" stop-opacity=".12"/>
+                    <stop offset="100%" stop-color="#eab308" stop-opacity=".02"/>
+                  </radialGradient>
+                </defs>
+
+                <!-- Center -->
+                <!-- Grid circles (3 rings at 33%, 66%, 100%) -->
+                <!-- Hex center: 160, 120 · radius: 95 -->
+                <!-- 6 axes at 0°, 60°, 120°, 180°, 240°, 300° -->
+                <!-- Axis lines -->
+                <line x1="160" y1="120" x2="160"  y2="25"   stroke="#1e1e3a" stroke-width="1"/>
+                <line x1="160" y1="120" x2="242"  y2="167"  stroke="#1e1e3a" stroke-width="1"/>
+                <line x1="160" y1="120" x2="242"  y2="215"  stroke="#1e1e3a" stroke-width="1"/>
+                <line x1="160" y1="120" x2="160"  y2="215"  stroke="#1e1e3a" stroke-width="1"/>
+                <line x1="160" y1="120" x2="78"   y2="215"  stroke="#1e1e3a" stroke-width="1"/>
+                <line x1="160" y1="120" x2="78"   y2="167"  stroke="#1e1e3a" stroke-width="1"/>
+
+                <!-- Ring 33% -->
+                <polygon points="160,88 187,104 187,136 160,152 133,136 133,104" fill="none" stroke="#1e1e3a" stroke-width=".8"/>
+                <!-- Ring 66% -->
+                <polygon points="160,57 214,88 214,152 160,183 106,152 106,88" fill="none" stroke="#1e1e3a" stroke-width=".8"/>
+                <!-- Ring 100% (max) -->
+                <polygon points="160,25 242,72 242,168 160,215 78,168 78,72" fill="none" stroke="#2a2a4a" stroke-width="1"/>
+
+                <!-- IDEAL polygon (dashed green)
+                     Values: Sn/CJ=0.84, FS/BS=0.86, Sn/BS=0.65, CJ/BS=0.77, FS/CJ=1.11, Pull/CJ=1.05
+                     Normalized to 0-1 scale on 0-1.2 range
+                     Using simplified coords relative to center+ring100 -->
+                <!-- Ideal: all at ~70% of ring100 -->
+                <polygon
+                  points="160,46 223,81 223,152 160,187 97,152 97,81"
+                  fill="rgba(34,197,94,0.06)" stroke="#4ade80" stroke-width="1.5" stroke-dasharray="4 3"/>
+
+                <!-- COACH GOAL polygon (yellow) - custom targets set by coach -->
+                <!-- Slightly above ideal on Sn/CJ and Pull/CJ, realistic goals -->
+                <polygon
+                  points="160,42 226,82 220,155 160,190 94,155 101,78"
+                  fill="url(#goalGrad)" stroke="#facc15" stroke-width="2" stroke-dasharray="6 3" opacity=".8"/>
+
+                <!-- ATHLETE current polygon (indigo solid) -->
+                <!-- Sn/CJ=0.839 ✓, FS/BS=0.862 ✓, Sn/BS=0.648 ⚠, CJ/BS=0.772 ✓, FS/CJ=1.116 ✓, Pull/CJ=0.98 -->
+                <polygon
+                  points="160,48 221,83 218,157 160,189 96,157 99,80"
+                  fill="url(#radarGrad)" stroke="#818cf8" stroke-width="2.5"/>
+
+                <!-- Weak spot highlight (Sn/BS axis — bottom left) -->
+                <circle cx="96" cy="157" r="6" fill="none" stroke="#f87171" stroke-width="2" class="pulse-pin"/>
+
+                <!-- Axis labels -->
+                <text x="160" y="18"  fill="#a5b4fc" font-size="9" text-anchor="middle" font-weight="bold">Sn/CJ</text>
+                <text x="252" y="70"  fill="#a5b4fc" font-size="9" text-anchor="start">FS/BS</text>
+                <text x="252" y="172" fill="#a5b4fc" font-size="9" text-anchor="start">CJ/BS</text>
+                <text x="160" y="228" fill="#f87171" font-size="9" text-anchor="middle" font-weight="bold">Sn/BS ⚠</text>
+                <text x="68"  y="172" fill="#a5b4fc" font-size="9" text-anchor="end">FS/CJ</text>
+                <text x="68"  y="70"  fill="#a5b4fc" font-size="9" text-anchor="end">Pull/CJ</text>
+
+                <!-- Value dots on athlete polygon -->
+                <circle cx="160" cy="48"  r="3" fill="#818cf8"/>
+                <circle cx="221" cy="83"  r="3" fill="#818cf8"/>
+                <circle cx="218" cy="157" r="3" fill="#818cf8"/>
+                <circle cx="96"  cy="157" r="3" fill="#f87171"/>
+                <circle cx="99"  cy="80"  r="3" fill="#818cf8"/>
+              </svg>
+
+              <!-- Weak axis callout -->
+              <div class="bg-red-900/20 border border-red-500/30 rounded-xl p-3 mt-2">
+                <p class="text-red-400 text-xs font-bold">⚠ Sn/BS = 0.648 — por debajo del ideal ≥0.65</p>
+                <p class="text-slate-500 text-xs mt-1">Déficit de fuerza relativa en arrancada respecto a back squat. Meta coach: alcanzar 0.68 en 4 semanas.</p>
+              </div>
+            </div>
+
+            <!-- Ratio sliders — Coach edits goal targets -->
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Metas del Coach (editables)</p>
+            <div class="space-y-4">
+
+              <!-- Sn/CJ -->
+              <div>
+                <div class="flex justify-between text-xs mb-2">
+                  <span class="text-slate-300 font-bold">Arrancada / Dos Tiempos</span>
+                  <div class="flex gap-2">
+                    <span class="text-indigo-400">Actual: 0.839</span>
+                    <span class="text-yellow-400 font-bold" id="lbl-sncj">Meta: 0.86</span>
+                  </div>
+                </div>
+                <input type="range" class="ratio-slider" min="70" max="95" value="86"
+                  oninput="document.getElementById('lbl-sncj').textContent='Meta: 0.'+this.value"/>
+                <div class="flex justify-between text-xs text-slate-600 mt-1">
+                  <span>0.70</span><span class="text-green-400">Ideal: 0.82–0.88</span><span>0.95</span>
+                </div>
+              </div>
+
+              <!-- Sn/BS (critical) -->
+              <div>
+                <div class="flex justify-between text-xs mb-2">
+                  <span class="text-red-400 font-bold">Arrancada / Back Squat ⚠</span>
+                  <div class="flex gap-2">
+                    <span class="text-red-400">Actual: 0.648</span>
+                    <span class="text-yellow-400 font-bold" id="lbl-snbs">Meta: 0.68</span>
+                  </div>
+                </div>
+                <input type="range" class="ratio-slider" min="55" max="80" value="68"
+                  oninput="document.getElementById('lbl-snbs').textContent='Meta: 0.'+this.value"
+                  style="-webkit-appearance: none; background: linear-gradient(to right, #ef4444 0%, #6366f1 40%, #4ade80 100%);"/>
+                <div class="flex justify-between text-xs text-slate-600 mt-1">
+                  <span>0.55</span><span class="text-green-400">Ideal: ≥0.65</span><span>0.80</span>
+                </div>
+              </div>
+
+              <!-- FS/BS -->
+              <div>
+                <div class="flex justify-between text-xs mb-2">
+                  <span class="text-slate-300 font-bold">Front Squat / Back Squat</span>
+                  <div class="flex gap-2">
+                    <span class="text-indigo-400">Actual: 0.862</span>
+                    <span class="text-yellow-400 font-bold" id="lbl-fsbs">Meta: 0.88</span>
+                  </div>
+                </div>
+                <input type="range" class="ratio-slider" min="72" max="95" value="88"
+                  oninput="document.getElementById('lbl-fsbs').textContent='Meta: 0.'+this.value"/>
+                <div class="flex justify-between text-xs text-slate-600 mt-1">
+                  <span>0.72</span><span class="text-green-400">Ideal: 0.80–0.88</span><span>0.95</span>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Action buttons -->
+            <div class="flex gap-3 mt-5 mb-4">
+              <button class="flex-1 bg-indigo-600 text-white font-bold text-sm py-3 rounded-2xl">💾 Guardar metas</button>
+              <button class="bg-slate-800 text-slate-400 font-bold text-sm px-4 py-3 rounded-2xl">Resetear</button>
+            </div>
+
+            <!-- Coach note -->
+            <div class="metric-card mb-4">
+              <p class="text-xs text-slate-400 font-bold mb-2">📝 Nota interna del Coach</p>
+              <div class="bg-slate-800 rounded-xl p-3 text-xs text-slate-300 leading-relaxed">
+                "Mariana tiene déficit en Sn/BS. Enfocar los próximos 4 microciclos en trabajo de fuerza de arrancada (Sn Deadlift + Power Sn). Lifestyle muy alto esta semana — hablar con ella antes de ajustar el programa."
+              </div>
+              <button class="mt-2 text-xs text-indigo-400 font-bold">✏️ Editar nota</button>
+            </div>
+
+          </div>
+
+          <!-- Bottom nav -->
+          <div class="bottom-nav">
+            <div class="nav-item"><span class="nav-icon">⚡</span><span>Hub</span></div>
+            <div class="nav-item active"><span class="nav-icon">👥</span><span>Equipo</span></div>
+            <div class="nav-item"><span class="nav-icon">📊</span><span>Stats</span></div>
+            <div class="nav-item"><span class="nav-icon">👤</span><span>Perfil</span></div>
+          </div>
+        </div><!-- /phone-inner -->
+      </div><!-- /phone -->
+    </div>
+
+  </div><!-- /flex -->
+
+  <!-- Legend / Engine map -->
+  <div class="max-w-3xl mx-auto mt-12 bg-slate-900 border border-slate-700/40 rounded-2xl p-6">
+    <h3 class="text-white font-bold mb-4">Engines presentes en esta pantalla</h3>
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+      <div class="bg-slate-800 rounded-xl p-3">
+        <p class="text-indigo-400 font-bold text-xs mb-1">🧠 Stress Engine</p>
+        <p class="text-slate-500 text-xs">Banister readiness + fatiga acumulada</p>
+      </div>
+      <div class="bg-slate-800 rounded-xl p-3">
+        <p class="text-red-400 font-bold text-xs mb-1">⚡ Session Adaptation</p>
+        <p class="text-slate-500 text-xs">Risk score → adaptaciones pendientes</p>
+      </div>
+      <div class="bg-slate-800 rounded-xl p-3">
+        <p class="text-purple-400 font-bold text-xs mb-1">🏆 Golden Ratio</p>
+        <p class="text-slate-500 text-xs">Radar 6 ratios · metas editables por coach</p>
+      </div>
+      <div class="bg-slate-800 rounded-xl p-3">
+        <p class="text-green-400 font-bold text-xs mb-1">🌿 Lifestyle Profile</p>
+        <p class="text-slate-500 text-xs">5 factores · correlación negativa con readiness</p>
+      </div>
+      <div class="bg-slate-800 rounded-xl p-3">
+        <p class="text-yellow-400 font-bold text-xs mb-1">🤖 Smart Coach</p>
+        <p class="text-slate-500 text-xs">Categorización atleta + alertas contextuales</p>
+      </div>
+      <div class="bg-slate-800 rounded-xl p-3">
+        <p class="text-cyan-400 font-bold text-xs mb-1">🔒 Privacy Engine</p>
+        <p class="text-slate-500 text-xs">Coach ve todo · atleta controla visibilidad</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center mt-8 mb-4">
+    <a href="index.html" class="text-indigo-400 text-sm hover:text-indigo-300 transition-colors">← Volver al índice</a>
+  </div>
+
+  <script>
+    // Tab switcher
+    function setTab(btn, tabId) {
+      // Deactivate all tabs
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('[id^="tab-"]').forEach(t => t.classList.add('hidden'));
+
+      // Activate selected
+      btn.classList.add('active');
+      document.getElementById('tab-' + tabId).classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>

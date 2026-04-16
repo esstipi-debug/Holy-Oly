@@ -1,0 +1,55 @@
+PARÁMETROS CLAVE DEL PROGRAMA
+
+    Sistema / Escuela: China (Enfoque: Hibridación Fuerza-Técnica, Culturismo funcional y "Weakness Correction").
+
+    Duración: 4 Semanas (Bloque Modular de Alta Intensidad).
+
+    Frecuencia: 5 Días / Semana (Sesiones de alta densidad).
+
+    Intensidad Media (IMR): 60% - 95%+ (Rango completo en cada sesión).
+
+    Volumen Mensual Objetivo: 400 - 600 repeticiones de calidad (sin contar el extenso trabajo de culturismo).
+
+    Filosofía de Carga: Estructura mixta. Se busca la fatiga muscular localizada (culturismo) después de la potencia. Mucho trabajo de Pulls (Tirones) y Squats (Sentadillas).
+
+    Best For: Atletas disciplinados, necesidad de corregir debilidades específicas, amantes del trabajo de hipertrofia.
+
+🔴 SEMANA 1: BASE ESTRUCTURAL (Volumen Alto)
+
+Objetivo: Acondicionamiento de tendones y construcción muscular (GPP Específico). Foco Chino: Pausas largas, movimientos excéntricos y mucho "Bodybuilding" al final (Remos, Fondos, Lumbares).
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA/ACC)
+LUN	VOL	Snatch (Slow Pull): 5x3 @ 70%	Snatch Panda Pull: 4x4 @ 90%	Back Squat (Pausa): 5x5 @ 70%
+MAR	MED	Muscle Snatch: 4x4 @ 50%	Clean & Jerk: 5x(2+1) @ 70%	Press Militar: 4x6 (Estricto)
+MIE	VOL	Power Clean: 5x3 @ 75%	Clean Deadlift: 5x5 @ 100%	Front Squat: 4x5 @ 75%
+JUE	ACT	Snatch Balance: 4x3 @ 60%	Lu Raises: 4x12	Core / Planchas Lastradas
+VIE	INT	Snatch: 6x2 @ 75%	Jerk from Rack: 5x3 @ 75%	Back Squat: 3x5 @ 75%
+
+    Nota de Estilo: Al finalizar cada sesión, realizar 15 min obligatorios de tracciones (dominadas/remos) y fondos.
+
+🟡 SEMANA 2: ACUMULACIÓN DE CARGA (Fuerza Absoluta)
+
+Objetivo: Desarrollar fuerza máxima en tirones y sentadillas para transferir a los clásicos. Foco Chino: Tirones pesados (Pulls) y Sentadillas por encima del 85%.
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA/ACC)
+LUN	VOL	Snatch: 6x2 @ 80%	Snatch High Pull: 5x3 @ 100%	Back Squat: 5x4 @ 80%
+MAR	MED	Power Snatch: 5x2 @ 75%	Push Press: 5x4 @ 75%	Remos con Barra: 4x8
+MIE	INT	Clean & Jerk: 5x(1+1) @ 85%	Clean Pull (Déficit): 4x3 @ 105%	Front Squat: 5x3 @ 85%
+JUE	TEC	Overhead Squat: 4x3 @ 70%	Sots Press: 4x5	Saltos al Cajón
+VIE	INT	Snatch: 4x1 @ 85%	C&J (Squat Jerk/Power): 4x1 @ 85%	Back Squat: 3x3 @ 88%
+🟣 SEMANA 3: CHOQUE (INTENSIDAD MÁXIMA)
+
+Objetivo: Simulación de máximos esfuerzos bajo fatiga. Foco Chino: "Max Out" controlado. Ir a buscar un 1RM o un Heavy Single diario en los clásicos, seguido de trabajo de fuerza pesada.
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA/ACC)
+LUN	MAX	Snatch: Heavy Single (90-95%)	Snatch Pull: 4x2 @ 110%	Back Squat: 4x2 @ 90%
+MAR	MED	Power Clean: 3x1 @ 85%	Jerk from Rack: 3x1 @ 90%	Fondos Lastrados: 4x6
+MIE	MAX	Clean & Jerk: Heavy Single (90-95%)	Clean Deadlift: 3x3 @ 120%	Front Squat: 3x2 @ 92%
+JUE	ACT	Muscle Snatch: 3x3 (Ligero)	Bodybuilding Espalda	Core Pesado
+VIE	MAX	Snatch: 1x1 @ 95%+	Clean & Jerk: 1x1 @ 95%+	Squat (1/4 rom): 3x3 @ 110%
+⚪ SEMANA 4: DESCARGA / TAPER (Recuperación Activa)
+
+Objetivo: Disipar fatiga y preparar el cuerpo para el siguiente bloque. Foco Chino: Mantener la "sensación" de peso (intensidad moderada-alta) pero con volumen (series) drásticamente reducido.
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (FUERZA/ACC)
+LUN	MED	Snatch: 3x1 @ 80%	Snatch Pull: 2x2 @ 90%	Back Squat: 2x3 @ 70%
+MAR	TEC	Técnica Barra	Movilidad Hombros	Estiramientos
+MIE	MED	Clean & Jerk: 2x1 @ 80%	Front Squat: 2x2 @ 75%	Dominadas (Peso corporal)
+JUE	OFF	Masaje / Descanso	---	---
+VIE	TEST	Snatch: 1x1 @ 85% (Sin fallos)	C&J: 1x1 @ 85% (Sin fallos)	Back Squat: 1x1 @ 85%

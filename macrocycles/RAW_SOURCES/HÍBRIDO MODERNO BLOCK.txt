@@ -1,0 +1,107 @@
+PERFIL HÍBRIDO MODERNO: BLOCK + UNDULATING
+
+Parámetros Clave del Sistema:
+
+    Filosofía: "Variación Coordinada". Combinación de bloques concentrados con ondulación semanal para evitar el estancamiento.
+
+    Jerarquía de Bloques:
+
+        Mes 1 (Acumulación): Hipertrofia y Capacidad de Trabajo (Reps 6-10 en fuerza, complejos en olímpicos).
+
+        Mes 2 (Transmutación): Fuerza Absoluta y CNS (Reps 1-5).
+
+        Mes 3 (Realización): Potencia y Puesta a Punto (Reps 1-3).
+
+    Ondulación Semanal (Patrón A-B-C-D):
+
+        Semana A: Volumen (80% Vol / 70% Int).
+
+        Semana B: Medio/Carga (100% Vol / 85% Int).
+
+        Semana C: Intensidad (60% Vol / 95% Int).
+
+        Semana D: Descarga/Recov (40% Vol / 65% Int).
+
+    Autorregulación: Uso de RPE (Rate of Perceived Exertion).
+
+        RPE 7-8: Zona Objetivo.
+
+        RPE 9: Reducir 5% próxima sesión.
+
+🟢 MES 1: BLOQUE DE HIPERTROFIA (Acumulación)
+
+Objetivo: Capacidad de trabajo y construcción muscular. Foco: Alto Volumen (300-400 reps/sem). Series largas y complejos.
+SEMANA 1 (Patrón A: Volumen Base - RPE 6-7)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (ACCESORIOS/FUERZA)
+1	VOL	Muscle Snatch + OHS: 5x(3+3) @ 65%	Muscle Clean + Press: 4x(3+3) @ 65%	Back Squat: 4x8 @ 70%
+2	AUX	Snatch Pull (Lento): 4x5 @ 85%	Push Press: 4x6 @ 70%	Dominadas Estrictas: 4x8
+3	MED	Power Snatch (No Feet): 5x3 @ 70%	Power Clean + F.Squat: 5x(2+2) @ 70%	Front Squat (Pausa): 4x6 @ 70%
+4	TEC	Tall Snatch: 4x4 (Ligero)	Sots Press: 4x6 (Barra)	Press Militar Sentado: 4x8
+5	INT	Snatch Complex: 4x(2 Pull+1 Snatch) @ 75%	C&J Complex: 4x(1 Clean+2 Jerk) @ 75%	Back Squat: 3x10 @ 65%
+SEMANA 2 (Patrón B: Carga Máxima - RPE 8)
+
+Semana de mayor tonelaje del bloque. | DÍA | TIPO | SLOT 1 (ARRANQUE) | SLOT 2 (ENVIÓN) | SLOT 3 (ACCESORIOS/FUERZA) | |:---:|:---|:---|:---|:---| | 6 | VOL | Hang Snatch (Rodilla): 6x3 @ 75% | Hang Clean + Jerk: 5x(2+1) @ 75% | Back Squat: 5x6 @ 75% | | 7 | AUX | Snatch Deadlift: 5x5 @ 90% | Push Jerk: 5x4 @ 75% | Remo Pendlay: 4x8 | | 8 | MED | Power Snatch: 6x3 @ 75% | Power Clean: 6x3 @ 75% | Front Squat: 5x5 @ 78% | | 9 | TEC | Snatch Balance: 5x4 @ 60% | Jerk Dip: 5x5 @ 85% | Buenos Días: 3x10 | | 10 | INT | Snatch (Sin pausa): 5x2 @ 80% | C&J (Sin pausa): 5x(1+1) @ 80% | Back Squat: 4x6 @ 78% |
+SEMANA 3 (Patrón C: Intensidad - RPE 8-9)
+
+Volumen baja al 60%, Intensidad sube. | DÍA | TIPO | SLOT 1 (ARRANQUE) | SLOT 2 (ENVIÓN) | SLOT 3 (ACCESORIOS/FUERZA) | |:---:|:---|:---|:---|:---| | 11 | VOL | Snatch: 5x2 @ 82% | Clean & Jerk: 4x(1+1) @ 82% | Back Squat: 4x5 @ 80% | | 12 | AUX | Snatch Pull: 4x4 @ 100% | Push Press: 4x4 @ 78% | Fondos Lastrados: 3x8 | | 13 | MED | Power Snatch: 4x2 @ 80% | Power Clean: 4x2 @ 80% | Front Squat: 3x4 @ 82% | | 14 | TEC | Drop Snatch: 3x3 @ 65% | Jerk Recovery: 3x3 @ 70% | Saltos al Cajón: 3x5 | | 15 | INT | Snatch: 3x1 @ 85% | Clean & Jerk: 3x1 @ 85% | Back Squat: 3x4 @ 82% |
+SEMANA 4 (Patrón D: Recuperación - RPE 5-6)
+
+Deload programado. Cambio de foco hacia Bloque 2. | DÍA | TIPO | SLOT 1 (ARRANQUE) | SLOT 2 (ENVIÓN) | SLOT 3 (ACCESORIOS/FUERZA) | |:---:|:---|:---|:---|:---| | 16 | VOL | Muscle Snatch: 3x3 @ 50% | Muscle Clean: 3x3 @ 50% | Back Squat: 3x5 @ 60% | | 17 | AUX | Movilidad Torácica | Barra Técnica | Core Estático | | 18 | MED | Power Snatch: 3x2 @ 60% | Power Clean: 3x1 @ 60% | Front Squat: 2x3 @ 60% | | 19 | TEC | Tall Snatch: 3x3 | Press Militar: 3x5 | Sin Carga | | 20 | INT | Snatch: 2x1 @ 70% | C&J: 2x1 @ 70% | Back Squat: 2x3 @ 70% |
+🟡 MES 2: BLOQUE DE FUERZA (Transmutación)
+
+Objetivo: Fuerza Absoluta y Adaptación Neural. Foco: Volumen Moderado (150-200 reps/sem). Reps 1-5.
+SEMANA 5 (Patrón A: Volumen Fuerza - RPE 7)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (ACCESORIOS/FUERZA)
+21	VOL	Snatch (Pausa rodilla): 5x2 @ 78%	C&J (1+2): 4x(1+2) @ 78%	Back Squat: 5x4 @ 82%
+22	AUX	Snatch Deadlift: 4x3 @ 100%	Push Jerk: 4x3 @ 80%	Hip Thrust: 3x6
+23	MED	Block Snatch: 4x2 @ 80%	Block Clean: 4x2 @ 80%	Front Squat: 4x3 @ 85%
+24	TEC	Snatch Balance: 4x3 @ 70%	Jerk Drive: 4x3 @ 90%	Saltos: 3x5
+25	INT	Snatch: 4x1 @ 85%	Clean & Jerk: 4x1 @ 85%	Back Squat: 3x3 @ 85%
+SEMANA 6 (Patrón B: Carga Neural - RPE 8)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (ACCESORIOS/FUERZA)
+26	VOL	Snatch: 6x2 @ 82%	Clean & Jerk: 5x(1+1) @ 82%	Back Squat: 5x3 @ 85%
+27	AUX	Snatch Pull: 5x3 @ 105%	Split Jerk (Rack): 5x2 @ 85%	Pull: 4x3 @ 105%
+28	MED	Block Snatch: 5x2 @ 85%	Block Clean: 5x2 @ 85%	Front Squat: 4x2 @ 88%
+29	TEC	OHS: 4x3 @ 75%	Jerk Recovery: 4x2 @ 80%	Core Rotacional
+30	INT	Snatch: 2x1 @ 90%	Clean & Jerk: 2x1 @ 90%	Back Squat: 3x2 @ 90%
+SEMANA 7 (Patrón C: Intensidad Máxima - RPE 9)
+
+Semana más pesada del bloque. | DÍA | TIPO | SLOT 1 (ARRANQUE) | SLOT 2 (ENVIÓN) | SLOT 3 (ACCESORIOS/FUERZA) | |:---:|:---|:---|:---|:---| | 31 | VOL | Snatch: 4x2 @ 85% | Clean & Jerk: 4x1 @ 85% | Back Squat: 4x2 @ 90% | | 32 | AUX | Snatch Pull: 4x2 @ 110% | Push Press: 4x2 @ 85% | Pull Pesado: 3x2 @ 110% | | 33 | MED | Power Snatch: 3x1 @ 85% | Power Clean: 3x1 @ 85% | Front Squat: 3x1 @ 92% | | 34 | TEC | Drop Snatch: 3x2 @ 70% | Jerk Support: 3x10s @ 100% | Pliometría | | 35 | INT | Snatch: 1x1 @ 92-95% | Clean & Jerk: 1x1 @ 92-95% | Back Squat: 2x1 @ 95% |
+SEMANA 8 (Patrón D: Descarga - RPE 5)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (ACCESORIOS/FUERZA)
+36	VOL	Hang Snatch: 3x2 @ 65%	Hang Clean: 3x1 @ 65%	Back Squat: 3x3 @ 65%
+37	AUX	Muscle Snatch: 3x3 @ 50%	Press Militar: 3x5 @ 50%	Movilidad
+38	MED	Block Snatch: 3x2 @ 70%	Block Clean: 2x1 @ 70%	Front Squat: 2x2 @ 70%
+39	TEC	Barra (Velocidad)	Core	Descanso Activo
+40	INT	Snatch: 2x1 @ 75%	C&J: 2x1 @ 75%	Back Squat: 2x2 @ 75%
+🔴 MES 3: BLOQUE DE POTENCIA (Realización/Peaking)
+
+Objetivo: Expresión de potencia y singles máximos. Foco: Volumen Bajo (50-100 reps/sem). Reps 1-3.
+SEMANA 9 (Patrón A: Introducción Potencia - RPE 7)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (ACCESORIOS/FUERZA)
+41	VOL	Snatch: 5x1 @ 85%	Clean & Jerk: 4x1 @ 85%	Back Squat: 3x2 @ 85%
+42	AUX	Power Snatch: 3x2 @ 80%	Jerk (Rack): 3x2 @ 85%	Snatch Pull: 3x2 @ 100%
+43	MED	Snatch: 4x1 @ 88%	Clean & Jerk: 3x1 @ 88%	Front Squat: 2x2 @ 88%
+44	TEC	Tall Snatch: 3x3 @ 40%	Jerk Recovery: 3x2 @ 85%	Core Dinámico
+45	INT	Snatch: 1x1 @ 90%	Clean & Jerk: 1x1 @ 90%	Back Squat: 2x1 @ 90%
+SEMANA 10 (Patrón B: Carga Específica - RPE 8-9)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (ACCESORIOS/FUERZA)
+46	VOL	Snatch: 4x1 @ 90%	Clean & Jerk: 3x1 @ 90%	Back Squat: 3x2 @ 90%
+47	AUX	Power Snatch: 3x1 @ 85%	Power Clean: 3x1 @ 85%	Pull: 3x2 @ 105%
+48	MED	Snatch: 3x1 @ 92%	Clean & Jerk: 2x1 @ 92%	Front Squat: 2x1 @ 92%
+49	TEC	Snatch Balance: 3x1 @ 80%	Jerk Support: 3x1 @ 95%	Saltos Reactivos
+50	INT	Snatch: 1x1 @ 95%	Clean & Jerk: 1x1 @ 95%	Back Squat: 1x1 @ 95%
+SEMANA 11 (Patrón C: Simulación/Test - RPE 10)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (ACCESORIOS/FUERZA)
+51	VOL	Snatch: 3x1 @ 85%	Clean & Jerk: 2x1 @ 85%	Back Squat: 2x2 @ 85%
+52	AUX	Power Snatch: 2x1 @ 80%	Jerk (Rack): 2x1 @ 85%	Pull: 2x1 @ 95%
+53	MED	Snatch: 2x1 @ 90%	C&J: 1x1 @ 90%	Front Squat: 1x1 @ 85%
+54	TEC	Activación	Visualización	Movilidad
+55	INT	Snatch: 1x1 @ 97%+	Clean & Jerk: 1x1 @ 97%+	Squat: 1x1 @ 97%+
+SEMANA 12 (Patrón D: Taper Final)
+DÍA	TIPO	SLOT 1 (ARRANQUE)	SLOT 2 (ENVIÓN)	SLOT 3 (ACCESORIOS/FUERZA)
+56	REC	Snatch: 3x1 @ 70%	C&J: 2x1 @ 70%	Back Squat: 2x2 @ 70%
+57	REC	Power Snatch: 2x1 @ 60%	Power Clean: 2x1 @ 60%	Movilidad
+58	ACT	Snatch: 2x1 @ 75%	C&J: 1x1 @ 75%	Front Squat: 1x1 @ 70%
+59	MOV	Barra Vacía	Shadow Lifting	Descanso
+60	TEST	TEST OPCIONAL	COMPETENCIA	O DESCANSO TOTAL

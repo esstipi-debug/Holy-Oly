@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>B3 — Injury Shield Modal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #050510;
+      min-height: 100vh;
+      font-family: 'Inter', system-ui, sans-serif;
+      padding: 40px 20px 80px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+
+    .phone {
+      width: 390px;
+      min-height: 780px;
+      background: #07070F;
+      border-radius: 44px;
+      border: 2px solid #2a2a3a;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 0 1px #1a1a28;
+    }
+    .phone-label {
+      width: 390px;
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: .08em; text-transform: uppercase;
+      color: #475569;
+    }
+    .status-bar {
+      height: 44px; background: #07070F;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px; flex-shrink: 0;
+    }
+
+    /* Risk meter */
+    .risk-arc {
+      position: relative;
+      width: 140px; height: 78px;
+      overflow: hidden;
+      margin: 0 auto;
+    }
+    .risk-arc svg { position: absolute; top: 0; left: 0; }
+
+    /* Exercise comparison card */
+    .ex-compare {
+      display: grid;
+      grid-template-columns: 1fr 28px 1fr;
+      gap: 8px;
+      align-items: center;
+    }
+    .ex-box {
+      background: #111118;
+      border: 1px solid #1e1e30;
+      border-radius: 14px;
+      padding: 12px;
+      text-align: center;
+    }
+    .ex-box.original { border-color: #7f1d1d; background: #150505; }
+    .ex-box.suggested { border-color: #0e4c56; background: #050d18; }
+    .ex-box.original.yellow { border-color: #713f12; background: #150a00; }
+    .ex-box.suggested.yellow { border-color: #1e3a24; background: #050d0a; }
+
+    /* Reason badge */
+    .reason-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px; border-radius: 20px;
+      font-size: 10px; font-weight: 700; letter-spacing: .05em;
+    }
+
+    /* Bottom sheet */
+    .sheet {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: #0a0a14;
+      border-radius: 28px 28px 0 0;
+      border-top: 1px solid #1e1e30;
+      padding: 20px 24px 36px;
+      z-index: 10;
+    }
+    .sheet-handle {
+      width: 36px; height: 4px; background: #2a2a3a;
+      border-radius: 2px; margin: 0 auto 20px;
+    }
+
+    @keyframes shieldPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,.4); }
+      50%       { box-shadow: 0 0 0 12px rgba(239,68,68,.0); }
+    }
+    .shield-pulse { animation: shieldPulse 2s ease-in-out infinite; }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); opacity: 0; }
+      to   { transform: translateY(0); opacity: 1; }
+    }
+    .slide-up { animation: slideUp .35s cubic-bezier(.32,.72,0,1) both; }
+
+    .scroll-area { flex:1; overflow-y:auto; scrollbar-width:none; }
+    .scroll-area::-webkit-scrollbar { display: none; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     ESTADO 1: RIESGO ROJO (76/100)
+     Modal de intervención crítica
+═══════════════════════════════════════════ -->
+<div>
+  <p class="phone-label">B3 — Riesgo ROJO (76/100)</p>
+  <div class="phone">
+    <div class="status-bar">
+      <span style="font-size:12px;color:#94a3b8;font-weight:600;">9:52</span>
+      <span style="font-size:12px;color:#94a3b8;font-weight:600;">84%</span>
+    </div>
+
+    <!-- Background: blurred session summary -->
+    <div style="padding:20px 24px;filter:blur(2px);opacity:.3;pointer-events:none;">
+      <p style="font-size:20px;font-weight:800;color:#f1f5f9;">Sesión de hoy</p>
+      <p style="font-size:14px;color:#64748b;margin-top:8px;">Colombiano 5D · Semana 6 · Día 2</p>
+      <div style="margin-top:20px;background:#111118;border-radius:16px;padding:16px;">
+        <p style="font-size:13px;color:#94a3b8;">Arrancada 5×3 @ 80kg...</p>
+        <p style="font-size:13px;color:#94a3b8;margin-top:8px;">Dos Tiempos 4×2 @ 100kg...</p>
+      </div>
+    </div>
+
+    <!-- Dark overlay -->
+    <div style="position:absolute;inset:0;background:rgba(7,7,15,.82);backdrop-filter:blur(6px);z-index:5;"></div>
+
+    <!-- Injury Shield Bottom Sheet -->
+    <div class="sheet slide-up" style="z-index:10;">
+      <div class="sheet-handle"></div>
+
+      <!-- Shield icon + Risk score -->
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+        <div class="shield-pulse" style="width:60px;height:60px;border-radius:16px;background:#1a0505;border:2px solid #EF4444;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <span style="font-size:28px;">🛡️</span>
+        </div>
+        <div style="flex:1;">
+          <p style="font-size:11px;font-weight:700;color:#EF4444;letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px;">Modo Protección Activado</p>
+          <p style="font-size:18px;font-weight:900;color:#f1f5f9;line-height:1.15;">Tu cuerpo necesita<br>un ajuste hoy</p>
+        </div>
+        <!-- Risk number -->
+        <div style="background:#1a0505;border:2px solid #EF4444;border-radius:14px;padding:8px 12px;text-align:center;flex-shrink:0;">
+          <p style="font-size:26px;font-weight:900;color:#EF4444;line-height:1;">76</p>
+          <p style="font-size:9px;color:#f87171;font-weight:700;">ROJO</p>
+        </div>
+      </div>
+
+      <!-- Reasons -->
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;">
+        <span class="reason-badge" style="background:#1a0505;border:1px solid #7f1d1d;color:#f87171;">😴 Sueño: 4h</span>
+        <span class="reason-badge" style="background:#1a0505;border:1px solid #7f1d1d;color:#f87171;">😣 Fatiga: 4/5</span>
+        <span class="reason-badge" style="background:#1a0a00;border:1px solid #92400e;color:#fbbf24;">🦵 Dolor rodilla: 3/5</span>
+        <span class="reason-badge" style="background:#1a0505;border:1px solid #7f1d1d;color:#f87171;">⚡ CNS bajo</span>
+      </div>
+
+      <!-- Exercise comparison -->
+      <div style="margin-bottom:16px;">
+        <p style="font-size:10px;font-weight:700;color:#475569;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;">Adaptación Sugerida · Nivel 2</p>
+        <div class="ex-compare">
+          <div class="ex-box original">
+            <p style="font-size:9px;color:#f87171;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;">Original</p>
+            <p style="font-size:13px;font-weight:800;color:#f1f5f9;">Arrancada</p>
+            <p style="font-size:11px;color:#64748b;margin-top:3px;">5×3 @ 80kg</p>
+            <div style="margin-top:6px;display:inline-block;background:#2a0a0a;border:1px solid #EF4444;border-radius:6px;padding:2px 8px;">
+              <span style="font-size:10px;color:#f87171;font-weight:700;">Complejidad 10</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+            <span style="font-size:14px;">→</span>
+          </div>
+          <div class="ex-box suggested">
+            <p style="font-size:9px;color:#06B6D4;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;">Sugerido</p>
+            <p style="font-size:13px;font-weight:800;color:#f1f5f9;">Power Snatch</p>
+            <p style="font-size:11px;color:#4ade80;margin-top:3px;">5×3 @ 68kg <span style="color:#64748b;">(-15%)</span></p>
+            <div style="margin-top:6px;display:inline-block;background:#0e2d1e;border:1px solid #22C55E;border-radius:6px;padding:2px 8px;">
+              <span style="font-size:10px;color:#4ade80;font-weight:700;">Complejidad 8</span>
+            </div>
+          </div>
+        </div>
+        <!-- Why explanation -->
+        <div style="background:#0a1018;border:1px solid #1e2a30;border-radius:12px;padding:10px 14px;margin-top:10px;display:flex;align-items:flex-start;gap:8px;">
+          <span style="font-size:14px;flex-shrink:0;">🤖</span>
+          <p style="font-size:11px;color:#64748b;line-height:1.5;">Tu CNS no está recuperado. El Power Snatch elimina la posición de catch completa, reduciendo el riesgo técnico un <strong style="color:#06B6D4;">35%</strong> sin perder el patrón de fuerza.</p>
+        </div>
+      </div>
+
+      <!-- CTA buttons -->
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button style="width:100%;background:linear-gradient(135deg,#0e4c56,#155e75);border:1px solid #06B6D4;border-radius:14px;padding:14px;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;border:none;">
+          <span style="font-size:18px;">🛡️</span>
+          <div style="text-align:left;">
+            <p style="font-size:14px;font-weight:800;color:#06B6D4;">Activar Protección</p>
+            <p style="font-size:10px;color:#0891b2;">Sesión ajustada automáticamente · <strong>+200 XP Elite Maturity</strong></p>
+          </div>
+        </button>
+        <button style="width:100%;background:#111118;border:1px solid #2a2a3a;border-radius:14px;padding:12px;color:#64748b;font-size:13px;font-weight:700;cursor:pointer;">
+          ⚠️ Ignorar riesgo y continuar con el plan original
+        </button>
+      </div>
+
+    </div><!-- end sheet -->
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     ESTADO 2: RIESGO AMARILLO (42/100)
+     Modal menos urgente
+═══════════════════════════════════════════ -->
+<div>
+  <p class="phone-label">B3 — Riesgo AMARILLO (42/100)</p>
+  <div class="phone">
+    <div class="status-bar">
+      <span style="font-size:12px;color:#94a3b8;font-weight:600;">9:52</span>
+      <span style="font-size:12px;color:#94a3b8;font-weight:600;">84%</span>
+    </div>
+
+    <div style="position:absolute;inset:0;background:rgba(7,7,15,.75);backdrop-filter:blur(4px);z-index:5;"></div>
+
+    <div class="sheet slide-up" style="z-index:10;">
+      <div class="sheet-handle"></div>
+
+      <!-- Header: warning tone, not critical -->
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+        <div style="width:60px;height:60px;border-radius:16px;background:#1c1500;border:2px solid #EAB308;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <span style="font-size:28px;">⚡</span>
+        </div>
+        <div style="flex:1;">
+          <p style="font-size:11px;font-weight:700;color:#EAB308;letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px;">Ajuste Recomendado</p>
+          <p style="font-size:17px;font-weight:800;color:#f1f5f9;line-height:1.2;">Puedes entrenar,<br>pero con precaución</p>
+        </div>
+        <div style="background:#1c1500;border:2px solid #EAB308;border-radius:14px;padding:8px 12px;text-align:center;flex-shrink:0;">
+          <p style="font-size:26px;font-weight:900;color:#EAB308;line-height:1;">42</p>
+          <p style="font-size:9px;color:#fbbf24;font-weight:700;">AMARILLO</p>
+        </div>
+      </div>
+
+      <!-- Reasons -->
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;">
+        <span class="reason-badge" style="background:#1c1500;border:1px solid #713f12;color:#fbbf24;">😴 Sueño: 6h</span>
+        <span class="reason-badge" style="background:#1c1500;border:1px solid #713f12;color:#fbbf24;">😮‍💨 Fatiga: 3/5</span>
+        <span class="reason-badge" style="background:#0d1f0d;border:1px solid #14532d;color:#4ade80;">🧠 Enfoque: 4/5</span>
+      </div>
+
+      <!-- Exercise comparison: Level 1 (mild) -->
+      <div style="margin-bottom:16px;">
+        <p style="font-size:10px;font-weight:700;color:#475569;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;">Adaptación Sugerida · Nivel 1 (leve)</p>
+        <div class="ex-compare">
+          <div class="ex-box original yellow">
+            <p style="font-size:9px;color:#fbbf24;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;">Original</p>
+            <p style="font-size:13px;font-weight:800;color:#f1f5f9;">Arrancada</p>
+            <p style="font-size:11px;color:#64748b;margin-top:3px;">5×3 @ 80kg</p>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:center;">
+            <span style="font-size:14px;color:#475569;">→</span>
+          </div>
+          <div class="ex-box suggested yellow">
+            <p style="font-size:9px;color:#22C55E;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;">Sugerido</p>
+            <p style="font-size:13px;font-weight:800;color:#f1f5f9;">Hang Snatch</p>
+            <p style="font-size:11px;color:#4ade80;margin-top:3px;">5×3 @ 76kg <span style="color:#64748b;">(-5%)</span></p>
+          </div>
+        </div>
+        <div style="background:#0a1008;border:1px solid #1e2a1e;border-radius:12px;padding:10px 14px;margin-top:10px;display:flex;align-items:flex-start;gap:8px;">
+          <span style="font-size:14px;flex-shrink:0;">🤖</span>
+          <p style="font-size:11px;color:#64748b;line-height:1.5;">Reducción mínima del rango de tirón. Mantiene el patrón completo pero <strong style="color:#4ade80;">reduce el estrés neural un 15%</strong>. Cambio casi imperceptible en ejecución.</p>
+        </div>
+      </div>
+
+      <!-- Three options available -->
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <button style="width:100%;background:linear-gradient(135deg,#14532d,#166534);border:none;border-radius:14px;padding:13px;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;">
+          <span style="font-size:16px;">🛡️</span>
+          <div style="text-align:left;">
+            <p style="font-size:13px;font-weight:800;color:#4ade80;">Aplicar ajuste leve</p>
+            <p style="font-size:10px;color:#22C55E;">Hang Snatch @76kg · <strong>+100 XP Wise Move</strong></p>
+          </div>
+        </button>
+        <button style="width:100%;background:#111118;border:1px solid #22C55E;border-radius:14px;padding:12px;color:#22C55E;font-size:13px;font-weight:700;cursor:pointer;">
+          ✅ Continuar con el plan original (Riesgo bajo aceptado)
+        </button>
+        <button style="width:100%;background:transparent;border:none;padding:8px;color:#475569;font-size:12px;cursor:pointer;">
+          Omitir sugerencia
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     ESTADO 3: CHECK-AND-BALANCE
+     Interrupción por RPE extremo durante sesión
+═══════════════════════════════════════════ -->
+<div>
+  <p class="phone-label">B3c — Guardián en sesión (RPE 10 × 3)</p>
+  <div class="phone" style="min-height:640px;">
+    <div class="status-bar">
+      <span style="font-size:12px;color:#94a3b8;font-weight:600;">10:14</span>
+      <span style="font-size:12px;color:#94a3b8;font-weight:600;">81%</span>
+    </div>
+
+    <!-- Session in background -->
+    <div style="padding:16px 24px;filter:blur(1px);opacity:.35;pointer-events:none;">
+      <p style="font-size:16px;font-weight:800;color:#f1f5f9;">Arrancada · Serie 4</p>
+      <div style="margin-top:12px;background:#111118;border-radius:14px;padding:14px;">
+        <div style="display:grid;grid-template-columns:32px 1fr 1fr 40px;gap:8px;padding-bottom:8px;border-bottom:1px solid #1e1e30;font-size:10px;color:#475569;font-weight:700;text-transform:uppercase;letter-spacing:.06em;">
+          <span>SER</span><span style="text-align:center;">PESO</span><span style="text-align:center;">REPS</span><span></span>
+        </div>
+        <div style="display:grid;grid-template-columns:32px 1fr 1fr 40px;gap:8px;padding-top:10px;align-items:center;">
+          <span style="font-size:12px;color:#4ade80;font-weight:700;text-align:center;">3</span>
+          <div style="background:#0d1f12;border:1px solid #22C55E;border-radius:10px;padding:10px;text-align:center;color:#4ade80;font-size:15px;font-weight:700;">82</div>
+          <div style="background:#0d1f12;border:1px solid #22C55E;border-radius:10px;padding:10px;text-align:center;color:#4ade80;font-size:15px;font-weight:700;">3</div>
+          <div style="width:36px;height:36px;border-radius:10px;background:#14532d;border:1.5px solid #22C55E;display:flex;align-items:center;justify-content:center;">✓</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dark overlay + warning color -->
+    <div style="position:absolute;inset:0;background:rgba(20,5,0,.88);backdrop-filter:blur(4px);z-index:5;border-top:3px solid #f97316;"></div>
+
+    <!-- Warning sheet -->
+    <div class="sheet slide-up" style="z-index:10;background:#100800;border-top:1px solid #713f12;">
+      <div style="width:36px;height:4px;background:#2a1500;border-radius:2px;margin:0 auto 20px;"></div>
+
+      <!-- Warning header -->
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
+        <div style="width:54px;height:54px;border-radius:14px;background:#1c0800;border:2px solid #f97316;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <span style="font-size:26px;">⚠️</span>
+        </div>
+        <div>
+          <p style="font-size:11px;font-weight:700;color:#f97316;letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px;">Guardián Activado</p>
+          <p style="font-size:16px;font-weight:800;color:#f1f5f9;line-height:1.2;">Estás por encima de la<br>intensidad programada</p>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div style="background:#1a0a00;border:1px solid #713f12;border-radius:14px;padding:12px 14px;margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+          <span style="font-size:12px;color:#94a3b8;">RPE programado por coach</span>
+          <span style="font-size:13px;font-weight:700;color:#4ade80;">RPE 8</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+          <span style="font-size:12px;color:#94a3b8;">Tu RPE en últimas 3 series</span>
+          <span style="font-size:13px;font-weight:700;color:#f87171;">RPE 10 · 10 · 10</span>
+        </div>
+        <div style="height:1px;background:#2a1500;margin:8px 0;"></div>
+        <p style="font-size:11px;color:#fbbf24;line-height:1.5;">Continuar puede causar crash del SNC y afectar tu capacidad de entrenamiento los próximos <strong>2–3 días</strong>.</p>
+      </div>
+
+      <!-- Options -->
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <button style="width:100%;background:linear-gradient(135deg,#0e4c56,#155e75);border:none;border-radius:14px;padding:13px;color:#06B6D4;font-size:14px;font-weight:800;cursor:pointer;">
+          🛡️ Recalcular y proteger las series restantes
+        </button>
+        <button style="width:100%;background:#111118;border:1px solid #2a2a3a;border-radius:12px;padding:11px;color:#64748b;font-size:12px;font-weight:700;cursor:pointer;">
+          ⚠️ Soy consciente del riesgo — continuar igual
+          <span style="display:block;font-size:10px;color:#374151;margin-top:1px;">(Tu coach recibirá una alerta)</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<a href="index.html" style="position:fixed;top:20px;left:20px;background:#1e1e30;color:#94a3b8;font-size:13px;padding:8px 14px;border-radius:10px;text-decoration:none;border:1px solid #2a2a3a;z-index:99;">← Volver</a>
+
+</body>
+</html>
