@@ -1,7 +1,7 @@
 # 🗺️ PLAN — Hoja de Ruta HolyOly
 
 **Última actualización:** 2026-04-16  
-**Estado:** Fase 1 FINALIZADA (100%) · Fase 2 INICIADA (15%)
+**Estado:** Fase 1 FINALIZADA (100%) · Fase 2 EN PROGRESO (55%)
 
 ---
 
@@ -80,15 +80,22 @@ wireframes/
 - [x] Setup ESLint + Prettier
 
 **2.2 Design System en código**
-- Componentes base: Button, Input, Card, Modal, Nav
-- Color system (4 temas: Classic, Carbon Stealth, Olympic Gold, Cyber Neon)
-- Tipografía (Inter 400/600/900)
-- Spacing + Border radius tokens
+- [x] Componentes base: Button, Input, Card, Badge, Nav
+- [x] Color system (4 temas base integrados en Tailwind)
+- [x] Tipografía (Inter configurada)
+- [ ] Spacing + Border radius tokens adicionales
 
 **2.3 Pantallas con mocks**
-- Recrear todos 27 wireframes como componentes React
-- Usar datos hardcodeados primero
-- Validar responsiveness (mobile-first)
+- [ ] Recrear todos 27 wireframes como componentes React
+- [x] Login (A1)
+- [x] Dashboard Atleta (B1)
+- [x] Session Summary Preview (B4)
+- [x] Warmup Generator (B5)
+- [x] Active Session (B6)
+- [x] Victory Screen (B7/B8)
+- [x] OLY Index (B11)
+- [ ] Usar datos hardcodeados primero
+- [ ] Validar responsiveness (mobile-first)
 
 **2.4 Frontend con API simulada**
 - Setup MSW (Mock Service Worker) o JSON Server

@@ -1,57 +1,65 @@
+import React, { useState } from 'react';
 import PhoneLayout from './layouts/PhoneLayout';
+import AtletaHome from './pages/AtletaHome';
+import Login from './pages/Login';
+import ActiveSession from './pages/ActiveSession';
+import WarmupGenerator from './pages/WarmupGenerator';
+import SessionSummaryPreview from './pages/SessionSummaryPreview';
+import VictoryScreen from './pages/VictoryScreen';
+import OlyIndex from './pages/OlyIndex';
+
+type View = 'LOGIN' | 'HOME' | 'SUMMARY' | 'WARMUP' | 'SESSION' | 'VICTORY' | 'INDEX';
 
 function App() {
+  const [currentView, setCurrentView] = useState<View>('HOME');
+
+  const renderView = () => {
+    switch(currentView) {
+      case 'LOGIN': return <Login />;
+      case 'HOME': return <AtletaHome />;
+      case 'SUMMARY': return <SessionSummaryPreview />;
+      case 'WARMUP': return <WarmupGenerator />;
+      case 'SESSION': return <ActiveSession />;
+      case 'VICTORY': return <VictoryScreen />;
+      case 'INDEX': return <OlyIndex />;
+      default: return <AtletaHome />;
+    }
+  };
+
   return (
-    <PhoneLayout>
-      <div className="px-6 py-4">
-        <header className="mb-8">
-          <h1 className="text-white text-2xl font-black">HolyOly</h1>
-          <p className="text-holy-primary text-xs font-bold uppercase tracking-widest mt-1">
-            Beccttor Platform
-          </p>
-        </header>
+    <div className="relative">
+      <PhoneLayout>
+        {renderView()}
+      </PhoneLayout>
 
-        <main className="space-y-6">
-          <div className="glass-card p-6 border-holy-primary/20">
-            <h2 className="text-white font-bold text-lg mb-2">Bienvenido, Atleta</h2>
-            <p className="text-sm text-slate-400 leading-relaxed">
-              Estamos configurando tu entorno de alto rendimiento. Fase 2 en curso.
-            </p>
-            <div className="mt-6 flex items-center gap-3">
-              <div className="h-2 flex-1 bg-slate-800 rounded-full overflow-hidden">
-                <div className="h-full bg-holy-primary w-2/5" />
-              </div>
-              <span className="text-[10px] font-black text-holy-primary">PROGRESS_40%</span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="glass-card p-4 text-center group cursor-pointer hover:border-holy-secondary/50">
-              <p className="text-2xl mb-1 group-hover:scale-110 transition-transform">🏋️</p>
-              <p className="text-[10px] font-bold text-slate-500 uppercase">Training</p>
-            </div>
-            <div className="glass-card p-4 text-center group cursor-pointer hover:border-holy-cyan/50">
-              <p className="text-2xl mb-1 group-hover:scale-110 transition-transform">🧪</p>
-              <p className="text-[10px] font-bold text-slate-500 uppercase">Analysis</p>
-            </div>
-          </div>
-
-          <div className="glass-card p-5 mt-4">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-white font-bold text-sm">Próxima Sesión</h3>
-              <span className="text-[10px] bg-holy-gold/20 text-holy-gold px-2 py-0.5 rounded-full font-bold">MAÑANA</span>
-            </div>
-            <div className="flex gap-4">
-              <div className="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center text-xl">🚀</div>
-              <div>
-                <p className="text-slate-200 text-sm font-bold">Snatch + Overhead Squat</p>
-                <p className="text-slate-500 text-xs mt-0.5">Focus: Speed & Stability</p>
-              </div>
-            </div>
-          </div>
-        </main>
+      {/* Vertical Slice Navigator (Floating) */}
+      <div className="fixed bottom-4 left-4 right-4 flex gap-2 z-50 overflow-x-auto bg-black/70 p-3 rounded-2xl backdrop-blur-xl border border-white/10 lg:left-auto lg:right-10 lg:bottom-10 lg:w-[400px]">
+        {[
+          { id: 'LOGIN', label: 'Auth' },
+          { id: 'HOME', label: 'Dash' },
+          { id: 'SUMMARY', label: 'B4' },
+          { id: 'WARMUP', label: 'B5' },
+          { id: 'SESSION', label: 'B6' },
+          { id: 'VICTORY', label: 'B7' },
+          { id: 'INDEX', label: 'B11' }
+        ].map((view) => (
+          <button 
+            key={view.id}
+            onClick={() => setCurrentView(view.id as View)}
+            className={`flex-shrink-0 px-4 py-2 rounded-xl text-[10px] font-black transition-all ${
+              currentView === view.id ? 'bg-holy-primary text-white scale-110' : 'bg-white/5 text-slate-500 hover:text-slate-300'
+            }`}
+          >
+            {view.label}
+          </button>
+        ))}
       </div>
-    </PhoneLayout>
+
+      <div className="hidden lg:block fixed left-10 top-10 border-l-2 border-holy-primary pl-4 py-3">
+        <p className="text-white text-sm font-black italic">PHASE_2_V_SLICE</p>
+        <p className="text-slate-500 text-[10px] uppercase font-bold tracking-widest mt-1">Athlete Journey: Clickable Prototype</p>
+      </div>
+    </div>
   );
 }
 
