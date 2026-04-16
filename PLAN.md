@@ -1,7 +1,7 @@
 # 🗺️ PLAN — Hoja de Ruta HolyOly
 
 **Última actualización:** 2026-04-16  
-**Estado:** Fase 1 FINALIZADA (100%) · Fase 2 EN PROGRESO (55%)
+**Estado:** Fase 1 FINALIZADA (100%) · Fase 2 EN PROGRESO (70%)
 
 ---
 
@@ -86,16 +86,15 @@ wireframes/
 - [ ] Spacing + Border radius tokens adicionales
 
 **2.3 Pantallas con mocks**
-- [ ] Recrear todos 27 wireframes como componentes React
-- [x] Login (A1)
-- [x] Dashboard Atleta (B1)
-- [x] Session Summary Preview (B4)
-- [x] Warmup Generator (B5)
-- [x] Active Session (B6)
-- [x] Victory Screen (B7/B8)
-- [x] OLY Index (B11)
-- [ ] Usar datos hardcodeados primero
-- [ ] Validar responsiveness (mobile-first)
+- [x] Recrear todos 27 wireframes como componentes React (18 Páginas)
+- [x] Onboarding & Auth (D1, A1)
+- [x] Dashboard & Session Loop (B1, B4, B5, B6, B7/B8)
+- [x] Analytics & OLY Index (B10, B11)
+- [x] Pulse Hub & Social (B9, B12/B13, B14)
+- [x] Portal del Coach completo (C1, C4, C5/C6, C7/C8/C9)
+- [x] Perfil & Configuración (B15, B2/B3)
+- [x] Usar datos hardcodeados para validación de UX
+- [x] Validar responsiveness (mobile-first) ✅
 
 **2.4 Frontend con API simulada**
 - Setup MSW (Mock Service Worker) o JSON Server
