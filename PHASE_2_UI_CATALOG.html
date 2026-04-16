@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HolyOly — Catálogo Visual Fase 2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #07070F; color: #94a3b8; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .holy-gold { color: #F59E0B; }
+        .holy-primary { color: #22C55E; }
+        .holy-cyan { color: #06B6D4; }
+        .preview-img {
+            width: 100%;
+            height: auto;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="p-8 lg:p-16">
+    <div class="max-w-6xl mx-auto">
+        <header class="mb-16 border-b border-white/10 pb-12">
+            <div class="flex items-center gap-4 mb-4">
+                <span class="bg-holy-primary/20 text-holy-primary px-3 py-1 rounded-full text-xs font-black tracking-widest">FASE 2 — REACT FRONTEND</span>
+                <span class="text-slate-500 text-xs font-bold uppercase">Estado: PROTOTIPO 100% FUNCIONAL</span>
+            </div>
+            <h1 class="text-white text-5xl font-black italic tracking-tighter mb-4">HOLY OLY <span class="text-holy-gold">CATALOG</span></h1>
+            <p class="text-slate-400 text-lg max-w-2xl">Hemos traducido 27 conceptos de wireframes a 18 páginas React optimizadas. Aquí puedes ver el diseño real que hemos implementado en el código.</p>
+        </header>
+
+        <!-- Athlete Journey -->
+        <section class="mb-24">
+            <h2 class="text-white text-3xl font-black mb-12 flex items-center gap-4">
+                <span class="w-10 h-10 rounded-xl bg-holy-primary/20 flex items-center justify-center text-holy-primary text-lg font-black italic">01</span>
+                ATHLETE JOURNEY
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16">
+                <!-- Screen 1 -->
+                <div class="space-y-6">
+                    <img src="assets/previews/athlete_home.png" alt="Athlete Home Mockup" class="preview-img">
+                    <div class="px-2">
+                        <p class="text-white font-black text-lg">Dashboard Atleta</p>
+                        <p class="text-holy-primary text-xs font-bold uppercase mb-4">AtletaHome.tsx</p>
+                        <ul class="text-xs text-slate-500 space-y-2 list-disc list-inside">
+                            <li>Métricas de Readiness en tiempo real</li>
+                            <li>Banister Fatigue Model</li>
+                            <li>Injury Shield (Prevención predictiva)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Screen 2 -->
+                <div class="space-y-6">
+                    <img src="assets/previews/active_session.png" alt="Active Session Mockup" class="preview-img">
+                    <div class="px-2">
+                        <p class="text-white font-black text-lg">Sesión Activa</p>
+                        <p class="text-holy-primary text-xs font-bold uppercase mb-4">ActiveSession.tsx</p>
+                        <ul class="text-xs text-slate-500 space-y-2 list-disc list-inside">
+                            <li>Crono de sesión de alto rendimiento</li>
+                            <li>Logging táctico de series y RPE</li>
+                            <li>Notas del coach dinámicas</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Victory Screen Placeholder or more info -->
+                <div class="space-y-6 p-6 glass rounded-3xl flex flex-col justify-center border-holy-gold/20">
+                    <p class="text-holy-gold text-4xl mb-4">🏆</p>
+                    <p class="text-white font-black text-lg underline decoration-holy-gold">GAMIFICACIÓN</p>
+                    <p class="text-slate-400 text-sm leading-relaxed mt-2">
+                        El flujo se completa con la <strong>Victory Screen</strong> (Recompensas XP) y el <strong>Warmup Generator</strong>, todos implementados con este mismo lenguaje visual premium.
+                    </p>
+                    <div class="mt-6 flex gap-2">
+                        <span class="px-2 py-1 bg-holy-gold/10 text-holy-gold text-[10px] font-black rounded italic">LEVEL_SYSTEM_DONE</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Coach -->
+        <section class="mb-24">
+            <h2 class="text-white text-3xl font-black mb-12 flex items-center gap-4">
+                <span class="w-10 h-10 rounded-xl bg-holy-cyan/20 flex items-center justify-center text-holy-cyan text-lg font-black italic">02</span>
+                COACH COMMAND
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16">
+                <!-- Screen 1 -->
+                <div class="space-y-6 lg:col-span-2">
+                    <img src="assets/previews/coach_dashboard.png" alt="Coach Dashboard Mockup" class="preview-img !rounded-[40px] border-holy-cyan/30">
+                </div>
+                
+                <div class="flex flex-col justify-center space-y-6">
+                    <div class="px-2">
+                        <p class="text-white font-black text-2xl">Command Center</p>
+                        <p class="text-holy-cyan text-xs font-black uppercase mb-6 tracking-widest">CommandCenter.tsx</p>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-8">
+                            La interfaz del Coach cambia a un esquema <strong>Holy Cyan</strong> para diferenciar la analítica de la acción. Permite ver la fatiga crítica de todo el equipo en un segundo.
+                        </p>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3 text-xs text-slate-300">
+                                <span class="holy-cyan">🧪</span> Análisis predictivo ATL/CTL
+                            </div>
+                            <div class="flex items-center gap-3 text-xs text-slate-300">
+                                <span class="holy-cyan">📡</span> Status Live del equipo
+                            </div>
+                            <div class="flex items-center gap-3 text-xs text-slate-300">
+                                <span class="holy-cyan">✍️</span> Asignación de Macrociclos
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pt-6">
+                        <button class="w-full py-4 bg-holy-cyan/10 border border-holy-cyan/20 text-holy-cyan text-xs font-black italic rounded-2xl hover:bg-holy-cyan hover:text-white transition-all">VER MÁS DETALLES EN TSX</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="text-center py-20 border-t border-white/5">
+            <p class="text-[10px] font-black uppercase tracking-[0.5em] text-holy-primary mb-2">BECCTTOR PLATFORM — SMART TRAINING, ZERO BURNOUT</p>
+            <p class="text-slate-700 text-xs font-bold">REPORTE VISUAL COMPLETO · ABRIL 2026</p>
+        </footer>
+    </div>
+</body>
+</html>
