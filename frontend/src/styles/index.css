@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-bg: #07070F;
+  --color-surface: #111118;
+  --color-surface2: #1A1A26;
+  --color-primary: #22C55E;
+  --color-gold: #F59E0B;
+  --color-cyan: #06B6D4;
+}
+
+@layer base {
+  body {
+    @apply bg-holy-bg text-slate-400 font-sans antialiased;
+  }
+}
+
+@layer components {
+  .phone-frame {
+    @apply w-[390px] h-[844px] bg-holy-bg rounded-[44px] border-2 border-slate-800 overflow-hidden relative shadow-2xl flex flex-col mx-auto;
+  }
+  
+  .glass-card {
+    @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl;
+  }
+
+  .btn-primary {
+    @apply px-6 py-3 bg-holy-primary text-white font-bold rounded-xl transition-all hover:brightness-110 active:scale-95 shadow-lg shadow-holy-primary/20;
+  }
+}

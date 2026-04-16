@@ -1,7 +1,7 @@
 # 🗺️ PLAN — Hoja de Ruta HolyOly
 
 **Última actualización:** 2026-04-16  
-**Estado:** Fase 1 — 85% completada (23/27 wireframes)
+**Estado:** Fase 1 FINALIZADA (100%) · Fase 2 INICIADA (15%)
 
 ---
 
@@ -27,7 +27,7 @@ Construir una **plataforma SaaS de coaching inteligente** para halterofilia olí
 - [x] 19 macrociclos de 9 escuelas
 - [x] Decisiones de producto confirmadas
 
-### **FASE 1 🔄 — Arquitectura & UX/UI** (78% — 21/27 wireframes)
+### **FASE 1 ✅ — Arquitectura & UX/UI** (100% — 27/27 wireframes)
 
 #### Hitos completados:
 - [x] 1.1 Validar arquitectura de datos
@@ -38,10 +38,10 @@ Construir una **plataforma SaaS de coaching inteligente** para halterofilia olí
 #### Falta terminar (6 pantallas):
 - [x] B4 — Session Summary (post-sesión wrap-up con XP, streaks, ratios)
 - [x] B5 — Warmup Generator (protocolo pre-sesión readiness-aware)
-- [ ] B11 — OLY Index (tabla percentiles, ranking, drill-down)
-- [ ] B12/B13 — Pulse Hub + Cockpit (retos EMOM/For Time, freshness gate)
-- [ ] B14 — Píldoras / Stories (tips diarios, +50 XP, 5 segundos)
-- [ ] C7/C8/C9 — Pulse Approval · Leaderboard Longevity · Coach Profile
+- [x] B11 — OLY Index (tabla percentiles, ranking, drill-down)
+- [x] B12/B13 — Pulse Hub + Cockpit (retos EMOM/For Time, freshness gate)
+- [x] B14 — Píldoras / Stories (tips diarios, +50 XP, 5 segundos)
+- [x] C7/C8/C9 — Pulse Approval · Leaderboard Longevity · Coach Profile
 
 **Estimado:** 2-3 horas (pantallas más simples)
 
@@ -58,14 +58,14 @@ wireframes/
 ├── B7_B8_victory_screen.html        ✅
 ├── B9_social_card.html              ✅
 ├── B10_performance_deep_dive.html   ✅
-├── B11_oly_index.html               ⏳ FALTA
-├── B12_B13_pulse_hub.html           ⏳ FALTA
-├── B14_pildoras_stories.html        ⏳ FALTA
+├── B11_oly_index.html               ✅
+├── B12_B13_pulse_hub.html           ✅
+├── B14_pildoras_stories.html        ✅
 ├── B15_perfil_atleta.html           ✅
 ├── C1_command_center_coach.html     ✅
 ├── C4_athlete_deep_dive.html        ✅
 ├── C5_C6_add_athlete_assign_macro   ✅
-├── C7_C8_C9_coach_tools.html        ⏳ FALTA
+├── C7_C8_C9_coach_tools.html        ✅
 ├── D1_onboarding_atleta.html        ✅
 └── D2_free_premium_transition.html  ✅
 ```
@@ -75,9 +75,9 @@ wireframes/
 ### **FASE 2 ⏳ — Frontend (Web App)** (~5 semanas)
 
 **2.1 Setup React + Vite + Tailwind**
-- Crear proyecto con `npm create vite@latest`
-- Integrar Tailwind CSS
-- Setup ESLint + Prettier
+- [x] Crear proyecto con `npm create vite@latest`
+- [x] Integrar Tailwind CSS
+- [x] Setup ESLint + Prettier
 
 **2.2 Design System en código**
 - Componentes base: Button, Input, Card, Modal, Nav
@@ -285,4 +285,4 @@ git commit -m "Memory: Fase 1 → 27/27 complete, ready Phase 2"
 
 **Versión:** 1.0  
 **Creado:** 2026-04-15  
-**Última actualización:** 2026-04-16 — En Fase 1, 23/27 wireframes
+**Última actualización:** 2026-04-16 — Fase 1 FINALIZADA · Fase 2 INICIADA
