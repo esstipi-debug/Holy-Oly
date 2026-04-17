@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HolyOly — Command Center Coach</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #07070F; font-family: 'Inter', sans-serif; overflow: hidden; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .phone-container {
+            width: 375px; height: 812px; border: 10px solid #1e293b; border-radius: 40px; position: relative; overflow-y: auto; box-shadow: 0 50px 100px -20px rgba(0,0,0,0.8);
+        }
+        .phone-container::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-10">
+    <div class="phone-container bg-[#07070F] text-slate-400">
+        <header class="p-8">
+           <h1 class="text-white text-2xl font-black italic tracking-tighter">COMMAND CENTER</h1>
+           <p class="text-cyan-400 text-[10px] font-black uppercase mt-1 tracking-widest italic">Coach Elite Portal</p>
+        </header>
+
+        <div class="px-8 space-y-6">
+           <!-- Fatigue Alert -->
+           <div class="p-6 bg-red-500/10 border border-red-500/20 rounded-[2rem]">
+              <div class="flex justify-between items-center mb-4">
+                 <h3 class="text-red-500 text-[10px] font-black uppercase tracking-widest">Alerta de Fatiga</h3>
+                 <span class="px-2 py-0.5 bg-red-500 text-[#07070F] text-[8px] font-black rounded">CRÍTICO</span>
+              </div>
+              <p class="text-white text-sm font-bold">Dani G. — ATL/CTL Ratio: 1.62</p>
+              <p class="text-slate-500 text-[10px] mt-1">Riesgo alto de sobreentrenamiento. Recomendado programar descarga.</p>
+           </div>
+
+           <!-- Athlete List -->
+           <div class="space-y-3">
+              <h3 class="text-slate-500 text-[10px] font-black uppercase tracking-widest pl-1">Mis Atletas (12)</h3>
+              
+              <div class="glass p-4 rounded-2xl flex items-center justify-between border-cyan-400/20">
+                 <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-cyan-400 font-black">JP</div>
+                    <div>
+                       <p class="text-white text-xs font-bold">Juan Pérez</p>
+                       <p class="text-slate-600 text-[9px] font-bold uppercase">Entrenando ahora</p>
+                    </div>
+                 </div>
+                 <div class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></div>
+              </div>
+
+              <div class="glass p-4 rounded-2xl flex items-center justify-between">
+                 <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-emerald-400 font-black">MA</div>
+                    <div>
+                       <p class="text-white text-xs font-bold">Miguel A.</p>
+                       <p class="text-emerald-400 text-[9px] font-bold uppercase">Ready for PR</p>
+                    </div>
+                 </div>
+                 <span class="text-slate-600">→</span>
+              </div>
+
+              <div class="glass p-4 rounded-2xl flex items-center justify-between opacity-50">
+                 <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-500 font-black">LC</div>
+                    <div>
+                       <p class="text-white text-xs font-bold">Lorena C.</p>
+                       <p class="text-slate-600 text-[9px] font-bold uppercase">Off-line</p>
+                    </div>
+                 </div>
+              </div>
+           </div>
+        </div>
+
+        <nav class="absolute bottom-6 left-6 right-6 flex justify-around p-4 glass rounded-3xl">
+           <span class="text-cyan-400">🛡️</span>
+           <span class="text-slate-600 opacity-40">📊</span>
+           <span class="text-slate-600 opacity-40">📱</span>
+           <span class="text-slate-600 opacity-40">⚙️</span>
+        </nav>
+    </div>
+</body>
+</html>

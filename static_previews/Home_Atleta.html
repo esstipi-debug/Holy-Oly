@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HolyOly — Home Atleta</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'holy-bg': '#07070F',
+                        'holy-surface': '#0F111A',
+                        'holy-primary': '#22C55E',
+                        'holy-gold': '#F59E0B',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #07070F; font-family: 'Inter', sans-serif; overflow: hidden; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .phone-container {
+            width: 375px; height: 812px; border: 10px solid #1e293b; border-radius: 40px; position: relative; overflow-y: auto; box-shadow: 0 50px 100px -20px rgba(0,0,0,0.8);
+        }
+        .phone-container::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-10">
+    <div class="phone-container bg-holy-bg text-slate-400">
+        <div class="p-6">
+            <header class="flex justify-between items-center mb-8">
+                <div>
+                   <h1 class="text-white text-2xl font-black italic tracking-tighter">HOLY OLY</h1>
+                   <p class="text-holy-primary text-[10px] font-black uppercase mt-1 tracking-widest">Athlete Dashboard</p>
+                </div>
+                <div class="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
+                   <span class="text-xl">👤</span>
+                </div>
+            </header>
+
+            <!-- Metrics -->
+            <div class="grid grid-cols-2 gap-4 mb-8">
+                <div class="glass p-5 rounded-3xl">
+                    <p class="text-[10px] font-black text-slate-500 uppercase">Readiness</p>
+                    <p class="text-white text-3xl font-black italic">8.4</p>
+                    <div class="w-full h-1 bg-white/10 mt-3 rounded-full overflow-hidden">
+                        <div class="bg-holy-primary h-full w-[84%] shadow-[0_0_10px_#22C55E]"></div>
+                    </div>
+                </div>
+                <div class="glass p-5 rounded-3xl">
+                    <p class="text-[10px] font-black text-slate-500 uppercase">Fatigue</p>
+                    <p class="text-white text-3xl font-black italic">LOW</p>
+                    <p class="text-holy-primary text-[8px] font-bold mt-2 uppercase tracking-tight">▲ Recovery Optimal</p>
+                </div>
+            </div>
+
+            <!-- Session Card -->
+            <div class="glass p-6 rounded-[2rem] border-holy-primary/30 relative overflow-hidden group mb-8">
+                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-100 transition-opacity">🏋️</div>
+                <h3 class="text-slate-500 text-[10px] font-black uppercase mb-2 tracking-widest">Siguiente Sesión</h3>
+                <h2 class="text-white text-2xl font-black italic leading-tight">SNATCH + <br/> OVERHEAD SQUAT</h2>
+                <p class="text-holy-primary text-xs font-bold mt-4">W3 · Táctica de Potencia</p>
+                <button class="w-full mt-6 py-4 bg-holy-primary text-white text-xs font-black italic rounded-xl shadow-lg shadow-holy-primary/20">COMENZAR PREPARA</button>
+            </div>
+
+            <!-- Chart Mockup -->
+            <div class="mb-10">
+                <h3 class="text-slate-500 text-[10px] font-black uppercase mb-4 tracking-widest pl-1">Injury Shield</h3>
+                <div class="glass p-5 rounded-3xl flex justify-between items-end h-24">
+                   <div class="w-6 bg-holy-primary/40 h-[40%] rounded-t-lg"></div>
+                   <div class="w-6 bg-holy-primary/40 h-[60%] rounded-t-lg"></div>
+                   <div class="w-6 bg-holy-primary h-[85%] rounded-t-lg shadow-[0_0_10px_rgba(34,197,94,0.3)]"></div>
+                   <div class="w-6 bg-holy-primary/40 h-[50%] rounded-t-lg"></div>
+                   <div class="w-6 bg-holy-primary/40 h-[70%] rounded-t-lg"></div>
+                </div>
+            </div>
+
+            <!-- Social Feed -->
+            <div class="space-y-4">
+               <h3 class="text-slate-500 text-[10px] font-black uppercase mb-4 tracking-widest pl-1">El Club</h3>
+               <div class="flex gap-4 items-center glass p-4 rounded-2xl">
+                  <div class="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-black text-xs">M</div>
+                  <div class="flex-1">
+                     <p class="text-white text-xs font-bold">Miguel A. completó 'Mad Russian'</p>
+                     <p class="text-slate-600 text-[9px] font-bold uppercase mt-1">HACE 2 MIN</p>
+                  </div>
+               </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

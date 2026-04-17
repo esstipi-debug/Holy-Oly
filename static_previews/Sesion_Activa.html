@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HolyOly — Sesión Activa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #07070F; font-family: 'Inter', sans-serif; overflow: hidden; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .phone-container {
+            width: 375px; height: 812px; border: 10px solid #1e293b; border-radius: 40px; position: relative; overflow-y: auto; box-shadow: 0 50px 100px -20px rgba(0,0,0,0.8);
+        }
+        .phone-container::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-10">
+    <div class="phone-container bg-[#07070F] text-slate-400">
+        <header class="p-8 pb-4 flex justify-between items-center text-white">
+           <div>
+              <p class="text-[10px] font-black uppercase text-emerald-500 tracking-[0.3em]">Sesión Activa</p>
+              <h1 class="text-2xl font-black italic tracking-tighter">S. SQUAT + OHS</h1>
+           </div>
+           <div class="text-right">
+              <p class="text-[10px] font-black uppercase text-slate-500">Tiempo</p>
+              <p class="text-xl font-black tabular-nums">42:15</p>
+           </div>
+        </header>
+
+        <div class="px-8 space-y-4 pt-4">
+           <!-- Exercise Block -->
+           <div class="glass p-6 rounded-[2rem] border-emerald-500/20">
+              <div class="flex justify-between items-center mb-6">
+                 <h3 class="text-white text-xs font-black uppercase">Bloque A — Técnico</h3>
+                 <span class="text-emerald-500 text-[10px] font-black">3 / 5 SERIES</span>
+              </div>
+              
+              <div class="space-y-3">
+                 <div class="flex justify-between items-center bg-white/5 p-4 rounded-xl opacity-40">
+                    <span class="text-white text-sm font-bold">Serie 1</span>
+                    <span class="text-slate-400 text-xs font-bold">85 KG × 2</span>
+                 </div>
+                 <div class="flex justify-between items-center bg-white/10 p-4 rounded-xl border border-emerald-500/30">
+                    <span class="text-white text-sm font-bold">Serie 2 (Actual)</span>
+                    <div class="flex gap-2">
+                       <span class="bg-emerald-500 text-[#07070F] text-[10px] font-black px-2 py-1 rounded">95 KG</span>
+                       <span class="bg-slate-700 text-white text-[10px] font-black px-2 py-1 rounded">× 2</span>
+                    </div>
+                 </div>
+              </div>
+
+              <!-- Input Area -->
+              <div class="mt-8 grid grid-cols-2 gap-4">
+                 <div class="p-4 bg-white/5 rounded-2xl border border-white/5 text-center">
+                    <p class="text-[9px] font-black uppercase text-slate-500 mb-1">PESO (KG)</p>
+                    <p class="text-white text-xl font-black">95</p>
+                 </div>
+                 <div class="p-4 bg-white/5 rounded-2xl border border-white/5 text-center">
+                    <p class="text-[9px] font-black uppercase text-slate-500 mb-1">REPS</p>
+                    <p class="text-white text-xl font-black">2</p>
+                 </div>
+              </div>
+           </div>
+
+           <!-- Tactical Notes -->
+           <div class="p-5 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl flex gap-4">
+              <span class="text-xl">🎙️</span>
+              <div>
+                 <p class="text-emerald-500 text-[9px] font-black uppercase mb-1">Nota del Coach</p>
+                 <p class="text-slate-300 text-xs italic leading-snug">"Mantén los codos altos en la recepción. No te precipites en el OHS."</p>
+              </div>
+           </div>
+        </div>
+
+        <div class="absolute bottom-10 left-8 right-8">
+           <button class="w-full py-5 bg-emerald-500 text-black text-xs font-black italic rounded-2xl shadow-xl shadow-emerald-500/20">LOG SERIE & SIGUIENTE</button>
+        </div>
+    </div>
+</body>
+</html>
