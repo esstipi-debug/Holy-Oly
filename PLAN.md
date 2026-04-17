@@ -1,17 +1,12 @@
-# 🗺️ PLAN — Hoja de Ruta HolyOly
-
-**Última actualización:** 2026-04-16  
-**Estado:** Fase 1 FINALIZADA (100%) · Fase 2 EN PROGRESO (70%)
+Fase 1 FINALIZADA (100%) · Fase 2 EN PROGRESO (70%) — HolyOly Premium Platform
 
 ---
 
 ## 🎯 Objetivo General
 
-Construir una **plataforma SaaS de coaching inteligente** para halterofilia olímpica que combine:
-- Periodización científica (Banister)
-- 19 motores computacionales
-- Gamificación profunda
-- Seguimiento hormonal (opcional)
+Construir una **plataforma para administrar entrenamientos de Halterofilia**, optimizada tanto para atletas como para entrenadores:
+*   **Lado Coach:** Administrar múltiples atletas y sus sesiones de entrenamiento de manera eficiente.
+*   **Lado Atleta:** Cuidar los niveles de fatiga y dimensionar el estrés del cuerpo para optimizar el rendimiento y evitar el burnout.
 
 **Timeline total:** 6 fases, ~16 semanas hasta MVP
 

@@ -1,9 +1,34 @@
 # 🏋️ HolyOly — Smart Training Platform
 
-> **Plataforma SaaS de coaching inteligente para halterofilia olímpica**  
-> Combinamos periodización científica (Banister), 19 motores computacionales y gamificación profunda.
+**HolyOly** es una aplicación diseñada para administrar entrenamientos de **Halterofilia**. 
+
+### 🎯 Propósito Principal
+*   **Lado Coach:** Administrar múltiples atletas y sus sesiones de entrenamiento de manera eficiente.
+*   **Lado Atleta:** Cuidar los niveles de fatiga y dimensionar el estrés del cuerpo para optimizar el rendimiento y evitar el burnout.
 
 **Tagline:** *Smart training, zero burnout.*
+
+---
+
+## 🏋️ ¿Qué es la Halterofilia?
+
+La **halterofilia** es el levantamiento olímpico de pesas: consiste en elevar el máximo peso posible con una barra y discos desde el suelo hasta por encima de la cabeza, con brazos extendidos, bajo reglas estrictas de la IWF (International Weightlifting Federation).
+
+Es deporte olímpico desde 1896. Desarrolla fuerza, potencia, velocidad y coordinación. **No es powerlifting** (que se enfoca solo en squat, press banca y deadlift).
+
+### Movimientos Principales
+*   **Arrancada (Snatch):** Un solo movimiento fluido. Agarre ancho, tiro explosivo desde el suelo, drop rápido bajo la barra en squat overhead y extensión final. Es el movimiento más técnico (~80% del peso del dos tiempos).
+*   **Dos tiempos (Clean & Jerk):** Se divide en dos fases.
+    1.  **Cargada (Clean):** Agarre medio, subir barra a los hombros (rack position) en squat frontal y ponerse de pie.
+    2.  **Envión (Jerk):** Impulso desde los hombros a overhead con un movimiento de dip y drive.
+
+### Características del Entrenamiento
+*   **Frecuencia:** Típicamente 3-5 días/semana.
+*   **Foco:** Técnica, fuerza explosiva y movilidad.
+*   **Prioridad:** Es fundamental contar con un coach para asegurar la técnica correcta y evitar lesiones.
+*   **Esfuerzo:** Ambos movimientos priorizan el tren inferior (aprox. 70% del esfuerzo). Un error común es la falta de extensión completa de cadera en el tiro.
+
+En competencia, cada atleta tiene 3 intentos por movimiento; se suma el mejor de cada uno para el total olímpico.
 
 ---
 

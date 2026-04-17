@@ -42,7 +42,7 @@ const SocialCard: React.FC = () => {
          </div>
 
          <div className="w-full flex justify-center mt-2">
-            <p className="text-slate-700 text-[9px] font-black italic tracking-tighter">BECCTTOR PLATFORM · SMART TRAINING</p>
+            <p className="text-slate-700 text-[9px] font-black italic tracking-tighter">HOLY OLY PLATFORM · SMART TRAINING</p>
          </div>
       </div>
 

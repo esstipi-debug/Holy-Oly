@@ -8,13 +8,12 @@
 
 ## ¿Qué es HolyOly?
 
-Plataforma SaaS de coaching inteligente para halterofilia olímpica.  
-Combina periodización científica (modelo Banister), 19 motores computacionales, gamificación profunda y seguimiento por ciclo hormonal.  
-**Tagline:** *Smart training, zero burnout.*
+**HolyOly** es una aplicación diseñada para administrar entrenamientos de **Halterofilia**.
 
-**Usuarios objetivo:**
-- **Atletas** — Ejecutan sesiones adaptativas, siguen su readiness, ganan XP/cinturones.
-- **Coaches** — Supervisan equipos, aprueban adaptaciones con 1-tap, analizan correlaciones Stress/Lifestyle.
+*   **Lado Coach:** Su función principal es administrar múltiples atletas y sus sesiones de entrenamiento de manera eficiente.
+*   **Lado Atleta:** Su función principal es cuidar los niveles de fatiga y dimensionar el estrés del cuerpo para optimizar el rendimiento.
+
+**Tagline:** *Smart training, zero burnout.*
 
 ---
 

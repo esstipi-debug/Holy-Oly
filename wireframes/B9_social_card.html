@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>B9 — Social Card Generator</title>
+  <title>B9 — Viral Card Generator</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -164,7 +164,7 @@
 <!-- Header -->
 <div style="text-align:center;">
   <span style="font-size:26px;font-weight:900;color:white;letter-spacing:-.03em;">HOLY<span style="color:#6366f1;">OLY</span></span>
-  <p style="font-size:12px;color:#475569;margin-top:3px;">Social Card Generator · B9</p>
+  <p style="font-size:12px;color:#475569;margin-top:3px;">Viral Card Generator · B9</p>
 </div>
 
 <!-- Phone -->
@@ -265,20 +265,25 @@
               </div>
 
               <!-- Secondary stats row -->
-              <div style="display:flex;gap:12px;margin-bottom:14px;">
-                <div style="text-align:left;">
-                  <p id="stat1val" style="font-size:16px;font-weight:800;color:white;">18.5t</p>
-                  <p style="font-size:9px;color:rgba(255,255,255,.4);font-weight:600;text-transform:uppercase;letter-spacing:.05em;">Tonelaje</p>
+              <div style="display:flex;gap:10px;margin-bottom:14px;">
+                <div style="text-align:left;flex:1;">
+                  <p id="stat1val" style="font-size:14px;font-weight:800;color:white;">18.5t</p>
+                  <p style="font-size:8px;color:rgba(255,255,255,.4);font-weight:600;text-transform:uppercase;letter-spacing:.05em;">Ton.</p>
                 </div>
                 <div style="width:1px;background:rgba(255,255,255,.1);"></div>
-                <div>
-                  <p id="stat2val" style="font-size:16px;font-weight:800;color:#f97316;">15 días 🔥</p>
-                  <p style="font-size:9px;color:rgba(255,255,255,.4);font-weight:600;text-transform:uppercase;letter-spacing:.05em;">Racha</p>
+                <div style="flex:1;">
+                  <p id="stat2val" style="font-size:14px;font-weight:800;color:#f97316;">15d🔥</p>
+                  <p style="font-size:8px;color:rgba(255,255,255,.4);font-weight:600;text-transform:uppercase;letter-spacing:.05em;">Racha</p>
                 </div>
                 <div style="width:1px;background:rgba(255,255,255,.1);"></div>
-                <div>
-                  <p id="stat3val" style="font-size:16px;font-weight:800;color:#a78bfa;">7.4</p>
-                  <p style="font-size:9px;color:rgba(255,255,255,.4);font-weight:600;text-transform:uppercase;letter-spacing:.05em;">OLY Index</p>
+                <div style="flex:1;">
+                  <p id="stat3val" style="font-size:14px;font-weight:800;color:#a78bfa;">7.4</p>
+                  <p style="font-size:8px;color:rgba(255,255,255,.4);font-weight:600;text-transform:uppercase;letter-spacing:.05em;">OLY</p>
+                </div>
+                <div style="width:1px;background:rgba(255,255,255,.1);"></div>
+                <div style="flex:1;">
+                  <p id="stat4val" style="font-size:14px;font-weight:800;color:#22C55E;">76%</p>
+                  <p style="font-size:8px;color:rgba(255,255,255,.4);font-weight:600;text-transform:uppercase;letter-spacing:.05em;">IMR</p>
                 </div>
               </div>
             </div>
@@ -438,6 +443,7 @@
       stat1:     '18.5t',
       stat2:     '15 días 🔥',
       stat3:     '7.4',
+      stat4:     '76%',
       copies: [
         { cat:'Competitivo 🔥', color:'#6366f1', text:'"Acabo de sumar 5kg a mi Arrancada con HolyOly. ¿Quién se pica? 🏋️ #HalterofiliaInteligente"' },
         { cat:'Progreso 📈',    color:'#22C55E', text:'"15 días consecutivos y nuevo PR desbloqueado 🔓. La constancia siempre gana. @HolyOly"' },
@@ -456,6 +462,7 @@
       stat1:     '+200 XP',
       stat2:     'Daño Evitado',
       stat3:     '847',
+      stat4:     '98%',
       copies: [
         { cat:'Inteligente 🧠', color:'#06B6D4', text:'"La ciencia dijo baja el ritmo y yo escuché. Longevity Protocol activado. 🛡️ #SmartAthlete"' },
         { cat:'Filosofía 🌿',  color:'#22C55E', text:'"No se trata de levantar más hoy. Se trata de seguir levantando en 10 años. Wise Score: 847 🏆"' },
@@ -474,6 +481,7 @@
       stat1:     '30 sesiones',
       stat2:     '382.5t total',
       stat3:     '+9,000 XP',
+      stat4:     '100%',
       copies: [
         { cat:'Motivación 🔥', color:'#f97316', text:'"30 días sin parar. Ni el trabajo, ni el cansancio me detuvieron. 🔥 #SmartStreak @HolyOly"' },
         { cat:'Reto 💪',      color:'#EF4444', text:'"¿Puedes mantener una racha de 30 días? Yo sí. Te reto. @HolyOly #HalterofiliaInteligente"' },
@@ -492,6 +500,7 @@
       stat1:     '100k XP',
       stat2:     '6 meses',
       stat3:     '7.4 OLY',
+      stat4:     '85%',
       copies: [
         { cat:'Orgullo 🏅',   color:'#a78bfa', text:'"Cinturón Púrpura desbloqueado 🟣. 6 meses de trabajo inteligente. El camino no ha terminado. @HolyOly"' },
         { cat:'Comunidad 🤜', color:'#6366f1', text:'"De Cinturón Blanco a Púrpura en 6 meses con HolyOly. El sistema funciona. ¿Te atreves? 🏋️"' },
@@ -561,6 +570,7 @@
     document.getElementById('stat1val').textContent      = ct.stat1;
     document.getElementById('stat2val').textContent      = ct.stat2;
     document.getElementById('stat3val').textContent      = ct.stat3;
+    document.getElementById('stat4val').textContent      = ct.stat4;
 
     /* Update copy options */
     const container = document.getElementById('copyOptions');
