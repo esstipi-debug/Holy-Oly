@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>B3_Injury_Shield_Modal - Holy Oly</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-secondary-container": "#D5A4FF",
+                      "secondary-container": "#6C11AF",
+                      "on-secondary-fixed-variant": "#690BAC",
+                      "on-background": "#E5E2E1",
+                      "secondary": "#DFB7FF",
+                      "surface": "#131313",
+                      "primary-fixed-dim": "#2AE500",
+                      "primary-fixed": "#79FF5B",
+                      "error-container": "#93000A",
+                      "surface-dim": "#0E0E0E",
+                      "primary-container": "#39FF14",
+                      "on-tertiary-fixed": "#1C1B1B",
+                      "inverse-surface": "#E5E2E1",
+                      "on-surface-variant": "#BACCB0",
+                      "surface-container-highest": "#353534",
+                      "surface-container-low": "#1C1B1B",
+                      "surface-container-high": "#2A2A2A",
+                      "on-primary": "#053900",
+                      "tertiary": "#FDF9F9",
+                      "secondary-fixed-dim": "#DFB7FF",
+                      "primary": "#39FF14",
+                      "outline": "#85967C",
+                      "on-secondary-fixed": "#2D004F",
+                      "surface-variant": "#353534",
+                      "on-tertiary-fixed-variant": "#474646",
+                      "on-secondary": "#4B007E",
+                      "on-primary-container": "#107100",
+                      "on-primary-fixed-variant": "#095300",
+                      "inverse-primary": "#106E00",
+                      "on-tertiary-container": "#626161",
+                      "secondary-fixed": "#F1DAFF",
+                      "outline-variant": "#3C4B35",
+                      "on-error-container": "#FFDAD6",
+                      "tertiary-fixed-dim": "#C9C6C5",
+                      "tertiary-container": "#E0DDDC",
+                      "surface-container-lowest": "#0E0E0E",
+                      "on-primary-fixed": "#022100",
+                      "background": "#131313",
+                      "surface-bright": "#3A3939",
+                      "on-tertiary": "#313030",
+                      "surface-container": "#201F1F",
+                      "on-surface": "#E5E2E1",
+                      "tertiary-fixed": "#E5E2E1",
+                      "inverse-on-surface": "#313030",
+                      "surface-tint": "#39FF14",
+                      "on-error": "#690005",
+                      "error": "#FFB4AB"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {},
+              "fontFamily": {
+                      "headline": [
+                              "Space Grotesk"
+                      ],
+                      "body": [
+                              "Inter"
+                      ],
+                      "label": [
+                              "Inter"
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body h-screen w-screen overflow-hidden flex flex-col relative antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- Blurred Background Context (Workout Session) -->
+<div class="absolute inset-0 z-0 bg-surface-container-lowest bg-cover bg-center filter blur-md opacity-40 mix-blend-luminosity" data-alt="Dark, moody gym environment with heavy weights and a focus on raw power, low key lighting, industrial aesthetic" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBPTJSAfJOKQaoSODCAq0DIN2TqMxK6sthDTkWO-48k9Icqn_LdZDVxAZniI645pD6CV1XPSk06AmB6OYygesQiAJ9K9g52xhIW1aHmrN7ZqNhp1os5KKdpRl7pc2sWHc960WXrBhlxl9Bow_wkdndgt89S67ncsx09h0MZzbAZBiXo7LTQsNeCTPg73uphwsHmWYZlSxOH0JgVzpk9Pojfl8yf_z2nS1C-tL8RjhzBdeulH72C5vBt8B0y1DdHwvjwE60vWw8AzEm7');"></div>
+<div class="absolute inset-0 z-0 bg-gradient-to-t from-background via-background/80 to-transparent"></div>
+<!-- Main Navigation TopAppBar -->
+<header class="flex justify-between items-center px-6 py-4 w-full bg-[#0A0A0A]/60 backdrop-blur-xl border-b border-[#39FF14]/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)] docked full-width top-0 z-10">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden border border-outline-variant/30">
+<img alt="Athlete Profile" class="w-full h-full object-cover" data-alt="Close up portrait of a serious female athlete in dark lighting with neon green rim light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBoVHUYSKBS2ZddAKL0T6v15d9TS2x5z90_lRhWps-F5f6TCpeOn0iRNM0PVD9thCB8vQZI4wrKC1QuaKEwC9MJp_1g1TZAZvrEuNxImN5zjBf2Me6DHARf8t4SJDAleFWT0g28tF0VKJnryl3tS24wM7zz_vnpZ2-yr-Wvj1K4ZYTPXjZu1vrbLbZHFr5-pEYztTJwQIAxEQhTNjKNI7LSM0fIcv5IA2cQQH8Nb4W2PPmEyhimrBv2VbjHQeAOxRJt-UkmNT08-ADN"/>
+</div>
+<h1 class="font-['Space_Grotesk'] text-xl font-bold tracking-tighter text-[#39FF14] italic uppercase">KINETIC HUB</h1>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full text-[#39FF14] hover:bg-[#39FF14]/5 transition-colors scale-95 active:duration-75">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">notifications_active</span>
+</button>
+</header>
+<!-- Modal Overlay Container -->
+<div class="fixed inset-0 z-50 flex flex-col justify-end pointer-events-none">
+<!-- Backdrop -->
+<div class="absolute inset-0 bg-background/60 backdrop-blur-sm pointer-events-auto"></div>
+<!-- Bottom Sheet Content -->
+<div class="relative w-full max-w-2xl mx-auto bg-surface-container-low/95 backdrop-blur-2xl rounded-t-xl border-t border-error/20 shadow-[0_-20px_60px_rgba(255,180,171,0.05)] pointer-events-auto flex flex-col pt-2 pb-8 px-4 sm:px-8">
+<!-- Drag Handle -->
+<div class="w-12 h-1.5 bg-surface-variant rounded-full mx-auto mb-6"></div>
+<!-- Header -->
+<div class="flex flex-col items-center text-center mb-8">
+<div class="w-16 h-16 rounded-full bg-error-container/20 border border-error/30 flex items-center justify-center mb-4 relative drop-shadow-[0_0_15px_rgba(255,180,171,0.2)]">
+<span class="material-symbols-outlined text-4xl text-error">warning</span>
+<div class="absolute -right-2 -top-2 bg-surface-container-highest border border-outline-variant px-2 py-0.5 rounded text-xs font-bold font-headline text-error tracking-wider">62%</div>
+</div>
+<h2 class="font-headline text-2xl font-bold tracking-tight text-error uppercase">MODO PROTECCIÓN ACTIVADO</h2>
+<p class="text-on-surface-variant text-sm mt-2 max-w-md">Riesgo de lesión detectado por alto estrés neural y fatiga acumulada.</p>
+</div>
+<!-- Risk Factors -->
+<div class="flex flex-wrap justify-center gap-3 mb-8">
+<div class="flex items-center gap-2 bg-error-container/10 border border-error/30 px-3 py-1.5 rounded-DEFAULT text-sm font-label text-error">
+<span class="material-symbols-outlined text-sm">bedtime</span>
+<span>Sueño: 4h</span>
+</div>
+<div class="flex items-center gap-2 bg-error-container/10 border border-error/30 px-3 py-1.5 rounded-DEFAULT text-sm font-label text-error">
+<span class="material-symbols-outlined text-sm">battery_0_bar</span>
+<span>Fatiga: 4/5</span>
+</div>
+<div class="flex items-center gap-2 bg-surface-container-highest border border-outline-variant/30 px-3 py-1.5 rounded-DEFAULT text-sm font-label text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">monitor_heart</span>
+<span>VFC: Baja</span>
+</div>
+</div>
+<!-- Exercise Degradation Core Section -->
+<div class="flex flex-col sm:flex-row items-stretch justify-between gap-4 mb-8 bg-surface border border-outline-variant/15 rounded-lg p-1 relative overflow-hidden">
+<!-- Decorative background glow -->
+<div class="absolute inset-0 bg-gradient-to-r from-error/5 via-transparent to-primary/5 pointer-events-none"></div>
+<!-- Left Column (Original) -->
+<div class="flex-1 bg-surface-container-low p-5 rounded-DEFAULT border border-error/10 relative">
+<div class="absolute top-0 right-0 bg-error/10 text-error text-[10px] font-bold font-headline px-2 py-1 uppercase tracking-wider rounded-bl-DEFAULT">Original</div>
+<h3 class="font-headline text-lg font-bold text-on-surface uppercase tracking-tight mb-4 mt-2">ARRANCADA</h3>
+<div class="space-y-3">
+<div class="flex justify-between items-center text-sm">
+<span class="text-on-surface-variant font-label">Complejidad</span>
+<span class="text-error font-bold font-headline">10/10</span>
+</div>
+<div class="flex justify-between items-center text-sm">
+<span class="text-on-surface-variant font-label">Carga</span>
+<span class="text-error font-bold font-headline">80kg</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1.5 rounded-full overflow-hidden mt-1">
+<div class="bg-error h-full w-[95%]"></div>
+</div>
+</div>
+</div>
+<!-- Central Arrow -->
+<div class="flex items-center justify-center sm:w-12 py-2 sm:py-0 relative z-10">
+<span class="material-symbols-outlined text-primary text-3xl sm:rotate-0 rotate-90 drop-shadow-[0_0_8px_rgba(57,255,20,0.4)]">arrow_forward</span>
+</div>
+<!-- Right Column (Adapted) -->
+<div class="flex-1 bg-surface-container-low p-5 rounded-DEFAULT border border-primary/20 relative shadow-[inset_0_0_20px_rgba(57,255,20,0.02)]">
+<div class="absolute top-0 right-0 bg-primary/20 text-primary text-[10px] font-bold font-headline px-2 py-1 uppercase tracking-wider rounded-bl-DEFAULT">Adaptado</div>
+<h3 class="font-headline text-lg font-bold text-primary uppercase tracking-tight mb-4 mt-2 drop-shadow-[0_0_4px_rgba(57,255,20,0.3)]">POWER SNATCH</h3>
+<div class="space-y-3">
+<div class="flex justify-between items-center text-sm">
+<span class="text-on-surface-variant font-label">Complejidad</span>
+<span class="text-primary font-bold font-headline">8/10</span>
+</div>
+<div class="flex justify-between items-center text-sm">
+<span class="text-on-surface-variant font-label">Carga Segura</span>
+<span class="text-primary font-bold font-headline">68kg</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1.5 rounded-full overflow-hidden mt-1">
+<div class="bg-primary h-full w-[60%]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- AI Insight -->
+<div class="bg-surface-container-highest/50 border-l-2 border-secondary-container p-4 rounded-r-DEFAULT mb-8 flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary-container mt-0.5">smart_toy</span>
+<p class="text-sm font-label text-on-surface-variant leading-relaxed">
+<strong class="text-secondary tracking-wide uppercase font-headline text-xs block mb-1">Análisis Motor</strong>
+                    Reducir el recorrido articular y la carga disminuirá la demanda del SNC en un 34%, permitiendo estímulo sin riesgo de fallo técnico bajo fatiga.
+                </p>
+</div>
+<!-- Actions -->
+<div class="flex flex-col gap-4">
+<button class="relative w-full bg-primary text-on-primary font-headline font-bold text-lg py-4 rounded-DEFAULT uppercase tracking-widest hover:bg-primary-fixed transition-colors active:scale-[0.98] shadow-[0_0_30px_rgba(57,255,20,0.2)] overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
+<div class="flex items-center justify-center gap-3">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">shield</span>
+<span>ACTIVAR PROTECCIÓN</span>
+</div>
+<div class="absolute top-0 right-0 bg-on-primary text-primary text-[10px] font-bold px-2 py-0.5 rounded-bl-DEFAULT tracking-wider">
+                        +50 XP / Wise Move
+                    </div>
+</button>
+<button class="w-full py-3 text-sm font-label text-on-surface-variant/60 hover:text-on-surface transition-colors uppercase tracking-wider">
+                    Ignorar riesgo y continuar original
+                </button>
+</div>
+</div>
+</div>
+</body></html>

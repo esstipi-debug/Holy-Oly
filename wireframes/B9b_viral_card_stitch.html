@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Holy Oly — Viral Card (Vertical · Stitch Ready)</title>
+<style>
+  :root{
+    --bg:#07070F; --panel:#0F1020; --panel2:#14162B;
+    --line:#262847; --text:#EAEAF2; --muted:#8A8FB0;
+    --cyan:#3DE8FF; --gold:#F5C542; --green:#3BE08C; --red:#FF4D6D;
+    --font:'Inter','Helvetica Neue',Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:var(--font)}
+  body{background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+  /* 9:16 vertical — 720x1280 (IG Stories / smartphone) */
+  .card{
+    position:relative;width:720px;height:1280px;background:var(--bg);
+    color:var(--text);overflow:hidden;border:1px solid #1a1c33;
+    background-image:
+      radial-gradient(700px 500px at 50% 10%, rgba(61,232,255,.12), transparent 60%),
+      radial-gradient(600px 500px at 50% 90%, rgba(245,197,66,.08), transparent 60%),
+      linear-gradient(180deg,#07070F 0%, #0A0B18 100%);
+  }
+  .card::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.05;
+    background-image:radial-gradient(#fff 1px,transparent 1px);background-size:3px 3px;mix-blend-mode:overlay}
+
+  /* HEADER BAR */
+  .hdr{position:absolute;top:0;left:0;right:0;height:70px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;
+    background:linear-gradient(90deg,#0B0C1C 0%, #121433 60%, #0B0C1C 100%);
+    border-bottom:1px solid var(--line);z-index:3}
+  .hdr .brand{display:flex;align-items:center;gap:10px}
+  .hdr .logo{width:28px;height:28px;background:linear-gradient(135deg,var(--cyan),var(--gold));
+    clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
+  .hdr .brand b{font-weight:900;letter-spacing:4px;font-size:14px}
+  .hdr .brand span{color:var(--cyan)}
+  .hdr .pos{font-weight:900;font-size:22px;color:var(--gold);letter-spacing:4px;
+    text-shadow:0 0 12px rgba(245,197,66,.55)}
+
+  /* HERO — photo + name tag */
+  .hero{position:absolute;top:70px;left:0;right:0;height:480px;overflow:hidden;
+    background:
+      radial-gradient(400px 500px at 50% 45%, rgba(61,232,255,.22), transparent 70%),
+      linear-gradient(180deg,#101232 0%, #05060F 100%);
+    border-bottom:1px solid var(--line)}
+  .hero::before{content:"";position:absolute;inset:0;
+    background:
+      repeating-linear-gradient(45deg, rgba(61,232,255,.04) 0 2px, transparent 2px 10px),
+      radial-gradient(circle at 50% 40%, rgba(245,197,66,.12) 0, transparent 55%)}
+  .silhouette{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);
+    width:320px;height:420px;border-radius:170px 170px 40px 40px;
+    background:linear-gradient(180deg, rgba(61,232,255,.38), rgba(11,12,28,.92));
+    box-shadow:0 0 80px rgba(61,232,255,.28)}
+  .silhouette::after{content:"ATLETA";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    color:rgba(255,255,255,.18);font-weight:900;letter-spacing:8px;font-size:28px}
+  .rarity{position:absolute;bottom:92px;left:0;right:0;text-align:center;color:var(--gold);
+    font-size:26px;letter-spacing:8px;text-shadow:0 0 12px rgba(245,197,66,.65)}
+  .name-tag{position:absolute;bottom:18px;left:20px;right:20px;display:flex;align-items:center;justify-content:space-between;
+    padding:14px 20px;background:rgba(7,7,15,.75);border:1px solid var(--line);backdrop-filter:blur(8px)}
+  .name-tag .big{font-weight:900;font-size:34px;color:#fff;letter-spacing:1px;line-height:1}
+  .name-tag .big span{color:var(--cyan)}
+  .name-tag .sub{font-size:11px;color:var(--muted);letter-spacing:3px;margin-top:6px}
+  .name-tag .medal{color:var(--gold);font-size:34px}
+  .vert{position:absolute;right:10px;top:50%;transform:translateY(-50%) rotate(180deg);writing-mode:vertical-rl;
+    color:var(--cyan);font-size:11px;letter-spacing:4px;opacity:.8}
+
+  /* META BAR */
+  .meta{position:absolute;top:550px;left:0;right:0;height:40px;display:flex;align-items:center;justify-content:space-between;
+    padding:0 24px;background:#0A0B18;border-bottom:1px solid var(--line)}
+  .meta .k{color:var(--muted);font-size:12px;letter-spacing:3px}
+  .meta .k b{color:#fff;font-weight:800;margin-left:6px}
+
+  /* STATS + HEX ROW */
+  .midrow{position:absolute;top:590px;left:0;right:0;height:340px;display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--line)}
+  .stats{padding:18px 22px;border-right:1px solid var(--line);background:#08091A;display:flex;flex-direction:column;gap:14px}
+  .stats .row{display:flex;justify-content:space-between;align-items:flex-end}
+  .stats .lbl{font-size:10px;color:var(--muted);letter-spacing:3px}
+  .stats .val{font-size:42px;font-weight:900;line-height:1;color:#fff}
+  .stats .val.gold{color:var(--gold);text-shadow:0 0 10px rgba(245,197,66,.4)}
+  .stats .sub{font-size:11px;color:var(--muted);letter-spacing:2px}
+  .xp{margin-top:auto}
+  .xp .bar{height:10px;background:#1A1D3A;border:1px solid var(--line);position:relative;overflow:hidden;margin-top:6px}
+  .xp .fill{position:absolute;inset:0;width:68%;background:linear-gradient(90deg,var(--cyan),#B44DFF);box-shadow:0 0 12px rgba(61,232,255,.6)}
+  .streak-box{margin-top:6px;display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border:1px solid var(--line);background:#0F1020}
+  .streak-box .g{color:var(--green);font-weight:900;font-size:18px}
+
+  /* HEX CENTER */
+  .hex-wrap{position:relative;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(220px 220px at 50% 50%, rgba(61,232,255,.10), transparent 70%)}
+  .hex-labels{position:absolute;inset:0}
+  .hex-labels div{position:absolute;font-size:10px;letter-spacing:2px;color:var(--muted);text-align:center;width:110px}
+  .hex-labels div b{display:block;color:#fff;font-size:16px;font-weight:900;margin-top:2px}
+  .hex-labels .t{top:10px;left:50%;transform:translateX(-50%)}
+  .hex-labels .tr{top:88px;right:4px}
+  .hex-labels .br{bottom:88px;right:4px}
+  .hex-labels .b{bottom:10px;left:50%;transform:translateX(-50%)}
+  .hex-labels .bl{bottom:88px;left:4px}
+  .hex-labels .tl{top:88px;left:4px}
+  .oly{position:relative;width:220px;height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .oly svg{position:absolute;inset:0}
+  .oly .score{font-size:58px;font-weight:900;color:var(--gold);text-shadow:0 0 18px rgba(245,197,66,.55);line-height:1}
+  .oly .tag-oly{font-size:10px;letter-spacing:4px;color:var(--cyan);margin-top:6px}
+
+  /* MOVEMENT PATTERNS */
+  .patterns{position:absolute;top:930px;left:0;right:0;height:130px;padding:12px 20px;background:#08091A;border-bottom:1px solid var(--line)}
+  .patterns .ttl{font-size:10px;letter-spacing:4px;color:var(--muted);margin-bottom:8px}
+  .patterns .grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+  .cell{aspect-ratio:1.4/1;display:flex;align-items:center;justify-content:center;background:#111431;border:1px solid var(--line);
+    font-size:12px;font-weight:800;letter-spacing:1px;color:#cfd3f0}
+  .cell.on{background:linear-gradient(180deg,#1C2250,#0E1130);border-color:var(--cyan);color:#fff;box-shadow:inset 0 0 12px rgba(61,232,255,.25)}
+  .cell.gold{background:linear-gradient(180deg,#3A2C08,#1A1306);border-color:var(--gold);color:var(--gold);box-shadow:inset 0 0 12px rgba(245,197,66,.25)}
+  .cell.red{background:linear-gradient(180deg,#3A0A18,#1A0610);border-color:var(--red);color:#FF8AA0}
+
+  /* SKILLS */
+  .skills{position:absolute;top:1060px;left:0;right:0;height:180px;display:flex;flex-direction:column;background:#07080F;border-bottom:1px solid var(--line)}
+  .row-sk{flex:1;display:grid;grid-template-columns:90px 1fr 90px;border-top:1px solid var(--line)}
+  .row-sk:first-child{border-top:none}
+  .row-sk .k{display:flex;align-items:center;justify-content:center;background:#0A0B18;color:var(--muted);font-size:10px;letter-spacing:3px;border-right:1px solid var(--line);text-align:center;line-height:1.3}
+  .row-sk .body{padding:12px 18px;display:flex;align-items:center;gap:14px}
+  .row-sk .ico{width:46px;height:46px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:11px;
+    color:#07070F;background:linear-gradient(180deg,#FF6AA3,#B44DFF);border:1px solid rgba(255,255,255,.2);flex-shrink:0}
+  .row-sk .ico.sp{background:linear-gradient(180deg,var(--gold),#9A7800)}
+  .row-sk .txt .title{font-size:20px;font-weight:900;color:#fff;line-height:1.1}
+  .row-sk .txt .desc{font-size:11px;color:var(--muted);letter-spacing:1px;margin-top:4px}
+  .row-sk .lvl{display:flex;flex-direction:column;align-items:center;justify-content:center;border-left:1px solid var(--line);background:#0A0B18;gap:2px}
+  .row-sk .lvl .n{font-size:10px;color:var(--muted);letter-spacing:2px}
+  .row-sk .lvl .badge{width:42px;height:42px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;
+    background:linear-gradient(180deg,#2a2d55,#13152f);border:1px solid var(--cyan);color:var(--cyan)}
+  .row-sk .lvl .badge.gold{border-color:var(--gold);color:var(--gold)}
+  .row-sk .lvl b{font-size:9px;color:var(--muted);letter-spacing:2px}
+
+  /* FOOTER WATERMARK */
+  .foot{position:absolute;bottom:0;left:0;right:0;height:40px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;
+    background:linear-gradient(90deg,#0B0C1C,#121433,#0B0C1C);border-top:1px solid var(--line)}
+  .foot .wm{color:var(--muted);font-size:10px;letter-spacing:4px}
+  .foot .wm b{color:var(--cyan)}
+  .foot .hash{color:var(--gold);font-size:11px;letter-spacing:2px;font-weight:800}
+</style>
+</head>
+<body>
+<div class="card" id="card">
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="brand">
+      <div class="logo"></div>
+      <b>HOLY <span>OLY</span></b>
+    </div>
+    <div class="pos">SN / C&amp;J</div>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="silhouette"></div>
+    <div class="vert">OBSIDIAN KINETIC · 2026 SEASON</div>
+    <div class="rarity">★ ★ ★ ★ ★</div>
+    <div class="name-tag">
+      <div>
+        <div class="big">DIEGO <span>RAMÍREZ</span></div>
+        <div class="sub">CLUB BARBELL LAB MX · CINTURÓN ORO</div>
+      </div>
+      <div class="medal">🥇</div>
+    </div>
+  </div>
+
+  <!-- META -->
+  <div class="meta">
+    <div class="k">PESO<b>84 kg</b></div>
+    <div class="k">ALT<b>178 cm</b></div>
+    <div class="k">EDAD<b>31</b></div>
+    <div class="k">TONELAJE<b>142.3 t</b></div>
+  </div>
+
+  <!-- STATS + HEX -->
+  <div class="midrow">
+    <div class="stats">
+      <div class="row">
+        <div>
+          <div class="lbl">BELT</div>
+          <div class="val gold">ORO</div>
+          <div class="sub">TIER 6 / 8</div>
+        </div>
+        <div style="text-align:right">
+          <div class="lbl">LV.</div>
+          <div class="val">60<span style="font-size:18px;color:var(--muted)">/60</span></div>
+          <div class="sub">ATHLETE LEVEL</div>
+        </div>
+      </div>
+      <div class="xp">
+        <div class="lbl">XP · 3,420 / 5,000</div>
+        <div class="bar"><div class="fill"></div></div>
+      </div>
+      <div class="streak-box">
+        <div>
+          <div class="lbl">SMART STREAK</div>
+          <div class="g">42 días</div>
+        </div>
+        <div style="color:var(--green);font-size:28px">🔥</div>
+      </div>
+      <div class="streak-box">
+        <div>
+          <div class="lbl">IMR SESIÓN</div>
+          <div class="g" style="color:var(--cyan)">91%</div>
+        </div>
+        <div style="color:var(--cyan);font-size:22px">⚡</div>
+      </div>
+    </div>
+
+    <div class="hex-wrap">
+      <div class="hex-labels">
+        <div class="t">SNATCH<b>82</b></div>
+        <div class="tr">TECH<b>88</b></div>
+        <div class="br">RECOV<b>74</b></div>
+        <div class="b">IMR<b>91</b></div>
+        <div class="bl">PULL/PUSH<b>79</b></div>
+        <div class="tl">SQUAT<b>85</b></div>
+      </div>
+      <div class="oly">
+        <svg viewBox="0 0 220 220">
+          <defs>
+            <linearGradient id="hg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#3DE8FF" stop-opacity=".35"/>
+              <stop offset="100%" stop-color="#F5C542" stop-opacity=".25"/>
+            </linearGradient>
+          </defs>
+          <polygon points="110,16 194,62 194,158 110,204 26,158 26,62"
+                   fill="none" stroke="#3DE8FF" stroke-opacity=".35" stroke-width="1.5"/>
+          <polygon points="110,44 170,77 170,143 110,176 50,143 50,77"
+                   fill="none" stroke="#3DE8FF" stroke-opacity=".22" stroke-width="1"/>
+          <polygon points="110,30 180,68 184,154 110,196 40,154 40,66"
+                   fill="url(#hg)" stroke="#F5C542" stroke-width="1.5" stroke-opacity=".8"/>
+          <line x1="110" y1="16" x2="110" y2="204" stroke="#262847"/>
+          <line x1="26" y1="62" x2="194" y2="158" stroke="#262847"/>
+          <line x1="194" y1="62" x2="26" y2="158" stroke="#262847"/>
+        </svg>
+        <div class="score">3045</div>
+        <div class="tag-oly">OLY INDEX</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOVEMENT PATTERNS -->
+  <div class="patterns">
+    <div class="ttl">MOVEMENT PATTERNS</div>
+    <div class="grid">
+      <div class="cell gold">SN</div>
+      <div class="cell on">C&amp;J</div>
+      <div class="cell on">PWR</div>
+      <div class="cell on">F.SQ</div>
+      <div class="cell gold">B.SQ</div>
+      <div class="cell on">OHS</div>
+      <div class="cell on">PULL</div>
+      <div class="cell on">PRESS</div>
+      <div class="cell red">JERK</div>
+      <div class="cell">BP</div>
+      <div class="cell on">ROW</div>
+      <div class="cell">DL</div>
+    </div>
+  </div>
+
+  <!-- SKILLS -->
+  <div class="skills">
+    <div class="row-sk">
+      <div class="k">TEAM<br>SKILL</div>
+      <div class="body">
+        <div class="ico">ALL</div>
+        <div class="txt">
+          <div class="title">Smart Streak</div>
+          <div class="desc">+17% consistencia · reduce RPE en bloques fatigantes</div>
+        </div>
+      </div>
+      <div class="lvl"><div class="n">LV.</div><div class="badge">8</div><b>A</b></div>
+    </div>
+    <div class="row-sk">
+      <div class="k">SPECIAL<br>SKILL</div>
+      <div class="body">
+        <div class="ico sp">SP</div>
+        <div class="txt">
+          <div class="title">Injure Shield</div>
+          <div class="desc">Bloquea sesión si riesgo &gt;0.75 · previene regresión PR</div>
+        </div>
+      </div>
+      <div class="lvl"><div class="n">LV.</div><div class="badge gold">8</div><b>B+</b></div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="foot">
+    <div class="wm">HOLY OLY · <b>VIRAL CARD</b></div>
+    <div class="hash">#HolyOly #PRUnlocked</div>
+  </div>
+</div>
+</body>
+</html>

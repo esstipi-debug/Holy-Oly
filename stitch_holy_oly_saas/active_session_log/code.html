@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<title>Kinetic Volt - Active Session Log</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;900&amp;family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-container": "#D5A4FF",
+                        "on-tertiary-container": "#626161",
+                        "secondary": "#6A0DAD",
+                        "on-primary-fixed-variant": "#095300",
+                        "on-tertiary": "#313030",
+                        "tertiary": "#FDF9F9",
+                        "on-primary": "#053900",
+                        "tertiary-fixed-dim": "#C9C6C5",
+                        "error": "#FFB4AB",
+                        "inverse-primary": "#106E00",
+                        "surface-container-high": "#2A2A2A",
+                        "surface-container": "#201F1F",
+                        "on-secondary": "#FFFFFF",
+                        "outline": "#85967C",
+                        "surface-variant": "#353534",
+                        "background": "#0E0E0E",
+                        "on-secondary-fixed": "#2D004F",
+                        "on-surface": "#E5E2E1",
+                        "on-secondary-fixed-variant": "#690BAC",
+                        "inverse-surface": "#E5E2E1",
+                        "error-container": "#93000A",
+                        "surface-container-highest": "#353534",
+                        "on-error-container": "#FFDAD6",
+                        "on-surface-variant": "#BACCB0",
+                        "primary": "#39FF14",
+                        "surface": "#131313",
+                        "tertiary-container": "#E0DDDC",
+                        "on-tertiary-fixed": "#1C1B1B",
+                        "surface-container-lowest": "#0E0E0E",
+                        "tertiary-fixed": "#E5E2E1",
+                        "on-background": "#E5E2E1",
+                        "surface-dim": "#0E0E0E",
+                        "surface-bright": "#3A3939",
+                        "secondary-fixed": "#F1DAFF",
+                        "on-error": "#690005",
+                        "inverse-on-surface": "#313030",
+                        "surface-container-low": "#1C1B1B",
+                        "on-primary-container": "#EFFFE3",
+                        "primary-fixed": "#79FF5B",
+                        "primary-fixed-dim": "#2AE500",
+                        "on-tertiary-fixed-variant": "#474646",
+                        "secondary-container": "#6C11AF",
+                        "secondary-fixed-dim": "#DFB7FF",
+                        "on-primary-fixed": "#022100",
+                        "primary-container": "#107100",
+                        "surface-tint": "#39FF14",
+                        "outline-variant": "#3C4B35"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Space Grotesk", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Hide scrollbar for a cleaner look */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body antialiased min-h-screen flex flex-col pt-[72px] pb-[96px] selection:bg-primary/30 selection:text-primary">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 bg-[#0E0E0E]/60 backdrop-blur-xl border-b border-[#1C1B1B] shadow-[0_0_15px_rgba(57,255,20,0.1)] flex justify-between items-center px-6 py-4 transition-transform">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-high overflow-hidden border border-outline-variant/30 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">person</span>
+</div>
+<h1 class="font-headline font-bold tracking-tight uppercase text-xl font-black tracking-tighter text-[#39FF14]">KINETIC VOLT</h1>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container-high/50 hover:bg-surface-container hover:text-[#39FF14] text-gray-400 transition-colors active:scale-95 transition-transform border border-outline-variant/30">
+<span class="material-symbols-outlined">sensors</span>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow flex flex-col px-4 max-w-md mx-auto w-full relative">
+<!-- Sticky Session Header -->
+<div class="sticky top-[72px] z-40 bg-background/90 backdrop-blur-md pt-6 pb-4 flex flex-col items-center justify-center border-b border-surface-container-low mb-8">
+<h2 class="font-headline text-2xl font-bold tracking-tight uppercase text-on-surface">Arrancada</h2>
+<div class="inline-flex items-center gap-2 mt-2 px-3 py-1 bg-surface-container-high rounded-full border border-outline-variant/30">
+<div class="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(57,255,20,0.8)]"></div>
+<span class="font-label text-xs font-bold tracking-widest uppercase text-primary">Serie 3 de 5</span>
+</div>
+</div>
+<!-- Session History (Background Context) -->
+<div class="flex flex-col gap-2 mb-8 opacity-60">
+<div class="flex justify-between items-center py-2 border-b border-surface-container-low">
+<span class="font-label text-sm text-on-surface-variant uppercase tracking-wider">Set 1</span>
+<span class="font-headline text-lg font-bold text-on-surface">80<span class="text-xs text-on-surface-variant font-label ml-1">KG</span> <span class="mx-2 text-surface-bright">x</span> 3</span>
+</div>
+<div class="flex justify-between items-center py-2 border-b border-surface-container-low">
+<span class="font-label text-sm text-on-surface-variant uppercase tracking-wider">Set 2</span>
+<span class="font-headline text-lg font-bold text-on-surface">80<span class="text-xs text-on-surface-variant font-label ml-1">KG</span> <span class="mx-2 text-surface-bright">x</span> 3</span>
+</div>
+<!-- Current set placeholder to anchor visual flow -->
+<div class="flex justify-between items-center py-2 border-b border-primary/30 bg-primary/5 px-2 rounded-DEFAULT -mx-2">
+<span class="font-label text-sm text-primary uppercase tracking-wider font-bold">Set 3</span>
+<span class="font-headline text-lg font-bold text-primary animate-pulse">En Progreso</span>
+</div>
+</div>
+<!-- Active Input Display -->
+<div class="grid grid-cols-2 gap-4 mb-10">
+<!-- Weight Input -->
+<div class="bg-surface-container-low rounded-xl p-4 flex flex-col items-center border border-outline-variant/30 shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
+<label class="font-label text-xs font-bold tracking-[0.1em] text-on-surface-variant uppercase mb-4">WEIGHT (KG)</label>
+<div class="flex items-center justify-between w-full">
+<button class="w-12 h-12 rounded-full bg-surface-container-high border border-outline-variant/50 flex items-center justify-center text-on-surface active:scale-95 transition-transform hover:bg-surface-bright hover:text-primary">
+<span class="material-symbols-outlined font-bold">remove</span>
+</button>
+<div class="font-headline text-5xl font-black tracking-tighter text-on-surface drop-shadow-[0_0_10px_rgba(255,255,255,0.1)]">85</div>
+<button class="w-12 h-12 rounded-full bg-surface-container-high border border-outline-variant/50 flex items-center justify-center text-on-surface active:scale-95 transition-transform hover:bg-surface-bright hover:text-primary">
+<span class="material-symbols-outlined font-bold">add</span>
+</button>
+</div>
+</div>
+<!-- Reps Input -->
+<div class="bg-surface-container-low rounded-xl p-4 flex flex-col items-center border border-primary/50 shadow-[0_0_15px_rgba(57,255,20,0.1)] relative overflow-hidden">
+<div class="absolute top-0 right-0 w-16 h-16 bg-primary/10 rounded-bl-full blur-xl pointer-events-none"></div>
+<label class="font-label text-xs font-bold tracking-[0.1em] text-primary uppercase mb-4">REPS</label>
+<div class="flex items-center justify-between w-full">
+<button class="w-12 h-12 rounded-full bg-surface-container-high border border-outline-variant/50 flex items-center justify-center text-on-surface active:scale-95 transition-transform hover:bg-surface-bright hover:text-primary">
+<span class="material-symbols-outlined font-bold">remove</span>
+</button>
+<div class="font-headline text-5xl font-black tracking-tighter text-primary drop-shadow-[0_0_15px_rgba(57,255,20,0.4)]">3</div>
+<button class="w-12 h-12 rounded-full bg-surface-container-high border border-outline-variant/50 flex items-center justify-center text-on-surface active:scale-95 transition-transform hover:bg-surface-bright hover:text-primary">
+<span class="material-symbols-outlined font-bold">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- RPE Slider -->
+<div class="bg-surface-container-low rounded-xl p-6 border border-outline-variant/30 mb-8 relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-r from-transparent via-secondary/5 to-error/10 pointer-events-none"></div>
+<div class="flex justify-between items-end mb-6 relative z-10">
+<label class="font-label text-xs font-bold tracking-[0.1em] text-on-surface-variant uppercase">RPE / Intensity</label>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-error" style="font-variation-settings: 'FILL' 1;">warning</span>
+<span class="font-headline text-lg font-bold text-error uppercase">8 - High Difficulty</span>
+</div>
+</div>
+<div class="relative w-full h-12 flex items-center z-10">
+<!-- Custom Track -->
+<div class="absolute w-full h-3 rounded-full bg-surface-container-highest border border-outline-variant/50 overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary via-secondary to-error w-[80%] opacity-80"></div>
+</div>
+<!-- Notches -->
+<div class="absolute w-full flex justify-between px-1">
+<div class="w-1 h-3 bg-background rounded-full"></div>
+<div class="w-1 h-3 bg-background rounded-full"></div>
+<div class="w-1 h-3 bg-background rounded-full"></div>
+<div class="w-1 h-3 bg-background rounded-full"></div>
+<div class="w-1 h-3 bg-background rounded-full"></div>
+<div class="w-1 h-3 bg-background rounded-full"></div>
+<div class="w-1 h-3 bg-background rounded-full"></div>
+<div class="w-1 h-3 bg-background rounded-full"></div>
+<div class="w-1 h-3 bg-background rounded-full"></div>
+<div class="w-1 h-3 bg-background rounded-full"></div>
+</div>
+<!-- Thumb -->
+<div class="absolute w-8 h-8 rounded-full bg-error border-2 border-background shadow-[0_0_15px_rgba(255,180,171,0.5)] flex items-center justify-center transform -translate-x-1/2 left-[80%] cursor-grab active:cursor-grabbing active:scale-110 transition-transform">
+<div class="w-2 h-2 rounded-full bg-background"></div>
+</div>
+</div>
+<div class="flex justify-between mt-3 font-label text-[10px] text-on-surface-variant uppercase tracking-widest relative z-10">
+<span>1 (Easy)</span>
+<span>10 (Max)</span>
+</div>
+</div>
+</main>
+<!-- Footer CTA (Fixed) -->
+<div class="fixed bottom-[80px] left-0 w-full px-4 py-4 bg-gradient-to-t from-background via-background/90 to-transparent z-40 flex justify-center pb-safe">
+<button class="w-full max-w-md bg-gradient-to-r from-primary-fixed to-primary-container text-on-primary-fixed font-headline font-bold text-xl uppercase tracking-widest py-5 rounded-DEFAULT shadow-[0_0_20px_rgba(57,255,20,0.3)] active:scale-95 transition-all relative overflow-hidden group">
+<span class="relative z-10 flex items-center justify-center gap-2">
+                COMPLETAR SERIE
+                <span class="material-symbols-outlined font-bold">check_circle</span>
+</span>
+<div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+</button>
+</div>
+<!-- BottomNavBar (Suppressed as this is a transactional flow) -->
+<!-- The BottomNavBar is intentionally excluded here as per the "Shell Visibility & Relevance" rule. 
+         This is a Task-Focused/Linear sub-page (active workout log), implying a temporary departure 
+         from the main navigation flow. The global nav shell is suppressed to prioritize the canvas. -->
+</body></html>

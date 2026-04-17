@@ -36,9 +36,9 @@ En competencia, cada atleta tiene 3 intentos por movimiento; se suma el mejor de
 
 | Métrica | Estado |
 |---------|--------|
-| **Fase** | 1 — UX/UI Wireframing |
-| **Pantallas** | 22 / 27 completadas (81%) |
-| **Engines** | 21 especificados, 0 implementados |
+| **Fase** | 2 — Alta Fidelidad UI (Google Stitch) |
+| **Pantallas** | Wireframes base Completos (21/27). Pantallas críticas UI desarrolladas en `stitch_holy_oly_saas/` |
+| **Engines** | 21 especificados, listos para Fase 3 (Prisma/Node) |
 | **Stack** | React + Vite + Tailwind (frontend) · Node.js + Express + Prisma (backend) |
 | **BD** | PostgreSQL · ~60 modelos · 150+ queries |
 

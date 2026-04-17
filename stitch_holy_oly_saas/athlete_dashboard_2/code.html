@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Holy Oly - Athlete Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;900&amp;family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed": "#022100",
+                        "surface": "#131313",
+                        "surface-bright": "#3a3939",
+                        "surface-container-low": "#1c1b1b",
+                        "surface-container-high": "#2a2a2a",
+                        "inverse-surface": "#e5e2e1",
+                        "background": "#131313",
+                        "tertiary-fixed": "#e5e2e1",
+                        "primary": "#efffe3",
+                        "surface-container-lowest": "#0e0e0e",
+                        "surface-container-highest": "#353534",
+                        "on-secondary-fixed": "#2d004f",
+                        "surface-variant": "#353534",
+                        "on-error-container": "#ffdad6",
+                        "on-tertiary-container": "#626161",
+                        "secondary-fixed": "#f1daff",
+                        "outline": "#85967c",
+                        "on-tertiary-fixed-variant": "#474646",
+                        "on-surface": "#e5e2e1",
+                        "secondary-fixed-dim": "#dfb7ff",
+                        "primary-fixed-dim": "#2ae500",
+                        "on-secondary": "#4b007e",
+                        "primary-fixed": "#79ff5b",
+                        "surface-dim": "#131313",
+                        "tertiary-container": "#e0dddc",
+                        "on-error": "#690005",
+                        "on-tertiary-fixed": "#1c1b1b",
+                        "on-secondary-container": "#d5a4ff",
+                        "on-primary-container": "#107100",
+                        "on-primary": "#053900",
+                        "tertiary": "#fdf9f9",
+                        "error": "#ffb4ab",
+                        "on-primary-fixed-variant": "#095300",
+                        "outline-variant": "#3c4b35",
+                        "on-secondary-fixed-variant": "#690bac",
+                        "inverse-on-surface": "#313030",
+                        "tertiary-fixed-dim": "#c9c6c5",
+                        "surface-tint": "#2ae500",
+                        "secondary": "#dfb7ff",
+                        "inverse-primary": "#106e00",
+                        "on-tertiary": "#313030",
+                        "on-background": "#e5e2e1",
+                        "primary-container": "#39ff14",
+                        "surface-container": "#201f1f",
+                        "secondary-container": "#6c11af",
+                        "on-surface-variant": "#baccb0",
+                        "error-container": "#93000a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Space Grotesk", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, h4, h5, h6, .font-headline { font-family: 'Space Grotesk', sans-serif; }
+        
+        /* Hide scrollbar for horizontal scrolling but keep functionality */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface-container-lowest text-on-surface pb-24 md:pb-0 font-body antialiased min-h-screen">
+<!-- TopAppBar JSON Anchor -->
+<header class="docked full-width top-0 sticky z-50 bg-zinc-950/60 backdrop-blur-xl shadow-[0_4px_20px_rgba(106,13,173,0.1)] border-b border-zinc-900/50 flex justify-between items-center w-full px-6 h-16 md:hidden">
+<button class="text-zinc-400 hover:text-[#39FF14] transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">menu</span>
+</button>
+<div class="text-xl font-black tracking-[0.2em] text-[#39FF14] font-['Space_Grotesk'] uppercase">HOLY OLY</div>
+<button class="w-8 h-8 rounded-full overflow-hidden border border-zinc-800 focus:outline-none focus:ring-2 focus:ring-[#39FF14]">
+<img alt="Athlete Profile" class="w-full h-full object-cover" data-alt="close up portrait of a focused athletic male in dark gym lighting with neon green rim light on his face" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCIATYQZxJO6wrYSmMdZ_gq9Ia4l8z-kxIPZKTwfCf-_HQao92moczk55Ogp3eadXDn3CC4Jn35X6Fb7_GN0fue-vDylV8qZ_slsUg2RLuRhEqtU6zV59cEJ5JWTik2AojOnEJ24mx6yzmmouV99MUuVJLPyejXI7-NjFlxnn838EhWgFrMMrJcKxxjXYDPkAqwBjBp9NXLy0iW2A0cWYnmrydOcLZ_WnfPY6LqKyVw8r0Xr1sRfDgSb8PIDAux5KZh7z7prvu8BYof"/>
+</button>
+</header>
+<!-- Web Nav (Hidden on Mobile) -->
+<nav class="hidden md:flex flex-col w-64 h-screen fixed left-0 top-0 bg-surface-container-low border-r border-outline-variant/15 z-50 p-6">
+<div class="text-xl font-black tracking-[0.2em] text-[#39FF14] font-['Space_Grotesk'] uppercase mb-12">HOLY OLY</div>
+<div class="flex flex-col gap-4 flex-grow">
+<a class="flex items-center gap-4 text-[#39FF14] bg-surface-container-high py-3 px-4 rounded border-l-2 border-[#39FF14]" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-bold tracking-widest uppercase text-sm">HOME</span>
+</a>
+<a class="flex items-center gap-4 text-zinc-400 hover:text-[#39FF14] py-3 px-4 rounded hover:bg-surface-container-high/50 transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">fitness_center</span>
+<span class="font-bold tracking-widest uppercase text-sm">WORKOUT</span>
+</a>
+<a class="flex items-center gap-4 text-zinc-400 hover:text-[#39FF14] py-3 px-4 rounded hover:bg-surface-container-high/50 transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">monitoring</span>
+<span class="font-bold tracking-widest uppercase text-sm">STATS</span>
+</a>
+<a class="flex items-center gap-4 text-zinc-400 hover:text-[#39FF14] py-3 px-4 rounded hover:bg-surface-container-high/50 transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">person</span>
+<span class="font-bold tracking-widest uppercase text-sm">PROFILE</span>
+</a>
+</div>
+<div class="flex items-center gap-3 mt-auto pt-6 border-t border-outline-variant/15">
+<img alt="Athlete Profile" class="w-10 h-10 rounded-full object-cover" data-alt="close up portrait of a focused athletic male in dark gym lighting with neon green rim light on his face" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZZ23POELzOgYZXHpJ-MeYCvkOApE-lSGqL3r9S9iM09TWK8MvjOLRUjwsMBM92TPzGofXxtGBZMQTwJMmBdPl8_uIgxtDp8u8AZPHsOZ9gPpudJwaBKk7IbcL5LbD772O34cIgzgEmLmmSgECJSC9ib_gBBm1iY6DTwMpt2mn6-dr6RlAmgutBvMtI5XnPeTLU1yX2UJ1kiSYKQ5eAdmNamSJ6ysc_XLlWp0DBc4DJ1PKHMhXzXBbBxnheI4m-OA1bTOOSl2TuUQy"/>
+<div>
+<div class="text-sm font-bold text-on-surface">Marcos D.</div>
+<div class="text-xs text-[#39FF14]">Cinturón Negro</div>
+</div>
+</div>
+</nav>
+<!-- Main Canvas -->
+<main class="md:ml-64 p-4 md:p-8 max-w-4xl mx-auto relative">
+<!-- Ambient Background Gradient -->
+<div class="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-secondary-container/10 to-transparent pointer-events-none -z-10"></div>
+<!-- 1. Header Section -->
+<section class="mb-8 hidden md:block">
+<h1 class="font-headline font-bold text-2xl tracking-widest uppercase text-on-surface mb-2">BUENOS DÍAS, MARCOS</h1>
+<div class="flex items-center gap-4">
+<span class="bg-surface-container-low border border-outline-variant/30 text-xs text-on-surface-variant font-bold px-3 py-1 rounded-full uppercase tracking-widest">CINTURÓN NEGRO</span>
+<div class="flex-grow max-w-xs flex items-center gap-3">
+<div class="h-1 flex-grow bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-[#39FF14] w-[84%] shadow-[0_0_10px_rgba(57,255,20,0.5)]"></div>
+</div>
+<span class="text-xs text-on-surface-variant font-bold">840/1000 XP</span>
+</div>
+</div>
+</section>
+<!-- Mobile Header (Simplified) -->
+<section class="mb-8 md:hidden mt-4">
+<h1 class="font-headline font-bold text-xl tracking-widest uppercase text-on-surface mb-3">HOLA, MARCOS</h1>
+<div class="flex items-center gap-3">
+<span class="bg-surface-container-low border border-outline-variant/30 text-[10px] text-on-surface-variant font-bold px-2 py-1 rounded-full uppercase tracking-widest">CINTURÓN NEGRO</span>
+<div class="h-1 w-24 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-[#39FF14] w-[84%] shadow-[0_0_10px_rgba(57,255,20,0.5)]"></div>
+</div>
+<span class="text-[10px] text-on-surface-variant font-bold">84%</span>
+</div>
+</section>
+<!-- 2. 'Píldoras de Hoy' -->
+<section class="mb-10">
+<h2 class="text-xs font-bold text-on-surface-variant uppercase tracking-[0.2em] mb-4">PÍLDORAS DE HOY</h2>
+<div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2">
+<!-- Story 1 -->
+<div class="flex flex-col items-center gap-2 min-w-[72px] cursor-pointer group">
+<div class="w-16 h-16 rounded-full bg-surface-container-low border-2 border-outline-variant/30 group-hover:border-[#39FF14] flex items-center justify-center transition-colors relative overflow-hidden">
+<div class="absolute inset-0 bg-secondary-container/10 group-hover:bg-[#39FF14]/10 transition-colors"></div>
+<span class="material-symbols-outlined text-secondary group-hover:text-[#39FF14] text-2xl z-10 transition-colors" style="font-variation-settings: 'FILL' 1;">psychology</span>
+</div>
+<span class="text-[10px] font-bold text-on-surface uppercase tracking-wider text-center">MENTALIDAD</span>
+</div>
+<!-- Story 2 -->
+<div class="flex flex-col items-center gap-2 min-w-[72px] cursor-pointer group">
+<div class="w-16 h-16 rounded-full bg-surface-container-low border-2 border-[#39FF14] flex items-center justify-center transition-colors relative overflow-hidden shadow-[0_0_15px_rgba(57,255,20,0.2)]">
+<div class="absolute inset-0 bg-[#39FF14]/10"></div>
+<span class="material-symbols-outlined text-[#39FF14] text-2xl z-10" style="font-variation-settings: 'FILL' 1;">snooze</span>
+</div>
+<span class="text-[10px] font-bold text-on-surface uppercase tracking-wider text-center">RECUPERACIÓN</span>
+</div>
+<!-- Story 3 -->
+<div class="flex flex-col items-center gap-2 min-w-[72px] cursor-pointer group">
+<div class="w-16 h-16 rounded-full bg-surface-container-low border-2 border-outline-variant/30 group-hover:border-[#39FF14] flex items-center justify-center transition-colors relative overflow-hidden">
+<div class="absolute inset-0 bg-secondary-container/10 group-hover:bg-[#39FF14]/10 transition-colors"></div>
+<span class="material-symbols-outlined text-secondary group-hover:text-[#39FF14] text-2xl z-10 transition-colors" style="font-variation-settings: 'FILL' 1;">my_location</span>
+</div>
+<span class="text-[10px] font-bold text-on-surface uppercase tracking-wider text-center">TÉCNICA</span>
+</div>
+</div>
+</section>
+<!-- 3. Readiness & Stats Row -->
+<section class="grid grid-cols-2 gap-4 mb-8">
+<!-- Readiness Card -->
+<div class="bg-surface-container-low border border-outline-variant/15 p-4 rounded-xl flex flex-col justify-between min-h-[140px] relative overflow-hidden shadow-[0_4px_20px_rgba(108,17,175,0.15)] group">
+<div class="absolute -right-8 -top-8 w-24 h-24 bg-[#39FF14]/5 rounded-full blur-xl"></div>
+<div class="flex justify-between items-start z-10">
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">READINESS</span>
+<span class="material-symbols-outlined text-on-surface-variant text-sm" style="font-variation-settings: 'FILL' 0;">info</span>
+</div>
+<div class="z-10 mt-2">
+<div class="flex items-baseline gap-2">
+<span class="font-headline font-bold text-4xl tracking-tighter text-on-surface">92</span>
+<span class="text-xs text-on-surface-variant">/100</span>
+</div>
+<div class="mt-2 inline-block bg-[#39FF14]/10 border border-[#39FF14]/30 px-2 py-1 rounded-full">
+<span class="text-[9px] font-bold text-[#39FF14] uppercase tracking-widest">ÓPTIMO</span>
+</div>
+</div>
+</div>
+<!-- Streak Card -->
+<div class="bg-surface-container-low border border-outline-variant/15 p-4 rounded-xl flex flex-col justify-between min-h-[140px] relative overflow-hidden shadow-[0_4px_20px_rgba(108,17,175,0.15)]">
+<div class="absolute -right-8 -bottom-8 w-24 h-24 bg-secondary-container/20 rounded-full blur-xl"></div>
+<div class="flex justify-between items-start z-10">
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">RACHA</span>
+<span class="material-symbols-outlined text-[#39FF14] text-sm" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+</div>
+<div class="z-10 mt-2">
+<div class="flex items-baseline gap-1">
+<span class="font-headline font-bold text-4xl tracking-tighter text-on-surface">24</span>
+</div>
+<div class="mt-1">
+<span class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">DÍAS SEGUIDOS</span>
+</div>
+</div>
+</div>
+</section>
+<!-- 4. Belt Progress -->
+<section class="mb-10">
+<div class="bg-surface-container-low border border-outline-variant/15 p-5 rounded-xl shadow-[0_4px_20px_rgba(108,17,175,0.15)]">
+<div class="flex justify-between items-center mb-4">
+<span class="text-xs font-bold text-on-surface uppercase tracking-widest">CINTURÓN NEGRO</span>
+<span class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">GRAN MAESTRO</span>
+</div>
+<div class="relative h-2 bg-surface-container-highest rounded-full overflow-hidden mb-2">
+<div class="absolute top-0 left-0 h-full bg-gradient-to-r from-secondary-container to-[#39FF14] w-[84%]"></div>
+<!-- Glow effect for the progress bar -->
+<div class="absolute top-0 left-0 h-full bg-[#39FF14] w-[84%] blur-[2px] opacity-50"></div>
+</div>
+<div class="flex justify-end">
+<span class="text-[10px] text-on-surface-variant font-bold tracking-wider">160 XP FALTANTES</span>
+</div>
+</div>
+</section>
+<!-- 5. Today's Session Card -->
+<section class="mb-8">
+<h2 class="text-xs font-bold text-on-surface-variant uppercase tracking-[0.2em] mb-4">SESIÓN DE HOY</h2>
+<div class="bg-surface-container-low border border-outline-variant/20 rounded-xl overflow-hidden shadow-[0_8px_30px_rgba(108,17,175,0.2)] relative">
+<!-- Subtle glow behind card content -->
+<div class="absolute top-0 right-0 w-64 h-64 bg-secondary-container/10 rounded-full blur-3xl pointer-events-none"></div>
+<div class="p-6 relative z-10">
+<div class="flex justify-between items-start mb-6 border-b border-outline-variant/20 pb-4">
+<div>
+<h3 class="font-headline font-bold text-lg tracking-wider text-on-surface uppercase mb-1">COLOMBIANO 5D - FUERZA</h3>
+<span class="text-xs text-on-surface-variant font-bold tracking-widest uppercase">SEMANA 4, DÍA 2</span>
+</div>
+<div class="bg-surface-container-highest p-2 rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-[#39FF14]" style="font-variation-settings: 'FILL' 0;">timer</span>
+</div>
+</div>
+<div class="space-y-4 mb-8">
+<!-- Exercise 1 -->
+<div class="flex justify-between items-center bg-surface-container-highest/50 p-3 rounded">
+<div class="flex items-center gap-3">
+<div class="w-1 h-8 bg-secondary-container rounded-full"></div>
+<div>
+<div class="text-sm font-bold text-on-surface uppercase tracking-wide">ARRANCADA</div>
+<div class="text-xs text-on-surface-variant">Snatch</div>
+</div>
+</div>
+<div class="text-right">
+<div class="text-sm font-bold text-[#39FF14] tracking-wider">5x3 @ 80KG</div>
+<div class="text-[10px] text-on-surface-variant font-bold">(85% RM)</div>
+</div>
+</div>
+<!-- Exercise 2 -->
+<div class="flex justify-between items-center bg-surface-container-highest/50 p-3 rounded">
+<div class="flex items-center gap-3">
+<div class="w-1 h-8 bg-secondary-container rounded-full"></div>
+<div>
+<div class="text-sm font-bold text-on-surface uppercase tracking-wide">ENVIÓN</div>
+<div class="text-xs text-on-surface-variant">Clean &amp; Jerk</div>
+</div>
+</div>
+<div class="text-right">
+<div class="text-sm font-bold text-[#39FF14] tracking-wider">4x2 @ 110KG</div>
+<div class="text-[10px] text-on-surface-variant font-bold">(90% RM)</div>
+</div>
+</div>
+<!-- Exercise 3 (Faded to show more) -->
+<div class="flex justify-between items-center p-3 rounded opacity-50">
+<div class="flex items-center gap-3">
+<div class="w-1 h-8 bg-surface-variant rounded-full"></div>
+<div>
+<div class="text-sm font-bold text-on-surface uppercase tracking-wide">SENTADILLA TRASERA</div>
+</div>
+</div>
+<div class="text-right">
+<div class="text-sm font-bold text-on-surface tracking-wider">5x5 @ 140KG</div>
+</div>
+</div>
+</div>
+<button class="w-full bg-gradient-to-r from-primary-fixed to-[#39FF14] text-on-primary-fixed font-headline font-bold text-sm tracking-[0.2em] uppercase py-4 rounded shadow-[0_0_20px_rgba(57,255,20,0.3)] hover:shadow-[0_0_30px_rgba(57,255,20,0.5)] transition-shadow flex justify-center items-center gap-2 active:scale-[0.98]">
+                        INICIAR SESIÓN
+                        <span class="material-symbols-outlined text-base" style="font-variation-settings: 'FILL' 0;">arrow_forward</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar JSON Anchor (Mobile Only) -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-safe h-20 bg-zinc-950/80 backdrop-blur-lg rounded-t-lg border-t border-zinc-800/50 shadow-[0_-4px_20px_rgba(57,255,20,0.05)] z-50 md:hidden">
+<!-- Active Tab: HOME -->
+<a class="flex flex-col items-center justify-center text-[#39FF14] border-t-2 border-[#39FF14] pt-2 w-16 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-['Inter'] text-[10px] font-bold tracking-tighter uppercase">HOME</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-500 pt-2 w-16 hover:bg-zinc-900/50 hover:text-[#39FF14] active:scale-90 transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 0;">fitness_center</span>
+<span class="font-['Inter'] text-[10px] font-bold tracking-tighter uppercase">WORKOUT</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-500 pt-2 w-16 hover:bg-zinc-900/50 hover:text-[#39FF14] active:scale-90 transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 0;">monitoring</span>
+<span class="font-['Inter'] text-[10px] font-bold tracking-tighter uppercase">STATS</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-500 pt-2 w-16 hover:bg-zinc-900/50 hover:text-[#39FF14] active:scale-90 transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 0;">person</span>
+<span class="font-['Inter'] text-[10px] font-bold tracking-tighter uppercase">PROFILE</span>
+</a>
+</nav>
+</body></html>

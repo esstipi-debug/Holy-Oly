@@ -285,6 +285,11 @@
                   <p id="stat4val" style="font-size:14px;font-weight:800;color:#22C55E;">76%</p>
                   <p style="font-size:8px;color:rgba(255,255,255,.4);font-weight:600;text-transform:uppercase;letter-spacing:.05em;">IMR</p>
                 </div>
+                <div style="width:1px;background:rgba(255,255,255,.1);"></div>
+                <div style="flex:1;">
+                  <p id="stat5val" style="font-size:14px;font-weight:800;color:#06B6D4;">2.4x</p>
+                  <p style="font-size:8px;color:rgba(255,255,255,.4);font-weight:600;text-transform:uppercase;letter-spacing:.05em;">BW Ratio</p>
+                </div>
               </div>
             </div>
 
@@ -444,6 +449,7 @@
       stat2:     '15 días 🔥',
       stat3:     '7.4',
       stat4:     '76%',
+      stat5:     '2.4x',
       copies: [
         { cat:'Competitivo 🔥', color:'#6366f1', text:'"Acabo de sumar 5kg a mi Arrancada con HolyOly. ¿Quién se pica? 🏋️ #HalterofiliaInteligente"' },
         { cat:'Progreso 📈',    color:'#22C55E', text:'"15 días consecutivos y nuevo PR desbloqueado 🔓. La constancia siempre gana. @HolyOly"' },
@@ -571,6 +577,7 @@
     document.getElementById('stat2val').textContent      = ct.stat2;
     document.getElementById('stat3val').textContent      = ct.stat3;
     document.getElementById('stat4val').textContent      = ct.stat4;
+    document.getElementById('stat5val').textContent      = ct.stat5;
 
     /* Update copy options */
     const container = document.getElementById('copyOptions');

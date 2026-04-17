@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Holy Oly - Command Center</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;900&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-secondary-container": "#d5a4ff",
+                        "tertiary-container": "#e0dddc",
+                        "primary-fixed-dim": "#2ae500",
+                        "on-tertiary-fixed-variant": "#474646",
+                        "surface-container-lowest": "#0e0e0e",
+                        "on-secondary-fixed": "#2d004f",
+                        "outline-variant": "#3c4b35",
+                        "surface-container-highest": "#353534",
+                        "surface-variant": "#353534",
+                        "inverse-on-surface": "#313030",
+                        "on-primary-fixed-variant": "#095300",
+                        "tertiary-fixed": "#e5e2e1",
+                        "on-primary-fixed": "#022100",
+                        "outline": "#85967c",
+                        "on-primary": "#053900",
+                        "error-container": "#93000a",
+                        "tertiary-fixed-dim": "#c9c6c5",
+                        "background": "#131313",
+                        "surface-container-high": "#2a2a2a",
+                        "on-primary-container": "#107100",
+                        "primary-container": "#39ff14",
+                        "on-tertiary-fixed": "#1c1b1b",
+                        "on-background": "#e5e2e1",
+                        "on-error-container": "#ffdad6",
+                        "surface-bright": "#3a3939",
+                        "on-tertiary": "#313030",
+                        "surface-dim": "#131313",
+                        "secondary-fixed": "#f1daff",
+                        "inverse-primary": "#106e00",
+                        "primary": "#efffe3",
+                        "secondary-fixed-dim": "#dfb7ff",
+                        "primary-fixed": "#79ff5b",
+                        "inverse-surface": "#e5e2e1",
+                        "on-surface": "#e5e2e1",
+                        "on-surface-variant": "#baccb0",
+                        "on-secondary-fixed-variant": "#690bac",
+                        "tertiary": "#fdf9f9",
+                        "surface-container": "#201f1f",
+                        "surface-container-low": "#1c1b1b",
+                        "secondary-container": "#6c11af",
+                        "on-secondary": "#4b007e",
+                        "secondary": "#dfb7ff",
+                        "error": "#ffb4ab",
+                        "surface-tint": "#2ae500",
+                        "on-tertiary-container": "#626161",
+                        "surface": "#131313",
+                        "on-error": "#690005"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body antialiased pb-24 selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="bg-zinc-950 font-['Space_Grotesk'] uppercase tracking-widest docked full-width top-0 border-b border-zinc-800 flat no shadows flex justify-between items-center w-full px-6 h-16 sticky z-40">
+<div class="flex items-center gap-4">
+<button aria-label="Menu" class="text-zinc-500 hover:text-[#39FF14] transition-colors p-2 -ml-2">
+<span class="material-symbols-outlined text-2xl">menu</span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-zinc-800 shrink-0">
+<img alt="Coach Avatar" class="w-full h-full object-cover" data-alt="Close up portrait of a tough looking fitness coach in a dark gym setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBCFveQx4lSo0Bk_waGqVmkEy9i-jHa8o4cPsb0zBDpQRECeGWbjggd14xOmf8W4T1FdB0d6BkqZ9UX1oFXoo80k_yMTaO3MmmShH3rgUPlmGm-C8raqCq5LfGA-l8rrhsS-k4_Ut0V53W_D8fySqUtJV5E4HLQqm8Prd1Q52HKnitFMUmU_HtG34rLMQu4lctP0XSkezu08PLNdEM0wxf4jqxocGsCmuAgt8iZx6OhyQ7O2pJhy7Y1R3Cy-HkANSlccRMj6OfRuB6E"/>
+</div>
+</div>
+<h1 class="text-xl font-black text-[#39FF14] italic m-0 flex-1 text-center truncate px-4">HOLY OLY</h1>
+<button aria-label="Notifications" class="text-zinc-500 hover:text-[#39FF14] transition-colors p-2 -mr-2 relative">
+<span class="material-symbols-outlined text-2xl">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-[#39FF14] rounded-full"></span>
+</button>
+</header>
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+<!-- Dashboard Summary Bento -->
+<section aria-label="Dashboard Summary" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<!-- Active Athletes -->
+<div class="bg-surface-container rounded-xl p-5 border border-zinc-800 flex flex-col justify-between relative overflow-hidden group">
+<div class="absolute -right-6 -top-6 w-24 h-24 bg-primary-container/5 rounded-full blur-2xl group-hover:bg-primary-container/10 transition-colors duration-500"></div>
+<div class="flex items-center gap-3 text-on-surface-variant mb-2">
+<span class="material-symbols-outlined text-xl">groups</span>
+<h2 class="font-headline text-sm tracking-wide uppercase">Roster Status</h2>
+</div>
+<div class="flex items-baseline gap-2 mt-2">
+<span class="text-4xl font-headline font-bold text-on-surface">24</span>
+<span class="text-lg text-on-surface-variant font-medium">/30</span>
+</div>
+<p class="text-xs text-primary-container mt-1 font-medium">Athletes Active</p>
+</div>
+<!-- Critical Alert -->
+<div class="md:col-span-2 bg-error-container/20 rounded-xl p-5 border border-error/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden backdrop-blur-sm shadow-[0_0_15px_rgba(255,180,171,0.05)]">
+<div class="absolute inset-0 bg-gradient-to-r from-error/10 to-transparent opacity-50"></div>
+<div class="relative z-10 flex items-start sm:items-center gap-4">
+<div class="bg-error text-on-error p-3 rounded-full shrink-0 flex items-center justify-center">
+<span class="material-symbols-outlined font-bold" data-weight="fill">warning</span>
+</div>
+<div>
+<h2 class="font-headline font-bold text-xl text-error tracking-wide uppercase">Action Required</h2>
+<p class="text-on-error-container font-medium mt-1 text-sm sm:text-base">3 Athletes in <span class="font-bold underline decoration-error/50 underline-offset-4">RISK ZONE</span></p>
+</div>
+</div>
+<button class="relative z-10 px-5 py-2.5 bg-error text-on-error font-headline font-bold uppercase text-sm rounded-lg hover:bg-error/90 transition-colors whitespace-nowrap shrink-0">
+                    Review Now
+                </button>
+</div>
+</section>
+<!-- Athlete List Section -->
+<section aria-label="Athlete Roster">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+<h3 class="font-headline text-xl font-bold text-on-surface uppercase tracking-wider">Command Roster</h3>
+<!-- Filter Chips -->
+<div class="flex flex-wrap gap-2">
+<button class="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-primary-container text-on-primary-container border border-primary-container">
+                        All
+                    </button>
+<button class="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-surface-container-high text-on-surface-variant border border-zinc-800 hover:bg-surface-container-highest transition-colors">
+                        At Risk
+                    </button>
+<button class="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-surface-container-high text-on-surface-variant border border-zinc-800 hover:bg-surface-container-highest transition-colors">
+                        No Plan
+                    </button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+<!-- Card 1: Green -->
+<article class="bg-surface-container/50 backdrop-blur-md rounded-xl p-4 border border-zinc-800/50 hover:border-primary-container/30 transition-all duration-300 group flex items-center gap-4">
+<div class="w-14 h-14 rounded-full overflow-hidden border-2 border-primary-container shrink-0 relative">
+<img alt="Marcos J." class="w-full h-full object-cover" data-alt="Portrait of a young athletic male with dark hair in a gym environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuACcb2lNzhPvSvsGhJoGLpFHnOtMSQIos2MmVDU5RnrmRvqi8fSFVKhAmLFluKS-AXVAeGLG1rYC92tKpKrtyuYqXY8cPhdx4G0JHB-ywvtZV6ujEX2_ThppshUwc-YaUtHAhRPWgxplMFQ3djmVcBrmRl2-SA1xTDOCfDmhBpSjNhykspzA7aE5xT38kzQTXdAZf58ECfRgnnyt7fumuS-cdsBkcxPMWUQQpKP7TYwa5h1TLtm9tZ7LVX7fOQPd5yP1-aXYffOjmfF"/>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start mb-1">
+<h4 class="font-headline font-bold text-on-surface truncate text-lg">Marcos J.</h4>
+<span class="text-[10px] font-bold uppercase tracking-wider bg-zinc-800 text-zinc-300 px-2 py-0.5 rounded-sm">Black Belt</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-full bg-zinc-800 rounded-full h-1.5 max-w-[100px]">
+<div class="bg-primary-container h-1.5 rounded-full" style="width: 92%"></div>
+</div>
+<span class="text-xs font-medium text-primary-container">Readiness: 92%</span>
+</div>
+</div>
+<button class="text-zinc-500 group-hover:text-primary-container transition-colors p-2 shrink-0">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</article>
+<!-- Card 2: Red (Risk Zone) -->
+<article class="bg-error-container/10 backdrop-blur-md rounded-xl p-4 border border-error/40 hover:border-error transition-all duration-300 group flex items-center gap-4 relative overflow-hidden">
+<div class="absolute top-0 right-0 w-1 h-full bg-error"></div>
+<div class="w-14 h-14 rounded-full overflow-hidden border-2 border-error shrink-0 relative">
+<img alt="Elena S." class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" data-alt="Portrait of an athletic female with focused expression looking slightly off camera" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLwTTmgYwAZmcMNZtCs5y8R2ITXAeMbb6MmGPJAODKkibDXgrCvdbes-2U7uQwD5_cptJVqKIuc6cK-ZFXODyH2MYP7C47DtjsggUeQQD0ee3gcvQw3EnR1Pa5Z_jO33XeSKzjYDQ9L0iLpZ-WhRFJkdm2jlY1g_Av7osmz0PkNYF-LxKYkMKnibLJnW05wIS4McS18G4CrU16iPoVdiSL4cJLT-gmbf7A-HmSG1erHEQzcy_Dt-Uhsf5lnftpu5Tl42mYaltU8bBa"/>
+<div class="absolute inset-0 bg-error/20 mix-blend-overlay group-hover:opacity-0 transition-opacity"></div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start mb-1">
+<h4 class="font-headline font-bold text-on-surface truncate text-lg flex items-center gap-2">
+                                Elena S.
+                                <span class="material-symbols-outlined text-error text-sm" data-weight="fill">warning</span>
+</h4>
+<span class="text-[10px] font-bold uppercase tracking-wider bg-blue-900/40 text-blue-300 px-2 py-0.5 rounded-sm border border-blue-800/50">Blue Belt</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-full bg-zinc-800 rounded-full h-1.5 max-w-[100px]">
+<div class="bg-error h-1.5 rounded-full" style="width: 42%"></div>
+</div>
+<span class="text-xs font-bold text-error">Readiness: 42%</span>
+</div>
+</div>
+<button class="text-zinc-500 group-hover:text-error transition-colors p-2 shrink-0">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</article>
+<!-- Card 3: Yellow -->
+<article class="bg-surface-container/50 backdrop-blur-md rounded-xl p-4 border border-zinc-800/50 hover:border-yellow-500/30 transition-all duration-300 group flex items-center gap-4">
+<div class="w-14 h-14 rounded-full overflow-hidden border-2 border-yellow-500 shrink-0 relative">
+<img alt="Alex T." class="w-full h-full object-cover" data-alt="Portrait of a young male with short hair in dark moody lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZxTjGbvPuvAWZg-cFq7DkkqluunE75w6abMIwiL9LEBbM63D_kbTHhpeHMoQznECU8n9UwVGS3ufk3K38CaObheiMZdLlzQRkDC4PXMWcI8Af0HPKOmDKlF2XL-z8dmGO7a_eVat6xe6cAL-pC8KW5U7ddeAeKwbw3zCVIWk14eenhCSmRcjsuhE7Z1XIyYWoRwA6FpS3Yupzm98D0QfJ4v1ffIqT8KXCX9PV_NrKuGWK8eYVFfyr6dZ2HYFq39SasSLM1gV5wZ03"/>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start mb-1">
+<h4 class="font-headline font-bold text-on-surface truncate text-lg">Alex T.</h4>
+<span class="text-[10px] font-bold uppercase tracking-wider bg-purple-900/40 text-purple-300 px-2 py-0.5 rounded-sm border border-purple-800/50">Purple Belt</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-full bg-zinc-800 rounded-full h-1.5 max-w-[100px]">
+<div class="bg-yellow-500 h-1.5 rounded-full" style="width: 68%"></div>
+</div>
+<span class="text-xs font-medium text-yellow-500">Readiness: 68%</span>
+</div>
+</div>
+<button class="text-zinc-500 group-hover:text-yellow-500 transition-colors p-2 shrink-0">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</article>
+</div>
+</section>
+</main>
+<!-- Overlay Bottom Sheet (Partially Visible / Triggered State for Elena S.) -->
+<div aria-hidden="false" class="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-end justify-center pointer-events-none sm:p-6">
+<div class="bg-surface-container-high w-full max-w-lg rounded-t-3xl sm:rounded-3xl border-t sm:border border-zinc-800 shadow-2xl pointer-events-auto transform transition-transform translate-y-0 flex flex-col max-h-[751px]">
+<!-- Handle -->
+<div class="w-full flex justify-center pt-3 pb-1 shrink-0">
+<div class="w-12 h-1.5 bg-zinc-700 rounded-full"></div>
+</div>
+<!-- Header -->
+<div class="px-6 py-4 border-b border-zinc-800 shrink-0 flex justify-between items-center">
+<div>
+<h2 class="font-headline font-bold text-xl text-on-surface uppercase tracking-wide">Assign Macrocycle</h2>
+<p class="text-sm text-on-surface-variant mt-1">For Elena S. • Needs Recovery/Base</p>
+</div>
+<button class="text-zinc-400 hover:text-white p-2 rounded-full bg-surface-container hover:bg-zinc-700 transition-colors">
+<span class="material-symbols-outlined text-xl">close</span>
+</button>
+</div>
+<!-- Scrollable Content -->
+<div class="px-6 py-6 overflow-y-auto flex-1 space-y-4">
+<!-- Macrocycle Option 1 -->
+<label class="block relative group cursor-pointer">
+<input class="peer sr-only" name="macrocycle" type="radio"/>
+<div class="p-4 rounded-xl border border-zinc-700 bg-surface peer-checked:border-primary-container peer-checked:bg-primary-container/5 transition-all">
+<div class="flex justify-between items-start mb-3">
+<div>
+<h3 class="font-headline font-bold text-lg text-on-surface">Colombiano 5D</h3>
+<div class="flex gap-3 mt-1 text-xs font-medium text-on-surface-variant">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">calendar_month</span> 8 weeks</span>
+<span class="flex items-center gap-1 text-blue-400"><span class="material-symbols-outlined text-[14px]">bolt</span> Power Focus</span>
+</div>
+</div>
+<div class="w-5 h-5 rounded-full border-2 border-zinc-600 peer-checked:border-primary-container flex items-center justify-center">
+<div class="w-2.5 h-2.5 rounded-full bg-primary-container scale-0 peer-checked:scale-100 transition-transform"></div>
+</div>
+</div>
+<!-- Simulated Sparkline -->
+<div class="h-10 w-full bg-zinc-900/50 rounded-lg border border-zinc-800/50 flex items-end p-1 gap-1 mt-4">
+<div class="bg-zinc-700 w-full rounded-sm h-[30%]"></div>
+<div class="bg-zinc-700 w-full rounded-sm h-[40%]"></div>
+<div class="bg-zinc-600 w-full rounded-sm h-[60%] peer-checked:bg-primary-container/50"></div>
+<div class="bg-zinc-600 w-full rounded-sm h-[80%] peer-checked:bg-primary-container/70"></div>
+<div class="bg-zinc-500 w-full rounded-sm h-[100%] peer-checked:bg-primary-container"></div>
+<div class="bg-zinc-700 w-full rounded-sm h-[50%]"></div>
+<div class="bg-zinc-800 w-full rounded-sm h-[20%]"></div>
+<div class="bg-zinc-800 w-full rounded-sm h-[10%]"></div>
+</div>
+</div>
+</label>
+<!-- Macrocycle Option 2 -->
+<label class="block relative group cursor-pointer">
+<input checked="" class="peer sr-only" name="macrocycle" type="radio"/>
+<div class="p-4 rounded-xl border border-zinc-700 bg-surface peer-checked:border-primary-container peer-checked:bg-primary-container/5 transition-all">
+<div class="flex justify-between items-start mb-3">
+<div>
+<h3 class="font-headline font-bold text-lg text-on-surface">Russian Peaking</h3>
+<div class="flex gap-3 mt-1 text-xs font-medium text-on-surface-variant">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">calendar_month</span> 6 weeks</span>
+<span class="flex items-center gap-1 text-purple-400"><span class="material-symbols-outlined text-[14px]">fitness_center</span> Strength Focus</span>
+</div>
+</div>
+<div class="w-5 h-5 rounded-full border-2 border-zinc-600 peer-checked:border-primary-container flex items-center justify-center">
+<div class="w-2.5 h-2.5 rounded-full bg-primary-container scale-0 peer-checked:scale-100 transition-transform"></div>
+</div>
+</div>
+<!-- Simulated Sparkline -->
+<div class="h-10 w-full bg-zinc-900/50 rounded-lg border border-zinc-800/50 flex items-end p-1 gap-1 mt-4">
+<div class="bg-zinc-700 w-full rounded-sm h-[80%] peer-checked:bg-primary-container/80"></div>
+<div class="bg-zinc-700 w-full rounded-sm h-[70%] peer-checked:bg-primary-container/70"></div>
+<div class="bg-zinc-600 w-full rounded-sm h-[60%] peer-checked:bg-primary-container/60"></div>
+<div class="bg-zinc-600 w-full rounded-sm h-[80%] peer-checked:bg-primary-container/80"></div>
+<div class="bg-zinc-500 w-full rounded-sm h-[90%] peer-checked:bg-primary-container/90"></div>
+<div class="bg-zinc-500 w-full rounded-sm h-[100%] peer-checked:bg-primary-container"></div>
+</div>
+</div>
+</label>
+</div>
+<!-- Footer CTA -->
+<div class="p-6 border-t border-zinc-800 shrink-0 bg-surface-container-high/90 backdrop-blur sm:rounded-b-3xl">
+<button class="w-full py-4 bg-primary-container text-on-primary-container font-headline font-bold text-lg uppercase tracking-wider rounded-xl hover:bg-primary-container/90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(57,255,20,0.15)] hover:shadow-[0_0_25px_rgba(57,255,20,0.25)]">
+<span class="material-symbols-outlined">assignment_turned_in</span>
+                    Assign Plan
+                </button>
+</div>
+</div>
+</div>
+<!-- BottomNavBar -->
+<nav class="bg-zinc-950 font-['Space_Grotesk'] text-[10px] font-bold uppercase fixed bottom-0 w-full border-t border-zinc-800 flat no shadows fixed bottom-0 left-0 w-full z-40 flex justify-around items-center h-20 pb-safe px-4 md:hidden">
+<a aria-current="page" class="flex flex-col items-center justify-center text-[#39FF14] bg-zinc-900 rounded-sm py-1 px-3 opacity-80" href="#">
+<span class="material-symbols-outlined mb-1" data-weight="fill">dashboard</span>
+<span>Command</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-500 py-1 px-3 hover:bg-zinc-900" href="#">
+<span class="material-symbols-outlined mb-1">groups</span>
+<span>Athletes</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-500 py-1 px-3 hover:bg-zinc-900" href="#">
+<span class="material-symbols-outlined mb-1">fitness_center</span>
+<span>Programs</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-500 py-1 px-3 hover:bg-zinc-900" href="#">
+<span class="material-symbols-outlined mb-1">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+</body></html>
