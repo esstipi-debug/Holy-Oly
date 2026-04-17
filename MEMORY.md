@@ -228,11 +228,20 @@ FASE 6 — App Nativa (React Native / Expo)
 | B2 Pre-Check 5 sliders | B6_active_session.html | ✅ |
 | B6 Sesión Activa + RPE | B6_active_session.html | ✅ |
 | B7/B8 Victory Screen (4 temas × 2 modos) | B7_B8_victory_screen.html | ✅ |
-| B9 Social Card Generator (4 tipos) | B9_social_card.html | ✅ |
+| B9 Viral Card Generator (con IMR) | B9_social_card.html | ✅ |
 | C1 Command Center Coach | C1_command_center_coach.html | ✅ |
 | C2 Risk Intervention Modal | C1_command_center_coach.html | ✅ |
 | C3 Adjustment Hub | C1_command_center_coach.html | ✅ |
 | Index navegación | index.html | ✅ |
+| Referencia Viral Card | VIRAL_CARD.md | ✅ |
+
+---
+
+### Resumen de Sesión (2026-04-17)
+- **Hito:** Definición y alineación de la **Viral Card** (antes Social Card).
+- **Métrica Nueva:** Integración del **IMR** (Intensity Maintenance Ratio) en la visualización de resultados.
+- **Alineación:** Validación de los 5 Ratios de Oro (Golden Ratios) para el gráfico poligonal de Halterofilia.
+- **Documentación:** Creación de `VIRAL_CARD.md` en el root para acceso rápido.
 
 ---
 
