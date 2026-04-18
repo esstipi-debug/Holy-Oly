@@ -287,3 +287,38 @@ FASE 6 — App Nativa (React Native / Expo)
 **Próximos bloques UX:** Bloque Atleta · Flujo viral · Consolidación Obsidian
 
 ---
+
+### Adenda Sesión (2026-04-18) — Holy Oly Skin System
+
+**Trigger:** Founder comparte imagen PES/eFootball como referencia. Plantea app entera construida alrededor del concepto FIFA-card.
+
+**Evaluación crítica realizada:**
+- ✅ Concepto card digital gamificada: APROBADO
+- ❌ Impresión física metal: RECHAZADO (logística + margen)
+- ❌ Sponsorships ad-tech: POSPUESTO (requiere 5k+ users)
+- ❌ Marca blanca B2B gyms: POSPUESTO (TAM Chile insuficiente)
+- ✅ Skins digitales ventas limitadas: APROBADO
+
+**Decisiones cerradas:**
+- Skin = capa cosmética digital sobre Victory Screen + Viral Card + Avatar
+- Separación: **Tema ≠ Skin** (Theme = paleta app, Skin = edición limitada)
+- Aesthetic propio inspirado PES pero NO copiado (riesgo legal Konami)
+- Stat estrella: **IMR** (Engine 22), reemplaza "Snatch 96" genérico de PES
+- Rareza 3 variantes: Plata / Oro / Holográfica según performance
+- B9d "Definitiva" = base neutral, skins se aplican encima (no invalida)
+
+**Documentación creada:** `ux/SKIN_SYSTEM.md` (propuesta completa + 7 decisiones pendientes)
+
+**Pendiente responder:**
+1. Mecánica escasez (drops vs numeradas vs seasonal vs hitos+drops)
+2. Precio base drop ($4.99 propuesto)
+3. Alcance skin (4 superficies)
+4. Timing (día 1 o post-launch)
+5. Catálogo inicial (3 skins propuestos)
+
+**Nuevo engine previsto:** Engine 23 Skin Engine (gestión catálogo + inventory).
+**Nueva pantalla prevista:** B16 Skin Store (wireframe pendiente).
+
+**Referencia visual:** `assets/references/` creado. PES card referenciada como inspiración, debe guardarse manualmente el archivo.
+
+---

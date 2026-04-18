@@ -18,6 +18,7 @@
 ## 🎨 UX · Decisiones
 
 - [[ux/COACH_FLOW_DECISIONS]] — ✅ Ronda 1 cerrada (32 decisiones coach)
+- [[ux/SKIN_SYSTEM]] — 🎨 Propuesta Holy Oly Card System + monetización skins
 - ux/ATHLETE_FLOW_DECISIONS — ⏳ pendiente
 - ux/VIRAL_FLOW_DECISIONS — ⏳ pendiente
 
