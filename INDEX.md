@@ -2,14 +2,14 @@
 
 **Status:** ✅ All 3 major systems extracted and documented  
 **Date:** 2026-04-10  
-**Total Files:** 33 markdown + data files  
-**Total Documentation:** ~10,000 lines
+**Total Files:** 34 markdown + data files  
+**Total Documentation:** ~10,200 lines
 
 ---
 
 ## Quick Navigation
 
-### 📊 [ENGINES/](./engines/) — 21 Computational Systems
+### 📊 [ENGINES/](./engines/) — 22 Computational Systems
 **Architecture, logic, and integration of all training engines**
 
 - **README.md** — Master architecture with dependency graphs
@@ -34,6 +34,7 @@
 - **19_privacy_engine.md** — Data access control
 - **20_readiness_cache_service.md** — Readiness caching (O(90)→O(1))
 - **21_leaderboard_cache_service.md** — Leaderboard caching (O(n log n)→O(1))
+- **22_imr_engine.md** — Intensity Maintenance Ratio (IMR) y cruce con Macrociclos
 - **EXTRACTION_COMPLETE.md** — Meta documentation
 
 **Key Insights:**
@@ -160,7 +161,7 @@ EXERCISES (Data Layer)
 
 | Component | Count | Details |
 |-----------|-------|---------|
-| **Engines** | 21 | 19 + 2 cache services |
+| **Engines** | 22 | 20 + 2 cache services |
 | **Programs** | 19 | From 9 schools, 8-16 weeks each |
 | **Sessions** | ~1,236 | Canonical exercises per program |
 | **Exercises** | 49 | Across 7 families |
@@ -202,6 +203,7 @@ EXTRACTION/
 │   ├── 19_privacy_engine.md
 │   ├── 20_readiness_cache_service.md
 │   ├── 21_leaderboard_cache_service.md
+│   ├── 22_imr_engine.md
 │   └── EXTRACTION_COMPLETE.md
 │
 ├── macrocycles/

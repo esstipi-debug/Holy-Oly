@@ -32,7 +32,7 @@
 
 ---
 
-## Los 21 Motores (Engines)
+## Los 22 Motores (Engines)
 
 ### Core
 | # | Motor | Propósito | Prioridad Impl. |
@@ -70,6 +70,7 @@
 | 15 | Píldoras | Tips diarios contextuales | P4 |
 | 16 | Social Engine | Social cards IG/WhatsApp | P4 |
 | 17 | Golden Ratio | Tracking proporciones de levantadas | P3 |
+| 22 | IMR Engine | Intensity Maintenance Ratio + AI Insights | P2 |
 
 ### UX & Infraestructura
 | # | Motor | Propósito | Prioridad Impl. |
@@ -241,8 +242,48 @@ FASE 6 — App Nativa (React Native / Expo)
 - **Hito:** Definición y alineación de la **Viral Card** (antes Social Card).
 - **Métrica Nueva:** Integración del **IMR** (Intensity Maintenance Ratio) en la visualización de resultados.
 - **Alineación:** Validación de los 5 Ratios de Oro (Golden Ratios) para el gráfico poligonal de Halterofilia.
-- **Documentación:** Creación de `VIRAL_CARD.md` en el root para acceso rápido.
+- **Documentación:** Creación de `VIRAL_CARD.md`.
+- **Motor 22 Creado:** Formulación lógica e incorporación al sistema del `22_imr_engine.md` como puente gamificado y analítico entre el stress y los macrociclos, listo para inyección de agentes IA de Huberman Lab.
 
 ---
 
 *Este archivo debe actualizarse al final de cada sesión de trabajo.*
+
+---
+
+### Resumen de Sesión (2026-04-18) — UX Afinamiento Bloque Coach
+
+**Metodología:** Entrevista iterativa con 4 roles (PM crítico, UX senior, founder escéptico, analista negocio).
+
+**Hito estratégico:** Decisión de **NO MVP**. Producto terminado completo antes de lanzar. Orden: UX afinado → UI alta fidelidad → Design System → Backend → Integración.
+
+**Bloque Coach — Ronda 1 CERRADA (32 decisiones):**
+
+- **Modelo negocio:** 45 días trial coach + atletas · $29 USD · Solo Chile (Lemon Squeezy + Flow) · Retention 2 años máximo · 3 días gracia post-cancelación + oferta anual -20%
+- **C1 Radar:** 3 atletas alertas visibles · Resto como notificaciones · Paginación 5/pág · Búsqueda nombre + nivel/grupo · Trial status FUERA del radar
+- **C1 Grupos:** Auto-clasificación por ratio peso corporal / carga movida (Sinclair simplificado)
+- **C1 Updates:** Push inmediato urgencias + recálculo Banister cada hora · Fallback 7 días con flag "data estimada"
+- **C2:** Renombrado **"IA" → "Recomendación Smart"** (marketing honesto)
+- **C2 Scope:** Solo sesión actual, NO afecta cascada macrociclo
+- **C3 Adjustment Hub:** Undo total + por atleta + por movimiento
+- **C4 Deep Dive:** Rodillo 7/14/28 días (3 taps reinicia)
+- **C5/C6:** Código anónimo auto-generado · Link pre-llenado · WhatsApp + email · Solo 1 coach por atleta
+- **C7 Pulse:** Mantener si AirBike anaeróbico (confirmar scope)
+- **C8 Longevity:** ELIMINADO
+- **C9 Perfil:** Privado, solo sus atletas
+- **Verificación coach:** Solo RUT/pasaporte
+- **Moneda:** USD único global
+- **Empty states:** Definidos Coach día 1 y día normal sin alertas
+
+**Contradicciones resueltas:**
+1. Retention data → 2 años máx
+2. Update readiness → Push inmediato + recálculo hora
+3. IA vs no-IA → "Recomendación Smart"
+
+**Documentación creada:** `ux/COACH_FLOW_DECISIONS.md` (32 decisiones + 24 pendientes Ronda 2)
+
+**Pendiente Ronda 2 Coach:** preguntas 33-56 (C4 tabs, C5/C6 campos, onboarding D0, billing, settings)
+
+**Próximos bloques UX:** Bloque Atleta · Flujo viral · Consolidación Obsidian
+
+---
