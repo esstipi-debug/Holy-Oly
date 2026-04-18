@@ -18,6 +18,7 @@
 ## 🎨 UX · Decisiones
 
 - [[ux/COACH_FLOW_DECISIONS]] — ✅ Ronda 1 cerrada (32 decisiones coach)
+- [[ux/COACH_FLOW_RONDA_2]] — ✅ Ronda 2 cerrada (24 decisiones + 4 ambigüedades)
 - [[ux/SKIN_SYSTEM]] — ✅ Holy Oly Card System + 7 decisiones skin cerradas
 - [[ux/ROLES_VISIBILITY]] — 👁️ Matriz qué ve Coach vs Atleta
 - [[ux/AI_STRATEGY]] — 🧠 Vector DB + RAG + Distillation roadmap
@@ -118,8 +119,8 @@
 ## 🚨 Estado Actual (2026-04-18)
 
 - **Fase:** 1 UX afinamiento · 2 UI alta fidelidad próximamente
-- **Bloque Coach:** Ronda 1 cerrada (32 decisiones)
-- **Pendiente:** Ronda 2 coach (preguntas 33-56) + Bloque atleta
+- **Bloque Coach:** Ronda 1 + Ronda 2 cerradas (60 decisiones totales)
+- **Pendiente:** Bloque atleta UX + Flujo Viral
 - **No MVP:** Producto terminado antes de lanzar
 - **Geografía:** Solo Chile hasta validar tracción
 

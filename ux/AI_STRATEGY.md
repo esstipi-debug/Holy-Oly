@@ -8,7 +8,7 @@ updated: 2026-04-18
 # 🧠 AI Strategy — Vector DB, RAG, Distillation
 
 **Fecha:** 2026-04-18
-**Estado:** Propuesta estratégica · pendiente decisiones clave
+**Estado:** ✅ 9/9 decisiones aprobadas por founder (2026-04-18) · Schema pgvector pendiente integrar a Prisma
 **Dependencias:** [[COACH_FLOW_DECISIONS]] (rename "IA" → "Smart"), [[../MEMORY]]
 **Propósito:** Plan técnico para IA real en Holy Oly — cuándo activar, qué construir, qué NO hacer.
 
@@ -325,19 +325,19 @@ model MLTrainingExample {
 
 ---
 
-## 📋 Decisiones requeridas
+## ✅ Decisiones cerradas (9/9) · 2026-04-18
 
-| # | Pregunta | Default propuesto |
+| # | Tema | Decisión final |
 |---|---|---|
-| 1 | Posición "Smart vs IA" | **A — Smart público, IA privada** |
-| 2 | Activar pgvector schema desde V1 | **Sí** (costo cero, prepara futuro) |
-| 3 | Logging exhaustivo día 1 | **Sí** (base para training futuro) |
-| 4 | Timing activación RAG | **Mes 9-12 al tener volumen** |
+| 1 | Posición "Smart vs IA" | **A — Smart público, IA privada backend** |
+| 2 | pgvector schema V1 | **APROBADO** (costo cero) |
+| 3 | Logging exhaustivo día 1 | **APROBADO** (input/output/feedback) |
+| 4 | Timing activación RAG | **Mes 9-12** al tener >10k sesiones |
 | 5 | Embeddings provider | **OpenAI text-embedding-3-small** |
-| 6 | LLM primario | **Claude Sonnet 4.6 + prompt caching** |
-| 7 | Distillation timeline | **Año 2+ con dataset >50k** |
-| 8 | Presupuesto infra año 1 | **$0 preparación** · Año 2: $150-350/mes |
-| 9 | Compliance data salud | **Anonimización obligatoria + opt-in explícito** |
+| 6 | LLM primario | **Claude Sonnet 4.6 + prompt caching** · Opus 4.7 casos críticos |
+| 7 | Distillation timeline | **Año 2+** con dataset etiquetado >50k |
+| 8 | Presupuesto infra | V1 **$0** · V2 **$150-350/mes** · V3 **$100-250/mes** |
+| 9 | Compliance data salud | **Anonimización obligatoria** vía código atleta + opt-in explícito |
 
 ---
 

@@ -357,3 +357,14 @@ FASE 6 — App Nativa (React Native / Expo)
 **Moat real identificado:** no es la IA, sino el dataset halterofilia altamente estructurado. En 12-18 meses, mejor dataset halterofilia del mercado.
 
 ---
+
+---
+
+## 📌 Adenda 2026-04-18 — Cierre Ronda 2 Coach + AI Strategy aprobada
+
+- **Ronda 2 Coach:** 24 decisiones cerradas (33-56). Ver [[ux/COACH_FLOW_RONDA_2]].
+- **Ambigüedades cruzadas A1-A4:** resueltas (atleta sin coach → D2 estéril, coach ve versión base sin skin, coach anterior notificado al desvincular, leaderboard interno mantenido eliminado).
+- **Total bloque Coach:** 60 decisiones cerradas (Ronda 1 + Ronda 2).
+- **AI Strategy:** 9/9 decisiones aprobadas. Stack Postgres + pgvector + OpenAI embeddings + Claude Sonnet. RAG diferido Q4 2026.
+- **Branding:** "Smart" público, "IA" sólo backend privado.
+- **Siguiente:** Bloque Atleta UX (D1, B1, B6, B7, B10-B15) + Flujo Viral.
