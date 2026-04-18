@@ -324,3 +324,36 @@ FASE 6 — App Nativa (React Native / Expo)
 **Referencia visual:** `assets/references/` creado. PES card referenciada como inspiración, debe guardarse manualmente el archivo.
 
 ---
+
+### Adenda Sesión (2026-04-18) — AI Strategy (Vector DB + RAG + Distillation)
+
+**Trigger:** Founder pregunta por viabilidad vector DB para RAG o destilación.
+
+**Contradicción marcada:** decisión previa "no hay IA, renombrar Smart" vs consulta actual por RAG/IA. Resolución propuesta: **Opción A — Smart público + IA privada backend**. Marketing dice "Smart", backend usa IA real oculta.
+
+**Decisiones estratégicas propuestas (pendiente confirmar):**
+- Stack: Postgres + pgvector (cero infra adicional)
+- Embeddings: OpenAI text-embedding-3-small ($0.02/1M tokens)
+- LLM primario: Claude Sonnet 4.6 + prompt caching
+- Logging exhaustivo desde día 1 (input/output/feedback)
+- NO activar IA en producto hasta volumen >10k sesiones (mes 9-12)
+- Distillation planificada año 2+ con dataset 50k+ ejemplos etiquetados
+
+**Casos de uso RAG identificados:**
+- Smart Coach Engine (14): contexto histórico para insights
+- Session Adaptation Engine (02): híbrido reglas + data real
+- Smart Insights futuro: chat coach con histórico
+- Clasificador texto libre (check-ins diarios)
+- Detector overreaching predictivo
+- Generador Píldoras personalizadas
+
+**Costos estimados:**
+- V1 (preparación): $0/mes
+- V2 (año 2 con 1k atletas): $150-350 USD/mes
+- V3 (año 3 con distillation): $100-250 USD/mes (ahorro 60%)
+
+**Documentación creada:** `ux/AI_STRATEGY.md` — roadmap 4 fases + schema Prisma + 9 decisiones pendientes
+
+**Moat real identificado:** no es la IA, sino el dataset halterofilia altamente estructurado. En 12-18 meses, mejor dataset halterofilia del mercado.
+
+---
