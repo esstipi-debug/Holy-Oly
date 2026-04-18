@@ -309,12 +309,14 @@ FASE 6 — App Nativa (React Native / Expo)
 
 **Documentación creada:** `ux/SKIN_SYSTEM.md` (propuesta completa + 7 decisiones pendientes)
 
-**Pendiente responder:**
-1. Mecánica escasez (drops vs numeradas vs seasonal vs hitos+drops)
-2. Precio base drop ($4.99 propuesto)
-3. Alcance skin (4 superficies)
-4. Timing (día 1 o post-launch)
-5. Catálogo inicial (3 skins propuestos)
+**7 decisiones CERRADAS (2026-04-18):**
+1. Tema vs Skin → **Separar capas** (B)
+2. Mecánica escasez → **Opción 4 Híbrida** (hitos free + drops pagos + ediciones limitadas)
+3. Precios → **$4.99 seasonal · $9.99 edición limitada · $14.99 colaboración oficial**
+4. Alcance → **4 superficies** (Victory + Viral Card + Avatar + Badge dashboard)
+5. Rareza → **3 variantes** Plata/Oro/Holográfica según performance
+6. Timing → **Día 1 con 3 skins base**
+7. Catálogo inicial → **Obsidian Classic (free) · Andes Electric ($4.99) · Olympic Legacy ($9.99, 500 unidades)**
 
 **Nuevo engine previsto:** Engine 23 Skin Engine (gestión catálogo + inventory).
 **Nueva pantalla prevista:** B16 Skin Store (wireframe pendiente).

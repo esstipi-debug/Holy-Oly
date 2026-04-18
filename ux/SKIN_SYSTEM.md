@@ -1,7 +1,7 @@
 # 🎨 Holy Oly Skin System
 
 **Fecha:** 2026-04-18
-**Estado:** Propuesta concepto · pendiente 7 decisiones
+**Estado:** ✅ 7 decisiones cerradas · Pendiente wireframe B16 Skin Store + Engine 23
 **Referencia visual:** `assets/references/konami_pes_card_reference.png` (PES/eFootball — NO copiar, solo inspiración layout densa)
 **Archivos relacionados:** [[COACH_FLOW_DECISIONS]] · [[../VIRAL_CARD]] · [[../wireframes/B9d_hybrid_card_stitch]]
 
@@ -234,17 +234,17 @@ Inspirado en PES pero reorganizado para evitar copyright:
 
 ---
 
-## 📋 Decisiones requeridas (7)
+## 📋 Decisiones cerradas (7/7) ✅
 
-| # | Pregunta | Estado |
+| # | Pregunta | Decisión final (2026-04-18) |
 |---|---|---|
-| 1 | Tema vs Skin: ¿A (renombrar), B (separar capas), C (reemplazar)? | ⏳ |
-| 2 | Mecánica escasez: ¿Opción 1/2/3/4? | ⏳ |
-| 3 | Precio drop: $4.99 OK o diferente? | ⏳ |
-| 4 | Alcance skin: ¿4 superficies o recortamos? | ⏳ |
-| 5 | Rareza 3 variantes (Plata/Oro/Holo): ¿apruebas? | ⏳ |
-| 6 | Timing: ¿Día 1 con skins o post-launch? | ⏳ |
-| 7 | Catálogo inicial: ¿3 skins como propuesta? | ⏳ |
+| 1 | Tema vs Skin | **B — Separar capas.** Theme = paleta app (4 temas Premium). Skin = edición limitada Victory+Viral+Avatar |
+| 2 | Mecánica escasez | **Opción 4 — Hitos + drops híbrido.** Gratis por hito + seasonal drops pagos + ediciones limitadas numeradas |
+| 3 | Precio drop | **Tres tiers.** Seasonal $4.99 · Edición limitada $9.99 · Colaboración oficial $14.99 |
+| 4 | Alcance skin | **4 superficies aprobadas.** Victory Screen + Viral Card + Avatar perfil + Badge dashboard |
+| 5 | Rareza 3 variantes | **APROBADO.** Plata (completar) · Oro (IMR top + sin fallos) · Holográfica (PR roto con skin activa) |
+| 6 | Timing lanzamiento | **Día 1 con 3 skins base.** Temporadas adicionales post-launch |
+| 7 | Catálogo inicial | **3 skins día 1:** Obsidian Classic (free) · Andes Electric ($4.99 seasonal) · Olympic Legacy ($9.99 edición 500 numeradas) |
 
 ---
 
@@ -277,4 +277,9 @@ Inspirado en PES pero reorganizado para evitar copyright:
 
 **Última actualización:** 2026-04-18
 **Autor:** Claude Code session con Stipi
-**Próximo paso:** Responder 7 decisiones pendientes + crear wireframe B16 Skin Store
+**Próximos pasos confirmados:**
+1. Crear wireframe **B16 Skin Store** (catálogo + detalle + compra + "Mi colección")
+2. Especificar **Engine 23 Skin Engine** (gestión catálogo, inventory ediciones numeradas, drop scheduler)
+3. Confirmar soporte microtransacciones one-time en Flow + Lemon Squeezy
+4. Brief ilustración assets: avatar pixel art + marcos + animación holográfica × 3 skins
+5. Integrar skin system al flujo B7/B8 Victory Screen + B9d Viral Card existentes
