@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Peak Qual — Power Profile Comparison</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  body { background:#0a0a0a; color:#eee; font-family:'Space Grotesk',sans-serif; padding:40px; }
+  h1 { font-weight:300; letter-spacing:2px; }
+  .chart-wrap { background:#111; border:1px solid #222; border-radius:8px; padding:24px; max-width:1100px; }
+  .legend { display:flex; gap:24px; margin-top:20px; font-size:13px; }
+  .dot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px; vertical-align:middle; }
+  .note { color:#888; font-size:12px; margin-top:16px; line-height:1.6; }
+</style>
+</head>
+<body>
+<h1>PEAK QUAL — POWER OUTPUT · 60 MIN SESSION</h1>
+<div class="chart-wrap">
+  <canvas id="chart" height="120"></canvas>
+  <div class="legend">
+    <span><span class="dot" style="background:#FFD700"></span>Holy Oly (Halterofilia)</span>
+    <span><span class="dot" style="background:#00E5FF"></span>Volta (CrossFit)</span>
+    <span><span class="dot" style="background:#FF3EA5"></span>Axon (Hyrox)</span>
+  </div>
+  <div class="note">
+    Eje Y: % power máximo personal. Eje X: minutos sesión.<br>
+    Halterofilia: picos explosivos (singles 90-100%), recuperación larga 3-5min entre series.<br>
+    CrossFit: metcon intenso sostenido 70-85%, warmup + WOD + cooldown.<br>
+    Hyrox: onda constante 60-75%, 8 estaciones + running, sin picos máximos.
+  </div>
+</div>
+
+<script>
+const labels = Array.from({length:61},(_,i)=>i);
+
+// Halterofilia: warmup progresivo, 5-6 picos explosivos singles, descansos largos
+const holy = labels.map(t=>{
+  if(t<10) return 30 + t*3;           // warmup ramp
+  if(t<15) return 55;                  // técnica
+  const peaks = [18,26,34,42,50,57];
+  const nearPeak = peaks.find(p=>Math.abs(t-p)<1);
+  if(nearPeak) return 95 + Math.random()*5;
+  const between = peaks.find(p=>Math.abs(t-p)<2.5);
+  if(between) return 60 + Math.random()*10;
+  return 25 + Math.random()*8;         // descanso
+});
+
+// CrossFit: warmup, skill, metcon caótico con spikes altos + valles profundos
+const volta = labels.map(t=>{
+  if(t<8) return 35 + t*3;                              // warmup
+  if(t<18) return 55 + Math.sin(t*1.5)*8;               // skill work
+  if(t<48){
+    // metcon: alterna sprints 85-95% con valles 40-50%
+    const cycle = Math.sin(t*1.8);
+    if(cycle > 0.3) return 85 + Math.random()*10;       // sprint movement
+    if(cycle < -0.3) return 40 + Math.random()*10;      // transition/breath
+    return 65 + Math.random()*10;                       // mid effort
+  }
+  return 60 - (t-48)*4;                                 // cooldown
+});
+
+// Hyrox: onda plana sostenida, techo 75%, sin picos máximos
+const axon = labels.map(t=>{
+  if(t<5) return 40 + t*3;                              // warmup corto
+  if(t<55){
+    const base = 68;
+    const stationWave = Math.sin(t*0.4)*4;              // modulación suave
+    return base + stationWave + (Math.random()*2-1);    // muy estable
+  }
+  return 72 - (t-55)*5;                                 // cooldown
+});
+
+new Chart(document.getElementById('chart'),{
+  type:'line',
+  data:{
+    labels,
+    datasets:[
+      {label:'Holy Oly',data:holy,borderColor:'#FFD700',backgroundColor:'rgba(255,215,0,0.08)',fill:true,tension:0.3,pointRadius:0,borderWidth:2},
+      {label:'Volta',data:volta,borderColor:'#00E5FF',backgroundColor:'rgba(0,229,255,0.08)',fill:true,tension:0.4,pointRadius:0,borderWidth:2},
+      {label:'Axon',data:axon,borderColor:'#FF3EA5',backgroundColor:'rgba(255,62,165,0.08)',fill:true,tension:0.4,pointRadius:0,borderWidth:2}
+    ]
+  },
+  options:{
+    plugins:{legend:{display:false}},
+    scales:{
+      x:{title:{display:true,text:'Minutos',color:'#888'},ticks:{color:'#666'},grid:{color:'#1a1a1a'}},
+      y:{title:{display:true,text:'% Power máximo',color:'#888'},ticks:{color:'#666'},grid:{color:'#1a1a1a'},min:0,max:110}
+    }
+  }
+});
+</script>
+</body>
+</html>
