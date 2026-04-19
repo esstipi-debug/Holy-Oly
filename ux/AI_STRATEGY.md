@@ -370,3 +370,50 @@ Holy Oly tiene ventaja única: halterofilia es nicho con **data altamente estruc
 **Última actualización:** 2026-04-18
 **Autor:** Claude Code session
 **Próximo paso:** Responder 9 decisiones + integrar schema a Prisma V1
+
+---
+
+## 📌 Adenda 2026-04-19 — Unit economics + stack ejecución
+
+### Precio atleta premium: **$9 USD/mes** (ajuste desde $12)
+
+**Costo por atleta uso intensivo (58 llamadas/día):**
+
+| Concepto | Costo |
+|---|---|
+| Gemini 2.5 Flash-Lite | $0.07 |
+| Sonnet 4.6 crítico (lesiones/planning) | $0.15 |
+| Embeddings + pgvector | $0.05 |
+| Infra servidor | $0.43 |
+| Soporte | $0.30 |
+| Payment fees | $0.45 |
+| IVA Chile 19% | $1.71 |
+| **Total costo** | **$3.16** |
+| **Margen bruto** | **$5.84 (65%)** |
+
+### Stack cascading
+
+```
+Request → SLM router (Phi-3 on-device)
+       → Gemini Flash-Lite cloud (80% casos)
+       → Sonnet 4.6 (crítico 5%)
+```
+
+### Voz
+
+Híbrida on-device: Whisper tiny + Kokoro TTS local + Flash-Lite cloud. Costo marginal ~$0.
+
+### Estrategia agente
+
+**Paralelo + MCP server (A+E).**
+- Construcción agente paralela a producto
+- MCP server público como side-project viral dev community
+- API-as-Service diferida mes 12+ (requiere dataset real)
+
+### Decisiones cerradas
+
+- ✅ Precio $9 USD atleta premium
+- ✅ Gemini Flash-Lite default + Sonnet crítico
+- ✅ On-device voz obligatorio
+- ✅ Cap soft 100 llamadas/día
+- ✅ MCP server como canal distribución paralelo
