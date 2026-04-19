@@ -7,6 +7,7 @@
 
 ## 🎯 Estrategia & Contexto
 
+- [[PEAK_QUAL]] — 🏔️ Marca paraguas · Holy Oly + Volta + Axon
 - [[README]] — Overview producto, stack, modelo negocio
 - [[PLAN]] — Roadmap 6 fases · 16 semanas a MVP web
 - [[MEMORY]] — Cerebro central · histórico decisiones
