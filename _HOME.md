@@ -9,6 +9,7 @@
 
 - [[PEAK_QUAL]] — 🏔️ Marca paraguas · Holy Oly + Volta + Axon
 - [[volta/VOLTA_BRAIN]] — ⚡ Cerebro Volta (CrossFit) · CompTrain base
+- [[axon/AXON_BRAIN]] — 🔷 Cerebro Axon (Hyrox) · 6 atributos PES
 - [[README]] — Overview producto, stack, modelo negocio
 - [[PLAN]] — Roadmap 6 fases · 16 semanas a MVP web
 - [[MEMORY]] — Cerebro central · histórico decisiones
