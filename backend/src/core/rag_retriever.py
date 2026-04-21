@@ -1,14 +1,15 @@
 from typing import List, Dict, Any
-from ..infrastructure.vector_store import VectorStore
-from ..infrastructure.gemini_provider import gemini_provider
+from infrastructure.vector_store import VectorStore
+from infrastructure.gemini_provider import gemini_provider
 
 class RAGRetriever:
     def __init__(self):
         self.vector_store = VectorStore()
 
-    def get_context(self, query: str, limit: int = 3) -> str:
-        # Perform vector search
-        results = self.vector_store.search(query, limit=limit)
+    def get_context(self, query: str, brand: str = None, limit: int = 5) -> str:
+        # Perform vector search with brand filtering if provided
+        filters = {"brand": brand} if brand else {}
+        results = self.vector_store.search(query, limit=limit, filters=filters)
         
         if not results:
             return "No relevant context found in training knowledge base."
@@ -21,8 +22,8 @@ class RAGRetriever:
 
         return "\n\n".join(context_parts)
 
-    async def answer_with_context(self, query: str, user_role: str = "athlete") -> Dict[str, Any]:
-        context = self.get_context(query)
+    def query(self, query: str, brand: str = None, user_role: str = "athlete") -> Dict[str, Any]:
+        context = self.get_context(query, brand=brand)
         
         system_prompt = f"""You are Holy Oly, an empathetic AI coach. 
 You are speaking to an {user_role}. 
@@ -40,7 +41,7 @@ CONTEXT:
         return {
             "answer": response,
             "context_used": context,
-            "model": "gemini-1.5-flash"
+            "model": "gemini-1.5-pro"
         }
 
 rag_retriever = RAGRetriever()

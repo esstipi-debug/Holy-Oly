@@ -1,55 +1,56 @@
 import re
-from typing import List, Dict
+import uuid
+from typing import List, Dict, Any
 
-class DocumentChunker:
-    """
-    Motor encargado de fragmentar textos metodológicos (USAW, Hyrox) 
-    y protocolos de salud (Huberman).
-    """
-
-    def __init__(self, chunk_size: int = 1000, chunk_overlap: int = 200):
-        self.chunk_size = chunk_size
-        self.chunk_overlap = chunk_overlap
-
-    def chunk_text(self, text: str, source_type: str = "general") -> List[str]:
-        """
-        Divide un texto en chunks dependiendo de sus metadatos o formato original.
-        """
-        if source_type == "huberman":
-            return self._semantic_chunk_huberman(text)
-        elif source_type in ["usaw", "hyrox"]:
-            return self._bulletpoint_chunk(text)
-        else:
-            return self._basic_chunk(text)
-
-    def _basic_chunk(self, text: str) -> List[str]:
-        # Implementación simple por caracteres (naive chunking)
+class Chunker:
+    @staticmethod
+    def split_by_markdown_headers(text: str, chunk_size: int, overlap: int) -> List[str]:
+        # Split by H2 or H3 headers as per instructions
+        sections = re.split(r'(?m)^##+\s+', text)
         chunks = []
-        start = 0
-        text_length = len(text)
-        while start < text_length:
-            end = min(start + self.chunk_size, text_length)
-            chunks.append(text[start:end])
-            start += (self.chunk_size - self.chunk_overlap)
-        return chunks
-
-    def _semantic_chunk_huberman(self, text: str) -> List[str]:
-        # Huberman tiene mucha prosa científica. Una buena idea es partir por párrafos
-        # y luego agruparlos hasta llegar a chunk_size de forma semántica.
-        # Por ahora delegamos a _basic_chunk, a mejorar en tuning RAG.
-        return self._basic_chunk(text)
-
-    def _bulletpoint_chunk(self, text: str) -> List[str]:
-        # Halterofilia suele estar llena de listas. Evitar romper listas por la mitad.
-        paragraphs = text.split('\n\n')
-        chunks = []
-        current_chunk = ""
-        for p in paragraphs:
-            if len(current_chunk) + len(p) > self.chunk_size and current_chunk:
-                chunks.append(current_chunk.strip())
-                current_chunk = p
+        
+        for section in sections:
+            if not section.strip():
+                continue
+            
+            # If section is too big, sub-chunk it
+            if len(section) > chunk_size * 4:
+                sub_chunks = Chunker.sliding_window(section, chunk_size * 4, overlap * 4)
+                chunks.extend(sub_chunks)
             else:
-                current_chunk += "\n\n" + p
-        if current_chunk:
-            chunks.append(current_chunk.strip())
+                chunks.append(section.strip())
+        
         return chunks
+
+    @staticmethod
+    def sliding_window(text: str, size: int, overlap: int) -> List[str]:
+        chunks = []
+        if len(text) <= size:
+            return [text]
+        
+        start = 0
+        while start < len(text):
+            end = start + size
+            chunks.append(text[start:end])
+            start += size - overlap
+            if start + overlap >= len(text):
+                break
+        return chunks
+
+    @staticmethod
+    def generate_metadata(brand: str, sport: str, topic: str, source: str, section: str, text: str) -> Dict[str, Any]:
+        return {
+            "brand": brand,
+            "sport": sport,
+            "topic": topic,
+            "difficulty": "intermediate", # Default
+            "source": source,
+            "section": section,
+            "token_count": len(text.split()) + (len(text) // 10), # Approximation
+            "lang": "es" if any(word in text.lower() for word in ["entrenamiento", "fuerza", "pausa"]) else "en"
+        }
+
+    @staticmethod
+    def generate_deterministic_id(brand: str, source: str, index: int) -> str:
+        namespace = uuid.NAMESPACE_DNS
+        return str(uuid.uuid5(namespace, f"{brand}_{source}_{index}"))

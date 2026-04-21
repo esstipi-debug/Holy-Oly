@@ -10,13 +10,13 @@ class GeminiProvider:
         
         genai.configure(api_key=api_key)
         
-        # Flash Only Migration: Using 1.5 Flash for stability and costs
-        self.flash_model = genai.GenerativeModel('gemini-1.5-flash')
+        # Flash Only Migration: Using 2.0 Flash Lite for best stability/cost
+        self.flash_model = genai.GenerativeModel('gemini-2.0-flash-lite')
 
     def generate_flash(self, prompt: str, system_instruction: Optional[str] = None) -> str:
         model = self.flash_model
         if system_instruction:
-            model = genai.GenerativeModel('gemini-1.5-flash', system_instruction=system_instruction)
+            model = genai.GenerativeModel('gemini-2.0-flash-lite', system_instruction=system_instruction)
         
         response = model.generate_content(prompt)
         return response.text

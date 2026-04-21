@@ -21,6 +21,22 @@ class KnowledgeBase(Base):
     source = Column(Text)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
+class MacrocycleAdjustmentLog(Base):
+    __tablename__ = 'macrocycle_adjustment_log'
+    id = Column(String, primary_key=True)
+    athlete_id = Column(String, nullable=False)
+    macrocycle_id = Column(String, nullable=False)
+    session_id = Column(String)
+    trigger = Column(String, nullable=False)
+    action_type = Column(String, nullable=False)
+    old_value = Column(JSON)
+    new_value = Column(JSON)
+    decided_by = Column(String, nullable=False)
+    approved_by = Column(String)
+    reason = Column(Text)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+
 class VectorStore:
     def __init__(self):
         db_url = os.getenv("DATABASE_URL")
@@ -56,15 +72,23 @@ class VectorStore:
         emb_data = predictions[0].get("embeddings", {}).get("values", [])
         return emb_data
 
-    def search(self, query: str, limit: int = 5) -> List[Dict[str, Any]]:
+    def search(self, query: str, limit: int = 5, filters: Dict[str, Any] = None) -> List[Dict[str, Any]]:
         query_vector = self._get_embedding(query)
         if not query_vector:
             return []
-
+        
         session = self.Session()
         try:
-            # Hybrid-ish: for now pure vector similarity (Cosine)
-            results = session.query(KnowledgeBase).order_by(
+            q = session.query(KnowledgeBase)
+            
+            # Apply metadata filters if provided
+            if filters:
+                for key, value in filters.items():
+                    if value is not None:
+                        # Filtering JSON column
+                        q = q.filter(KnowledgeBase.meta[key].astext == str(value))
+                        
+            results = q.order_by(
                 KnowledgeBase.embedding.cosine_distance(query_vector)
             ).limit(limit).all()
             

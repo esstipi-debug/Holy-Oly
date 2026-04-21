@@ -1,58 +1,49 @@
 import os
-import markdown
-from typing import List
-from ..infrastructure.vector_store import VectorStoreManager
+import sys
+from pathlib import Path
 
-class HubermanETL:
-    def __init__(self):
-        self.vector_store = VectorStoreManager()
+ROOT_DIR = Path(__file__).parent.parent.parent.parent
+sys.path.append(str(ROOT_DIR / "backend" / "src"))
+
+from ingestion.chunker import Chunker
+from infrastructure.vector_store import VectorStore
+
+def ingest_huberman():
+    print("Starting Huberman Ingestion...")
+    vs = VectorStore()
+    chunker = Chunker()
     
-    def parse_markdown(self, filepath: str) -> List[dict]:
-        """
-        Lee el archivo de Huberman y lo separa por topics (H2).
-        Retorna una lista de payloads con Metadata limpia.
-        """
-        if not os.path.exists(filepath):
-            return []
+    source_path = ROOT_DIR / "huberman_topics.md"
+    
+    if not source_path.exists():
+        print("Huberman file not found.")
+        return 0
+        
+    with open(source_path, "r", encoding="utf-8") as f:
+        content = f.read()
             
-        with open(filepath, 'r', encoding='utf-8') as f:
-            content = f.read()
+    chunks = chunker.split_by_markdown_headers(content, 768, 120)
+    
+    total_chunks = 0
+    for i, chunk_text in enumerate(chunks):
+        if len(chunk_text.split()) < 30:
+            continue
+            
+        chunk_uuid = chunker.generate_deterministic_id("huberman", "huberman_topics.md", i)
+        metadata = chunker.generate_metadata(
+            brand="huberman",
+            sport="lifestyle",
+            topic="recovery",
+            source="huberman_topics.md",
+            section="topic",
+            text=chunk_text
+        )
+        
+        vs.upsert(chunk_uuid, chunk_text, metadata, source="huberman_topics.md")
+        total_chunks += 1
+            
+    print(f"Ingested {total_chunks} chunks for Huberman.")
+    return total_chunks
 
-        # División rudimentaria base por Headers ##
-        topics = content.split('## ')
-        processed_chunks = []
-        
-        for topic in topics[1:]: # El primer bloque suele ser el título del documento o vacío
-            lines = topic.strip().split('\n')
-            title = lines[0].strip()
-            body = '\n'.join(lines[1:]).strip()
-            
-            # Aquí iría el Chunking interno y el embedding mock
-            # Por seguridad en esta build, si no hay API: 
-            # asume embeddings dummy [0.0] * 1536
-            mock_embedding = [0.1] * 1536
-            
-            payload = {
-                "source": "huberman_topics",
-                "title": title,
-                "text": body,
-                "domain": "recovery_control_daños"
-            }
-            
-            processed_chunks.append((mock_embedding, payload))
-            
-        return processed_chunks
-        
-    def run_pipeline(self):
-        root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
-        target_path = os.path.join(root_path, "huberman_topics.md")
-        
-        chunks = self.parse_markdown(target_path)
-        
-        if chunks:
-            print(f"[Huberman ETL] Encontrados {len(chunks)} topics. Iniciando carga a V-Store...")
-            vectors = [c[0] for c in chunks]
-            payloads = [c[1] for c in chunks]
-            self.vector_store.upsert_chunks(vectors, payloads)
-            return True
-        return False
+if __name__ == "__main__":
+    ingest_huberman()
