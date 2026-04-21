@@ -13,11 +13,10 @@ const genAI = new GoogleGenerativeAI(API_KEY);
 
 export class GeminiProvider {
   private flashModel: GenerativeModel;
-  private proModel: GenerativeModel;
 
   constructor() {
-    this.flashModel = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-    this.proModel = genAI.getGenerativeModel({ model: "gemini-2.0-pro-exp-02-05" });
+    // Only using Flash family as requested
+    this.flashModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
   }
 
   async generateFlash(prompt: string): Promise<string> {
@@ -26,18 +25,13 @@ export class GeminiProvider {
     return response.text();
   }
 
+  // Maintaining signature for compatibility but routing to Flash
   async generatePro(prompt: string): Promise<string> {
-    const result = await this.proModel.generateContent(prompt);
-    const response = await result.response;
-    return response.text();
+    return this.generateFlash(prompt);
   }
 
   getFlashModel(): GenerativeModel {
     return this.flashModel;
-  }
-
-  getProModel(): GenerativeModel {
-    return this.proModel;
   }
 }
 

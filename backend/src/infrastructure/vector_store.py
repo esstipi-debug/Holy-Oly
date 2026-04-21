@@ -1,44 +1,96 @@
 import os
-from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams, PointStruct
-from typing import List
+from typing import List, Dict, Any
+import numpy as np
+from pgvector.sqlalchemy import Vector
+from sqlalchemy import Column, Integer, Text, String, JSON, DateTime, select, create_engine
+from sqlalchemy.orm import declarative_base, sessionmaker
+import datetime
+import google.auth
+from google.cloud import aiplatform_v1
+from google.protobuf import json_format
+from google.protobuf.struct_pb2 import Value
 
-class VectorStoreManager:
-    """
-    Manager de infraestructura para Qdrant (Base de datos vectorial).
-    Maneja la inicialización de colecciones y persistencia (local o managed cluster).
-    """
-    def __init__(self, collection_name: str = "holyoly_knowledge"):
-        # Utilizamos entorno local o de memoria de ser necesario hasta recibir keys
-        qdrant_url = os.getenv("QDRANT_URL", ":memory:")
-        qdrant_key = os.getenv("QDRANT_API_KEY", None)
+Base = declarative_base()
 
-        if qdrant_url == ":memory:":
-            self.client = QdrantClient(location=":memory:")
-            print("[VectorStore] Advertencia: Ejecutando Qdrant en Memoria (Local).")
-        else:
-            self.client = QdrantClient(url=qdrant_url, api_key=qdrant_key)
+class KnowledgeBase(Base):
+    __tablename__ = 'knowledge_base'
+    id = Column(String, primary_key=True)
+    content = Column(Text, nullable=False)
+    embedding = Column(Vector(768)) # Matching text-embedding-004
+    meta = Column('metadata', JSON, default={})
+    source = Column(Text)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
-        self.collection_name = collection_name
-        self._ensure_collection()
+class VectorStore:
+    def __init__(self):
+        db_url = os.getenv("DATABASE_URL")
+        # Ensure the URL starts with postgresql:// for SQLAlchemy
+        if db_url and db_url.startswith("postgres://"):
+            db_url = db_url.replace("postgres://", "postgresql://", 1)
+        
+        self.engine = create_engine(db_url)
+        self.Session = sessionmaker(bind=self.engine)
+        
+        # Vertex AI client for embeddings
+        self.project = "liftai-evolved-strength"
+        self.location = "us-central1"
+        self.client = aiplatform_v1.PredictionServiceClient(client_options={
+            "api_endpoint": f"{self.location}-aiplatform.googleapis.com"
+        })
 
-    def _ensure_collection(self):
-        """Crea la colección si no existe."""
-        if not self.client.collection_exists(self.collection_name):
-            self.client.create_collection(
-                collection_name=self.collection_name,
-                vectors_config=VectorParams(size=1536, distance=Distance.COSINE), # Tamaño embedding OpenAI target
-            )
-            print(f"[VectorStore] Colección '{self.collection_name}' inicializada (1536 dims).")
-
-    def upsert_chunks(self, vectors: List[list], payloads: List[dict]):
-        """Sube lotes de embeddings a Qdrant."""
-        points = [
-            PointStruct(id=idx, vector=vec, payload=payload)
-            for idx, (vec, payload) in enumerate(zip(vectors, payloads))
-        ]
-        self.client.upsert(
-            collection_name=self.collection_name,
-            points=points
+    def _get_embedding(self, text: str) -> List[float]:
+        endpoint = f"projects/{self.project}/locations/{self.location}/publishers/google/models/text-embedding-004"
+        instance = Value()
+        json_format.ParseDict({"content": text, "task_type": "RETRIEVAL_DOCUMENT"}, instance)
+        
+        response = self.client.predict(
+            endpoint=endpoint,
+            instances=[instance]
         )
-        print(f"[VectorStore] {len(points)} puntos ingestados correctamente.")
+        # Extract embedding from response
+        predictions = response.predictions
+        if not predictions:
+            return []
+        
+        # Structure varies, but for text-embedding-004 it's often in 'embeddings' -> 'values'
+        emb_data = predictions[0].get("embeddings", {}).get("values", [])
+        return emb_data
+
+    def search(self, query: str, limit: int = 5) -> List[Dict[str, Any]]:
+        query_vector = self._get_embedding(query)
+        if not query_vector:
+            return []
+
+        session = self.Session()
+        try:
+            # Hybrid-ish: for now pure vector similarity (Cosine)
+            results = session.query(KnowledgeBase).order_by(
+                KnowledgeBase.embedding.cosine_distance(query_vector)
+            ).limit(limit).all()
+            
+            return [
+                {
+                    "content": r.content,
+                    "metadata": r.meta,
+                    "source": r.source,
+                    "distance": 0 # Distance could be calculated if needed
+                } for r in results
+            ]
+        finally:
+            session.close()
+
+    def upsert(self, id: str, content: str, metadata: Dict[str, Any] = None, source: str = None):
+        vector = self._get_embedding(content)
+        session = self.Session()
+        try:
+            kb_entry = KnowledgeBase(
+                id=id,
+                content=content,
+                embedding=vector,
+                meta=metadata or {},
+                source=source
+            )
+            session.merge(kb_entry)
+            session.commit()
+        finally:
+            session.close()
