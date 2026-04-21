@@ -200,12 +200,21 @@ function selectDeliveryTime(athlete, pildora_type) {
 ```json
 {
   "pildora_id": "pildora_2026_04_10_001",
-  "title": "Sleep 8+ Hours Tonight",
+  "title": "Control de Daños: Alcohol vs Recuperación",
   "category": "recovery",
-  "message": "Your readiness is low (38). Aim for 8-10 hours sleep. It's your best recovery tool.",
+  "payload_type": "visual_chart", // Posibles: "text", "video", "visual_chart"
+  "chart_data": {
+    "type": "bar_comparison",
+    "datasets": [
+      {"label": "Cerveza", "dehydration_score": 5, "inflammation_score": 5},
+      {"label": "Destilado + Agua", "dehydration_score": 4, "inflammation_score": 3}
+    ],
+    "insight": "Destilados con agua o soda Zero mitigan enormemente la inflamación celular vs bebidas altas en carga glucémica."
+  },
+  "message": "Sabemos que la vida se celebra. Toma mejores rutas metabólicas para salvar tu sesión de mañana.",
   "video_link": null,
-  "cue": "Consistent sleep schedule beats quantity. Go to bed at the same time nightly.",
-  "action_link": null,
+  "cue": "Bebe 1 vaso de agua extra con 1/2 cuchara de bicarbonato antes de dormir o apenas despiertes.",
+  "action_link": "log_hydration",
   "xp_if_confirmed": 50,
   "delivery_time": "2026-04-10T21:00:00Z",
   "athlete_id": "uuid"
@@ -216,22 +225,23 @@ function selectDeliveryTime(athlete, pildora_type) {
 
 ## Athlete Interaction
 
-### View Daily Píldora
+### View Daily Píldora (Visual Payload Example)
 
 ```
 ┌─ Daily Coaching Píldora ──────────────┐
 │                                        │
-│  "Perfect Your Snatch Position"        │
+│  "Sliding Doors: Predicción de Hábitos"│
 │                                        │
-│  [Video: 30-second tip]                │
+│  [🚀 Gráfico D3 Interactivo Rendered ] │
+│  Curva Verde: Dormir hoy -> +12% CNS   │
+│  Curva Roja: Mal dormir -> Crash 85%   │
 │                                        │
-│  Cue: "Keep bar close from floor      │
-│  to knees. Shift shoulders slightly    │
-│  forward."                             │
+│  Cue: "Tus decisiones de hoy, dibujan  │
+│  tu línea del viernes."                │
 │                                        │
-│  [ ✓ I'll do this ] [ Later ] [ Skip ] │
+│  [ ✓ Elegiré ruta verde ] [ Skip ]     │
 │                                        │
-│  ⭐ +50 XP if you confirm             │
+│  ⭐ +80 XP por cambio de hábito       │
 │                                        │
 └────────────────────────────────────────┘
 ```

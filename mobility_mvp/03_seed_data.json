@@ -1,0 +1,58 @@
+[
+    {
+      "title": "Rotaciones de Tobillo Controladas (CARs)",
+      "target_zone": "Tobillos",
+      "phase_type": "Pre-WOD",
+      "equipment_needed": "Ninguno",
+      "duration_seconds": 60,
+      "description": "Rotaciones articulares controladas buscando el rango máximo de movimiento."
+    },
+    {
+      "title": "Liberación de Fascia Plantar",
+      "target_zone": "Tobillos",
+      "phase_type": "Mantenimiento",
+      "equipment_needed": "Lacrosse",
+      "duration_seconds": 120,
+      "description": "Masaje profundo en la planta del pie con pelota de lacrosse. Puntos gatillo."
+    },
+    {
+      "title": "Pass-Throughs con Banda",
+      "target_zone": "Hombros",
+      "phase_type": "Pre-WOD",
+      "equipment_needed": "Banda",
+      "duration_seconds": 60,
+      "description": "Dislocaciones de hombro resistidas para activación y calentamiento articular."
+    },
+    {
+      "title": "Estiramiento Pectoral Isométrico",
+      "target_zone": "Hombros",
+      "phase_type": "Post-WOD",
+      "equipment_needed": "Pared",
+      "duration_seconds": 120,
+      "description": "Estiramiento estático contra la pared para liberar tensión del pectoral menor tras hacer Jerks."
+    },
+    {
+      "title": "Movilidad de Cadera 90/90",
+      "target_zone": "Cadera",
+      "phase_type": "Pre-WOD",
+      "equipment_needed": "Ninguno",
+      "duration_seconds": 90,
+      "description": "Transiciones de cadera 90/90 para rotación interna y externa."
+    },
+    {
+      "title": "Couch Stretch (Estiramiento de Sofá)",
+      "target_zone": "Cadera",
+      "phase_type": "Post-WOD",
+      "equipment_needed": "Pared",
+      "duration_seconds": 120,
+      "description": "Estiramiento profundo de cuádriceps y flexores de cadera."
+    },
+    {
+      "title": "Extensión Torácica en Foam Roller",
+      "target_zone": "Torácica",
+      "phase_type": "Mantenimiento",
+      "equipment_needed": "Foam Roller",
+      "duration_seconds": 120,
+      "description": "Extensiones segmentadas en la zona torácica."
+    }
+  ]

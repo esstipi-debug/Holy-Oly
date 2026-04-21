@@ -6,6 +6,8 @@
 *   **Lado Coach:** Administrar múltiples atletas y sus sesiones de entrenamiento de manera eficiente.
 *   **Lado Atleta:** Cuidar los niveles de fatiga y dimensionar el estrés del cuerpo para optimizar el rendimiento y evitar el burnout.
 
+**Filosofía Core (Control de Daños):** Sabemos que nadie es perfecto y que la mayoría de los usuarios no son atletas profesionales. Quieren vivir una buena vida, equilibrada y disfrutarla. *Es por esto que los cuidamos*. Peak Qual no es un sistema punitivo ni culpa al atleta; su inteligencia artificial aplica un "control de daños" empático para recuperar al usuario y adaptar la prescripción cuando la vida (estrés, fiestas, cansancio) se entromete en el entrenamiento.
+
 **Tagline:** *Smart training, zero burnout.*
 
 ---

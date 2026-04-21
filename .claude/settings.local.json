@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__Desktop_Commander__create_directory",
+      "Bash(git fetch *)",
+      "Bash(git pull *)"
+    ]
+  }
+}

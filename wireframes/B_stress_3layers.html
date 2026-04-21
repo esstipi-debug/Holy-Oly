@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Stress Engine · 3 Capas — Holy Oly</title>
+<style>
+  :root{
+    --bg:#0a0a0f; --panel:#12121a; --panel2:#1a1a24;
+    --ink:#f5f5f7; --muted:#8a8a99; --muted2:#5a5a6a;
+    --green:#22c55e; --amber:#f59e0b; --red:#ef4444;
+    --cyan:#22d3ee; --gold:#fbbf24; --border:#1f1f2a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:#050508;font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink);min-height:100vh;padding:30px 20px;display:flex;flex-direction:column;align-items:center;gap:30px}
+  .title-top{text-align:center;margin-bottom:10px}
+  .title-top h1{font-size:22px;font-weight:900;letter-spacing:-.01em}
+  .title-top p{color:var(--muted);font-size:12px;letter-spacing:.14em;text-transform:uppercase;margin-top:6px}
+  .row{display:flex;gap:24px;justify-content:center;flex-wrap:wrap}
+  .col{display:flex;flex-direction:column;align-items:center;gap:10px}
+  .col .cap{font-size:10px;letter-spacing:.28em;color:var(--gold);font-weight:800;text-transform:uppercase}
+  .col .subt{font-size:12px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+
+  .phone{width:320px;background:var(--bg);border-radius:34px;padding:18px;border:1px solid var(--border);box-shadow:0 20px 60px rgba(0,0,0,.5);min-height:640px}
+  .hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+  .brand{font-size:9px;color:var(--gold);letter-spacing:.2em;font-weight:800}
+  .time{font-size:11px;color:var(--muted)}
+
+  /* ---------- LAYER 1 ---------- */
+  .l1-greet{font-size:13px;color:var(--muted);margin-top:6px}
+  .l1-name{font-size:20px;font-weight:800;margin-bottom:24px}
+  .l1-gauge{position:relative;display:flex;justify-content:center;margin:20px 0 16px}
+  .l1-gauge svg{transform:rotate(-90deg)}
+  .l1-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .l1-num{font-size:76px;font-weight:900;line-height:1;background:linear-gradient(180deg,#22d3ee,#22c55e);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .l1-lbl{font-size:10px;color:var(--muted);letter-spacing:.22em;text-transform:uppercase;margin-top:4px}
+  .l1-zone{text-align:center;margin-top:6px;font-size:15px;font-weight:800;color:var(--green);letter-spacing:.06em}
+  .l1-zone .dot{display:inline-block;width:8px;height:8px;border-radius:99px;background:var(--green);margin-right:6px;box-shadow:0 0 12px var(--green)}
+  .l1-msg{text-align:center;font-size:13px;color:var(--muted);margin:14px 20px;line-height:1.4}
+  .cta{display:block;width:100%;margin-top:18px;padding:15px;background:linear-gradient(135deg,#22d3ee,#22c55e);color:#001018;border:0;border-radius:16px;font-size:15px;font-weight:800;letter-spacing:.04em;cursor:pointer}
+  .cta-ghost{display:block;width:100%;margin-top:8px;padding:13px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:14px;font-size:12px;font-weight:600;letter-spacing:.05em;cursor:pointer}
+
+  /* ---------- LAYER 2 ---------- */
+  .l2-head{margin-bottom:14px}
+  .l2-back{font-size:11px;color:var(--muted);letter-spacing:.08em}
+  .l2-title{font-size:20px;font-weight:800;margin-top:4px}
+  .l2-sub{font-size:11px;color:var(--muted);margin-top:2px;letter-spacing:.08em;text-transform:uppercase}
+
+  .l2-hero{background:linear-gradient(135deg,rgba(34,211,238,.1),rgba(34,197,94,.06));border:1px solid rgba(34,211,238,.22);border-radius:18px;padding:14px;margin-bottom:12px}
+  .l2-hero-row{display:flex;justify-content:space-between;align-items:center}
+  .l2-hero-num{font-size:42px;font-weight:900;background:linear-gradient(180deg,#22d3ee,#22c55e);-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1}
+  .l2-hero-lbl{font-size:9px;color:var(--cyan);letter-spacing:.18em;text-transform:uppercase;font-weight:800}
+  .l2-spark{margin-top:10px}
+
+  .l2-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+  .l2-tile{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:11px 12px;cursor:pointer;position:relative}
+  .l2-tile .lbl{font-size:9px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase}
+  .l2-tile .val{font-size:22px;font-weight:800;margin-top:4px}
+  .l2-tile .bar{height:3px;background:#1f1f2a;border-radius:99px;margin-top:8px;overflow:hidden}
+  .l2-tile .bar > span{display:block;height:100%;border-radius:99px}
+  .l2-tile .chev{position:absolute;right:10px;top:12px;color:var(--muted2);font-size:14px}
+
+  .l2-proj{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:12px}
+  .l2-proj .t{font-size:10px;color:var(--gold);letter-spacing:.16em;text-transform:uppercase;font-weight:800;margin-bottom:8px}
+  .l2-proj .r{display:flex;justify-content:space-between;align-items:center}
+  .l2-proj .day{font-size:14px;font-weight:700}
+  .l2-proj .s{font-size:18px;font-weight:800;color:var(--green)}
+
+  /* ---------- LAYER 3 ---------- */
+  .l3-formula{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:12px;margin-bottom:12px;font-family:ui-monospace,SF Mono,monospace;font-size:12px;line-height:1.9}
+  .l3-formula .row{display:flex;justify-content:space-between;color:var(--ink)}
+  .l3-formula .row .ok{color:var(--green)}
+  .l3-formula .row .warn{color:var(--amber)}
+  .l3-formula .total{border-top:1px dashed var(--border);margin-top:8px;padding-top:8px;font-weight:800;color:var(--cyan)}
+
+  .l3-toggles{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:12px;margin-bottom:12px}
+  .l3-toggles .th{font-size:10px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px}
+  .toggle{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+  .toggle:last-child{border-bottom:0}
+  .toggle .tl{font-size:13px}
+  .toggle .tw{font-size:10px;color:var(--muted);letter-spacing:.1em;margin-left:6px}
+  .sw{width:36px;height:20px;background:#2a2a36;border-radius:99px;position:relative;cursor:pointer;transition:.2s}
+  .sw.on{background:linear-gradient(135deg,#22d3ee,#22c55e)}
+  .sw::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:99px;background:#fff;transition:.2s}
+  .sw.on::after{left:18px}
+
+  .l3-meta{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:12px;font-size:11px;color:var(--muted);line-height:1.6}
+  .l3-meta .k{color:var(--ink);font-weight:600}
+  .l3-meta .conf{display:flex;align-items:center;gap:6px;margin-top:6px;color:var(--green)}
+
+  .l3-chart{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:12px;margin-bottom:12px}
+  .l3-chart .th{font-size:10px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin-bottom:8px}
+
+  .arrow{display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:24px;font-weight:900}
+  @media (max-width:1080px){.arrow{transform:rotate(90deg);margin:10px 0}}
+
+  .legend{max-width:1100px;margin-top:10px;padding:16px;background:var(--panel);border:1px solid var(--border);border-radius:14px;font-size:12px;color:var(--muted);line-height:1.7}
+  .legend b{color:var(--ink)}
+</style>
+</head>
+<body>
+
+  <div class="title-top">
+    <h1>🧠 Stress Engine · Arquitectura Progresiva 3 Capas</h1>
+    <p>Holy Oly · Simplificar + Detallar</p>
+  </div>
+
+  <div class="row">
+
+    <!-- ========== CAPA 1 ========== -->
+    <div class="col">
+      <span class="cap">Capa 1 · Glance</span>
+      <span class="subt">Home · 1 número · 1 decisión</span>
+      <div class="phone">
+        <div class="hdr">
+          <div class="brand">HOLY OLY</div>
+          <div class="time">08:14</div>
+        </div>
+        <p class="l1-greet">Buenos días,</p>
+        <p class="l1-name">Stipi 👋</p>
+
+        <div class="l1-gauge">
+          <svg width="220" height="220" viewBox="0 0 220 220">
+            <circle cx="110" cy="110" r="92" fill="none" stroke="#1a1a24" stroke-width="16"/>
+            <circle cx="110" cy="110" r="92" fill="none" stroke="url(#g1)" stroke-width="16"
+                    stroke-linecap="round" stroke-dasharray="578" stroke-dashoffset="139"/>
+            <defs>
+              <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#22d3ee"/>
+                <stop offset="100%" stop-color="#22c55e"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="l1-center">
+            <div class="l1-num">76</div>
+            <div class="l1-lbl">Readiness</div>
+          </div>
+        </div>
+
+        <div class="l1-zone"><span class="dot"></span>READY TO LIFT</div>
+        <p class="l1-msg">SNC óptimo. Ventana abierta para intensidad alta (85–95% 1RM).</p>
+
+        <button class="cta">Entrenar ahora →</button>
+        <button class="cta-ghost">Ver desglose</button>
+      </div>
+    </div>
+
+    <div class="arrow">→</div>
+
+    <!-- ========== CAPA 2 ========== -->
+    <div class="col">
+      <span class="cap">Capa 2 · Breakdown</span>
+      <span class="subt">Dashboard · 4 scores + proyección</span>
+      <div class="phone">
+        <div class="hdr">
+          <div class="brand">HOLY OLY</div>
+          <div class="time">08:14</div>
+        </div>
+        <div class="l2-head">
+          <div class="l2-back">← Home</div>
+          <div class="l2-title">Stress Engine</div>
+          <div class="l2-sub">Tendencia 14 días</div>
+        </div>
+
+        <div class="l2-hero">
+          <div class="l2-hero-row">
+            <div>
+              <div class="l2-hero-lbl">Readiness Final</div>
+              <div class="l2-hero-num">81</div>
+            </div>
+            <svg viewBox="0 0 120 48" width="130" height="48">
+              <path d="M0,30 L10,28 L20,32 L30,22 L40,26 L50,18 L60,24 L70,16 L80,20 L90,12 L100,18 L110,10 L120,14" stroke="#22d3ee" stroke-width="2" fill="none" stroke-linecap="round"/>
+              <circle cx="120" cy="14" r="3.5" fill="#22c55e"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="l2-grid">
+          <div class="l2-tile">
+            <div class="chev">›</div>
+            <div class="lbl">🔋 CNS</div>
+            <div class="val">76</div>
+            <div class="bar"><span style="width:76%;background:var(--green)"></span></div>
+          </div>
+          <div class="l2-tile">
+            <div class="chev">›</div>
+            <div class="lbl">⚡ Fatiga</div>
+            <div class="val">28</div>
+            <div class="bar"><span style="width:28%;background:var(--green)"></span></div>
+          </div>
+          <div class="l2-tile">
+            <div class="chev">›</div>
+            <div class="lbl">💪 Fitness</div>
+            <div class="val">64</div>
+            <div class="bar"><span style="width:64%;background:var(--cyan)"></span></div>
+          </div>
+          <div class="l2-tile">
+            <div class="chev">›</div>
+            <div class="lbl">🎯 IMR sesión</div>
+            <div class="val">72</div>
+            <div class="bar"><span style="width:72%;background:var(--amber)"></span></div>
+          </div>
+        </div>
+
+        <div class="l2-proj">
+          <div class="t">📅 Ventana PR proyectada</div>
+          <div class="r">
+            <div>
+              <div class="day">Jueves 23 Abr</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:2px">+3 días</div>
+            </div>
+            <div class="s">88</div>
+          </div>
+          <div style="display:flex;gap:3px;margin-top:10px;align-items:end;height:28px">
+            <div style="flex:1;background:var(--cyan);height:60%;border-radius:3px"></div>
+            <div style="flex:1;background:var(--cyan);height:68%;border-radius:3px"></div>
+            <div style="flex:1;background:var(--green);height:78%;border-radius:3px"></div>
+            <div style="flex:1;background:var(--green);height:92%;border-radius:3px;box-shadow:0 0 10px var(--green)"></div>
+            <div style="flex:1;background:var(--amber);height:70%;border-radius:3px"></div>
+            <div style="flex:1;background:var(--amber);height:55%;border-radius:3px"></div>
+            <div style="flex:1;background:var(--red);height:42%;border-radius:3px"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted2);margin-top:4px">
+            <span>HOY</span><span>MAR</span><span>MIE</span><span>JUE</span><span>VIE</span><span>SAB</span><span>DOM</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow">→</div>
+
+    <!-- ========== CAPA 3 ========== -->
+    <div class="col">
+      <span class="cap">Capa 3 · Deep</span>
+      <span class="subt">Detalle · fórmula + toggles + audit</span>
+      <div class="phone">
+        <div class="hdr">
+          <div class="brand">HOLY OLY</div>
+          <div class="time">08:14</div>
+        </div>
+        <div class="l2-head">
+          <div class="l2-back">← Stress Engine</div>
+          <div class="l2-title">🔋 CNS Score</div>
+          <div class="l2-sub">Auditoría completa</div>
+        </div>
+
+        <div class="l2-hero" style="text-align:center">
+          <div class="l2-hero-num" style="font-size:54px">76</div>
+          <div class="l2-hero-lbl">Zona · Ready</div>
+        </div>
+
+        <div class="l3-formula">
+          <div class="row"><span>0.30 × HRV (90)</span><span class="ok">27.0 ✓</span></div>
+          <div class="row"><span>0.25 × Sueño (84)</span><span class="ok">21.0 ✓</span></div>
+          <div class="row"><span>0.20 × RHR (60)</span><span class="warn">12.0 ⚠</span></div>
+          <div class="row"><span>0.25 × Subjet. (80)</span><span class="ok">20.0 ✓</span></div>
+          <div class="row total"><span>CNS Score</span><span>80.0 → 76</span></div>
+        </div>
+
+        <div class="l3-toggles">
+          <div class="th">Factores activos</div>
+          <div class="toggle"><div class="tl">HRV (rMSSD) <span class="tw">30%</span></div><div class="sw on"></div></div>
+          <div class="toggle"><div class="tl">Sueño <span class="tw">25%</span></div><div class="sw on"></div></div>
+          <div class="toggle"><div class="tl">RHR matinal <span class="tw">20%</span></div><div class="sw on"></div></div>
+          <div class="toggle"><div class="tl">Subjetivo <span class="tw">25%</span></div><div class="sw on"></div></div>
+          <div class="toggle"><div class="tl" style="color:var(--muted)">Bar velocity <span class="tw">opt</span></div><div class="sw"></div></div>
+          <div class="toggle"><div class="tl" style="color:var(--muted)">Grip strength <span class="tw">opt</span></div><div class="sw"></div></div>
+        </div>
+
+        <div class="l3-chart">
+          <div class="th">Historial 30 días</div>
+          <svg viewBox="0 0 280 60" width="100%" height="60">
+            <path d="M0,40 L10,36 L20,42 L30,34 L40,30 L50,38 L60,32 L70,28 L80,36 L90,30 L100,24 L110,32 L120,28 L130,22 L140,30 L150,26 L160,20 L170,26 L180,22 L190,16 L200,22 L210,18 L220,14 L230,20 L240,16 L250,12 L260,18 L270,14 L280,12" stroke="#22d3ee" stroke-width="2" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <div class="l3-meta">
+          <div><span class="k">Baseline:</span> 14 días (editable)</div>
+          <div><span class="k">Última actualización:</span> hace 3 min</div>
+          <div class="conf">● Confidence: 100% (4/4 activos)</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <b>Filosofía:</b> Cada capa responde una pregunta. L1 → ¿entreno?; L2 → ¿por qué?; L3 → ¿cómo se calcula y puedo ajustarlo?
+    <br/><br/>
+    <b>Permisos:</b> Atleta accede L1/L2/L3 propios + toggles. Coach accede L1/L2 vía C1/C4; L3 read-only + anotar + sugerir toggle. Sistema calcula, no edita.
+    <br/><br/>
+    <b>Resultado:</b> Novato ve 1 número, experto audita fórmula. Transparencia sin saturación. Mismo engine, 3 superficies.
+  </div>
+
+</body>
+</html>

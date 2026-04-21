@@ -5,6 +5,11 @@ dist/
 .DS_Store
 *.log
 
+# Secrets
+apps/api/gcp-service-account.json
+apps/api/.env
+CREDENTIALS_BACKUP.md
+
 # Obsidian workspace (personal, not shared)
 .obsidian/workspace.json
 .obsidian/workspace-mobile.json

@@ -284,6 +284,111 @@ git commit -m "Memory: Fase 1 → 27/27 complete, ready Phase 2"
 
 ---
 
-**Versión:** 1.0  
-**Creado:** 2026-04-15  
-**Última actualización:** 2026-04-16 — Fase 1 FINALIZADA · Fase 2 INICIADA
+## 📊 Dynamic Graph System (NUEVO — 2026-04-20)
+
+**Objetivo:** Gráficos reutilizables, dinámicos, multivariable que funcionan en múltiples superficies (app, viral card, email coach, social share, onboarding, competition countdown).
+
+### Principios
+
+1. **Componentes graph atómicos** — un mismo chart component se renderiza en distintos contextos.
+2. **Multivariable** — contrastar 2-3 variables para mostrar correlaciones y puntos de quiebre.
+3. **Zonas visibles** — verde/amarillo/rojo explícitas. Conciencia del estado.
+4. **Motivación + orientación** — no solo diagnóstico; cada gráfico sugiere siguiente paso.
+5. **3D opcional** — para viral cards y vista "Explorer" en capa 3, NO pantalla principal.
+
+### Tipos de gráfico base
+
+| Componente | Uso primario | Reutilización |
+|---|---|---|
+| GaugeRing | CNS/Readiness score | Home, viral card, email |
+| ScatterZones | Sueño × Carga (risk map) | Deep analytics, coach view |
+| TrajectoryPath | ACWR × HRV trayectoria | Deep, progress timeline |
+| DualLineAnti | RHR × Readiness correlation | Deep, coach insight card |
+| ThresholdCurve | Volumen >90% × CNS drop | Deep, injury prevention panel |
+| ForecastRisk | Burnout risk 7d con zona | Home alert, push notification |
+| RadarPolygon | Atributos FIFA-style | Viral card, progress panel |
+| TerrainSurface | 3D risk landscape | Explorer mode, viral share |
+
+### Escenarios de reutilización
+
+- **In-app** — capas 1/2/3 Stress Engine.
+- **Viral card** — radar + CNS gauge + overall score.
+- **Coach digest email** — charts embebidos, status sus atletas.
+- **Push notifications** — mini-gauge inline ("CNS cayó a 52, revisa →").
+- **Onboarding** — charts educativos con data demo.
+- **Competition countdown** — forecast readiness al día de competencia.
+- **Social share** — PNG renderizado con glow/branding por skin deporte.
+- **Coach onboarding** — tour explicando cada gráfico.
+
+### Implementación
+
+- Librería: D3 + framer-motion + SVG puro (no Canvas — mejor share PNG).
+- 3D: Three.js o React-Three-Fiber (solo para Explorer + viral cards).
+- Tema por deporte (skin): Holy Oly dorado, Volta rojo, Axon cian.
+- Export: `toPNG()` para viral card + share + email.
+
+### Entregables
+
+- [ ] 8 componentes graph base documentados en Storybook.
+- [ ] 3 skins aplicables (Holy Oly / Volta / Axon).
+- [ ] PNG export pipeline.
+- [ ] Viral card con radar + gauge integrado.
+- [ ] Email template con graph embebido.
+- [ ] 3 wireframes de referencia: `B_cns_battery.html`, `B_stress_3layers.html`, `B_stress_correlations.html`.
+
+---
+
+## 🤖 Automatización Máxima (NUEVO — 2026-04-20)
+
+**Pregunta de diseño:** ¿cuánto podemos automatizar antes de requerir coach humano?
+
+### Áreas automatizables
+
+| Área | Nivel auto | Requiere humano |
+|---|---|---|
+| RAG ingestion de docs | ✅ Full | Curación inicial sources |
+| Generación macrociclos base | ✅ Full | Coach ajusta cargas finales |
+| Readiness + CNS + Stress | ✅ Full | — |
+| Ajustes sesión (intensidad/volumen) | ✅ Auto + coach aprueba | Coach approval crítico |
+| Warmup personalizado | ✅ Full | — |
+| Detección patrones lesión | ✅ Flag | Coach decide stop |
+| Viral cards | ✅ Full | — |
+| Nutrición básica | ✅ Auto | Nutricionista real casos avanzados |
+| Píldoras contenido | ✅ RAG-driven | Curación tópicos |
+| Técnica video | ❌ V2 (IA visión) | Coach revisa |
+| Decisión psicológica/motivación | ⚠️ Parcial | Coach real |
+
+### RAG — SÍ se puede automatizar
+
+**Pipeline auto-RAG:**
+
+1. **Source watcher** — cron scanea carpetas (RAW_SOURCES, nuevos PDFs, Huberman transcripts).
+2. **Polish** — `polish-markdown.js` ya existe (GPT-4 + YAML frontmatter).
+3. **Chunk + embed** — split semántico + OpenAI/Voyage embeddings.
+4. **Ingest vector DB** — Supabase pgvector o Qdrant.
+5. **Tag por deporte** — clasificador auto (halterofilia/crossfit/hyrox).
+6. **Quality check** — LLM valida chunk antes de ingestar.
+7. **Dedup** — hash semántico, evita duplicados.
+8. **Re-index** — scheduled nightly.
+
+**Ya existe:**
+- `scripts/generate-rag.js` (revisar conflicto stack — obs memoria).
+- `scripts/polish-markdown.js`.
+- Engine `24_ai_brains_rag_engine.md`.
+
+**Falta:**
+- Watcher automático filesystem.
+- Clasificador deporte.
+- Pipeline quality gate.
+- UI admin ver status ingest.
+
+### Automatización end-to-end (visión)
+
+- Atleta sube data → engines procesan → RAG sugiere protocolo → coach aprueba 1-click → atleta ejecuta → viral card se genera sola → social share auto.
+- Coach intervención mínima: aprobar recomendaciones Smart + notas privadas.
+
+---
+
+**Versión:** 1.1
+**Creado:** 2026-04-15
+**Última actualización:** 2026-04-20 — Dynamic Graph System + Auto RAG añadidos

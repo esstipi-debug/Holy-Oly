@@ -24,8 +24,18 @@ The **Stress Engine** is the central nervous system of HolyOly. It calculates at
 
 **Formula:**
 ```
-Training Load = Sets × Reps × Weight (kg) × RPE Factor
+Training Load = Sets × Reps × Weight (kg) × RPE Factor × Intensity_Multiplier × Sport_Bias
 ```
+
+**Intensity Multiplier (Neural Tax):**
+- `< 70% 1RM` = 1.0 (Metabolic/Hypertrophy zone)
+- `70% - 85% 1RM` = 1.2 (Strength zone)
+- `85% - 95% 1RM` = 1.5 (High CNS tax)
+- `> 95% 1RM` = 2.0 (Maximum Neural Drive)
+
+**Sport Bias Multiplier (RAG Engine Interop):**
+- **Halterofilia:** x1.0 para fuerza cruda, pero volumen puro de reps >8 (poco común) se reduce a x0.8.
+- **CrossFit / Hyrox:** x1.2 para zonas de alta frecuencia cardíaca o DOMS metabólico prolongado.
 
 **RPE Factor Table (1-10 scale):**
 | RPE | Factor | RPE | Factor |
@@ -34,53 +44,54 @@ Training Load = Sets × Reps × Weight (kg) × RPE Factor
 | 9.5 | 0.975  | 5.5 | 0.775  |
 | 9   | 0.95   | 6   | 0.80   |
 | 8.5 | 0.925  | 6.5 | 0.825  |
-| 8   | 0.90   | 7   | 0.85   |
-| 7.5 | 0.875  | 7.5 | 0.875  |
-| 7   | 0.85   | ...and so on|
 
 **Example:**
 ```
-Exercise: Snatch
+Exercise: Snatch (Halterofilia)
   Sets: 5
   Reps: 3
-  Weight: 100kg
+  Weight: 100kg (88% 1RM)
   RPE: 8.5
 
-Load = 5 × 3 × 100 × 0.925 = 1,387.5
+Load = 5 × 3 × 100 × 0.925 (RPE) × 1.5 (Int_M) × 1.0 (Sport_B) = 2,081.25
 ```
 
 **Session Total:** Sum of all exercise loads
 
 ---
 
-### 2. Fatigue Score (7-Day Exponential Moving Average)
+### 2. Fatigue Score (Short-Term Exponential Moving Average)
 
 **Formula:**
 ```
 Fatigue_today = α × Load_today + (1-α) × Fatigue_yesterday
 
-where α (alpha) = 2 / (7 + 1) = 0.25
+where α (alpha) = 2 / (Fatigue_Window + 1)
 ```
 
-**Interpretation:**
-- **Higher fatigue** = Accumulated stress from recent sessions
-- **Decays slowly** — Takes ~28 days to fully recover from a single high-load session
-- **Example:** If you hit 5,000 load today and rest tomorrow:
-  - Day 1: Fatigue = 0.25 × 5000 + 0.75 × 0 = 1,250
-  - Day 2: Fatigue = 0.25 × 0 + 0.75 × 1,250 = 938
-  - Day 3: Fatigue = 0.25 × 0 + 0.75 × 938 = 704
-  - ... continues decaying
+**Age-Adjusted Fatigue Window (Amortization):**
+The speed at which an athlete clears fatigue decreases with age.
+- `Age < 25`: Window = 5 Days (α = 0.33)
+- `Age 25-35`: Window = 7 Days (α = 0.25) [BASELINE]
+- `Age 35-45`: Window = 9 Days (α = 0.20)
+- `Age 45+`: Window = 11 Days (α = 0.16)
 
 ---
 
-### 3. Fitness Score (28-Day Exponential Moving Average)
+### 3. Fitness Score (Long-Term Exponential Moving Average)
 
 **Formula:**
 ```
 Fitness_today = β × Load_today + (1-β) × Fitness_yesterday
 
-where β (beta) = 2 / (28 + 1) ≈ 0.069
+where β (beta) = 2 / (Fitness_Window + 1)
 ```
+
+**Age-Adjusted Fitness Window:**
+- `Age < 25`: Window = 21 Days (β = 0.090)
+- `Age 25-35`: Window = 28 Days (β = 0.069) [BASELINE]
+- `Age 35-45`: Window = 35 Days (β = 0.055)
+- `Age 45+`: Window = 42 Days (β = 0.046)
 
 **Interpretation:**
 - **Higher fitness** = Long-term training adaptations and strength gains
@@ -403,6 +414,72 @@ Final Readiness = 77 - 5 = 72 → "High" ✓ Ready to train hard
 - **Prisma ORM** — Fetch session data from `completedSession` table
 - **PostgreSQL** — Store `ReadinessCache` table (pre-calculated values)
 - **Cron Service** — Scheduled recalculation daily
+
+---
+
+## 8. CNS Score (Nervous System Load) — Extension
+
+**Purpose:** Dedicated 0-100 score measuring central nervous system state, distinct from general Readiness. Captures autonomic fatigue that Banister alone misses (HRV, resting HR, grip, bar velocity, subjective load).
+
+**Why separate:** Banister tracks training load stress. CNS tracks recovery capacity of the nervous system — a lifter can be "fit" (high fitness score) yet CNS-drained (low HRV, elevated RHR) and should not attempt max lifts.
+
+### Inputs (4 signals)
+
+| Signal | Source | Weight |
+|---|---|---|
+| HRV (rMSSD) | Wearable auto / manual entry | 30% |
+| Sleep (hours × quality) | Wearable / self-report | 25% |
+| Resting HR (morning) | Wearable / manual | 20% |
+| Subjective (soreness + motivation + life stress, 1–10 each) | Self-report | 25% |
+
+Each signal normalized 0-100 against athlete's rolling 14-day baseline (personal, not population).
+
+### Formula
+
+```
+cnsScore = 0.30*hrvNorm + 0.25*sleepNorm + 0.20*rhrNorm + 0.25*subjectiveNorm
+```
+
+Where:
+- `hrvNorm`    = clamp(0, 100, 50 + (hrvToday - hrvBaseline14d) / hrvBaseline14d * 200)
+- `sleepNorm`  = min(100, (hoursSlept / 8) * 100) * (qualityScore / 10)
+- `rhrNorm`    = clamp(0, 100, 100 - (rhrToday - rhrBaseline14d) * 4)
+- `subjectiveNorm` = ((11 - soreness) + motivation + (11 - lifeStress)) / 3 * 10
+
+### Zones
+
+| Score | Zone | Guidance |
+|---|---|---|
+| ≥75 | 🟢 Ready | PR attempts safe, 85-95% 1RM window open |
+| 50-74 | 🟡 Moderate | Volume OK, cap intensity ≤80% 1RM |
+| <50 | 🔴 Drained | Deload, mobility only, or full rest |
+
+### Interaction with Readiness
+
+- `readinessFinal` uses Banister + sleep + RPE + compliance (unchanged above).
+- `cnsScore` is **independent** but **gates high-intensity decisions** in Session Adaptation Engine.
+- Rule: if `readinessFinal ≥ 70` but `cnsScore < 50` → downgrade intensity cap to 75% 1RM regardless.
+
+### Role Permissions
+
+- Athlete: edits raw inputs (HRV manual, sleep hours, subjective 1-10, logs grip/velocity tests).
+- Coach: views score + inputs, annotates (private notes), adjusts athlete's baseline window (14/28d), flags test as invalid. **Cannot edit raw biometric values.**
+- System: calculates cnsScore. No manual override of final score.
+
+### Sport-specific adaptation
+
+- **Holy Oly (Weightlifting):** bar velocity @70% squat added as optional 5th signal (if sensor available), replacing 5% of HRV weight.
+- **Volta (CrossFit):** grip strength weighted higher (gymnastics volume drains grip CNS fast).
+- **Axon (Hyrox):** HR drift in Z2 test added as optional 5th signal (aerobic CNS).
+
+### Output addition to `ReadinessCache`
+
+```
+cnsScore         Int       // 0-100
+cnsZone          String    // 'ready' | 'moderate' | 'drained'
+cnsSignals       Json      // { hrvNorm, sleepNorm, rhrNorm, subjectiveNorm }
+cnsBaselineWindow Int      // days used for baseline (default 14)
+```
 
 ---
 
