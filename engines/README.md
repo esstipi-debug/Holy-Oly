@@ -1,21 +1,32 @@
 # HolyOly Engine Architecture
 
-**19 Computational Engines** powering the intelligent coaching system.
+**22 Computational Engines** organizados en 4 grupos para Atleta + Vista Coach
 
 ---
 
-## Table of Contents
+## Estructura General
 
-1. [Core Engines](#core-engines) — Stress, Session Adaptation, Macrocycles
-2. [Athlete Development](#athlete-development) — Gamification, Belt, Streak, BW Milestones
-3. [Training Optimization](#training-optimization) — Warmup, Pulse, Balance, OLY Index
-4. [Lifestyle & Recovery](#lifestyle--recovery) — Lifestyle Profile, Hormonal Periodization
-5. [Insights & Social](#insights--social) — Smart Coach, Píldoras, Social, Golden Ratio
-6. [User Experience](#user-experience) — Theme, Privacy, Cache, Readiness
+### Vista Atleta (4 Grupos)
+
+| Grupo | Engines | Propósito |
+|------|---------|----------|
+| **Readiness** | 01 Stress + 10 Balance + 11 OLY Index | Estado físico |
+| **Training Flow** | 02 Session Adapt + 03 Macrocycle + 08 Warmup + 09 Pulse | Flujo entrenamiento |
+| **Gamification** | 04 XP + 05 Belt + 06 Streak + 07 BW + 17 Golden Ratio + 16 Social | Progresión |
+| **Wellness** | 12 Lifestyle + 13 Hormonal + 14 Smart Coach + 15 Píldoras | Vida + Coach IA |
+
+### Vista Coach (4 Grupos)
+
+| Grupo | Propósito |
+|------|----------|
+| **Command** | Dashboard riesgo + bandeja |
+| **Athletes** | Ver/Agregar athletes |
+| **Programs** | Asignar/Modificar macrociclos |
+| **Tools** | Herramientas admin |
 
 ---
 
-## Core Engines
+## Detalle Engines
 
 ### 1. Stress Engine (Readiness Calculator)
 **File:** `01_stress_engine.md`  
