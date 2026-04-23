@@ -112,6 +112,7 @@
       letter-spacing: .03em;
     }
     .tab.active { background: #1e1b4b; color: #a78bfa; }
+    .tab:hover { background: #1a1a28; }
     .tab:not(.active) { color: #475569; }
   </style>
 </head>
@@ -532,11 +533,99 @@
 
         <!-- Period selector -->
         <div style="display:flex;gap:6px;background:#111118;border:1px solid #1e1e30;border-radius:14px;padding:4px;margin-bottom:20px;">
-          <div class="tab" style="flex:1;padding:8px 4px;font-size:10px;">Sem</div>
-          <div class="tab active" style="flex:1;padding:8px 4px;font-size:10px;">Mes</div>
-          <div class="tab" style="flex:1;padding:8px 4px;font-size:10px;">3m</div>
-          <div class="tab" style="flex:1;padding:8px 4px;font-size:10px;">6m</div>
-          <div class="tab" style="flex:1;padding:8px 4px;font-size:10px;">1y</div>
+          <div id="tab-sem" class="tab" style="flex:1;padding:8px 4px;font-size:10px;cursor:pointer;">Sem</div>
+          <div id="tab-mes" class="tab active" style="flex:1;padding:8px 4px;font-size:10px;cursor:pointer;">Mes</div>
+          <div id="tab-3m" class="tab" style="flex:1;padding:8px 4px;font-size:10px;cursor:pointer;">3m</div>
+          <div id="tab-6m" class="tab" style="flex:1;padding:8px 4px;font-size:10px;cursor:pointer;">6m</div>
+          <div id="tab-1y" class="tab" style="flex:1;padding:8px 4px;font-size:10px;cursor:pointer;">1y</div>
+        </div>
+
+        <!-- Vista Semana (hidden by default) -->
+        <div id="vista-semana" style="display:none;margin-bottom:16px;">
+          <p style="font-size:11px;font-weight:700;color:#475569;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;">Esta Semana</p>
+          
+          <div style="background:#111118;border:1px solid #1e1e30;border-radius:16px;padding:14px;margin-bottom:12px;">
+            <p style="font-size:12px;color:#94a3b8;margin-bottom:8px;">Lun 21 - Dom 27</p>
+            
+            <!-- Día a día -->
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;background:#0a0a12;border-radius:10px;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:10px;color:#64748b;width:28px;">Lun</span>
+                  <span style="font-size:12px;color:#f1f5f9;">Snatch + Front Squat</span>
+                </div>
+                <span style="font-size:10px;color:#22C55E;font-weight:700;">✅ 85kg PR</span>
+              </div>
+              
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;background:#0a0a12;border-radius:10px;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:10px;color:#64748b;width:28px;">Mar</span>
+                  <span style="font-size:12px;color:#f1f5f9;">Clean & Jerk</span>
+                </div>
+                <span style="font-size:10px;color:#22C55E;font-weight:700;">✅ Completado</span>
+              </div>
+              
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;background:#0a0a12;border-radius:10px;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:10px;color:#64748b;width:28px;">Mié</span>
+                  <span style="font-size:12px;color:#f1f5f9;">Descanso</span>
+                </div>
+                <span style="font-size:10px;color:#64748b;">😴 Recuperación</span>
+              </div>
+              
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;background:#0a0a12;border-radius:10px;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:10px;color:#64748b;width:28px;">Jue</span>
+                  <span style="font-size:12px;color:#f1f5f9;">Back Squat</span>
+                </div>
+                <span style="font-size:10px;color:#EAB308;font-weight:700;">⚠️ 140kg</span>
+              </div>
+              
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;background:#0a0a12;border-radius:10px;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:10px;color:#64748b;width:28px;">Vie</span>
+                  <span style="font-size:12px;color:#f1f5f9;">Snatch + pulls</span>
+                </div>
+                <span style="font-size:10px;color:#22C55E;font-weight:700;">✅ Completado</span>
+              </div>
+              
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;background:#0a0a12;border-radius:10px;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:10px;color:#64748b;width:28px;">Sáb</span>
+                  <span style="font-size:12px;color:#f1f5f9;">Pulse / Conditioning</span>
+                </div>
+                <span style="font-size:10px;color:#64748b;">⏳ Pendiente</span>
+              </div>
+              
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;background:#0a0a12;border-radius:10px;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:10px;color:#64748b;width:28px;">Dom</span>
+                  <span style="font-size:12px;color:#f1f5f9;">Descanso</span>
+                </div>
+                <span style="font-size:10px;color:#64748b;">💤</span>
+              </div>
+            </div>
+            
+            <!-- Stats semanales -->
+            <div style="display:flex;justify-content:space-around;margin-top:14px;padding-top:14px;border-top:1px solid #1e1e30;">
+              <div style="text-align:center;">
+                <p style="font-size:18px;font-weight:900;color:#4ade80;">5/7</p>
+                <p style="font-size:9px;color:#64748b;">Sesiones</p>
+              </div>
+              <div style="text-align:center;">
+                <p style="font-size:18px;font-weight:900;color:#818cf8;">12.4k</p>
+                <p style="font-size:9px;color:#64748b;">Tonelaje</p>
+              </div>
+              <div style="text-align:center;">
+                <p style="font-size:18px;font-weight:900;color:#F59E0B;">+850</p>
+                <p style="font-size:9px;color:#64748b;">XP</p>
+              </div>
+              <div style="text-align:center;">
+                <p style="font-size:18px;font-weight:900;color:#a78bfa;">72</p>
+                <p style="font-size:9px;color:#64748b;">Readiness</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- ═══ SUEÑO ═══ -->
@@ -784,6 +873,33 @@
     </div>
   </div>
 </div>
+
+<script>
+  // Period toggle logic
+  const tabs = ['sem', 'mes', '3m', '6m', '1y'];
+  const vistaSemana = document.getElementById('vista-semana');
+  
+  tabs.forEach(tab => {
+    const btn = document.getElementById('tab-' + tab);
+    if (btn) {
+      btn.addEventListener('click', function() {
+        // Update active tab
+        tabs.forEach(t => {
+          const b = document.getElementById('tab-' + t);
+          if (b) b.classList.remove('active');
+        });
+        btn.classList.add('active');
+        
+        // Show/hide semana view
+        if (tab === 'sem') {
+          vistaSemana.style.display = 'block';
+        } else {
+          vistaSemana.style.display = 'none';
+        }
+      });
+    }
+  });
+</script>
 
 </body>
 </html>
