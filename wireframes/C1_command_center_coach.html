@@ -137,7 +137,7 @@
     .count-grey   { background: #1a1a28; color: #64748b; }
     .count-purple { background: #1e1b4b; color: #a78bfa; }
 
-    /* Intervention modal */
+/* Intervention modal */
     .modal-overlay {
       position: absolute; inset: 0;
       background: rgba(7,7,15,.85);
@@ -152,7 +152,88 @@
       padding: 24px;
       width: 100%;
     }
-  </style>
+    /* Toggle botones */
+    .toggle-btn.active {
+      background: #3730a3 !important;
+      color: #a78bfa !important;
+    }
+    .toggle-btn:not(.active):hover {
+      background: #1a1a28;
+      color: #94a3b8;
+    }
+
+    /* Vista Semana */
+    .semana-view {
+      display: none;
+      padding: 12px 24px;
+    }
+    .semana-view.active {
+      display: block;
+    }
+    .semana-dia {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid #1e1e30;
+    }
+    .semana-dia-label {
+      font-size: 11px; font-weight: 700;
+      color: #64748b; width: 36px;
+      text-align: center;
+    }
+    .semana-dia-count {
+      font-size: 11px; font-weight: 700;
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .semana-atleta-chip {
+      font-size: 10px;
+      padding: 2px 6px; border-radius: 6px;
+      background: #1a1a28;
+      color: #94a3b8;
+    }
+
+    /* Vista 28 días */
+    .view-28d {
+      display: none;
+      padding: 12px 24px;
+    }
+    .view-28d.active {
+      display: block;
+    }
+    .grid-28d {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+    .grid-semana {
+      display: contents;
+    }
+    .grid-dia {
+      aspect-ratio: 1;
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      background: #111118;
+      border: 1px solid #1e1e30;
+      gap: 2px;
+    }
+    .grid-dia-label {
+      font-size: 8px; color: #475569;
+    }
+    .grid-dia-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+    }
+    .dot-alto { background: #EF4444; }
+    .dot-medio { background: #EAB308; }
+    .dot-bajo { background: #22C55E; }
+    .dot-vacio { background: #1e1e30; }
+   </style>
 </head>
 <body>
 
@@ -176,6 +257,12 @@
           <p style="font-size:20px;font-weight:800;color:#f1f5f9;letter-spacing:-.02em;">Coach Ramírez</p>
         </div>
         <div style="display:flex;align-items:center;gap:10px;">
+          <!-- Toggle view -->
+          <div style="display:flex;background:#111118;border:1px solid #1e1e30;border-radius:10px;padding:3px;">
+            <button id="btn-hoy" class="toggle-btn active" style="background:#3730a3;color:#a78bfa;font-size:10px;font-weight:700;padding:6px 10px;border-radius:8px;border:none;cursor:pointer;">Hoy</button>
+            <button id="btn-semana" class="toggle-btn" style="background:transparent;color:#64748b;font-size:10px;font-weight:700;padding:6px 10px;border-radius:8px;border:none;cursor:pointer;">Semana</button>
+            <button id="btn-28d" class="toggle-btn" style="background:transparent;color:#64748b;font-size:10px;font-weight:700;padding:6px 10px;border-radius:8px;border:none;cursor:pointer;">28d</button>
+          </div>
           <button style="background:#111118;border:1px solid #3730a3;border-radius:12px;padding:8px 12px;color:#818cf8;font-size:12px;font-weight:700;cursor:pointer;">+ Atleta</button>
           <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8B5CF6);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:white;">R</div>
         </div>
@@ -328,6 +415,141 @@
               ⚡ Aprobar e Inyectar en calendarios
             </button>
           </div>
+        </div>
+      </div>
+
+      <!-- Vista Semana (toggle) -->
+      <div id="vista-semana" class="semana-view">
+        <p style="font-size:11px;font-weight:700;color:#475569;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;">Esta Semana</p>
+        
+        <div class="semana-dia">
+          <span class="semana-dia-label">Lun<br/>21</span>
+          <div style="flex:1;display:flex;gap:6px;flex-wrap:wrap;">
+            <span class="semana-atleta-chip">J: Sn/FS</span>
+            <span class="semana-atleta-chip">M: CJ/BS</span>
+            <span class="semana-atleta-chip">C: Sn</span>
+          </div>
+          <span class="semana-dia-count" style="background:#22C55E;color:#fff;">3</span>
+        </div>
+        
+        <div class="semana-dia">
+          <span class="semana-dia-label">Mar<br/>22</span>
+          <div style="flex:1;display:flex;gap:6px;flex-wrap:wrap;">
+            <span class="semana-atleta-chip">L: CJ</span>
+            <span class="semana-atleta-chip">J: Rest</span>
+          </div>
+          <span class="semana-dia-count" style="background:#1e1e30;color:#64748b;">2</span>
+        </div>
+        
+        <div class="semana-dia">
+          <span class="semana-dia-label">Mié<br/>23</span>
+          <div style="flex:1;display:flex;gap:6px;flex-wrap:wrap;">
+            <span class="semana-atleta-chip">P: FS</span>
+            <span class="semana-atleta-chip">M: Rest</span>
+          </div>
+          <span class="semana-dia-count" style="background:#22C55E;color:#fff;">2</span>
+        </div>
+        
+        <div class="semana-dia">
+          <span class="semana-dia-label">Jue<br/>24</span>
+          <div style="flex:1;display:flex;gap:6px;flex-wrap:wrap;">
+            <span style="font-size:11px;color:#475569;">Sin programar</span>
+          </div>
+          <span class="semana-dia-count" style="background:#1e1e30;color:#475569;">0</span>
+        </div>
+        
+        <div class="semana-dia">
+          <span class="semana-dia-label">Vie<br/>25</span>
+          <div style="flex:1;display:flex;gap:6px;flex-wrap:wrap;">
+            <span class="semana-atleta-chip">C: Comp</span>
+          </div>
+          <span class="semana-dia-count" style="background:#EAB308;color:#000;">1</span>
+        </div>
+        
+        <div class="semana-dia">
+          <span class="semana-dia-label">Sáb<br/>26</span>
+          <div style="flex:1;display:flex;gap:6px;flex-wrap:wrap;">
+            <span class="semana-atleta-chip">J: CJ</span>
+            <span class="semana-atleta-chip">M: Sn</span>
+            <span class="semana-atleta-chip">L: CJ</span>
+          </div>
+          <span class="semana-dia-count" style="background:#22C55E;color:#fff;">3</span>
+        </div>
+        
+        <div class="semana-dia">
+          <span class="semana-dia-label">Dom<br/>27</span>
+          <div style="flex:1;display:flex;gap:6px;flex-wrap:wrap;">
+            <span style="font-size:11px;color:#475569;">Descanso</span>
+          </div>
+          <span class="semana-dia-count" style="background:#1e1e30;color:#475569;">0</span>
+        </div>
+      </div>
+
+      <!-- Vista 28 días (toggle) -->
+      <div id="vista-28d" class="view-28d">
+        <p style="font-size:11px;font-weight:700;color:#475569;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;">28 Días</p>
+        
+        <!-- Semana 1 -->
+        <div style="margin-bottom:12px;">
+          <p style="font-size:10px;color:#64748b;margin-bottom:4px;">Semana 1 (21-27)</p>
+          <div class="grid-28d">
+            <div class="grid-dia"><span class="grid-dia-label">L</span><div class="grid-dia-dot dot-alto"></div></div>
+            <div class="grid-dia"><span class="grid-dia-label">M</span><div class="grid-dia-dot dot-bajo"></div></div>
+            <div class="grid-dia"><span class="grid-dia-label">X</span><div class="grid-dia-dot dot-bajo"></div></div>
+            <div class="grid-dia"><span class="grid-dia-label">J</span><div class="grid-dia-dot dot-vacio"></div></div>
+            <div class="grid-dia"><span class="grid-dia-label">V</span><div class="grid-dia-dot dot-medio"></div></div>
+            <div class="grid-dia"><span class="grid-dia-label">S</span><div class="grid-dia-dot dot-alto"></div></div>
+            <div class="grid-dia"><span class="grid-dia-label">D</span><div class="grid-dia-dot dot-vacio"></div></div>
+          </div>
+        </div>
+        
+        <!-- Semana 2 -->
+        <div style="margin-bottom:12px;">
+          <p style="font-size:10px;color:#64748b;margin-bottom:4px;">Semana 2 (28-4)</p>
+          <div class="grid-28d">
+            <div class="grid-dia"><span class="grid-dia-label">L</span><div class="grid-dia-dot dot-bajo"></div></div>
+            <div class="grid-dia"><span class="grid-dia-label">M</span><div class="grid-dia-dot dot-bajo"></div></div>
+            <div class="grid-dia"><span class="grid-dia-label">X</span><div class="grid-dia-dot dot-medio"></div></div>
+            <div class="grid-dia"><span class="grid-dia-label">J</span><div class="grid-dia-dot dot-bajo"></div></div>
+            <div class="grid-dia"><span class="grid-dia-label">V</span><div class="grid-dia-dot dot-alto"></div></div>
+            <div class="grid-dia"><span class="grid-dia-label">S</span><div class="grid-dia-dot dot-alto"></div></div>
+            <div class="grid-dia"><span class="grid-dia-label">D</span><div class="grid-dia-dot dot-vacio"></div></div>
+          </div>
+        </div>
+        
+        <!-- Semana 3 -->
+        <div style="margin-bottom:12px;">
+          <p style="font-size:10px;color:#64748b;margin-bottom:4px;">Semana 3 (5-11)</p>
+          <div class="grid-28d">
+            <div class="grid-dia"><span class="grid-dia-label">L</span><div class="grid-dia-dot dot-medio"></div></div>
+            <div class="grid-dia"><span class="grid-dia-label">M</span><div class="grid-dia-dot dot-bajo"></div></div>
+            <div class="grid-dia"><span class="grid-dia-label">X</span><div class="grid-dia-dot dot-bajo"></div></div>
+            <div class="grid-dia"><span class="grid-dia-label">J</span><div class="grid-dia-dot dot-bajo"></div></div>
+            <div class="grid-dia"><span class="grid-dia-label">V</span><div class="grid-dia-dot dot-medio"></div></div>
+            <div class="grid-dia"><span class="grid-dia-label">S</span><div class="grid-dia-dot dot-alto"></div></div>
+            <div class="grid-dia"><span class="grid-dia-label">D</span><div class="grid-dia-dot dot-vacio"></div></div>
+          </div>
+        </div>
+        
+        <!-- Semana 4 -->
+        <div>
+          <p style="font-size:10px;color:#64748b;margin-bottom:4px;">Semana 4 (12-18)</p>
+          <div class="grid-28d">
+            <div class="grid-dia"><span class="grid-dia-label">L</span><div class="grid-dia-dot dot-bajo"></div></div>
+            <div class="grid-dia"><span class="grid-dia-label">M</span><div class="grid-dia-dot dot-bajo"></div></div>
+            <div class="grid-dia"><span class="grid-dia-label">X</span><div class="grid-dia-dot dot-bajo"></div></div>
+            <div class="grid-dia"><span class="grid-dia-label">J</span><div class="grid-dia-dot dot-vacio"></div></div>
+            <div class="grid-dia"><span class="grid-dia-label">V</span><div class="grid-dia-dot dot-vacio"></div></div>
+            <div class="grid-dia"><span class="grid-dia-label">S</span><div class="grid-dia-dot dot-vacio"></div></div>
+            <div class="grid-dia"><span class="grid-dia-label">D</span><div class="grid-dia-dot dot-vacio"></div></div>
+          </div>
+        </div>
+        
+        <!-- Leyenda -->
+        <div style="display:flex;gap:16px;margin-top:14px;padding-top:10px;border-top:1px solid #1e1e30;">
+          <div style="display:flex;align-items:center;gap:4px;"><div class="grid-dia-dot dot-alto" style="width:8px;height:8px;"></div><span style="font-size:9px;color:#64748b;">Alto</span></div>
+          <div style="display:flex;align-items:center;gap:4px;"><div class="grid-dia-dot dot-medio" style="width:8px;height:8px;"></div><span style="font-size:9px;color:#64748b;">Medio</span></div>
+          <div style="display:flex;align-items:center;gap:4px;"><div class="grid-dia-dot dot-bajo" style="width:8px;height:8px;"></div><span style="font-size:9px;color:#64748b;">Bajo</span></div>
         </div>
       </div>
 
@@ -527,6 +749,47 @@
 </div>
 
 <a href="index.html" style="position:fixed;top:20px;left:20px;background:#1e1e30;color:#94a3b8;font-size:13px;padding:8px 14px;border-radius:10px;text-decoration:none;border:1px solid #2a2a3a;z-index:99;">← Volver</a>
+
+<script>
+  // Toggle view logic
+  const btnHoy = document.getElementById('btn-hoy');
+  const btnSemana = document.getElementById('btn-semana');
+  const btn28d = document.getElementById('btn-28d');
+  const vistaHoy = document.querySelector('.scroll-area');
+  const vistaSemana = document.getElementById('vista-semana');
+  const vista28d = document.getElementById('vista-28d');
+  
+  // Hide views by default
+  vistaSemana.classList.remove('active');
+  vista28d.classList.remove('active');
+  
+  btnHoy.addEventListener('click', function() {
+    btnHoy.classList.add('active');
+    btnSemana.classList.remove('active');
+    btn28d.classList.remove('active');
+    vistaHoy.style.display = 'block';
+    vistaSemana.classList.remove('active');
+    vista28d.classList.remove('active');
+  });
+  
+  btnSemana.addEventListener('click', function() {
+    btnSemana.classList.add('active');
+    btnHoy.classList.remove('active');
+    btn28d.classList.remove('active');
+    vistaHoy.style.display = 'none';
+    vistaSemana.classList.add('active');
+    vista28d.classList.remove('active');
+  });
+  
+  btn28d.addEventListener('click', function() {
+    btn28d.classList.add('active');
+    btnHoy.classList.remove('active');
+    btnSemana.classList.remove('active');
+    vistaHoy.style.display = 'none';
+    vistaSemana.classList.remove('active');
+    vista28d.classList.add('active');
+  });
+</script>
 
 </body>
 </html>
