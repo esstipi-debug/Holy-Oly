@@ -1,0 +1,269 @@
+# rag_sources.yaml
+# Peak Qual — Fuentes del RAG
+# Para agregar una fuente nueva: agrega un bloque y corre etl_universal.py
+# Para desactivar una fuente: cambia enabled: false
+
+sources:
+
+  # ── CARTA MAGNA (siempre se recupera primero) ──────────────────────────────
+  - path: RAG_CARTA_MAGNA.md
+    brand: peak_qual
+    sport: all
+    topic: constitution
+    priority: 99
+    chunk_size: 300
+    overlap: 50
+    enabled: true
+
+  # ── HOLY OLY — Halterofilia ────────────────────────────────────────────────
+  - path: holy_oly/HOLY_OLY_BRAIN.md
+    brand: holy_oly
+    sport: weightlifting
+    topic: philosophy
+    chunk_size: 256
+    overlap: 40
+    enabled: true
+
+  - path: holy_oly/MOVEMENT_VOLUME_BRAIN.md
+    brand: holy_oly
+    sport: weightlifting
+    topic: volume
+    chunk_size: 256
+    overlap: 40
+    enabled: true
+
+  - path: holy_oly/source/USA_4PHASE_PERIODIZATION.md
+    brand: holy_oly
+    sport: weightlifting
+    topic: programming
+    chunk_size: 512
+    overlap: 80
+    enabled: true
+
+  - path: holy_oly/source/USA_COACHING_CUES.md
+    brand: holy_oly
+    sport: weightlifting
+    topic: technique
+    chunk_size: 384
+    overlap: 60
+    enabled: true
+
+  - path: holy_oly/source/USA_SCHOOL_INGESTION.md
+    brand: holy_oly
+    sport: weightlifting
+    topic: programming
+    chunk_size: 384
+    overlap: 60
+    enabled: true
+
+  # ── VOLTA — CrossFit ───────────────────────────────────────────────────────
+  - path: volta/VOLTA_BRAIN.md
+    brand: volta
+    sport: crossfit
+    topic: philosophy
+    chunk_size: 256
+    overlap: 40
+    enabled: true
+
+  - path: volta/VOLTA_CYCLE_BRAIN.md
+    brand: volta
+    sport: crossfit
+    topic: programming
+    chunk_size: 300
+    overlap: 50
+    enabled: true
+
+  - path: volta/WISE_SCORE_BRAIN.md
+    brand: volta
+    sport: crossfit
+    topic: wise_score
+    chunk_size: 256
+    overlap: 40
+    enabled: true
+
+  - path: volta/source/COMPTRAIN_MASTER.md
+    brand: volta
+    sport: crossfit
+    topic: programming
+    chunk_size: 384
+    overlap: 50
+    enabled: true
+
+  # ── AXON — Hyrox ──────────────────────────────────────────────────────────
+  - path: axon/AXON_BRAIN.md
+    brand: axon
+    sport: hyrox
+    topic: philosophy
+    chunk_size: 256
+    overlap: 40
+    enabled: true
+
+  - path: axon/source/HYROX_ARCHITECTURE.md
+    brand: axon
+    sport: hyrox
+    topic: programming
+    chunk_size: 384
+    overlap: 60
+    enabled: true
+
+  # ── ENGINES — Explicabilidad del sistema ──────────────────────────────────
+  - path: engines/01_stress_engine.md
+    brand: peak_qual
+    sport: all
+    topic: stress
+    chunk_size: 256
+    overlap: 40
+    enabled: true
+
+  - path: engines/02_session_adaptation_engine.md
+    brand: peak_qual
+    sport: all
+    topic: adaptation
+    chunk_size: 256
+    overlap: 40
+    enabled: true
+
+  - path: engines/03_macrocycle_engine.md
+    brand: peak_qual
+    sport: all
+    topic: programming
+    chunk_size: 256
+    overlap: 40
+    enabled: true
+
+  - path: engines/04_gamification_engine.md
+    brand: peak_qual
+    sport: all
+    topic: gamification
+    chunk_size: 256
+    overlap: 40
+    enabled: true
+
+  - path: engines/05_belt_engine.md
+    brand: peak_qual
+    sport: all
+    topic: progression
+    chunk_size: 256
+    overlap: 40
+    enabled: true
+
+  - path: engines/06_smart_streak_engine.md
+    brand: peak_qual
+    sport: all
+    topic: consistency
+    chunk_size: 256
+    overlap: 40
+    enabled: true
+
+  - path: engines/09_pulse_engine.md
+    brand: peak_qual
+    sport: all
+    topic: readiness
+    chunk_size: 256
+    overlap: 40
+    enabled: true
+
+  - path: engines/10_balance_engine.md
+    brand: peak_qual
+    sport: all
+    topic: balance
+    chunk_size: 256
+    overlap: 40
+    enabled: true
+
+  - path: engines/11_oly_index_engine.md
+    brand: holy_oly
+    sport: weightlifting
+    topic: oly_index
+    chunk_size: 256
+    overlap: 40
+    enabled: true
+
+  - path: engines/12_lifestyle_engine.md
+    brand: peak_qual
+    sport: all
+    topic: lifestyle
+    chunk_size: 256
+    overlap: 40
+    enabled: true
+
+  - path: engines/13_hormonal_engine.md
+    brand: peak_qual
+    sport: all
+    topic: hormonal
+    chunk_size: 256
+    overlap: 40
+    enabled: true
+
+  - path: engines/14_smart_coach_engine.md
+    brand: peak_qual
+    sport: all
+    topic: smart_coach
+    chunk_size: 256
+    overlap: 40
+    enabled: true
+
+  - path: engines/22_imr_engine.md
+    brand: holy_oly
+    sport: weightlifting
+    topic: imr
+    chunk_size: 256
+    overlap: 40
+    enabled: true
+
+  - path: engines/24_ai_brains_rag_engine.md
+    brand: peak_qual
+    sport: all
+    topic: ai_architecture
+    chunk_size: 256
+    overlap: 40
+    enabled: true
+
+  # ── CIENCIA TRANSVERSAL — Huberman ────────────────────────────────────────
+  - path: sleep/SLEEP_BRAIN.md
+    brand: peak_qual
+    sport: all
+    topic: sleep
+    chunk_size: 384
+    overlap: 60
+    enabled: true
+
+  - path: nutrition/NUTRITION_BRAIN.md
+    brand: peak_qual
+    sport: all
+    topic: nutrition
+    chunk_size: 384
+    overlap: 60
+    enabled: true
+
+  - path: alcohol/ALCOHOL_BRAIN.md
+    brand: peak_qual
+    sport: all
+    topic: alcohol
+    chunk_size: 384
+    overlap: 60
+    enabled: true
+
+  - path: caffeine/CAFFEINE_BRAIN.md
+    brand: peak_qual
+    sport: all
+    topic: caffeine
+    chunk_size: 384
+    overlap: 60
+    enabled: true
+
+  - path: hormonal/HORMONAL_BRAIN.md
+    brand: peak_qual
+    sport: all
+    topic: hormonal
+    chunk_size: 384
+    overlap: 60
+    enabled: true
+
+  - path: competition/COMPETITION_BRAIN.md
+    brand: peak_qual
+    sport: all
+    topic: competition
+    chunk_size: 384
+    overlap: 60
+    enabled: true
