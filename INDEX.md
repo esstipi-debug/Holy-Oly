@@ -9,7 +9,7 @@
 
 ## Quick Navigation
 
-### 📊 [ENGINES/](./engines/) — 22 Computational Systems
+### 📊 [ENGINES/](./engines/) — 26 Computational Systems
 **Architecture, logic, and integration of all training engines**
 
 - **README.md** — Master architecture with dependency graphs
@@ -35,6 +35,10 @@
 - **20_readiness_cache_service.md** — Readiness caching (O(90)→O(1))
 - **21_leaderboard_cache_service.md** — Leaderboard caching (O(n log n)→O(1))
 - **22_imr_engine.md** — Intensity Maintenance Ratio (IMR) y cruce con Macrociclos
+- **23_skin_engine.md** — Visual skin system
+- **24_ai_brains_rag_engine.md** — RAG + AI Brains integration
+- **25_caffeine_engine.md** — Bateman model + 4 módulos CNS masking detector
+- **26_sleep_engine.md** — Sleep Score + cascada agudo/crónico/tolerancia
 - **EXTRACTION_COMPLETE.md** — Meta documentation
 
 **Key Insights:**

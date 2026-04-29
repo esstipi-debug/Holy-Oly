@@ -14,6 +14,8 @@
 | C6b Edit Macrocycle | ✅ | 2026-04-23 |
 | DB Schema lifestyle | ✅ | 2026-04-23 |
 | Engines reorganizados (4 grupos) | ✅ | 2026-04-22 |
+| Caffeine Engine (25) | ✅ | 2026-04-29 |
+| Sleep Engine (26) | ✅ | 2026-04-29 |
 
 ---
 
@@ -23,8 +25,8 @@
 
 | # | Item | Descripción |
 |---|------|------------|
-| 1 | Cafeína Engine | Implementar 4 módulos (filtro, multiplicador, castigo, alerta) |
-| 2 | Sueño Engine | Cascada de alertas (agudo, crónico, tolerancia) |
+| 1 | ~~Cafeína Engine~~ | ✅ `engines/25_caffeine_engine.md` |
+| 2 | ~~Sueño Engine~~ | ✅ `engines/26_sleep_engine.md` |
 | 3 | Wearable sync | Integrar Apple Health / Google Fit |
 | 4 | HRV/RHR tracking | Métricas desde wearable |
 
@@ -99,9 +101,9 @@ if caffeine_streak > 5 and sleep_debt_7d > 4:
 
 ## 🔜 siguiente
 
-1. Implementar Cafeína Engine (4 módulos)
-2. Crear tabla `caffeine_settings` en schema
-3. Actualizar B10 UI con alertas
+1. Wearable sync Engine (27) — Apple Health / Google Fit / Garmin
+2. HRV + RHR Engine (28) — métricas desde wearable, integración con Stress Engine
+3. B10 UI — badges de alerta cafeína + sueño en vista atleta
 
 ---
 
