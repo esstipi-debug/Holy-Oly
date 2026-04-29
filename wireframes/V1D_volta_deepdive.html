@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volta V1-D · Athlete Deep Dive</title>
+<style>
+  :root { --bg:#07070F;--surface:#0F0F1C;--surface2:#161626;--line:#1E1E32;--text:#EAEAF5;--muted:#52527A;--cyan:#00E5FF;--cyan-dim:#00B8CC;--cyan-glow:rgba(0,229,255,0.18);--amber:#FFB300;--red:#FF3D00;--green:#00E676;--font:'Inter','Helvetica Neue',Arial,sans-serif; }
+  * { box-sizing:border-box;margin:0;padding:0;font-family:var(--font); }
+  body { background:#03030A;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:32px 16px; }
+  .phone { width:360px;min-height:780px;background:var(--bg);border-radius:40px;border:1.5px solid #1E1E38;overflow:hidden;position:relative;flex-shrink:0;box-shadow:0 0 0 1px #12121E,0 0 60px rgba(0,229,255,0.08),0 24px 80px rgba(0,0,0,0.7);display:flex;flex-direction:column; }
+  .status-bar { height:40px;background:var(--bg);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0; }
+  .scroll-area { flex:1;overflow-y:auto;padding-bottom:72px;scrollbar-width:none; }
+  .scroll-area::-webkit-scrollbar { display:none; }
+  .bottom-nav { position:absolute;bottom:0;left:0;right:0;height:68px;background:rgba(7,7,15,0.95);border-top:1px solid var(--line);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:space-around;padding-bottom:8px; }
+  .nav-item { display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer; }
+  .nav-icon { font-size:18px;line-height:1; }
+  .nav-txt { font-size:9px;font-weight:700;letter-spacing:.04em;color:var(--muted); }
+  .nav-txt.active { color:var(--cyan); }
+  .nav-dot { width:4px;height:4px;border-radius:50%;background:var(--cyan);box-shadow:0 0 6px var(--cyan); }
+  .alert-badge { display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap; }
+  .ab-warning  { background:rgba(255,179,0,0.12);color:var(--amber);border:1px solid rgba(255,179,0,0.25); }
+  .ab-critical { background:rgba(255,61,0,0.12);color:var(--red);border:1px solid rgba(255,61,0,0.25); }
+  .ab-info     { background:rgba(0,229,255,0.08);color:var(--cyan);border:1px solid rgba(0,229,255,0.2); }
+  .ab-positive { background:rgba(0,230,118,0.1);color:var(--green);border:1px solid rgba(0,230,118,0.2); }
+  .vform-badge { display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:8px;font-size:11px;font-weight:700; }
+  .vf-yellow { background:rgba(255,179,0,0.12);color:var(--amber);border:1px solid rgba(255,179,0,0.25); }
+  .sec { font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted); }
+  .card { background:var(--surface);border:1px solid var(--line);border-radius:18px; }
+  .chip-rx { font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;background:rgba(0,229,255,0.1);color:var(--cyan);border:1px solid rgba(0,229,255,0.2); }
+  .wise-ring { width:60px;height:60px;border-radius:50%;border:3px solid var(--cyan);background:radial-gradient(circle at 50% 50%,rgba(0,229,255,0.08),transparent);display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px rgba(0,229,255,0.25); }
+  .wbar { height:4px;border-radius:2px;background:var(--line);overflow:hidden; }
+  .wbar-fill { height:100%;border-radius:2px; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status-bar">
+    <span style="font-size:12px;font-weight:700;color:#94a3b8;">9:41</span>
+    <span style="font-size:11px;color:#94a3b8;font-weight:600;">92%</span>
+  </div>
+
+  <div style="padding:10px 20px 0;display:flex;align-items:center;gap:10px;">
+    <div style="font-size:18px;cursor:pointer;color:var(--muted);">←</div>
+    <div style="font-size:15px;font-weight:700;color:var(--muted);">Atleta</div>
+  </div>
+
+  <div class="scroll-area" style="padding:12px 16px 80px;">
+    <!-- Atleta header -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+      <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--red),#FF6B35);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:white;flex-shrink:0;">M</div>
+      <div style="flex:1;">
+        <div style="font-size:18px;font-weight:900;color:var(--text);">Marco Torres</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:3px;">
+          <div class="chip-rx">Rx</div>
+          <div style="font-size:11px;color:var(--muted);">28 años · 80kg</div>
+        </div>
+      </div>
+      <div style="text-align:center;">
+        <div class="wise-ring">
+          <span style="font-size:18px;font-weight:900;color:var(--cyan);line-height:1;">72</span>
+        </div>
+        <div style="font-size:9px;color:var(--muted);margin-top:3px;">Wise</div>
+      </div>
+    </div>
+
+    <!-- Wellness status -->
+    <div class="sec" style="margin-bottom:8px;">Wellness status</div>
+    <div class="card" style="padding:14px;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;margin-bottom:12px;">
+        <div style="width:70px;font-size:11px;font-weight:700;color:var(--text);">💓 HRV</div>
+        <div style="flex:1;margin:0 10px;position:relative;">
+          <div class="wbar"><div class="wbar-fill" style="width:28%;background:var(--red);"></div></div>
+          <div style="position:absolute;left:28%;top:-14px;transform:translateX(-50%);font-size:10px;color:var(--red);font-weight:700;">52</div>
+        </div>
+        <div class="alert-badge ab-critical" style="font-size:9px;padding:2px 7px;">-1.8σ</div>
+      </div>
+      <div style="display:flex;align-items:center;margin-bottom:12px;">
+        <div style="width:70px;font-size:11px;font-weight:700;color:var(--text);">😴 Sueño</div>
+        <div style="flex:1;margin:0 10px;position:relative;">
+          <div class="wbar"><div class="wbar-fill" style="width:64%;background:var(--amber);"></div></div>
+          <div style="position:absolute;left:64%;top:-14px;transform:translateX(-50%);font-size:10px;color:var(--amber);font-weight:700;">64</div>
+        </div>
+        <div class="alert-badge ab-warning" style="font-size:9px;padding:2px 7px;">3d bajo</div>
+      </div>
+      <div style="display:flex;align-items:center;margin-bottom:12px;">
+        <div style="width:70px;font-size:11px;font-weight:700;color:var(--text);">☕ Café</div>
+        <div style="flex:1;margin:0 10px;position:relative;">
+          <div class="wbar"><div class="wbar-fill" style="width:62%;background:var(--cyan);"></div></div>
+          <div style="position:absolute;left:62%;top:-14px;transform:translateX(-50%);font-size:10px;color:var(--cyan);font-weight:700;">88mg</div>
+        </div>
+        <div class="alert-badge ab-info" style="font-size:9px;padding:2px 7px;">OK</div>
+      </div>
+      <div style="display:flex;align-items:center;margin-bottom:12px;">
+        <div style="width:70px;font-size:11px;font-weight:700;color:var(--text);">🍺 Alcohol</div>
+        <div style="flex:1;margin:0 10px;">
+          <div class="wbar"><div class="wbar-fill" style="width:0%;background:var(--green);"></div></div>
+        </div>
+        <div class="alert-badge ab-positive" style="font-size:9px;padding:2px 7px;">Sin reg.</div>
+      </div>
+      <div style="display:flex;align-items:center;">
+        <div style="width:70px;font-size:11px;font-weight:700;color:var(--text);">⚡ V-Form</div>
+        <div style="flex:1;margin:0 10px;">
+          <div class="wbar"><div class="wbar-fill" style="width:53%;background:var(--amber);"></div></div>
+        </div>
+        <div class="vform-badge vf-yellow" style="font-size:9px;padding:2px 7px;">🟡 +3</div>
+      </div>
+    </div>
+
+    <!-- Alerta activa -->
+    <div style="background:rgba(255,61,0,0.06);border:1px solid rgba(255,61,0,0.2);border-radius:14px;padding:13px;margin-bottom:14px;">
+      <div style="font-size:12px;font-weight:800;color:var(--red);margin-bottom:5px;">🔴 Alerta activa — 3 días consecutivos</div>
+      <div style="font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:10px;">HRV bajo baseline 3 días consecutivos. Revisar carga del macrociclo. Posible acumulación de fatiga neural.</div>
+      <div style="display:flex;gap:7px;">
+        <button style="flex:1;padding:9px;background:rgba(0,229,255,0.1);color:var(--cyan);border:1px solid rgba(0,229,255,0.2);border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;">Ajustar macro →</button>
+        <button style="flex:1;padding:9px;background:var(--surface2);color:var(--muted);border:1px solid var(--line);border-radius:10px;font-size:11px;font-weight:600;cursor:pointer;">Nota privada</button>
+      </div>
+    </div>
+
+    <!-- Wise Score trend -->
+    <div class="sec" style="margin-bottom:8px;">Wise Score — últimas 4 semanas</div>
+    <div class="card" style="padding:14px;">
+      <div style="display:flex;align-items:flex-end;gap:4px;height:48px;margin-bottom:8px;">
+        <div style="flex:1;background:rgba(0,229,255,0.3);border-radius:3px 3px 0 0;height:52%;"></div>
+        <div style="flex:1;background:rgba(0,229,255,0.4);border-radius:3px 3px 0 0;height:62%;"></div>
+        <div style="flex:1;background:rgba(0,229,255,0.5);border-radius:3px 3px 0 0;height:71%;"></div>
+        <div style="flex:1;background:rgba(0,229,255,0.3);border-radius:3px 3px 0 0;height:65%;"></div>
+        <div style="flex:1;background:rgba(0,229,255,0.4);border-radius:3px 3px 0 0;height:68%;"></div>
+        <div style="flex:1;background:rgba(0,229,255,0.5);border-radius:3px 3px 0 0;height:74%;"></div>
+        <div style="flex:1;background:rgba(0,229,255,0.4);border-radius:3px 3px 0 0;height:70%;"></div>
+        <div style="flex:1;background:var(--cyan);border-radius:3px 3px 0 0;height:74%;box-shadow:0 0 8px var(--cyan-glow);"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;">
+        <div style="font-size:10px;color:var(--muted);">Sem 1</div>
+        <div style="font-size:10px;color:var(--muted);">Sem 2</div>
+        <div style="font-size:10px;color:var(--muted);">Sem 3</div>
+        <div style="font-size:10px;color:var(--cyan);font-weight:700;">Hoy: 72</div>
+      </div>
+      <div style="margin-top:8px;display:flex;gap:12px;">
+        <div style="font-size:11px;color:var(--green);">↑ +4 vs hace 4 sem</div>
+        <div style="font-size:11px;color:var(--muted);">Tendencia: mejorando</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-item"><span class="nav-icon">🏠</span><span class="nav-txt">Inicio</span></div>
+    <div class="nav-item"><span class="nav-icon">👥</span><span class="nav-txt active">Atletas</span><div class="nav-dot"></div></div>
+    <div class="nav-item"><span class="nav-icon">📋</span><span class="nav-txt">Programas</span></div>
+    <div class="nav-item"><span class="nav-icon">🛠</span><span class="nav-txt">Tools</span></div>
+    <div class="nav-item"><span class="nav-icon">👤</span><span class="nav-txt">Perfil</span></div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volta V1-C · Coach Bandeja Alertas</title>
+<style>
+  :root { --bg:#07070F;--surface:#0F0F1C;--surface2:#161626;--line:#1E1E32;--text:#EAEAF5;--muted:#52527A;--cyan:#00E5FF;--amber:#FFB300;--red:#FF3D00;--green:#00E676;--font:'Inter','Helvetica Neue',Arial,sans-serif; }
+  * { box-sizing:border-box;margin:0;padding:0;font-family:var(--font); }
+  body { background:#03030A;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:32px 16px; }
+  .phone { width:360px;min-height:780px;background:var(--bg);border-radius:40px;border:1.5px solid #1E1E38;overflow:hidden;position:relative;flex-shrink:0;box-shadow:0 0 0 1px #12121E,0 0 60px rgba(0,229,255,0.08),0 24px 80px rgba(0,0,0,0.7);display:flex;flex-direction:column; }
+  .status-bar { height:40px;background:var(--bg);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0; }
+  .scroll-area { flex:1;overflow-y:auto;padding-bottom:72px;scrollbar-width:none; }
+  .scroll-area::-webkit-scrollbar { display:none; }
+  .bottom-nav { position:absolute;bottom:0;left:0;right:0;height:68px;background:rgba(7,7,15,0.95);border-top:1px solid var(--line);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:space-around;padding-bottom:8px; }
+  .nav-item { display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer; }
+  .nav-icon { font-size:18px;line-height:1; }
+  .nav-txt { font-size:9px;font-weight:700;letter-spacing:.04em;color:var(--muted); }
+  .nav-txt.active { color:var(--cyan); }
+  .nav-dot { width:4px;height:4px;border-radius:50%;background:var(--cyan);box-shadow:0 0 6px var(--cyan); }
+  .alert-badge { display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap; }
+  .ab-warning  { background:rgba(255,179,0,0.12);color:var(--amber);border:1px solid rgba(255,179,0,0.25); }
+  .ab-critical { background:rgba(255,61,0,0.12);color:var(--red);border:1px solid rgba(255,61,0,0.25); }
+  .ab-positive { background:rgba(0,230,118,0.1);color:var(--green);border:1px solid rgba(0,230,118,0.2); }
+  .sec { font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted); }
+  .card { background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden; }
+  .ath-row { display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line);cursor:pointer; }
+  .ath-row:last-child { border-bottom:none; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status-bar">
+    <span style="font-size:12px;font-weight:700;color:#94a3b8;">9:41</span>
+    <span style="font-size:11px;color:#94a3b8;font-weight:600;">92%</span>
+  </div>
+
+  <div style="padding:10px 20px 12px;display:flex;align-items:center;justify-content:space-between;">
+    <div>
+      <div style="font-size:12px;color:var(--muted);">Coach</div>
+      <div style="font-size:19px;font-weight:900;color:var(--text);">CrossFit Norte</div>
+    </div>
+    <div style="position:relative;">
+      <div style="width:36px;height:36px;border-radius:50%;background:var(--surface2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;">🔔</div>
+      <div style="position:absolute;top:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:white;border:1.5px solid var(--bg);">3</div>
+    </div>
+  </div>
+
+  <div class="scroll-area" style="padding:0 16px 80px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <div class="sec">Alertas activas</div>
+      <div style="font-size:10px;color:var(--cyan);font-weight:700;cursor:pointer;">ver todas →</div>
+    </div>
+
+    <!-- Marco CRITICAL -->
+    <div style="background:rgba(255,61,0,0.06);border:1px solid rgba(255,61,0,0.2);border-radius:14px;padding:13px;margin-bottom:8px;cursor:pointer;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--red),#FF6B35);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:white;">M</div>
+          <div>
+            <div style="font-size:13px;font-weight:800;color:var(--text);">Marco Torres</div>
+            <div style="font-size:10px;color:var(--muted);">Wise 72 · Rx</div>
+          </div>
+        </div>
+        <div class="alert-badge ab-critical" style="font-size:10px;padding:3px 8px;">🔴 CRÍTICO</div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);">HRV bajo baseline 3 días + sueño crónico. WOD modificado automáticamente.</div>
+      <div style="display:flex;gap:6px;margin-top:9px;">
+        <button style="flex:1;padding:7px;background:rgba(255,61,0,0.12);color:var(--red);border:1px solid rgba(255,61,0,0.25);border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;">Ajustar macrociclo</button>
+        <button style="padding:7px 10px;background:var(--surface2);color:var(--muted);border:1px solid var(--line);border-radius:10px;font-size:11px;font-weight:600;cursor:pointer;">Nota privada</button>
+      </div>
+    </div>
+
+    <!-- Carla WARNING -->
+    <div style="background:rgba(255,179,0,0.05);border:1px solid rgba(255,179,0,0.18);border-radius:14px;padding:13px;margin-bottom:8px;cursor:pointer;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--amber),#FF8C00);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#07070F;">C</div>
+          <div>
+            <div style="font-size:13px;font-weight:800;color:var(--text);">Carla Vega</div>
+            <div style="font-size:10px;color:var(--muted);">Wise 65 · Scaled</div>
+          </div>
+        </div>
+        <div class="alert-badge ab-warning" style="font-size:10px;padding:3px 8px;">⚠ WARNING</div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);">Alcohol daño moderado anoche. Readiness -10 hoy. Monitorear RPE.</div>
+      <div style="display:flex;gap:6px;margin-top:9px;">
+        <button style="flex:1;padding:7px;background:rgba(255,179,0,0.1);color:var(--amber);border:1px solid rgba(255,179,0,0.2);border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;">Ver perfil</button>
+      </div>
+    </div>
+
+    <!-- Diego WARNING -->
+    <div style="background:rgba(255,179,0,0.05);border:1px solid rgba(255,179,0,0.18);border-radius:14px;padding:13px;margin-bottom:16px;cursor:pointer;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),#0070FF);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#07070F;">D</div>
+          <div>
+            <div style="font-size:13px;font-weight:800;color:var(--text);">Diego Salas</div>
+            <div style="font-size:10px;color:var(--muted);">Wise 71 · Rx</div>
+          </div>
+        </div>
+        <div class="alert-badge ab-warning" style="font-size:10px;padding:3px 8px;">⚠ WARNING</div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);">V-Form en rojo — Forma negativa (-4). Recomendar deload o técnica.</div>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <div class="sec">Equipo completo</div>
+      <div style="font-size:10px;color:var(--muted);">12 atletas</div>
+    </div>
+    <div class="card" style="margin-bottom:14px;">
+      <div class="ath-row">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--red),#FF6B35);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:white;">M</div>
+          <div><div style="font-size:12px;font-weight:700;color:var(--text);">Marco Torres</div><div style="font-size:10px;color:var(--muted);">Wise 72</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div class="alert-badge ab-critical" style="font-size:9px;padding:2px 6px;">🔴</div>
+          <div style="font-size:12px;color:var(--muted);">›</div>
+        </div>
+      </div>
+      <div class="ath-row">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--amber),#FF8C00);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#07070F;">C</div>
+          <div><div style="font-size:12px;font-weight:700;color:var(--text);">Carla Vega</div><div style="font-size:10px;color:var(--muted);">Wise 65</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div class="alert-badge ab-warning" style="font-size:9px;padding:2px 6px;">⚠</div>
+          <div style="font-size:12px;color:var(--muted);">›</div>
+        </div>
+      </div>
+      <div class="ath-row">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),#0070FF);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#07070F;">D</div>
+          <div><div style="font-size:12px;font-weight:700;color:var(--text);">Diego Salas</div><div style="font-size:10px;color:var(--muted);">Wise 71</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div class="alert-badge ab-warning" style="font-size:9px;padding:2px 6px;">⚠</div>
+          <div style="font-size:12px;color:var(--muted);">›</div>
+        </div>
+      </div>
+      <div class="ath-row">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--green),#00B050);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#07070F;">P</div>
+          <div><div style="font-size:12px;font-weight:700;color:var(--text);">Paula Mora</div><div style="font-size:10px;color:var(--muted);">Wise 83</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div class="alert-badge ab-positive" style="font-size:9px;padding:2px 6px;">✓</div>
+          <div style="font-size:12px;color:var(--muted);">›</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-item"><span class="nav-icon">🏠</span><span class="nav-txt active">Inicio</span><div class="nav-dot"></div></div>
+    <div class="nav-item"><span class="nav-icon">👥</span><span class="nav-txt">Atletas</span></div>
+    <div class="nav-item"><span class="nav-icon">📋</span><span class="nav-txt">Programas</span></div>
+    <div class="nav-item"><span class="nav-icon">🛠</span><span class="nav-txt">Tools</span></div>
+    <div class="nav-item"><span class="nav-icon">👤</span><span class="nav-txt">Perfil</span></div>
+  </div>
+</div>
+</body>
+</html>
