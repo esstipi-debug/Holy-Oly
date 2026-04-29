@@ -27,8 +27,8 @@
 |---|------|------------|
 | 1 | ~~Cafeína Engine~~ | ✅ `engines/25_caffeine_engine.md` |
 | 2 | ~~Sueño Engine~~ | ✅ `engines/26_sleep_engine.md` |
-| 3 | Wearable sync | Integrar Apple Health / Google Fit |
-| 4 | HRV/RHR tracking | Métricas desde wearable |
+| 3 | ~~Wearable sync~~ | ✅ `engines/27_wearable_sync_engine.md` |
+| 4 | ~~HRV/RHR tracking~~ | ✅ `engines/28_hrv_rhr_engine.md` |
 
 ### Media Prioridad
 
@@ -101,9 +101,10 @@ if caffeine_streak > 5 and sleep_debt_7d > 4:
 
 ## 🔜 siguiente
 
-1. Wearable sync Engine (27) — Apple Health / Google Fit / Garmin
-2. HRV + RHR Engine (28) — métricas desde wearable, integración con Stress Engine
-3. B10 UI — badges de alerta cafeína + sueño en vista atleta
+1. B10 UI — badges de alerta cafeína + sueño en vista atleta
+2. B10c standalone — vista vida independiente
+3. Alcohol Engine (29) — ver ALCOHOL_BRAIN.md
+4. Wise Score sub-índices — ver VOLTA_PENDIENTES.md
 
 ---
 

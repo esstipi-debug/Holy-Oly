@@ -1,6 +1,6 @@
 # HolyOly Engine Architecture
 
-**26 Computational Engines** organizados en 4 grupos para Atleta + Vista Coach
+**28 Computational Engines** organizados en 4 grupos para Atleta + Vista Coach
 
 ---
 
@@ -13,7 +13,7 @@
 | **Readiness** | 01 Stress + 10 Balance + 11 OLY Index | Estado físico |
 | **Training Flow** | 02 Session Adapt + 03 Macrocycle + 08 Warmup + 09 Pulse | Flujo entrenamiento |
 | **Gamification** | 04 XP + 05 Belt + 06 Streak + 07 BW + 17 Golden Ratio + 16 Social | Progresión |
-| **Wellness** | 12 Lifestyle + 13 Hormonal + 14 Smart Coach + 15 Píldoras + 25 Caffeine + 26 Sleep | Vida + Coach IA |
+| **Wellness** | 12 Lifestyle + 13 Hormonal + 14 Smart Coach + 15 Píldoras + 25 Caffeine + 26 Sleep + 27 Wearable Sync + 28 HRV/RHR | Vida + Coach IA |
 
 ### Vista Coach (4 Grupos)
 

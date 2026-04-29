@@ -9,7 +9,7 @@
 
 ## Quick Navigation
 
-### 📊 [ENGINES/](./engines/) — 26 Computational Systems
+### 📊 [ENGINES/](./engines/) — 28 Computational Systems
 **Architecture, logic, and integration of all training engines**
 
 - **README.md** — Master architecture with dependency graphs
@@ -39,6 +39,8 @@
 - **24_ai_brains_rag_engine.md** — RAG + AI Brains integration
 - **25_caffeine_engine.md** — Bateman model + 4 módulos CNS masking detector
 - **26_sleep_engine.md** — Sleep Score + cascada agudo/crónico/tolerancia
+- **27_wearable_sync_engine.md** — Pipeline Apple Health / Garmin / Oura / Whoop + resolución de conflictos
+- **28_hrv_rhr_engine.md** — Baseline personal + Zscore HRV/RHR + tendencia 7d
 - **EXTRACTION_COMPLETE.md** — Meta documentation
 
 **Key Insights:**
