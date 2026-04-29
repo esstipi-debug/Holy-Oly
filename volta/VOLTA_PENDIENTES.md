@@ -2,7 +2,25 @@
 
 ---
 
-## PENDIENTE 1 — Wise Score: definir sub-índices
+## ✅ RESUELTO — Wise Score sub-índices
+
+Ver `volta/wise_score_config.py` + `volta/WISE_SCORE_BRAIN.md` — completo.
+
+---
+
+## ✅ RESUELTO — V-Stress Engine CrossFit
+
+Ver `volta/v_stress_engine_config.py` — completo.
+
+---
+
+## PENDIENTE ACTIVO — Badges y alertas UI Volta
+
+Ver `volta/VOLTA_ALERTS_SPEC.md` — en desarrollo.
+
+---
+
+## ARCHIVO — Wise Score: definir sub-índices (ORIGINAL)
 
 El Wise Score (stat estrella 0-99) está estructurado pero le faltan los parámetros de cada sub-índice.
 
