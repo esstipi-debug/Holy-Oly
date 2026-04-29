@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volta V3 · WOD Log Activo</title>
+<style>
+  :root { --bg:#07070F;--surface:#0F0F1C;--surface2:#161626;--line:#1E1E32;--text:#EAEAF5;--muted:#52527A;--cyan:#00E5FF;--amber:#FFB300;--red:#FF3D00;--green:#00E676;--font:'Inter','Helvetica Neue',Arial,sans-serif; }
+  * { box-sizing:border-box;margin:0;padding:0;font-family:var(--font); }
+  body { background:#03030A;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:32px 16px; }
+  .phone { width:360px;min-height:780px;background:var(--bg);border-radius:40px;border:1.5px solid #1E1E38;overflow:hidden;position:relative;flex-shrink:0;box-shadow:0 0 0 1px #12121E,0 0 60px rgba(0,229,255,0.08),0 24px 80px rgba(0,0,0,0.7);display:flex;flex-direction:column; }
+  .scroll-area { flex:1;overflow-y:auto;padding-bottom:80px;scrollbar-width:none; }
+  .scroll-area::-webkit-scrollbar { display:none; }
+  .card { background:var(--surface);border:1px solid var(--line);border-radius:16px; }
+  .sec { font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted); }
+  .badge { display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700; }
+  .badge-crit { background:rgba(255,61,0,0.15);color:var(--red);border:1px solid rgba(255,61,0,0.3); }
+  .badge-green { background:rgba(0,230,118,0.1);color:var(--green);border:1px solid rgba(0,230,118,0.25); }
+  .round-col { display:flex;flex-direction:column;align-items:center;gap:4px; }
+  .round-num { width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800; }
+  .rn-done { background:rgba(0,229,255,0.12);color:var(--cyan);border:1px solid rgba(0,229,255,0.25); }
+  .rn-active { background:var(--cyan);color:#07070F; }
+  .rn-pending { background:var(--surface2);color:var(--muted);border:1px solid var(--line); }
+  .tap-btn { width:100%;padding:16px;border:none;border-radius:14px;font-size:16px;font-weight:900;cursor:pointer;letter-spacing:.04em; }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- Timer bar fija -->
+  <div style="background:var(--surface2);border-bottom:1px solid var(--line);padding:10px 20px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-size:9px;color:var(--muted);font-weight:700;letter-spacing:.08em;">AMRAP · 20:00</div>
+        <div style="font-size:32px;font-weight:900;color:var(--cyan);line-height:1;letter-spacing:-.02em;text-shadow:0 0 20px rgba(0,229,255,0.3);">07:26</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:9px;color:var(--muted);font-weight:700;">RONDA</div>
+        <div style="font-size:32px;font-weight:900;color:var(--text);line-height:1;">5</div>
+      </div>
+      <div class="badge badge-crit" style="align-self:flex-start;margin-top:4px;">⚠ HRV</div>
+    </div>
+    <!-- Progress bar -->
+    <div style="margin-top:8px;height:3px;background:var(--line);border-radius:2px;overflow:hidden;">
+      <div style="height:100%;width:37%;background:var(--cyan);border-radius:2px;"></div>
+    </div>
+  </div>
+
+  <div class="scroll-area" style="padding:14px 16px 80px;">
+
+    <!-- Rondas progress -->
+    <div class="sec" style="margin-bottom:10px;">Rondas completadas</div>
+    <div style="display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px;">
+      <div class="round-col">
+        <div class="round-num rn-done">1</div>
+        <div style="font-size:8px;color:var(--muted);">1:45</div>
+      </div>
+      <div class="round-col">
+        <div class="round-num rn-done">2</div>
+        <div style="font-size:8px;color:var(--muted);">1:52</div>
+      </div>
+      <div class="round-col">
+        <div class="round-num rn-done">3</div>
+        <div style="font-size:8px;color:var(--muted);">1:58</div>
+      </div>
+      <div class="round-col">
+        <div class="round-num rn-done">4</div>
+        <div style="font-size:8px;color:var(--muted);">2:05</div>
+      </div>
+      <div class="round-col">
+        <div class="round-num rn-active">5</div>
+        <div style="font-size:8px;color:var(--cyan);font-weight:700;">ahora</div>
+      </div>
+      <div class="round-col">
+        <div class="round-num rn-pending">6</div>
+        <div style="font-size:8px;color:var(--line);">—</div>
+      </div>
+      <div class="round-col">
+        <div class="round-num rn-pending">7</div>
+        <div style="font-size:8px;color:var(--line);">—</div>
+      </div>
+      <div class="round-col">
+        <div class="round-num rn-pending">8</div>
+        <div style="font-size:8px;color:var(--line);">—</div>
+      </div>
+    </div>
+
+    <!-- Movimientos ronda actual -->
+    <div class="sec" style="margin-bottom:10px;">Ronda 5 — marcar reps</div>
+
+    <!-- C&J -->
+    <div class="card" style="padding:14px;margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+        <div>
+          <div style="font-size:14px;font-weight:800;color:var(--text);">Clean &amp; Jerk</div>
+          <div style="font-size:10px;color:var(--amber);margin-top:2px;">48kg (80% · HRV ajuste) · 5 reps</div>
+        </div>
+        <div class="badge badge-green">✓ Hecho</div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <div style="flex:1;height:6px;border-radius:3px;background:var(--cyan);"></div>
+        <div style="flex:1;height:6px;border-radius:3px;background:var(--cyan);"></div>
+        <div style="flex:1;height:6px;border-radius:3px;background:var(--cyan);"></div>
+        <div style="flex:1;height:6px;border-radius:3px;background:var(--cyan);"></div>
+        <div style="flex:1;height:6px;border-radius:3px;background:var(--cyan);"></div>
+      </div>
+    </div>
+
+    <!-- Pull-ups — en progreso -->
+    <div class="card" style="padding:14px;margin-bottom:10px;border-color:rgba(0,229,255,0.3);">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+        <div>
+          <div style="font-size:14px;font-weight:800;color:var(--cyan);">Pull-ups</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px;">10 reps · En progreso</div>
+        </div>
+        <div style="font-size:22px;font-weight:900;color:var(--cyan);">7<span style="font-size:14px;color:var(--muted);">/10</span></div>
+      </div>
+      <!-- Tap dots -->
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
+        <div style="width:28px;height:28px;border-radius:8px;background:var(--cyan);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#07070F;">1</div>
+        <div style="width:28px;height:28px;border-radius:8px;background:var(--cyan);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#07070F;">2</div>
+        <div style="width:28px;height:28px;border-radius:8px;background:var(--cyan);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#07070F;">3</div>
+        <div style="width:28px;height:28px;border-radius:8px;background:var(--cyan);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#07070F;">4</div>
+        <div style="width:28px;height:28px;border-radius:8px;background:var(--cyan);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#07070F;">5</div>
+        <div style="width:28px;height:28px;border-radius:8px;background:var(--cyan);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#07070F;">6</div>
+        <div style="width:28px;height:28px;border-radius:8px;background:var(--cyan);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#07070F;">7</div>
+        <div style="width:28px;height:28px;border-radius:8px;background:var(--surface2);border:1px dashed rgba(0,229,255,0.3);display:flex;align-items:center;justify-content:center;font-size:11px;color:rgba(0,229,255,0.3);">8</div>
+        <div style="width:28px;height:28px;border-radius:8px;background:var(--surface2);border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--line);">9</div>
+        <div style="width:28px;height:28px;border-radius:8px;background:var(--surface2);border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--line);">10</div>
+      </div>
+      <button class="tap-btn" style="background:var(--cyan);color:#07070F;">Tap — rep completada</button>
+    </div>
+
+    <!-- Box jumps — pendiente -->
+    <div class="card" style="padding:14px;opacity:.5;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-size:14px;font-weight:800;color:var(--muted);">Box Jumps</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px;">15 reps · 60cm · Pendiente</div>
+        </div>
+        <div style="font-size:22px;font-weight:900;color:var(--line);">0<span style="font-size:14px;">/15</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom -->
+  <div style="position:absolute;bottom:0;left:0;right:0;padding:12px 16px;background:rgba(7,7,15,0.97);border-top:1px solid var(--line);display:flex;gap:8px;">
+    <button style="flex:1;padding:13px;background:var(--surface2);color:var(--muted);border:1px solid var(--line);border-radius:13px;font-size:13px;font-weight:700;cursor:pointer;">No rep</button>
+    <button style="flex:2;padding:13px;background:var(--cyan);color:#07070F;border:none;border-radius:13px;font-size:14px;font-weight:900;cursor:pointer;">✓ Ronda completa</button>
+    <button style="padding:13px 14px;background:rgba(255,61,0,0.1);color:var(--red);border:1px solid rgba(255,61,0,0.2);border-radius:13px;font-size:12px;font-weight:700;cursor:pointer;">Fin</button>
+  </div>
+
+</div>
+</body>
+</html>
