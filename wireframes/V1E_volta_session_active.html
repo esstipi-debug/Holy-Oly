@@ -62,12 +62,19 @@
 
   <div class="scroll-area" style="padding:14px 16px 80px;">
 
-    <!-- Alerta activa en sesión -->
-    <div style="background:rgba(255,61,0,0.05);border:1px solid rgba(255,61,0,0.18);border-radius:12px;padding:10px 13px;margin-bottom:14px;display:flex;align-items:center;gap:10px;">
-      <span style="font-size:16px;">🔴</span>
-      <div style="flex:1;">
-        <div style="font-size:11px;font-weight:700;color:var(--red);">Intensidad cappada al 80%</div>
-        <div style="font-size:10px;color:var(--muted);margin-top:2px;">HRV bajo · Peso C&amp;J ajustado automáticamente</div>
+    <!-- Alerta activa + Wise Score acumulando -->
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <div style="flex:1;background:rgba(255,61,0,0.05);border:1px solid rgba(255,61,0,0.18);border-radius:12px;padding:10px 13px;display:flex;align-items:center;gap:8px;">
+        <span style="font-size:14px;">🔴</span>
+        <div>
+          <div style="font-size:11px;font-weight:700;color:var(--red);">Intensidad cappada 80%</div>
+          <div style="font-size:9px;color:var(--muted);margin-top:1px;">HRV bajo · C&amp;J ajustado</div>
+        </div>
+      </div>
+      <div style="background:rgba(0,230,118,0.05);border:1px solid rgba(0,230,118,0.2);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:72px;">
+        <div style="font-size:9px;font-weight:700;color:rgba(0,230,118,0.6);letter-spacing:.04em;margin-bottom:2px;">WISE</div>
+        <div style="font-size:18px;font-weight:900;color:#00E676;line-height:1;">+30</div>
+        <div style="font-size:8px;color:var(--muted);margin-top:2px;">al terminar</div>
       </div>
     </div>
 
