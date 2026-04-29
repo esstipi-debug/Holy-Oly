@@ -101,10 +101,9 @@ if caffeine_streak > 5 and sleep_debt_7d > 4:
 
 ## 🔜 siguiente
 
-1. B10 UI — badges de alerta cafeína + sueño en vista atleta
+1. B10 UI — badges de alerta cafeína + sueño + alcohol en vista atleta
 2. B10c standalone — vista vida independiente
-3. Alcohol Engine (29) — ver ALCOHOL_BRAIN.md
-4. Wise Score sub-índices — ver VOLTA_PENDIENTES.md
+3. Wise Score sub-índices — ver VOLTA_PENDIENTES.md
 
 ---
 
