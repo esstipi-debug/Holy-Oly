@@ -364,10 +364,10 @@ git commit -m "Memory: Fase 1 → 27/27 complete, ready Phase 2"
 
 1. **Source watcher** — cron scanea carpetas (RAW_SOURCES, nuevos PDFs, Huberman transcripts).
 2. **Polish** — `polish-markdown.js` ya existe (GPT-4 + YAML frontmatter).
-3. **Chunk + embed** — split semántico + OpenAI/Voyage embeddings.
-4. **Ingest vector DB** — Supabase pgvector o Qdrant.
+3. **Chunk + embed** — split semántico + Google Vertex AI embeddings.
+4. **Ingest vector DB** — Google Cloud SQL (pgvector).
 5. **Tag por deporte** — clasificador auto (halterofilia/crossfit/hyrox).
-6. **Quality check** — LLM valida chunk antes de ingestar.
+6. **Quality check** — Gemini 2.5 Flash Lite valida chunk antes de ingestar.
 7. **Dedup** — hash semántico, evita duplicados.
 8. **Re-index** — scheduled nightly.
 

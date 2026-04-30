@@ -23,7 +23,6 @@ ROOT_DIR = Path(__file__).parent.parent.parent.parent
 sys.path.append(str(ROOT_DIR / "backend" / "src"))
 
 from ingestion.chunker import Chunker
-from infrastructure.vector_store import VectorStore
 
 YAML_PATH = ROOT_DIR / "rag_sources.yaml"
 
@@ -67,7 +66,7 @@ def save_hash(session, file_path: str, hash_val: str, chunk_count: int):
 # ---------------------------------------------------------------------------
 
 def ingest_source(
-    vs: VectorStore,
+    vs,
     chunker: Chunker,
     source: dict,
     dry_run: bool = False,
@@ -141,6 +140,8 @@ def run(
     # Filtrar desactivadas
     sources = [s for s in sources if s.get("enabled", True)]
 
+    if not dry_run:
+        from infrastructure.vector_store import VectorStore
     vs      = VectorStore() if not dry_run else None
     chunker = Chunker()
     session = vs.Session() if not dry_run else None
@@ -178,7 +179,12 @@ def run(
             current_hash = file_hash(src_path)
 
         # Ingestar
-        label = "[DRY] " if dry_run else ("[NEW] " if not get_stored_hash(session, source["path"]) if session else "[UPD] " else "[UPD] ")
+        if dry_run:
+            label = "[DRY] "
+        elif session and not get_stored_hash(session, source["path"]):
+            label = "[NEW] "
+        else:
+            label = "[UPD] "
         count = ingest_source(vs, chunker, source, dry_run=dry_run)
 
         if not dry_run and session:
@@ -188,18 +194,18 @@ def run(
         stats["files"]    += 1
 
         if verbose:
-            print(f"  {label} {source['path']}  →  {count} chunks")
+            print(f"  {label} {source['path']}  ->  {count} chunks")
 
     if session:
         session.close()
 
     if verbose:
-        print(f"\n{'─'*50}")
+        print(f"\n{'-'*50}")
         print(f"  Archivos procesados: {stats['files']}")
         print(f"  Chunks ingresados:   {stats['ingested']}")
         print(f"  Sin cambios:         {stats['skipped']}")
         print(f"  Archivos faltantes:  {stats['missing']}")
-        print(f"{'─'*50}\n")
+        print(f"{'-'*50}\n")
 
     return stats
 

@@ -161,55 +161,41 @@ updated: 2026-04-18
 
 ---
 
-## 🏗️ Stack técnico recomendado
+## 🏗️ Stack técnico — Google Cloud Ecosystem (Unified Billing)
 
 ### Base de datos vectorial
 
-**Elección: Postgres + pgvector extension**
+**Elección: Google Cloud SQL for PostgreSQL + pgvector extension**
 
 Razones:
-- ✅ Ya usas Postgres para datos relacionales (Prisma schema)
-- ✅ Cero infra adicional
-- ✅ Gratis (open source)
-- ✅ Escalable a 10M+ vectores sin problema
-- ✅ Queries híbridas SQL + vector en una sola BD
+- ✅ **Unificación:** Una sola factura en Google Cloud.
+- ✅ **Aprovechamiento Ecosistema:** Integración nativa con Vertex AI.
+- ✅ **Escalabilidad:** Soporta `pgvector` para queries SQL + vector combinadas.
+- ✅ **GCP Service Account:** Ya integrado en el proyecto (`apps/api`).
 
-Alternativas descartadas:
-- ❌ Pinecone: $70+/mes mínimo, vendor lock-in
-- ❌ Weaviate/Qdrant: infra separada, overhead operacional
-- ❌ Chroma: excelente dev pero menos maduro producción
+Alternativas flexibilizadas:
+- ❌ Supabase: Descartado para centralizar en Google.
+- ❌ Pinecone: Vendor lock-in innecesario.
 
 ### Embeddings provider
 
-**Opción A — OpenAI `text-embedding-3-small`:**
-- $0.02 / 1M tokens
-- 1536 dimensiones
-- Calidad excelente español
-- Latencia ~200ms
+**Elección: Google Vertex AI — `text-multilingual-embedding-002` (o similar):**
+- ✅ Optimizado para español y multilingüe.
+- ✅ Costo integrado en la factura de GCP.
+- ✅ Latencia mínima dentro de la misma región de Cloud SQL.
 
-**Opción B — Anthropic (cuando liberen embeddings):**
-- Por definir precio/performance
-- Integración ya existente con Claude
+### LLM Inference
 
-**Opción C — Local (sentence-transformers):**
-- Gratis (self-hosted)
-- Calidad español menor
-- Latencia local <50ms
+**Elección Primaria: Google Gemini 2.5 Flash Lite**
+- ✅ **Velocidad:** Latencia ultra baja para check-ins en tiempo real.
+- ✅ **Costo:** El más eficiente para volumen masivo de sesiones.
+- ✅ **Contexto:** Ventana de contexto amplia para RAG de largo historial.
 
-**Recomendación:** OpenAI Option A. Más simple, calidad probada, costo insignificante.
+**Elección Crítica: Google Gemini 1.5 Pro (o Ultra)**
+- ✅ Casos complejos: análisis de lesiones, periodización avanzada.
+- ✅ Razonamiento superior para el "Smart Coach".
 
-### LLM inference
-
-**Opción A — Claude API:**
-- Sonnet 4.6 para latencia/costo
-- Opus 4.7 para casos críticos (lesión, análisis complejo)
-- Context caching para ahorrar en prompts repetidos
-
-**Opción B — OpenAI GPT-4o:**
-- Alternativa principal
-- Ecosistema maduro
-
-**Recomendación:** Claude Sonnet 4.6 primario + Opus 4.7 casos críticos. Enable prompt caching desde día 1.
+**Recomendación:** Usar Gemini 2.5 Flash Lite para el 90% de las tareas (clasificación, RAG diario) y escalar a Pro solo cuando el score de confianza sea bajo.
 
 ---
 
@@ -325,19 +311,19 @@ model MLTrainingExample {
 
 ---
 
-## ✅ Decisiones cerradas (9/9) · 2026-04-18
+## ✅ Decisiones cerradas (9/9) · 2026-04-21 (Actualizado)
 
 | # | Tema | Decisión final |
 |---|---|---|
 | 1 | Posición "Smart vs IA" | **A — Smart público, IA privada backend** |
-| 2 | pgvector schema V1 | **APROBADO** (costo cero) |
-| 3 | Logging exhaustivo día 1 | **APROBADO** (input/output/feedback) |
+| 2 | pgvector schema V1 | **APROBADO** (en Google Cloud SQL) |
+| 3 | Logging exhaustivo día 1 | **APROBADO** (vía Cloud Logging / GCP) |
 | 4 | Timing activación RAG | **Mes 9-12** al tener >10k sesiones |
-| 5 | Embeddings provider | **OpenAI text-embedding-3-small** |
-| 6 | LLM primario | **Claude Sonnet 4.6 + prompt caching** · Opus 4.7 casos críticos |
-| 7 | Distillation timeline | **Año 2+** con dataset etiquetado >50k |
-| 8 | Presupuesto infra | V1 **$0** · V2 **$150-350/mes** · V3 **$100-250/mes** |
-| 9 | Compliance data salud | **Anonimización obligatoria** vía código atleta + opt-in explícito |
+| 5 | Embeddings provider | **Google Vertex AI** |
+| 6 | LLM primario | **Gemini 2.5 Flash Lite** (Flash-Lite cloud default) |
+| 7 | Distillation timeline | **Año 2+** (entrenar modelos Google locales Ej: Gemma) |
+| 8 | Presupuesto infra | Centralizado en **Google Cloud Invoice** |
+| 9 | Compliance data salud | **Anonimización obligatoria** en la nube de Google |
 
 ---
 

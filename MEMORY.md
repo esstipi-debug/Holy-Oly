@@ -1,8 +1,8 @@
 # HOLY OLY — Cerebro Central del Proyecto
 
-**Última actualización:** 2026-04-15  
-**Estado actual:** Fase 0 — Organización / Pre-diseño  
-**Versión:** 1.0
+**Última actualización:** 2026-04-30
+**Estado actual:** Fase 1 completada → Fase 2 iniciada
+**Versión:** 2.0
 
 ---
 
@@ -21,14 +21,15 @@
 
 | Capa | Tecnología | Notas |
 |------|-----------|-------|
-| **Frontend** | React + Vite + Tailwind CSS | SPA, 369KB JS gzipped |
+| **Frontend** | React + Vite + Tailwind CSS | SPA mobile-first (390px) |
 | **State Management** | React Context API | Sin Redux por ahora |
-| **Backend** | Node.js + Express | Monolítico, async/await |
-| **ORM** | Prisma (schema-first) | ~60 modelos |
-| **Database** | PostgreSQL | ~150 query patterns únicos |
-| **Auth** | JWT (access + refresh rotation) | bcryptjs, roles: Athlete/Coach/Admin |
-| **Jobs** | Cron jobs | 4 schedules: 5min/1h/24h/semanal |
-| **Cache** | Tablas de pre-cálculo en DB | Readiness O(90)→O(1), Leaderboard O(nlogn)→O(1) |
+| **Backend** | Python (FastAPI) | Estructura `backend/src/`, módulos RAG + ETL |
+| **ORM** | Prisma (schema-first) | ~60 modelos, `pgvector` |
+| **Database** | AlloyDB (PostgreSQL compatible) | IP `34.176.100.236` en `.env`, soporta `pgvector` |
+| **IA / LLM** | Gemini 2.5 Flash Lite + Vertex AI | Unificación de factura y ecosistema Google |
+| **Jobs** | Cloud Scheduler + Cloud Run | 4 schedules: 5min/1h/24h/semanal |
+| **Nutrición** | Apple HealthKit / Android Health Connect | Única capa de integración nutricional |
+| **Design** | Google Stitch (importación .md) | Wireframes HTML → export .md → Stitch |
 
 ---
 
@@ -71,14 +72,16 @@
 | 16 | Social Engine | Social cards IG/WhatsApp | P4 |
 | 17 | Golden Ratio | Tracking proporciones de levantadas | P3 |
 | 22 | IMR Engine | Intensity Maintenance Ratio + AI Insights | P2 |
+| 23 | Skin Engine | Catálogo + inventory (3 skins base día 1) | P3 |
 
 ### UX & Infraestructura
 | # | Motor | Propósito | Prioridad Impl. |
 |---|-------|-----------|-----------------|
-| 18 | Theme Engine | Light/Dark/Olimpic themes | P4 |
+| 18 | Theme Engine | 5 temas (Classic + 4 Premium) | P2 |
 | 19 | Privacy Engine | Control acceso Coach/Atleta/Club/Admin | P2 |
 | 20 | Readiness Cache | O(1) lookup pre-calculado | P2 |
 | 21 | Leaderboard Cache | O(1) lookup pre-calculado | P3 |
+| 24 | Nutrition Bridge | HealthKit/Health Connect → DB sync | P3 |
 
 ---
 
@@ -115,33 +118,35 @@
 ## Fases del Proyecto
 
 ```
-FASE 0 — Organización           ← ESTAMOS AQUÍ
-FASE 1 — Arquitectura & UX/UI
-  1.1  Validar arquitectura de datos
-  1.2  User Journeys completos
-  1.3  Wireframes (Figma / HTML estático)
-  1.4  Design system (colores, tipografía, componentes)
-FASE 2 — Frontend (Web App)
-  2.1  Setup React + Vite + Tailwind
-  2.2  Componentes base + Design System
-  2.3  Pantallas con mocks (sin API real)
-  2.4  Frontend con API simulada (MSW o JSON)
+FASE 0 — Organización           ✅ COMPLETADA
+FASE 1 — Arquitectura & UX/UI   ✅ COMPLETADA (100%)
+  1.1  Validar arquitectura de datos        ✅
+  1.2  User Journeys completos              ✅
+  1.3  Wireframes (27 pantallas HTML)       ✅
+  1.4  Design system (colores, tipografía)  ✅
+  1.5  STITCH_EXPORT.md para Google Stitch  ✅
+  1.6  20 decisiones UX firmadas            ✅ (ARCHITECTURE_DECISIONS_PENDING.md)
+FASE 2 — Frontend (Web App)     🔄 INICIADA (70%)
+  2.1  Setup React + Vite + Tailwind        ⏳
+  2.2  Componentes base + Design System     ⏳
+  2.3  Pantallas con mocks (sin API real)   ⏳
+  2.4  Frontend con API simulada (MSW)      ⏳
 FASE 3 — Backend Core
-  3.1  Prisma schema + migrations
-  3.2  Auth (JWT + roles)
-  3.3  Engines P1: Stress, Session Adaptation, Macrocycle
-  3.4  Endpoints REST + cron jobs base
+  3.1  Schema + migrations                  ⏳
+  3.2  Auth (JWT + roles)                   ⏳
+  3.3  Engines P1: Stress, Session, Macro   ⏳
+  3.4  Endpoints REST + cron jobs           ⏳
 FASE 4 — Integración Full-Stack
-  4.1  Conectar frontend con backend real
-  4.2  Engines P2: Gamification, Belt, Streak, Cache
-  4.3  Testing E2E
+  4.1  Conectar frontend con backend real   ⏳
+  4.2  Engines P2: Gamification, Belt, etc  ⏳
+  4.3  Testing E2E                          ⏳
 FASE 5 — Engines Avanzados
-  5.1  Engines P3 y P4 (Hormonal, Social, Golden Ratio, etc.)
-  5.2  ML para selección de macrociclo
+  5.1  Engines P3 y P4                      ⏳
+  5.2  ML para selección de macrociclo      ⏳
 FASE 6 — App Nativa (React Native / Expo)
-  6.1  Migración de componentes a RN
-  6.2  Features nativas (notificaciones push, offline mode)
-  6.3  App Store / Play Store deployment
+  6.1  Migración de componentes a RN        ⏳
+  6.2  Features nativas (push, offline)     ⏳
+  6.3  App Store / Play Store deployment    ⏳
 ```
 
 ---
@@ -150,13 +155,16 @@ FASE 6 — App Nativa (React Native / Expo)
 
 | Decisión | Elección | Razón |
 |----------|---------|-------|
-| Arquitectura backend | Monolítico (Express) | Simplicidad; split después si necesario |
+| Arquitectura backend | Python (FastAPI) | Ecosistema ML/IA, módulos RAG + ETL existentes |
 | ORM | Prisma | Schema-first, migrations trackeadas |
 | Auth | JWT + refresh rotation | Stateless, escala bien |
 | Cache | Tablas DB (no Redis) | Suficiente para escala inicial |
 | Mobile | Web primero → React Native | Validar producto antes de invertir en nativo |
 | Video analysis | ❌ NO incluido | Decisión explícita del producto |
 | Chat in-app | ❌ NO incluido | No hay mensajería interna en ninguna versión |
+| Nutrición | HealthKit / Health Connect | Puente universal, evita APIs de terceros |
+| Diseño | Google Stitch desde .md | Mejor parsing que HTML crudo |
+| DB | AlloyDB (no Cloud SQL) | Mejor rendimiento pgvector |
 
 ## Decisiones de Producto / UX (confirmadas 2026-04-15)
 
@@ -204,11 +212,12 @@ FASE 6 — App Nativa (React Native / Expo)
 | Gap | Criticidad | Necesario para |
 |-----|-----------|----------------|
 | Prisma schema completo | ALTA | Fase 3 |
-| Wireframes / Mockups | ALTA | Fase 1 |
-| Design System (colores, tipografía) | ALTA | Fase 1-2 |
-| User Stories formalizadas | MEDIA | Fase 1 |
+| Design System implementado en código | ALTA | Fase 2 |
+| User Stories formalizadas | MEDIA | Fase 1-2 |
 | Diagrama ERD (Entity Relationship) | MEDIA | Fase 3 |
 | API contract (endpoints + payloads) | MEDIA | Fase 3-4 |
+| MSW mock server | MEDIA | Fase 2 |
+| ETL universal dry-run | MEDIA | Fase 4 |
 | Estrategia de deployment | BAJA | Fase 4+ |
 | Análisis competitivo | BAJA | Marketing |
 
@@ -220,21 +229,42 @@ FASE 6 — App Nativa (React Native / Expo)
 |--------|-------|----------------|
 | 1 | 2026-04-15 | Catastro completo, creación de MEMORY.md, hoja de ruta definida |
 | 2 | 2026-04-15 | 10 wireframes HTML completados · Victory Screen 4 temas interactiva · Social Card Generator con 4 tipos · Inventario 27 pantallas · Decisiones de producto confirmadas |
+| 3 | 2026-04-26 | 27 wireframes HTML auditados · STITCH_EXPORT.md generado · Nutrición vía Health/Health Connect confirmada · 20 decisiones UX firmadas · MEMORY.md actualizado |
 
-## Wireframes completados (Fase 1)
+## Wireframes completados (Fase 1 — 27 pantallas)
 
 | Pantalla | Archivo | Estado |
 |---------|---------|--------|
+| A1 Login | A1_login_register.html | ✅ |
+| A2 Registro + Invite Coach | A1_login_register.html | ✅ |
+| A3 Forgot Password (3 estados) | A1_login_register.html | ✅ |
 | B1 Dashboard Atleta | B1_dashboard_atleta.html | ✅ |
 | B2 Pre-Check 5 sliders | B6_active_session.html | ✅ |
+| B3 Injury Shield Modal | B3_injury_shield.html | ✅ |
+| B4 Session Summary | B4_session_summary.html | ✅ |
+| B5 Warmup Generator | B5_warmup.html | ✅ |
 | B6 Sesión Activa + RPE | B6_active_session.html | ✅ |
 | B7/B8 Victory Screen (4 temas × 2 modos) | B7_B8_victory_screen.html | ✅ |
-| B9 Viral Card Generator (con IMR) | B9_social_card.html | ✅ |
-| C1 Command Center Coach | C1_command_center_coach.html | ✅ |
-| C2 Risk Intervention Modal | C1_command_center_coach.html | ✅ |
-| C3 Adjustment Hub | C1_command_center_coach.html | ✅ |
+| B9 Viral Card Generator | B9_social_card.html | ✅ |
+| B10 Analytics (4 tabs) | B10_analytics.html | ✅ |
+| B11 OLY Index | B11_oly_index.html | ✅ |
+| B12/B13 Pulse Hub | B12_pulse.html | ✅ |
+| B14 Píldoras/Stories | B14_stories.html | ✅ |
+| B15 Perfil Atleta | B15_profile.html | ✅ |
+| C1 Command Center Coach | C1_command_center.html | ✅ |
+| C2 Risk Intervention Modal | C1_command_center.html | ✅ |
+| C3 Adjustment Hub | C1_command_center.html | ✅ |
+| C4 Athlete Deep Dive | C4_athlete_detail.html | ✅ |
+| C5/C6 Add Athlete + Macrocycle | C5_add_athlete.html | ✅ |
+| C7/C8/C9 Coach Tools | C7_coach_tools.html | ✅ |
+| D1 Onboarding (4 pasos) | D1_onboarding.html | ✅ |
+| D2 Trial → Premium | D2_trial_upgrade.html | ✅ |
 | Index navegación | index.html | ✅ |
-| Referencia Viral Card | VIRAL_CARD.md | ✅ |
+
+### Export para Google Stitch
+| Archivo | Propósito | Estado |
+|---------|-----------|--------|
+| `STITCH_EXPORT.md` | 27 pantallas con layout, tokens, componentes, navegación | ✅ |
 
 ---
 
@@ -247,7 +277,33 @@ FASE 6 — App Nativa (React Native / Expo)
 
 ---
 
-*Este archivo debe actualizarse al final de cada sesión de trabajo.*
+---
+
+### 📌 Adenda 2026-04-30 — Nutrición + Fase 1 Completada
+
+**Nutrición — Estrategia de Integración:**
+- **Capa universal:** Apple HealthKit (iOS) + Google Health Connect (Android)
+- **Apps compatibles:** MyFitnessPal, Cronometer, FatSecret, Lose It!, MacroFactor, Yazio
+- **NO se conectan APIs directas de apps de terceros** — todo via Health/Health Connect
+- **Datos leídos:** Calorías, proteínas, carbohidratos, grasas, agua, peso corporal, IMC
+- **Frecuencia sync:** Cada 6h o manual desde perfil
+- **Fallback:** Input manual si no hay app de nutrición instalada
+
+**Fase 1 — Estado:**
+- 27 wireframes HTML: ✅ 100%
+- STITCH_EXPORT.md: ✅ Generado (24 secciones, 27 pantallas cubiertas)
+- 20 decisiones UX/UI firmadas: ✅ (ARCHITECTURE_DECISIONS_PENDING.md)
+- Design tokens definidos: ✅ (colores, tipografía, spacing, navegación)
+
+**Pendientes inmediatos:**
+- Phase 4 Step 1: `python -m ingestion.etl_universal --dry-run`
+- Importar STITCH_EXPORT.md en Google Stitch
+- Actualizar SIGUIENTE_SESION.md con progreso
+
+**Git status:**
+- Repo: `esstipi-debug/Holy-Oly.git` (rama `main`)
+- 1 commit ahead de remote
+- Múltiples unstaged/untracked (wireframes, memory, decisions)
 
 ---
 
@@ -360,11 +416,10 @@ FASE 6 — App Nativa (React Native / Expo)
 
 ---
 
-## 📌 Adenda 2026-04-18 — Cierre Ronda 2 Coach + AI Strategy aprobada
-
-- **Ronda 2 Coach:** 24 decisiones cerradas (33-56). Ver [[ux/COACH_FLOW_RONDA_2]].
-- **Ambigüedades cruzadas A1-A4:** resueltas (atleta sin coach → D2 estéril, coach ve versión base sin skin, coach anterior notificado al desvincular, leaderboard interno mantenido eliminado).
-- **Total bloque Coach:** 60 decisiones cerradas (Ronda 1 + Ronda 2).
-- **AI Strategy:** 9/9 decisiones aprobadas. Stack Postgres + pgvector + OpenAI embeddings + Claude Sonnet. RAG diferido Q4 2026.
-- **Branding:** "Smart" público, "IA" sólo backend privado.
-- **Siguiente:** Bloque Atleta UX (D1, B1, B6, B7, B10-B15) + Flujo Viral.
+### 📌 Adenda 2026-04-21 — Google Cloud Ecosystem Consolidation
+- **Estrategia:** Unificar todo en la factura de Google Cloud para simplificar administración.
+- **Base de Datos:** Google Cloud SQL for PostgreSQL con `pgvector`.
+- **Inteligencia Artificial:** Gemini 2.5 Flash Lite (default) + Gemini 1.5 Pro (crítico).
+- **Embeddings:** Google Vertex AI.
+- **Branding:** "Smart" para el usuario final, IA real en el backend.
+- **Continuación:** Refinar integración de Vertex AI en `apps/api`.
