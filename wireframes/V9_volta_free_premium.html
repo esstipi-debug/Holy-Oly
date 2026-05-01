@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volta V9 · Free → Premium</title>
+<style>
+  :root { --bg:#07070F;--surface:#0F0F1C;--surface2:#161626;--line:#1E1E32;--text:#EAEAF5;--muted:#52527A;--cyan:#00E5FF;--amber:#FFB300;--red:#FF3D00;--green:#00E676;--font:'Inter','Helvetica Neue',Arial,sans-serif; }
+  * { box-sizing:border-box;margin:0;padding:0;font-family:var(--font); }
+  body { background:#03030A;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:32px 16px; }
+  .phone { width:360px;min-height:780px;background:var(--bg);border-radius:40px;border:1.5px solid #1E1E38;overflow:hidden;position:relative;flex-shrink:0;box-shadow:0 0 0 1px #12121E,0 0 60px rgba(0,229,255,0.08),0 24px 80px rgba(0,0,0,0.7);display:flex;flex-direction:column; }
+  .scroll-area { flex:1;overflow-y:auto;padding-bottom:90px;scrollbar-width:none; }
+  .scroll-area::-webkit-scrollbar { display:none; }
+  .sec { font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted); }
+  .feature-row { display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line); }
+  .feature-row:last-child { border-bottom:none; }
+  .check-free { width:18px;height:18px;border-radius:50%;background:var(--surface2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;color:var(--muted); }
+  .check-pro { width:18px;height:18px;border-radius:50%;background:rgba(0,229,255,0.12);border:1px solid rgba(0,229,255,0.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;color:var(--cyan); }
+  .lock { font-size:11px;opacity:.4; }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- Hero -->
+  <div style="background:linear-gradient(180deg,rgba(0,229,255,0.07) 0%,transparent 100%);padding:28px 20px 20px;text-align:center;border-bottom:1px solid var(--line);position:relative;overflow:hidden;">
+    <div style="position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(0,229,255,0.1),transparent);pointer-events:none;"></div>
+
+    <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:14px;">
+      <div style="width:26px;height:26px;background:linear-gradient(135deg,#00E5FF,#0070FF);clip-path:polygon(50% 0%,95% 25%,95% 75%,50% 100%,5% 75%,5% 25%);"></div>
+      <span style="font-size:16px;font-weight:900;letter-spacing:3px;color:var(--text);">VOL<span style="color:var(--cyan);">TA</span></span>
+    </div>
+
+    <div style="font-size:22px;font-weight:900;color:var(--text);margin-bottom:6px;">Tu Wise Score lleva<br><span style="color:var(--cyan);">7 días bloqueado en Free</span></div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.5;">Estás ignorando tu HRV sin datos completos.<br>Premium te dice exactamente qué hacer.</div>
+
+    <!-- Fear of loss metric -->
+    <div style="margin-top:14px;background:rgba(255,61,0,0.07);border:1px solid rgba(255,61,0,0.18);border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:10px;text-align:left;">
+      <span style="font-size:22px;">⚠️</span>
+      <div>
+        <div style="font-size:12px;font-weight:800;color:var(--red);">HRV bajo sin protocolo = sobreentrenamiento</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px;">Atletas Free pierden en promedio 2 semanas de progreso por mes por falta de datos.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scroll-area" style="padding:16px 16px 90px;">
+
+    <!-- Planes -->
+    <div class="sec" style="margin-bottom:10px;">Elegí tu plan</div>
+    <div style="display:flex;gap:8px;margin-bottom:16px;">
+      <!-- Free -->
+      <div style="flex:1;background:var(--surface2);border:1px solid var(--line);border-radius:16px;padding:14px;">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.06em;margin-bottom:4px;">FREE</div>
+        <div style="font-size:24px;font-weight:900;color:var(--text);margin-bottom:2px;">$0</div>
+        <div style="font-size:9px;color:var(--muted);">Para siempre</div>
+      </div>
+      <!-- Premium — highlighted -->
+      <div style="flex:1;background:linear-gradient(135deg,rgba(0,229,255,0.07),rgba(0,112,255,0.05));border:2px solid var(--cyan);border-radius:16px;padding:14px;position:relative;">
+        <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--cyan);color:#07070F;font-size:9px;font-weight:900;padding:3px 10px;border-radius:20px;white-space:nowrap;">MÁS POPULAR</div>
+        <div style="font-size:11px;font-weight:700;color:var(--cyan);letter-spacing:.06em;margin-bottom:4px;">PREMIUM</div>
+        <div style="display:flex;align-items:flex-end;gap:3px;margin-bottom:2px;">
+          <div style="font-size:24px;font-weight:900;color:var(--cyan);">$14</div>
+          <div style="font-size:11px;color:var(--muted);padding-bottom:4px;">/mes</div>
+        </div>
+        <div style="font-size:9px;color:var(--muted);">o $99/año · ahorrás 41%</div>
+      </div>
+    </div>
+
+    <!-- Feature comparison -->
+    <div style="background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:4px 14px;margin-bottom:16px;">
+      <!-- Headers -->
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 0 6px;border-bottom:1px solid var(--line);">
+        <div style="flex:1;font-size:10px;font-weight:700;color:var(--muted);">Feature</div>
+        <div style="width:44px;text-align:center;font-size:9px;font-weight:700;color:var(--muted);">FREE</div>
+        <div style="width:44px;text-align:center;font-size:9px;font-weight:700;color:var(--cyan);">PRO</div>
+      </div>
+
+      <div class="feature-row">
+        <div style="flex:1;font-size:11px;color:var(--text);">WOD log básico</div>
+        <div style="width:44px;display:flex;justify-content:center;"><div class="check-free">✓</div></div>
+        <div style="width:44px;display:flex;justify-content:center;"><div class="check-pro">✓</div></div>
+      </div>
+      <div class="feature-row">
+        <div style="flex:1;font-size:11px;color:var(--text);">CF Index (3 sub-índices)</div>
+        <div style="width:44px;display:flex;justify-content:center;"><div class="check-free">✓</div></div>
+        <div style="width:44px;display:flex;justify-content:center;"><div class="check-pro">✓</div></div>
+      </div>
+      <div class="feature-row">
+        <div style="flex:1;">
+          <div style="font-size:11px;color:var(--text);">Wise Score completo</div>
+          <div style="font-size:9px;color:var(--muted);">Compliance + XP + historial</div>
+        </div>
+        <div style="width:44px;display:flex;justify-content:center;"><span class="lock">🔒</span></div>
+        <div style="width:44px;display:flex;justify-content:center;"><div class="check-pro">✓</div></div>
+      </div>
+      <div class="feature-row">
+        <div style="flex:1;">
+          <div style="font-size:11px;color:var(--text);">HRV + alertas en tiempo real</div>
+          <div style="font-size:9px;color:var(--muted);">Ajuste automático de carga</div>
+        </div>
+        <div style="width:44px;display:flex;justify-content:center;"><span class="lock">🔒</span></div>
+        <div style="width:44px;display:flex;justify-content:center;"><div class="check-pro">✓</div></div>
+      </div>
+      <div class="feature-row">
+        <div style="flex:1;">
+          <div style="font-size:11px;color:var(--text);">IA Coach chat</div>
+          <div style="font-size:9px;color:var(--muted);">Contextual · Sin límites</div>
+        </div>
+        <div style="width:44px;display:flex;justify-content:center;"><span class="lock">🔒</span></div>
+        <div style="width:44px;display:flex;justify-content:center;"><div class="check-pro">✓</div></div>
+      </div>
+      <div class="feature-row">
+        <div style="flex:1;">
+          <div style="font-size:11px;color:var(--text);">Wearable sync</div>
+          <div style="font-size:9px;color:var(--muted);">Apple Watch · Oura · Garmin</div>
+        </div>
+        <div style="width:44px;display:flex;justify-content:center;"><span class="lock">🔒</span></div>
+        <div style="width:44px;display:flex;justify-content:center;"><div class="check-pro">✓</div></div>
+      </div>
+      <div class="feature-row">
+        <div style="flex:1;">
+          <div style="font-size:11px;color:var(--text);">Píldoras + gamificación</div>
+          <div style="font-size:9px;color:var(--muted);">XP · Badges · Niveles</div>
+        </div>
+        <div style="width:44px;display:flex;justify-content:center;"><span class="lock">🔒</span></div>
+        <div style="width:44px;display:flex;justify-content:center;"><div class="check-pro">✓</div></div>
+      </div>
+      <div class="feature-row">
+        <div style="flex:1;">
+          <div style="font-size:11px;color:var(--text);">Social cards</div>
+          <div style="font-size:9px;color:var(--muted);">Compartir resultados</div>
+        </div>
+        <div style="width:44px;display:flex;justify-content:center;"><span class="lock">🔒</span></div>
+        <div style="width:44px;display:flex;justify-content:center;"><div class="check-pro">✓</div></div>
+      </div>
+    </div>
+
+    <!-- Testimonial -->
+    <div style="background:rgba(0,229,255,0.04);border:1px solid rgba(0,229,255,0.12);border-radius:14px;padding:13px;margin-bottom:8px;">
+      <div style="font-size:12px;color:var(--text);line-height:1.5;font-style:italic;margin-bottom:8px;">"Desde que el sistema me avisa cuándo bajar la carga, dejé de tener lesiones. El Wise Score me cambió cómo entreno."</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),#0070FF);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#07070F;">P</div>
+        <span style="font-size:10px;color:var(--muted);">Paula · CrossFit Norte · Wise 91</span>
+      </div>
+    </div>
+
+    <div style="font-size:10px;color:var(--muted);text-align:center;">Sin compromisos · Cancelás cuando querés · 7 días gratis</div>
+
+  </div>
+
+  <!-- Bottom CTA -->
+  <div style="position:absolute;bottom:0;left:0;right:0;padding:12px 16px;background:rgba(7,7,15,0.97);border-top:1px solid var(--line);display:flex;flex-direction:column;gap:6px;">
+    <button style="width:100%;padding:14px;background:linear-gradient(135deg,var(--cyan),#0070FF);color:#07070F;border:none;border-radius:14px;font-size:15px;font-weight:900;cursor:pointer;box-shadow:0 0 20px rgba(0,229,255,0.25);">Empezar 7 días gratis →</button>
+    <button style="width:100%;padding:10px;background:transparent;color:var(--muted);border:none;font-size:12px;cursor:pointer;">Seguir con Free</button>
+  </div>
+
+</div>
+</body>
+</html>
