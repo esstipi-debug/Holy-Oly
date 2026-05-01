@@ -36,3 +36,19 @@ export const knowledgeBase = pgTable("knowledge_base", {
   source: text("source"),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+export const macrocycleAdjustmentLog = pgTable("macrocycle_adjustment_log", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  athleteId: uuid("athlete_id").references(() => users.id).notNull(),
+  macrocycleId: text("macrocycle_id").notNull(),
+  sessionId: uuid("session_id"),
+  trigger: text("trigger", { enum: ["cns_red", "acwr_high", "injury_flag", "coach_manual", "auto_deload"] }).notNull(),
+  actionType: text("action_type", { enum: ["skip", "reduce_load", "substitute_exercise", "abort_block"] }).notNull(),
+  oldValue: jsonb("old_value"),
+  newValue: jsonb("new_value"),
+  decidedBy: text("decided_by", { enum: ["system", "coach", "athlete"] }).notNull(),
+  approvedBy: uuid("approved_by").references(() => users.id),
+  reason: text("reason"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
