@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 from pathlib import Path
+from contextlib import asynccontextmanager
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(os.path.join(BASE_DIR, '.env'))
@@ -16,11 +17,84 @@ from .rag.router import router as rag_router
 from .rag.feedback import router as rag_feedback_router
 from .coach.router import router as coach_router
 from .api.middleware import SecurityLoggingMiddleware, RateLimitMiddleware
+from .agents.response_agent.router import router as response_router, set_handlers
+from .agents.response_agent.email_handler import EmailInboundHandler
+from .agents.response_agent.webchat import WebChatHandler
+from .agents.response_agent.lead_capture import LeadCapture
+from .agents.response_agent.intent_classifier import IntentClassifier
+from .agents.response_agent.response_generator import ResponseGenerator
+from .scheduler import init_scheduler, scheduler_lifespan, get_all_jobs_status
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger("motor25")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Lifespan: init agents + scheduler on startup, cleanup on shutdown.
+    """
+    logger.info("[Motor25] Initializing agents...")
+
+    # DB pool (si esta configurado)
+    db_pool = getattr(app, "db_pool", None)
+
+    # Gemini client (si esta configurado)
+    gemini_client = getattr(app, "gemini_client", None)
+
+    # --- Response Agent ---
+    intent_classifier = IntentClassifier(gemini_client=gemini_client)
+    response_generator = ResponseGenerator(gemini_client=gemini_client)
+    lead_capture = LeadCapture(db_pool=db_pool)
+
+    email_handler = EmailInboundHandler(
+        intent_classifier=intent_classifier,
+        response_generator=response_generator,
+        lead_capture=lead_capture,
+        resend_api_key=os.getenv("RESEND_API_KEY"),
+    )
+
+    webchat_handler = WebChatHandler(
+        intent_classifier=intent_classifier,
+        response_generator=response_generator,
+        lead_capture=lead_capture,
+    )
+
+    # Set handlers en el router
+    set_handlers(email_handler, webchat_handler, lead_capture)
+
+    # --- Other Agents ---
+    from .agents.security_agent import SecurityAgent
+    from .agents.growth_agent import GrowthAgent
+    from .agents.content_agent import ContentAgent
+
+    agents = {
+        "test": None,  # Test Agent se crea on-demand
+        "security": SecurityAgent(db_pool=db_pool, gemini_client=gemini_client),
+        "growth": GrowthAgent(db_pool=db_pool, gemini_client=gemini_client, resend_api_key=os.getenv("RESEND_API_KEY")),
+        "content": ContentAgent(db_pool=db_pool, gemini_client=gemini_client),
+    }
+
+    # --- Scheduler ---
+    init_scheduler(db_pool=db_pool, agents=agents)
+
+    logger.info("[Motor25] Agents initialized. Starting scheduler...")
+
+    async with scheduler_lifespan(app):
+        yield
+
+    logger.info("[Motor25] Shutdown complete.")
+
 
 app = FastAPI(
     title="Holy Oly API",
-    description="Smart Training Platform - Stress, Adaptation & Macrocycle Engines + RAG",
-    version="1.0.0"
+    description="Smart Training Platform - Stress, Adaptation & Macrocycle Engines + RAG + Motor 25 AI Agents",
+    version="1.1.0",
+    lifespan=lifespan,
 )
 
 origins = os.getenv("CORS_ORIGINS", "*").split(",")
@@ -46,16 +120,37 @@ app.include_router(router)
 app.include_router(rag_router)
 app.include_router(rag_feedback_router)
 app.include_router(coach_router)
+app.include_router(response_router)
+
+# --- Agents Status Endpoint ---
+@app.get("/api/v1/agents/status")
+async def agents_status():
+    """Status de todos los agentes y scheduler jobs."""
+    return {
+        "status": "running",
+        "agents": {
+            "response": "active",
+            "test": "on-demand",
+            "security": "scheduled",
+            "growth": "scheduled",
+            "content": "scheduled",
+        },
+        "scheduler_jobs": get_all_jobs_status(),
+    }
+
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "message": "Holy Oly engines running"}
+    return {"status": "ok", "message": "Holy Oly engines + Motor 25 agents running"}
+
 
 @app.get("/")
 def read_root():
     return {
         "module": "Holy Oly API",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "auth": "/v1/auth/login",
-        "docs": "/docs"
+        "docs": "/docs",
+        "agents": "/api/v1/agents/status",
+        "webchat": "/api/v1/webchat/message",
     }
