@@ -194,3 +194,17 @@ CREATE INDEX IF NOT EXISTS idx_test_runs_deploy ON test_runs(deploy_id);
 CREATE INDEX IF NOT EXISTS idx_test_results_run ON test_results(test_run_id);
 CREATE INDEX IF NOT EXISTS idx_content_schedule_status ON content_schedule(status);
 CREATE INDEX IF NOT EXISTS idx_content_schedule_date ON content_schedule(scheduled_for);
+
+-- BUDGET TRACKING (Agent Budget System)
+CREATE TABLE IF NOT EXISTS agent_spending (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    agent_name VARCHAR(50) NOT NULL,
+    resource_type VARCHAR(20) NOT NULL,
+    amount DECIMAL(12,2) NOT NULL,
+    cost_usd DECIMAL(10,6) NOT NULL DEFAULT 0,
+    context JSONB,
+    spent_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_agent_spending_agent ON agent_spending(agent_name);
+CREATE INDEX IF NOT EXISTS idx_agent_spending_date ON agent_spending(spent_at);

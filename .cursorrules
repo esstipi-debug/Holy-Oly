@@ -1,0 +1,38 @@
+# Cursor Rules for HolyOly
+
+## Project Context
+Read `CURSOR_CONTEXT.md` for full project overview, architecture, and current state.
+
+## Code Style
+- Python: Use type hints, docstrings for public methods
+- React: TypeScript, functional components, hooks
+- Keep responses concise — no unnecessary comments in code
+- Follow existing patterns in the codebase
+
+## Important Conventions
+- Spanish for business logic comments and variable names where domain-specific
+- English for code infrastructure (function names, API endpoints, etc.)
+- Always check existing files before creating new ones
+- Never commit secrets or .env files
+- Use `async/await` for all I/O operations in FastAPI
+
+## Agent Development Rules
+- New agents must inherit from `BaseAgent` in `backend/src/agents/base.py`
+- All agent actions must respect budget limits via `BudgetManager`
+- Low risk = auto-act, Medium/High risk = recommend only
+- Log all decisions to `agent_decisions` table
+
+## Database
+- Use `backend/src/db/agents_schema.sql` as source of truth
+- All tables use UUID primary keys with `gen_random_uuid()`
+- Indexes for foreign keys and frequent query columns
+
+## Testing
+- Run `python -m py_compile` before committing Python files
+- Test agent endpoints via `/docs` (Swagger UI)
+- Use `pytest` for unit tests in `backend/tests/`
+
+## Deploy
+- Render auto-deploys on push to `main` via GitHub Actions
+- Keep-alive ping every 5 min prevents Render sleep
+- Free tier limits: 512MB RAM, 750 hours/mo

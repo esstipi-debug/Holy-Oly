@@ -18,12 +18,15 @@ from .rag.feedback import router as rag_feedback_router
 from .coach.router import router as coach_router
 from .api.middleware import SecurityLoggingMiddleware, RateLimitMiddleware
 from .agents.response_agent.router import router as response_router, set_handlers
+from .agents.router import router as agents_router
 from .agents.response_agent.email_handler import EmailInboundHandler
 from .agents.response_agent.webchat import WebChatHandler
 from .agents.response_agent.lead_capture import LeadCapture
 from .agents.response_agent.intent_classifier import IntentClassifier
 from .agents.response_agent.response_generator import ResponseGenerator
 from .scheduler import init_scheduler, scheduler_lifespan, get_all_jobs_status
+from .agents.github_researcher import get_researcher
+from .agents.budget import get_budget_manager
 import logging
 
 logging.basicConfig(
@@ -46,9 +49,13 @@ async def lifespan(app: FastAPI):
     # Gemini client (si esta configurado)
     gemini_client = getattr(app, "gemini_client", None)
 
+    # --- Budget Manager (self-funding agents) ---
+    budget_manager = get_budget_manager(db_pool)
+    logger.info("[Motor25] Budget manager initialized. All agents start at Starter tier.")
+
     # --- Response Agent ---
     intent_classifier = IntentClassifier(gemini_client=gemini_client)
-    response_generator = ResponseGenerator(gemini_client=gemini_client)
+    response_generator = ResponseGenerator(gemini_client=gemini_client, budget_manager=budget_manager)
     lead_capture = LeadCapture(db_pool=db_pool)
 
     email_handler = EmailInboundHandler(
@@ -56,6 +63,7 @@ async def lifespan(app: FastAPI):
         response_generator=response_generator,
         lead_capture=lead_capture,
         resend_api_key=os.getenv("RESEND_API_KEY"),
+        budget_manager=budget_manager,
     )
 
     webchat_handler = WebChatHandler(
@@ -75,9 +83,13 @@ async def lifespan(app: FastAPI):
     agents = {
         "test": None,  # Test Agent se crea on-demand
         "security": SecurityAgent(db_pool=db_pool, gemini_client=gemini_client),
-        "growth": GrowthAgent(db_pool=db_pool, gemini_client=gemini_client, resend_api_key=os.getenv("RESEND_API_KEY")),
+        "growth": GrowthAgent(db_pool=db_pool, gemini_client=gemini_client, resend_api_key=os.getenv("RESEND_API_KEY"), budget_manager=budget_manager),
         "content": ContentAgent(db_pool=db_pool, gemini_client=gemini_client),
     }
+
+    # --- GitHub Research Agent (disponible para todos los agentes) ---
+    researcher = get_researcher()
+    researcher.token = os.getenv("GITHUB_TOKEN")
 
     # --- Scheduler ---
     init_scheduler(db_pool=db_pool, agents=agents)
@@ -121,23 +133,7 @@ app.include_router(rag_router)
 app.include_router(rag_feedback_router)
 app.include_router(coach_router)
 app.include_router(response_router)
-
-# --- Agents Status Endpoint ---
-@app.get("/api/v1/agents/status")
-async def agents_status():
-    """Status de todos los agentes y scheduler jobs."""
-    return {
-        "status": "running",
-        "agents": {
-            "response": "active",
-            "test": "on-demand",
-            "security": "scheduled",
-            "growth": "scheduled",
-            "content": "scheduled",
-        },
-        "scheduler_jobs": get_all_jobs_status(),
-    }
-
+app.include_router(agents_router)
 
 @app.get("/health")
 def health_check():
@@ -152,5 +148,7 @@ def read_root():
         "auth": "/v1/auth/login",
         "docs": "/docs",
         "agents": "/api/v1/agents/status",
+        "budget": "/api/v1/agents/budget",
+        "research": "/api/v1/agents/research/repos",
         "webchat": "/api/v1/webchat/message",
     }

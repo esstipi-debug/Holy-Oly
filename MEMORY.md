@@ -416,10 +416,71 @@ FASE 6 — App Nativa (React Native / Expo)
 
 ---
 
-### 📌 Adenda 2026-04-21 — Google Cloud Ecosystem Consolidation
-- **Estrategia:** Unificar todo en la factura de Google Cloud para simplificar administración.
-- **Base de Datos:** Google Cloud SQL for PostgreSQL con `pgvector`.
-- **Inteligencia Artificial:** Gemini 2.5 Flash Lite (default) + Gemini 1.5 Pro (crítico).
-- **Embeddings:** Google Vertex AI.
-- **Branding:** "Smart" para el usuario final, IA real en el backend.
-- **Continuación:** Refinar integración de Vertex AI en `apps/api`.
+### 📌 Adenda 2026-05-02 — Motor 25: Agentes Autónomos + Budget Autofinanciado
+
+**Motor 25 — Agentic AI Ecosystem:**
+5 agentes autónomos que trabajan mientras duermes:
+
+| Agente | Función | Schedule | Auto-actua |
+|--------|---------|----------|------------|
+| **Response Agent** | Captura leads (email, webchat, IG, WhatsApp) + responde con voz de marca | 24/7 (webhook) | Sí (bajo riesgo) |
+| **Test Agent** | Tests post-deploy: endpoints, DB, seguridad | On-demand (deploy) | Sí (auto-fix) |
+| **Security Agent** | Escaneo diario de vulnerabilidades + semanal completo | 3am diario / 3am domingo | No (solo reporta) |
+| **Growth Agent** | Engagement scoring, churn prediction, trial reminders, win-back emails, A/B tests | 2am-10am diario | Sí (emails) |
+| **Content Agent** | Píldoras diarias, weekly coach digest, social posts | 9am diario / lunes 8am | No (draft) |
+
+**Budget Autofinanciado (nuevo concepto):**
+Los agentes EMPIEZAN con presupuesto mínimo y ganan más mientras generan valor.
+
+**Tiers:**
+| Tier | Credit | Tokens/dia | Emails/dia | Modelo Max | Label |
+|------|--------|------------|------------|------------|-------|
+| 0 | 0+ | 1,000 | 5 | Flash Lite | 😬 Broke |
+| 1 | 5+ | 10,000 | 25 | Flash Lite | 🌱 Starter |
+| 2 | 50+ | 50,000 | 100 | Flash | 📈 Growing |
+| 3 | 200+ | 200,000 | 500 | 2.5 Flash | ⭐ Star |
+| 4 | 1000+ | 1,000,000 | 2,000 | 2.5 Pro | 👑 Legend |
+
+**Como ganan credits:**
+| Accion | Credits | Agente que gana |
+|--------|---------|-----------------|
+| Lead capturado | +1.0 | Response |
+| Lead respondido | +0.5 | Response |
+| Trial convertido | +10.0 | Growth |
+| Churn salvado | +5.0 | Growth |
+| A/B test winner | +3.0 | Growth |
+| Vulnerabilidad encontrada | +8.0 | Security |
+| Deploy tests pass | +2.0 | Test |
+| Email abierto | +0.1 | Growth |
+| Email clicked | +0.3 | Growth |
+
+**Como gastan:**
+| Recurso | Costo | Por |
+|---------|-------|-----|
+| 1K tokens Flash Lite | 0.0001 credits | 1000 tokens |
+| 1K tokens Flash | 0.0003 credits | 1000 tokens |
+| 1K tokens Pro | 0.001 credits | 1000 tokens |
+| 1 email enviado | 0.05 credits | email |
+| 1 GitHub API call | 0.01 credits | call |
+
+**Endpoints nuevos:**
+- `GET /api/v1/agents/budget` → status de todos los agentes
+- `GET /api/v1/agents/budget?agent=response_agent` → detalle de un agente
+- `GET /api/v1/agents/status` → status general + scheduler jobs
+
+**Archivos creados:**
+- `backend/src/agents/budget.py` — BudgetManager, tiers, credits
+- `backend/src/agents/growth_agent/__init__.py` — Implementacion completa (trial reminders, win-back, engagement, churn, A/B tests)
+- `backend/src/agents/router.py` — Endpoints para agents + budget + research
+- `backend/src/agents/response_agent/response_generator.py` — Budget-aware (checka antes de usar Gemini)
+- `backend/src/agents/response_agent/email_handler.py` — Budget-aware (checka antes de enviar email)
+
+**Costo estimado con 100 users:**
+- Agents brokes (Tier 0): ~$0.10/mes
+- Agents starters (Tier 1): ~$1.50/mes
+- Agents growing (Tier 2): ~$5/mes
+- Agents stars (Tier 3): ~$15/mes
+- **Todos se pagan solos con las conversiones que generan**
+
+---
+

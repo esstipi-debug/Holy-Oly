@@ -2,9 +2,11 @@
 Response Generator — Genera respuestas con voz de marca.
 Tono: energetico y motivador.
 Contexto: conoce HolyOly (halterofilia) y Volta (crossfit).
+Budget-aware: checkea presupuesto antes de usar Gemini.
 """
 
 import logging
+from typing import Optional
 
 logger = logging.getLogger("motor25.response")
 
@@ -83,41 +85,30 @@ DEFAULT_RESPONSE = {
 
 
 class ResponseGenerator:
-    """Genera respuestas con voz de marca usando templates + Gemini."""
+    """Genera respuestas con voz de marca usando templates + Gemini.
+    Budget-aware: gasta tokens del presupuesto del Response Agent."""
 
-    def __init__(self, gemini_client):
+    def __init__(self, gemini_client, budget_manager=None):
         self.gemini_client = gemini_client
+        self.budget_manager = budget_manager
 
     async def generate(self, intent: str, user_role: str, product: str, message: str, channel: str = "email") -> str:
-        """
-        Generar respuesta para un lead.
-
-        Args:
-            intent: categoria de intencion clasificada
-            user_role: coach, athlete, o unknown
-            product: holyoly, volta, both, unknown
-            message: mensaje original del usuario
-            channel: canal de origen
-
-        Returns:
-            String con la respuesta completa
-        """
         template = INTENT_RESPONSE_TEMPLATES.get(intent, INTENT_RESPONSE_TEMPLATES.get("general", DEFAULT_RESPONSE))
 
-        # Seleccionar body segun rol
         body = template.get(user_role, template.get("body", DEFAULT_RESPONSE["body"]))
 
-        # Construir respuesta base del template
         base_response = f"{template['greeting']}\n\n{body}\n\n{template['cta']}"
 
-        # Si el mensaje es complejo o no esta en templates, usar Gemini
         if intent == "general" or len(message) > 200 or intent in ("complaint", "partnership"):
             return await self._generate_gemini_response(intent, user_role, product, message, channel)
 
         return base_response
 
     async def _generate_gemini_response(self, intent: str, user_role: str, product: str, message: str, channel: str) -> str:
-        """Generar respuesta personalizada con Gemini."""
+        if self.budget_manager and not self.budget_manager.check_budget("response_agent", "tokens", 2000):
+            logger.warning("[ResponseGenerator] Budget exceeded, using fallback response")
+            return DEFAULT_RESPONSE["greeting"] + "\n\n" + DEFAULT_RESPONSE["body"]
+
         prompt = f"""
 {BRAND_CONTEXT}
 
@@ -136,7 +127,13 @@ Responde en espanol.
             response = await self.gemini_client.generate_flash(
                 user_prompt=prompt,
             )
-            return response.strip()
+            response_text = response.strip()
+
+            if self.budget_manager:
+                estimated_tokens = len(response_text) // 4
+                self.budget_manager.spend("response_agent", "tokens_flash_lite", estimated_tokens)
+
+            return response_text
         except Exception as e:
             logger.error(f"[ResponseGenerator] Gemini failed: {e}")
             return DEFAULT_RESPONSE["greeting"] + "\n\n" + DEFAULT_RESPONSE["body"]

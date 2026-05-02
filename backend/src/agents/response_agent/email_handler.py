@@ -23,11 +23,12 @@ class EmailInboundHandler:
     - to: email destino (hola@holyoly.com)
     """
 
-    def __init__(self, intent_classifier, response_generator, lead_capture, resend_api_key: str = None):
+    def __init__(self, intent_classifier, response_generator, lead_capture, resend_api_key: str = None, budget_manager=None):
         self.intent_classifier = intent_classifier
         self.response_generator = response_generator
         self.lead_capture = lead_capture
         self.resend_api_key = resend_api_key
+        self.budget_manager = budget_manager
 
     async def handle_inbound(self, data: dict) -> dict:
         """
@@ -92,6 +93,15 @@ class EmailInboundHandler:
             response_time_ms=response_time_ms,
         )
 
+        # Earn credits for capturing a lead
+        if self.budget_manager:
+            self.budget_manager.earn("response_agent", "lead_captured", {
+                "lead_id": lead.id,
+                "email": sender_email,
+                "intent": intent_data.get("intent"),
+                "score": lead.lead_score,
+            })
+
         return {
             "lead_id": lead.id,
             "lead_score": lead.lead_score,
@@ -103,18 +113,10 @@ class EmailInboundHandler:
 
     async def send_reply(self, to_email: str, subject: str, body: str,
                           in_reply_to: str = None) -> dict:
-        """
-        Enviar respuesta via Resend API.
+        if self.budget_manager and not self.budget_manager.check_budget("response_agent", "emails", 1):
+            logger.warning("[EmailInbound] Budget exceeded, email not sent")
+            return {"error": "Budget exceeded"}
 
-        Args:
-            to_email: email del lead
-            subject: asunto del email
-            body: cuerpo del email (puede ser HTML)
-            in_reply_to: message-id del email original para threading
-
-        Returns:
-            dict con id del email enviado
-        """
         if not self.resend_api_key:
             logger.warning("[EmailInbound] No Resend API key, email not sent")
             return {"error": "No Resend API key configured"}
@@ -142,6 +144,10 @@ class EmailInboundHandler:
                 resp.raise_for_status()
                 result = resp.json()
                 logger.info(f"[EmailInbound] Reply sent to {to_email}: {result.get('id')}")
+
+                if self.budget_manager:
+                    self.budget_manager.spend("response_agent", "email_sent", 1)
+
                 return result
         except Exception as e:
             logger.error(f"[EmailInbound] Failed to send reply: {e}")
