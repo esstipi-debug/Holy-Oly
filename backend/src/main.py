@@ -2,11 +2,9 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 
-# Cargar .env al inicio para que esté disponible globalmente
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(os.path.join(BASE_DIR, '.env'))
 
-# Configurar credenciales de Google Cloud desde .env
 if os.getenv("GOOGLE_APPLICATION_CREDENTIALS"):
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
 
@@ -25,37 +23,36 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Middleware de rate limiting (debe ir primero)
+origins = os.getenv("CORS_ORIGINS", "*").split(",")
+
 app.add_middleware(
     RateLimitMiddleware,
-    max_requests=100,
-    window_seconds=60
+    max_requests=int(os.getenv("RATE_LIMIT_MAX_REQUESTS", "100")),
+    window_seconds=int(os.getenv("RATE_LIMIT_WINDOW_SECONDS", "60"))
 )
 
-# Middleware de logging y seguridad
 app.add_middleware(SecurityLoggingMiddleware)
 
-# CORS Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # TODO: Configurar dominios específicos en producción
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+app.include_router(auth_router)
+app.include_router(router)
 app.include_router(rag_router)
 app.include_router(rag_feedback_router)
 app.include_router(coach_router)
 
 @app.get("/health")
 def health_check():
-    """Health check endpoint - público para monitoreo."""
     return {"status": "ok", "message": "Holy Oly engines running"}
 
 @app.get("/")
 def read_root():
-    """Root endpoint - público."""
     return {
         "module": "Holy Oly API",
         "version": "1.0.0",
