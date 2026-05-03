@@ -1,32 +1,10 @@
 services:
-  - type: web
-    name: holy-oly-api
-    env: docker
-    dockerfilePath: ./backend/Dockerfile
-    region: oregon
-    envVars:
-      - key: ENVIRONMENT
-        value: production
-      - key: DATABASE_URL
-        fromDatabase:
-          name: holy-oly-postgres
-          property: connectionString
-    healthCheckPath: /health
-    preDeployCommand: |
-      cd backend && python -m alembic upgrade head || true
-
-  - type: static site
-    name: holy-oly-web
+  - type: static
+    name: peakqual-app
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: ./frontend/dist
+    pullRequestPreviewsEnabled: true
     routes:
-      - path: /
+      - type: rewrite
+        source: /*
         destination: /index.html
-      - path: /api/*
-        destination: https://holy-oly-api.onrender.com/api/:splat
-
-databases:
-  - name: holy-oly-postgres
-    databaseName: holy_oly_db
-    user: holy_oly_user
-    region: oregon
