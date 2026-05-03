@@ -109,30 +109,45 @@
       <div style="font-size:10px;color:var(--muted);">12 atletas</div>
     </div>
     <div class="card" style="margin-bottom:14px;">
-      <div class="ath-row">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--red),#FF6B35);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:white;">M</div>
-          <div><div style="font-size:12px;font-weight:700;color:var(--text);">Marco Torres</div><div style="font-size:10px;color:var(--muted);">CF 72 · Wise <span style="color:#00E676;">84</span></div></div>
+        <div class="ath-row" onclick="go('V1D_volta_deepdive.html')">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--red),#FF6B35);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:white;">M</div>
+            <div><div style="font-size:12px;font-weight:700;color:var(--text);">Marco Torres</div><div style="font-size:10px;color:var(--muted);">Wise 72</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div class="alert-badge ab-critical" style="font-size:9px;padding:2px 6px;">🔴</div>
+            <div style="font-size:12px;color:var(--muted);">›</div>
+          </div>
         </div>
         <div style="display:flex;align-items:center;gap:6px;">
           <div class="alert-badge ab-critical" style="font-size:9px;padding:2px 6px;">🔴</div>
           <div style="font-size:12px;color:var(--muted);">›</div>
         </div>
       </div>
-      <div class="ath-row">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--amber),#FF8C00);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#07070F;">C</div>
-          <div><div style="font-size:12px;font-weight:700;color:var(--text);">Carla Vega</div><div style="font-size:10px;color:var(--muted);">CF 65 · Wise <span style="color:var(--amber);">42</span></div></div>
+        <div class="ath-row" onclick="go('V1D_volta_deepdive.html')">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--amber),#FF8C00);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#07070F;">C</div>
+            <div><div style="font-size:12px;font-weight:700;color:var(--text);">Carla Vega</div><div style="font-size:10px;color:var(--muted);">Wise 65</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div class="alert-badge ab-warning" style="font-size:9px;padding:2px 6px;">⚠</div>
+            <div style="font-size:12px;color:var(--muted);">›</div>
+          </div>
         </div>
         <div style="display:flex;align-items:center;gap:6px;">
           <div class="alert-badge ab-warning" style="font-size:9px;padding:2px 6px;">⚠</div>
           <div style="font-size:12px;color:var(--muted);">›</div>
         </div>
       </div>
-      <div class="ath-row">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),#0070FF);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#07070F;">D</div>
-          <div><div style="font-size:12px;font-weight:700;color:var(--text);">Diego Salas</div><div style="font-size:10px;color:var(--muted);">CF 71 · Wise <span style="color:var(--amber);">55</span></div></div>
+        <div class="ath-row" onclick="go('V1D_volta_deepdive.html')">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),#0070FF);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#07070F;">D</div>
+            <div><div style="font-size:12px;font-weight:700;color:var(--text);">Diego Salas</div><div style="font-size:10px;color:var(--muted);">Wise 71</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div class="alert-badge ab-warning" style="font-size:9px;padding:2px 6px;">⚠</div>
+            <div style="font-size:12px;color:var(--muted);">›</div>
+          </div>
         </div>
         <div style="display:flex;align-items:center;gap:6px;">
           <div class="alert-badge ab-warning" style="font-size:9px;padding:2px 6px;">⚠</div>
@@ -160,13 +175,13 @@
     </div>
   </div>
 
-  <div class="bottom-nav">
-    <div class="nav-item"><span class="nav-icon">🏠</span><span class="nav-txt active">Inicio</span><div class="nav-dot"></div></div>
-    <div class="nav-item"><span class="nav-icon">👥</span><span class="nav-txt">Atletas</span></div>
-    <div class="nav-item"><span class="nav-icon">📋</span><span class="nav-txt">Programas</span></div>
-    <div class="nav-item"><span class="nav-icon">🛠</span><span class="nav-txt">Tools</span></div>
-    <div class="nav-item"><span class="nav-icon">👤</span><span class="nav-txt">Perfil</span></div>
-  </div>
+    <div class="bottom-nav">
+      <div class="nav-item" onclick="go('V1C_volta_coach.html')"><span class="nav-icon">🏠</span><span class="nav-txt active">Hub</span><div class="nav-dot"></div></div>
+      <div class="nav-item" onclick="go('V1C_volta_coach.html')"><span class="nav-icon">👥</span><span class="nav-txt">Equipo</span></div>
+      <div class="nav-item" onclick="go('C7_C8_C9_coach_tools.html')"><span class="nav-icon">📋</span><span class="nav-txt">Programación</span></div>
+      <div class="nav-item" onclick="go('C5_C6_add_athlete_assign_macro.html')"><span class="nav-icon">🛠</span><span class="nav-txt">Asignar</span></div>
+      <div class="nav-item" onclick="go('B15_perfil_atleta.html')"><span class="nav-icon">👤</span><span class="nav-txt">Perfil</span></div>
+    </div>
 </div>
 <script src="_nav.js"></script>
 </body>

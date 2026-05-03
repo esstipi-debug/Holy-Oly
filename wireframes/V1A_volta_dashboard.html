@@ -153,7 +153,7 @@
         <div style="font-size:11px;color:var(--text);margin-top:4px;">• Volumen total: <span style="color:var(--amber);font-weight:700;">-15%</span> accesorios</div>
       </div>
       <div style="padding:12px 14px;border-top:1px solid var(--line);display:flex;gap:8px;">
-        <button style="flex:1;padding:10px;background:var(--cyan);color:#07070F;border:none;border-radius:12px;font-size:13px;font-weight:800;cursor:pointer;">Iniciar WOD</button>
+        <button onclick="go('V1B_volta_prewod.html')" style="flex:1;padding:10px;background:var(--cyan);color:#07070F;border:none;border-radius:12px;font-size:13px;font-weight:800;cursor:pointer;">Iniciar WOD</button>
         <button style="padding:10px 14px;background:var(--surface2);color:var(--muted);border:1px solid var(--line);border-radius:12px;font-size:12px;font-weight:700;cursor:pointer;">Ver detalle</button>
       </div>
     </div>
@@ -180,13 +180,12 @@
     </div>
   </div>
 
-  <div class="bottom-nav">
-    <div class="nav-item"><span class="nav-icon">🏠</span><span class="nav-txt active">Inicio</span><div class="nav-dot"></div></div>
-    <div class="nav-item"><span class="nav-icon">⚡</span><span class="nav-txt">WOD</span></div>
-    <div class="nav-item"><span class="nav-icon">📊</span><span class="nav-txt">Stats</span></div>
-    <div class="nav-item"><span class="nav-icon">🏅</span><span class="nav-txt">Logros</span></div>
-    <div class="nav-item"><span class="nav-icon">👤</span><span class="nav-txt">Perfil</span></div>
-  </div>
+    <div class="bottom-nav">
+      <div class="nav-item" onclick="go('V1A_volta_dashboard.html')"><span class="nav-icon">🏠</span><span class="nav-txt active">Inicio</span><div class="nav-dot"></div></div>
+      <div class="nav-item" onclick="go('V3_volta_wod_log.html')"><span class="nav-icon">⚡</span><span class="nav-txt">WOD</span></div>
+      <div class="nav-item" onclick="go('V5_volta_ia_chat.html')"><span class="nav-icon">📊</span><span class="nav-txt">Stats</span></div>
+      <div class="nav-item" onclick="go('V4_volta_perfil.html')"><span class="nav-icon">👤</span><span class="nav-txt">Perfil</span></div>
+    </div>
 </div>
 <script src="_nav.js"></script>
 </body>

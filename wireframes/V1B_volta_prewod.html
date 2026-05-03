@@ -125,7 +125,7 @@
     <div style="display:flex;flex-direction:column;gap:8px;">
       <button style="padding:14px;background:var(--cyan);color:#07070F;border:none;border-radius:14px;font-size:14px;font-weight:900;cursor:pointer;width:100%;">⚡ Iniciar WOD (modificado) +30 Wise</button>
       <button style="padding:12px;background:var(--surface2);color:var(--text);border:1px solid var(--line);border-radius:14px;font-size:13px;font-weight:700;cursor:pointer;width:100%;">😴 Cambiar a movilidad / descanso +50 Wise</button>
-      <button style="padding:12px;background:transparent;color:var(--muted);border:1px solid var(--line);border-radius:14px;font-size:12px;font-weight:600;cursor:pointer;width:100%;">Ver WOD sin cambios · sin pts Wise</button>
+      <button onclick="go('V1E_volta_session_active.html')" style="padding:12px;background:transparent;color:var(--muted);border:1px solid var(--line);border-radius:14px;font-size:12px;font-weight:600;cursor:pointer;width:100%;">Ver WOD sin cambios · sin pts Wise</button>
     </div>
   </div>
 
@@ -138,11 +138,11 @@
   </div>
 
   <div class="bottom-nav">
-    <div class="nav-item"><span class="nav-icon">🏠</span><span class="nav-txt">Inicio</span></div>
-    <div class="nav-item"><span class="nav-icon">⚡</span><span class="nav-txt active">WOD</span><div class="nav-dot"></div></div>
-    <div class="nav-item"><span class="nav-icon">📊</span><span class="nav-txt">Stats</span></div>
+    <div class="nav-item" onclick="go('V1A_volta_dashboard.html')" style="cursor:pointer;"><span class="nav-icon">🏠</span><span class="nav-txt">Inicio</span></div>
+    <div class="nav-item" onclick="go('V3_volta_wod_log.html')" style="cursor:pointer;"><span class="nav-icon">⚡</span><span class="nav-txt active">WOD</span><div class="nav-dot"></div></div>
+    <div class="nav-item" onclick="go('V5_volta_ia_chat.html')" style="cursor:pointer;"><span class="nav-icon">📊</span><span class="nav-txt">Chat IA</span></div>
     <div class="nav-item"><span class="nav-icon">🏅</span><span class="nav-txt">Logros</span></div>
-    <div class="nav-item"><span class="nav-icon">👤</span><span class="nav-txt">Perfil</span></div>
+    <div class="nav-item" onclick="go('V4_volta_perfil.html')" style="cursor:pointer;"><span class="nav-icon">👤</span><span class="nav-txt">Perfil</span></div>
   </div>
 </div>
 <script src="_nav.js"></script>

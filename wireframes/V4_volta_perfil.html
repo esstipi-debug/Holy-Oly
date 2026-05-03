@@ -40,9 +40,11 @@
         <div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
           <div class="badge badge-cyan">Rx</div>
           <span style="font-size:11px;color:var(--muted);">28 años · 80kg · CrossFit Norte</span>
+      </div>
+      <div style="font-size:14px;cursor:pointer;color:var(--muted);" onclick="go('A1_A2_A3_auth.html')">⚙ Cerrar sesión</div>
         </div>
       </div>
-      <div style="font-size:14px;cursor:pointer;color:var(--muted);">⚙</div>
+       <div style="font-size:14px;cursor:pointer;color:var(--muted);" onclick="go('B16_theme_gallery.html')">⚙ Apariencia/Tema</div>
     </div>
 
     <!-- CF Index + Wise Score hero -->
@@ -263,11 +265,11 @@
 
   <!-- Bottom nav -->
   <div style="position:absolute;bottom:0;left:0;right:0;height:64px;background:rgba(7,7,15,0.97);border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-around;padding-bottom:6px;">
-    <div style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;"><span style="font-size:18px;">🏠</span><span style="font-size:9px;color:var(--muted);font-weight:700;">Inicio</span></div>
-    <div style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;"><span style="font-size:18px;">⚡</span><span style="font-size:9px;color:var(--muted);font-weight:700;">WOD</span></div>
-    <div style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;"><span style="font-size:18px;">📊</span><span style="font-size:9px;color:var(--muted);font-weight:700;">Stats</span></div>
-    <div style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;"><span style="font-size:18px;">🏅</span><span style="font-size:9px;color:var(--muted);font-weight:700;">Logros</span></div>
-    <div style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;">
+    <div onclick="go('V1A_volta_dashboard.html')" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;"><span style="font-size:18px;">🏠</span><span style="font-size:9px;color:var(--muted);font-weight:700;">Inicio</span></div>
+    <div onclick="go('V3_volta_wod_log.html')" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;"><span style="font-size:18px;">⚡</span><span style="font-size:9px;color:var(--muted);font-weight:700;">WOD Log</span></div>
+    <div onclick="go('V5_volta_ia_chat.html')" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;"><span style="font-size:18px;">📊</span><span style="font-size:9px;color:var(--muted);font-weight:700;">Chat IA</span></div>
+    <div onclick="go('V7_volta_pildoras.html')" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;"><span style="font-size:18px;">🏅</span><span style="font-size:9px;color:var(--muted);font-weight:700;">Logros</span></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;" onclick="go('V4_volta_perfil.html')">
       <span style="font-size:18px;">👤</span>
       <span style="font-size:9px;font-weight:700;color:var(--cyan);">Perfil</span>
       <div style="width:4px;height:4px;border-radius:50%;background:var(--cyan);box-shadow:0 0 6px var(--cyan);"></div>

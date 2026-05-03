@@ -41,7 +41,7 @@
   </div>
 
   <div style="padding:10px 20px 0;display:flex;align-items:center;gap:10px;">
-    <div style="font-size:18px;cursor:pointer;color:var(--muted);">←</div>
+    <div onclick="back('V1C_volta_coach.html')" style="font-size:18px;cursor:pointer;color:var(--muted);">←</div>
     <div style="font-size:15px;font-weight:700;color:var(--muted);">Atleta</div>
   </div>
 
@@ -152,11 +152,11 @@
   </div>
 
   <div class="bottom-nav">
-    <div class="nav-item"><span class="nav-icon">🏠</span><span class="nav-txt">Inicio</span></div>
-    <div class="nav-item"><span class="nav-icon">👥</span><span class="nav-txt active">Atletas</span><div class="nav-dot"></div></div>
-    <div class="nav-item"><span class="nav-icon">📋</span><span class="nav-txt">Programas</span></div>
-    <div class="nav-item"><span class="nav-icon">🛠</span><span class="nav-txt">Tools</span></div>
-    <div class="nav-item"><span class="nav-icon">👤</span><span class="nav-txt">Perfil</span></div>
+    <div class="nav-item" onclick="go('V1C_volta_coach.html')"><span class="nav-icon">🏠</span><span class="nav-txt">Hub</span></div>
+    <div class="nav-item" onclick="go('V1C_volta_coach.html')"><span class="nav-icon">👥</span><span class="nav-txt active">Equipo</span><div class="nav-dot"></div></div>
+    <div class="nav-item" onclick="go('C7_C8_C9_coach_tools.html')"><span class="nav-icon">📋</span><span class="nav-txt">Programación</span></div>
+    <div class="nav-item" onclick="go('C5_C6_add_athlete_assign_macro.html')"><span class="nav-icon">🛠</span><span class="nav-txt">Asignar</span></div>
+    <div class="nav-item" onclick="go('B15_perfil_atleta.html')"><span class="nav-icon">👤</span><span class="nav-txt">Perfil</span></div>
   </div>
 </div>
 <script src="_nav.js"></script>

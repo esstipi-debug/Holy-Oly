@@ -169,7 +169,7 @@
                 <p class="text-red-300 font-black text-sm">🔥 Tu Elite Trial termina en 5 días</p>
                 <p class="text-red-400/70 text-xs">Día 40 de 45 · Después pierdes todos tus motores</p>
               </div>
-              <button class="bg-white text-red-600 font-black text-xs px-3 py-2 rounded-xl whitespace-nowrap">Subir ahora</button>
+              <button class="bg-white text-red-600 font-black text-xs px-3 py-2 rounded-xl whitespace-nowrap" onclick="go('B15_perfil_atleta.html')">Subir ahora</button>
             </div>
             <!-- Progress bar countdown -->
             <div class="mt-2 prog-bar" style="background: rgba(239,68,68,.2);">
@@ -264,7 +264,7 @@
                   <p class="text-purple-200 text-xs line-through">$19</p>
                 </div>
               </div>
-              <button class="w-full bg-white text-purple-700 font-black text-sm py-3.5 rounded-2xl">
+              <button class="w-full bg-white text-purple-700 font-black text-sm py-3.5 rounded-2xl" onclick="go('B15_perfil_atleta.html')">
                 🚀 Mantener acceso Elite
               </button>
               <p class="text-purple-200/60 text-xs text-center mt-2">Cancela cuando quieras · Sin permanencia</p>
@@ -337,7 +337,7 @@
                 <p class="text-slate-400 font-bold text-sm">Tu Elite Trial ha terminado</p>
                 <p class="text-slate-600 text-xs">Los motores inteligentes están pausados</p>
               </div>
-              <button class="bg-indigo-600 text-white font-bold text-xs px-3 py-1.5 rounded-xl">Reactivar</button>
+              <button class="bg-indigo-600 text-white font-bold text-xs px-3 py-1.5 rounded-xl" onclick="go('B15_perfil_atleta.html')">Reactivar</button>
             </div>
           </div>
 
@@ -404,7 +404,7 @@
                 <p class="text-slate-600 text-xs">Esta sesión no fue adaptada a tu estado físico de hoy.<br/>
                   <span class="text-slate-500">Activa Elite para entrenamiento inteligente.</span></p>
               </div>
-              <button class="w-full mt-3 bg-slate-800 text-slate-500 font-bold text-sm py-3 rounded-2xl border border-slate-700">
+              <button class="w-full mt-3 bg-slate-800 text-slate-500 font-bold text-sm py-3 rounded-2xl border border-slate-700" onclick="go('B1_dashboard_atleta.html')">
                 Registrar sesión genérica
               </button>
             </div>
@@ -556,7 +556,7 @@
   </div>
 
   <div class="text-center mt-8 mb-4">
-    <a href="index.html" class="text-indigo-400 text-sm hover:text-indigo-300 transition-colors">← Volver al índice</a>
+    <a onclick="back('B1_dashboard_atleta.html')" class="text-indigo-400 text-sm hover:text-indigo-300 transition-colors;cursor:pointer;">← Volver al inicio</a>
   </div>
 
 <script src="_nav.js"></script>

@@ -177,22 +177,22 @@
 
   <!-- Bottom Nav -->
   <div style="height:76px; background:#0E0E1C; border-top:1px solid #1e1e30; display:flex; align-items:center; justify-content:space-around; padding-bottom:12px;">
-    <div style="display:flex; flex-direction:column; align-items:center; gap:3px;">
+    <div style="display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer;" onclick="go('C1_command_center_coach.html')">
       <svg width="22" height="22" fill="none" stroke="#3B82F6" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-      <span style="font-size:10px; color:#3B82F6; font-weight:700;">Atletas</span>
+      <span style="font-size:10px; color:#3B82F6; font-weight:700;">Hub/Equipo</span>
     </div>
-    <div style="display:flex; flex-direction:column; align-items:center; gap:3px;">
+    <div style="display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer;" onclick="go('C5_C6_add_athlete_assign_macro.html')">
       <svg width="22" height="22" fill="none" stroke="#475569" stroke-width="2" viewBox="0 0 24 24"><path d="M8 7V3m8 4v-4m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-      <span style="font-size:10px; color:#475569;">Agenda</span>
+      <span style="font-size:10px; color:#475569;">Asignar</span>
     </div>
-    <div style="display:flex; flex-direction:column; align-items:center; gap:3px;">
+    <div style="display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer;" onclick="go('B15_perfil_atleta.html')">
       <svg width="22" height="22" fill="none" stroke="#475569" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
-      <span style="font-size:10px; color:#475569;">Ajustes</span>
+      <span style="font-size:10px; color:#475569;">Perfil</span>
     </div>
   </div>
 </div>
 
-<a href="index.html" style="position:fixed; top:20px; left:20px; background:#1e1e30; color:#94a3b8; font-size:13px; padding:8px 14px; border-radius:10px; text-decoration:none; border:1px solid #2a2a3a; z-index:100;">← Volver</a>
+<a onclick="back('C1_command_center_coach.html')" style="position:fixed; top:20px; left:20px; background:#1e1e30; color:#94a3b8; font-size:13px; padding:8px 14px; border-radius:10px; text-decoration:none; border:1px solid #2a2a3a; z-index:100;cursor:pointer;">← Volver</a>
 
 <script src="_nav.js"></script>
 </body>
