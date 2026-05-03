@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PeakQual — Preview</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #07070F;
+      font-family: system-ui, -apple-system, sans-serif;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ── TOP BAR ── */
+    .bar {
+      width: 100%;
+      height: 52px;
+      background: #0B0B18;
+      border-bottom: 1px solid #1E1E32;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 12px;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+    .icon-btn {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      background: #1A1A28;
+      border: 1px solid #2A2A3A;
+      color: #94a3b8;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: background .15s;
+      line-height: 1;
+    }
+    .icon-btn:hover { background: #252538; color: #EAEAF5; }
+    .screen-name {
+      flex: 1;
+      font-size: 13px;
+      font-weight: 700;
+      color: #EAEAF5;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .brand {
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 3px;
+      color: #334155;
+    }
+
+    /* ── STAGE (desktop: phone frame) ── */
+    .stage {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      overflow: hidden;
+    }
+
+    .phone {
+      position: relative;
+      width: 393px;
+      height: min(852px, calc(100vh - 52px - 48px));
+      border-radius: 50px;
+      border: 2px solid #2A2A3A;
+      overflow: hidden;
+      box-shadow:
+        0 0 0 10px #0B0B18,
+        0 0 0 12px #1E1E32,
+        0 40px 120px rgba(0,0,0,.8);
+      flex-shrink: 0;
+    }
+    /* notch */
+    .phone::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 100px; height: 26px;
+      background: #0B0B18;
+      border-radius: 0 0 18px 18px;
+      z-index: 5;
+    }
+    .phone iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    /* ── MOBILE: fullscreen iframe ── */
+    @media (max-width: 500px) {
+      .stage { padding: 0; }
+      .phone {
+        width: 100vw;
+        height: calc(100vh - 52px);
+        border-radius: 0;
+        border: none;
+        box-shadow: none;
+      }
+      .phone::before { display: none; }
+    }
+
+    /* ── SIDEBAR OVERLAY ── */
+    .overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.75);
+      z-index: 100;
+      backdrop-filter: blur(4px);
+    }
+    .overlay.open { display: block; }
+
+    .sidebar {
+      position: fixed;
+      top: 0; right: 0;
+      width: 280px;
+      height: 100vh;
+      background: #0B0B18;
+      border-left: 1px solid #1E1E32;
+      overflow-y: auto;
+      z-index: 101;
+      padding: 16px 12px 32px;
+    }
+    .sidebar-close {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 12px;
+    }
+    .s-section {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: #334155;
+      margin: 20px 0 6px 8px;
+    }
+    .s-section:first-of-type { margin-top: 4px; }
+    .s-link {
+      display: block;
+      padding: 9px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      color: #64748b;
+      cursor: pointer;
+      margin-bottom: 2px;
+    }
+    .s-link:hover { background: #1A1A28; color: #EAEAF5; }
+    .s-link.active { background: #1A1A28; color: #EAEAF5; font-weight: 700; }
+
+    /* ── BREADCRUMB ── */
+    .back-indicator {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #22c55e;
+      flex-shrink: 0;
+      display: none;
+    }
+    .back-indicator.visible { display: block; }
+  </style>
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <div class="bar">
+    <button class="icon-btn" id="back-btn" onclick="goBack()" title="Atrás">←</button>
+    <div class="back-indicator" id="back-dot"></div>
+    <span class="screen-name" id="screen-name">PeakQual</span>
+    <span class="brand">PEAKQUAL</span>
+    <button class="icon-btn" onclick="goHome()" title="Inicio">⌂</button>
+    <button class="icon-btn" onclick="openSidebar()" title="Pantallas">≡</button>
+  </div>
+
+  <!-- PHONE FRAME -->
+  <div class="stage">
+    <div class="phone">
+      <iframe id="frame" src="A1_A2_A3_auth.html" allow="*"></iframe>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="overlay" id="overlay" onclick="closeSidebar()">
+    <div class="sidebar" onclick="event.stopPropagation()">
+      <div class="sidebar-close">
+        <button class="icon-btn" onclick="closeSidebar()">✕</button>
+      </div>
+
+      <div class="s-section">🏋️ Holy Oly — Atleta</div>
+      <div class="s-link" onclick="nav('A1_A2_A3_auth.html','Login / Registro')">A1–A3 · Login</div>
+      <div class="s-link" onclick="nav('D1_onboarding_atleta.html','Onboarding')">D1 · Onboarding</div>
+      <div class="s-link" onclick="nav('B1_dashboard_atleta.html','Dashboard')">B1 · Dashboard</div>
+      <div class="s-link" onclick="nav('B3_injury_shield.html','Injury Shield')">B3 · Injury Shield</div>
+      <div class="s-link" onclick="nav('B4_session_summary.html','Resumen de Sesión')">B4 · Resumen Sesión</div>
+      <div class="s-link" onclick="nav('B5_warmup_generator.html','Warmup Generator')">B5 · Warmup</div>
+      <div class="s-link" onclick="nav('B6_active_session.html','Sesión Activa')">B6 · Sesión Activa</div>
+      <div class="s-link" onclick="nav('B7_B8_victory_screen.html','Victoria')">B7/B8 · Victoria</div>
+      <div class="s-link" onclick="nav('B9_social_card.html','Social Card')">B9 · Social Card</div>
+      <div class="s-link" onclick="nav('B10_performance_deep_dive.html','Performance')">B10 · Performance</div>
+      <div class="s-link" onclick="nav('B11_oly_index.html','OLY Index')">B11 · OLY Index</div>
+      <div class="s-link" onclick="nav('B12_B13_pulse_hub.html','Pulse Hub')">B12/B13 · Pulse Hub</div>
+      <div class="s-link" onclick="nav('B14_pildoras_stories.html','Píldoras')">B14 · Píldoras</div>
+      <div class="s-link" onclick="nav('B15_perfil_atleta.html','Perfil Atleta')">B15 · Perfil</div>
+      <div class="s-link" onclick="nav('B16_theme_gallery.html','Temas')">B16 · Temas</div>
+      <div class="s-link" onclick="nav('D2_free_premium_transition.html','Free → Premium')">D2 · Free → Premium</div>
+
+      <div class="s-section">🏅 Holy Oly — Coach</div>
+      <div class="s-link" onclick="nav('C1_command_center_coach.html','Command Center')">C1 · Command Center</div>
+      <div class="s-link" onclick="nav('C4_athlete_deep_dive.html','Athlete Deep Dive')">C4 · Deep Dive 360°</div>
+      <div class="s-link" onclick="nav('C5_C6_add_athlete_assign_macro.html','Añadir Atleta')">C5/C6 · Añadir Atleta</div>
+      <div class="s-link" onclick="nav('C7_C8_C9_coach_tools.html','Herramientas Coach')">C7–C9 · Herramientas</div>
+
+      <div class="s-section">⚡ Volta CrossFit</div>
+      <div class="s-link" onclick="nav('V2_volta_onboarding.html','Onboarding Volta')">V2 · Onboarding</div>
+      <div class="s-link" onclick="nav('V1A_volta_dashboard.html','Dashboard Volta')">V1A · Dashboard</div>
+      <div class="s-link" onclick="nav('V1B_volta_prewod.html','Pre-WOD')">V1B · Pre-WOD</div>
+      <div class="s-link" onclick="nav('V1E_volta_session_active.html','WOD Activo')">V1E · WOD Activo</div>
+      <div class="s-link" onclick="nav('V1F_volta_victory.html','Victoria Volta')">V1F · Victoria</div>
+      <div class="s-link" onclick="nav('V6_volta_social_card.html','Social Card Volta')">V6 · Social Card</div>
+      <div class="s-link" onclick="nav('V1C_volta_coach.html','Coach Volta')">V1C · Coach View</div>
+      <div class="s-link" onclick="nav('V3_volta_wod_log.html','WOD Log')">V3 · WOD Log</div>
+      <div class="s-link" onclick="nav('V4_volta_perfil.html','Perfil Volta')">V4 · Perfil</div>
+      <div class="s-link" onclick="nav('V5_volta_ia_chat.html','Chat IA')">V5 · Chat IA</div>
+      <div class="s-link" onclick="nav('V7_volta_pildoras.html','Píldoras Volta')">V7 · Píldoras</div>
+      <div class="s-link" onclick="nav('V9_volta_free_premium.html','Free → Premium Volta')">V9 · Free → Premium</div>
+    </div>
+  </div>
+
+  <script>
+    var frame   = document.getElementById('frame');
+    var nameEl  = document.getElementById('screen-name');
+    var backDot = document.getElementById('back-dot');
+    var stack   = []; // history stack: [{src, name}]
+
+    function updateBack() {
+      backDot.classList.toggle('visible', stack.length > 0);
+    }
+
+    // ── Exposed to iframes via window.parent ──
+    window.openModal = function(file, title) {
+      stack.push({ src: frame.src, name: nameEl.textContent });
+      frame.src = file;
+      nameEl.textContent = title || file.replace('.html', '').replace(/_/g, ' ');
+      updateBack();
+      closeSidebar();
+    };
+
+    window.closeModal = function() {
+      goBack();
+    };
+
+    // ── Controls ──
+    function goBack() {
+      if (stack.length > 0) {
+        var prev = stack.pop();
+        frame.src = prev.src;
+        nameEl.textContent = prev.name;
+        updateBack();
+      }
+    }
+
+    function goHome() {
+      stack = [];
+      frame.src = 'A1_A2_A3_auth.html';
+      nameEl.textContent = 'PeakQual';
+      updateBack();
+    }
+
+    function nav(file, title) {
+      window.openModal(file, title);
+    }
+
+    function openSidebar()  { document.getElementById('overlay').classList.add('open'); }
+    function closeSidebar() { document.getElementById('overlay').classList.remove('open'); }
+  </script>
+
+</body>
+</html>
