@@ -1,0 +1,17 @@
+.git
+.gitignore
+*.md
+.env.local
+.env.*.local
+node_modules
+__pycache__
+.pytest_cache
+.venv
+venv
+.DS_Store
+*.pyc
+.claude
+.vscode
+frontend/dist
+backend/.venv
+.next
