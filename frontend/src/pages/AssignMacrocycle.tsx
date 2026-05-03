@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Card from '../components/Card';
-import Badge from '../components/Badge';
 import Button from '../components/Button';
 
 const AssignMacrocycle: React.FC = () => {
+  const navigate = useNavigate();
+  const [selected, setSelected] = useState<string | null>(null);
   const schools = [
     { id: 'bulgarian', name: 'Bulgarian Method', desc: 'Max Intensity, High Frequency.', color: 'border-red-500' },
     { id: 'soviet', name: 'Soviet System', desc: 'Volume based, technical precision.', color: 'border-holy-cyan' },
@@ -15,7 +17,7 @@ const AssignMacrocycle: React.FC = () => {
     <div className="flex flex-col h-full bg-[#07070F]">
       <div className="px-6 py-8 flex-1 overflow-y-auto">
         <header className="mb-8">
-           <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400 mb-4">←</div>
+           <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400 mb-4 hover:text-white" aria-label="Volver">←</button>
            <h1 className="text-white text-2xl font-black">Asignar Macrociclo</h1>
            <p className="text-slate-500 text-xs font-bold uppercase mt-1">Selecciona la escuela filosófica para el atleta</p>
         </header>
@@ -34,10 +36,11 @@ const AssignMacrocycle: React.FC = () => {
            <h3 className="text-slate-500 text-[10px] font-black uppercase tracking-widest pl-1">Escuelas Disponibles</h3>
            
            {schools.map(school => (
-             <Card 
-               key={school.id} 
-               variant="glass" 
-               className={`border-l-4 ${school.color} hover:bg-white/[0.08] cursor-pointer group transition-all`}
+             <Card
+               key={school.id}
+               variant="glass"
+               onClick={() => setSelected(school.id)}
+               className={`border-l-4 ${school.color} hover:bg-white/[0.08] cursor-pointer group transition-all ${selected === school.id ? 'ring-2 ring-holy-cyan/40' : ''}`}
              >
                 <div className="flex justify-between items-start">
                    <div className="flex-1 pr-4">
@@ -69,7 +72,7 @@ const AssignMacrocycle: React.FC = () => {
       </div>
 
       <footer className="p-6">
-         <Button fullWidth variant="primary" size="lg" className="bg-holy-cyan hover:brightness-110 shadow-holy-cyan/20 font-black">CONFIRMAR MACROCICLO</Button>
+         <Button fullWidth variant="primary" size="lg" className="bg-holy-cyan hover:brightness-110 shadow-holy-cyan/20 font-black" disabled={!selected} onClick={() => navigate('/coach')}>CONFIRMAR MACROCICLO</Button>
       </footer>
     </div>
   );

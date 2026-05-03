@@ -1,9 +1,11 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import Badge from '../components/Badge';
 
 const VictoryScreen: React.FC = () => {
+  const navigate = useNavigate();
   return (
     <div className="flex flex-col h-full bg-[#07070F] overflow-hidden relative">
       {/* Background Glows */}
@@ -66,8 +68,8 @@ const VictoryScreen: React.FC = () => {
 
       {/* Footer Buttons */}
       <footer className="p-6 pt-0 space-y-3 relative z-10">
-         <Button fullWidth variant="gold" size="lg">COMPARTIR VICTORIA 📱</Button>
-         <Button fullWidth variant="ghost" className="text-slate-500">Volver al Dashboard</Button>
+         <Button fullWidth variant="gold" size="lg" onClick={() => navigate('/social')}>COMPARTIR VICTORIA 📱</Button>
+         <Button fullWidth variant="ghost" className="text-slate-500" onClick={() => navigate('/home')}>Volver al Dashboard</Button>
       </footer>
     </div>
   );

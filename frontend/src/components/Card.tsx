@@ -6,14 +6,16 @@ interface CardProps {
   variant?: 'glass' | 'solid' | 'outline';
   padding?: 'none' | 'sm' | 'md' | 'lg';
   hover?: boolean;
+  onClick?: React.MouseEventHandler<HTMLDivElement>;
 }
 
-const Card: React.FC<CardProps> = ({ 
-  children, 
-  className = '', 
+const Card: React.FC<CardProps> = ({
+  children,
+  className = '',
   variant = 'glass',
   padding = 'md',
-  hover = false
+  hover = false,
+  onClick,
 }) => {
   const baseStyles = 'rounded-2xl transition-all duration-300 overflow-hidden';
   
@@ -33,7 +35,12 @@ const Card: React.FC<CardProps> = ({
   const hoverStyles = hover ? 'hover:border-holy-primary/30 hover:bg-white/[0.08] cursor-pointer' : '';
 
   return (
-    <div className={`${baseStyles} ${variants[variant]} ${paddings[padding]} ${hoverStyles} ${className}`}>
+    <div
+      className={`${baseStyles} ${variants[variant]} ${paddings[padding]} ${hoverStyles} ${className}`}
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+    >
       {children}
     </div>
   );

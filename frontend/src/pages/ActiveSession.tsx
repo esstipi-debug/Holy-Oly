@@ -1,21 +1,32 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import Badge from '../components/Badge';
 import Input from '../components/Input';
 
+const TOTAL_BLOCKS = 4;
+
 const ActiveSession: React.FC = () => {
+  const navigate = useNavigate();
+  const [block, setBlock] = useState(1);
+
+  const advance = () => {
+    if (block >= TOTAL_BLOCKS) navigate('/victory');
+    else setBlock(b => b + 1);
+  };
+
   return (
     <div className="flex flex-col h-full">
       {/* Header / Timer */}
       <header className="px-6 py-4 flex justify-between items-center bg-holy-surface/50 backdrop-blur-md sticky top-0 z-10">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-holy-surface border border-slate-800 flex items-center justify-center">
+          <button onClick={() => navigate('/home')} className="w-8 h-8 rounded-lg bg-holy-surface border border-slate-800 flex items-center justify-center hover:border-slate-600" aria-label="Salir">
              <span className="text-slate-400 text-xs">←</span>
-          </div>
+          </button>
           <div>
             <h2 className="text-white text-sm font-bold">Snatch + OHS</h2>
-            <p className="text-holy-primary text-[10px] font-black uppercase">Bloque A · Serie 1/4</p>
+            <p className="text-holy-primary text-[10px] font-black uppercase">Bloque A · Serie {block}/{TOTAL_BLOCKS}</p>
           </div>
         </div>
         <div className="text-right">
@@ -56,8 +67,8 @@ const ActiveSession: React.FC = () => {
           </div>
 
           <div className="flex gap-2 pt-2">
-            <Button variant="secondary" fullWidth>FALLO</Button>
-            <Button variant="primary" fullWidth>COMPLETAR</Button>
+            <Button variant="secondary" fullWidth onClick={advance}>FALLO</Button>
+            <Button variant="primary" fullWidth onClick={advance}>COMPLETAR</Button>
           </div>
         </div>
 
@@ -78,8 +89,8 @@ const ActiveSession: React.FC = () => {
 
       {/* Persistence Bar / Footer CTA */}
       <footer className="absolute bottom-20 left-6 right-6 pb-4">
-        <Button variant="gold" fullWidth size="lg">
-          SIGUIENTE EJERCICIO →
+        <Button variant="gold" fullWidth size="lg" onClick={advance}>
+          {block >= TOTAL_BLOCKS ? 'TERMINAR SESIÓN →' : 'SIGUIENTE EJERCICIO →'}
         </Button>
       </footer>
     </div>

@@ -1,14 +1,16 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Card from '../components/Card';
 import Badge from '../components/Badge';
 import Button from '../components/Button';
 
 const CommandCenter: React.FC = () => {
+  const navigate = useNavigate();
   const athletes = [
-    { name: 'Miguel Arias', readiness: 9.4, status: 'TRAINING', block: 'Snatch 85%', mood: '🔥' },
-    { name: 'Lorena C.', readiness: 4.2, status: 'FATIGUED', block: 'Rest Advised', mood: '😴' },
-    { name: 'Juan Pérez', readiness: 7.8, status: 'WARMUP', block: 'C&J Tech', mood: '⚡' },
-    { name: 'Dani G.', readiness: 6.5, status: 'IDLE', block: '-', mood: '😐' },
+    { id: 'miguel-arias', name: 'Miguel Arias', readiness: 9.4, status: 'TRAINING', block: 'Snatch 85%', mood: '🔥' },
+    { id: 'lorena-c', name: 'Lorena C.', readiness: 4.2, status: 'FATIGUED', block: 'Rest Advised', mood: '😴' },
+    { id: 'juan-perez', name: 'Juan Pérez', readiness: 7.8, status: 'WARMUP', block: 'C&J Tech', mood: '⚡' },
+    { id: 'dani-g', name: 'Dani G.', readiness: 6.5, status: 'IDLE', block: '-', mood: '😐' },
   ];
 
   return (
@@ -49,11 +51,12 @@ const CommandCenter: React.FC = () => {
            </div>
 
            {athletes.map((athlete, i) => (
-             <Card 
-               key={i} 
-               variant="solid" 
-               padding="sm" 
+             <Card
+               key={i}
+               variant="solid"
+               padding="sm"
                className="hover:border-holy-cyan/30 cursor-pointer group"
+               onClick={() => navigate(`/coach/athlete/${athlete.id}`)}
              >
                 <div className="flex items-center gap-4">
                    <div className="relative">
@@ -84,8 +87,8 @@ const CommandCenter: React.FC = () => {
                 
                 {athlete.status === 'FATIGUED' && (
                   <div className="mt-3 pt-3 border-t border-white/5 flex gap-2">
-                     <Button variant="danger" size="sm" className="flex-1 text-[9px]">Sugerir Descanso</Button>
-                     <Button variant="secondary" size="sm" className="flex-1 text-[9px]">Ver Deep Dive</Button>
+                     <Button variant="danger" size="sm" className="flex-1 text-[9px]" onClick={e => e.stopPropagation()}>Sugerir Descanso</Button>
+                     <Button variant="secondary" size="sm" className="flex-1 text-[9px]" onClick={(e) => { e.stopPropagation(); navigate(`/coach/athlete/${athlete.id}`); }}>Ver Deep Dive</Button>
                   </div>
                 )}
              </Card>
@@ -95,8 +98,8 @@ const CommandCenter: React.FC = () => {
 
       {/* Bottom Actions */}
       <footer className="p-6 bg-holy-surface/80 backdrop-blur-xl border-t border-slate-800/50 flex gap-3">
-         <Button variant="ghost" fullWidth className="text-holy-cyan font-black italic">PROG. MASIVA</Button>
-         <Button variant="primary" fullWidth className="shadow-holy-cyan/20 bg-holy-cyan">NUEVO ATLETA +</Button>
+         <Button variant="ghost" fullWidth className="text-holy-cyan font-black italic" onClick={() => navigate('/coach/assign')}>PROG. MASIVA</Button>
+         <Button variant="primary" fullWidth className="shadow-holy-cyan/20 bg-holy-cyan" onClick={() => navigate('/onboarding')}>NUEVO ATLETA +</Button>
       </footer>
     </div>
   );

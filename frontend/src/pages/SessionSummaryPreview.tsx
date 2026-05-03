@@ -1,9 +1,11 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import Badge from '../components/Badge';
 
 const SessionSummaryPreview: React.FC = () => {
+  const navigate = useNavigate();
   const workout = {
     title: 'Snatch Day: Speed Focus',
     tags: ['Olympic', 'Technical', 'High Speed'],
@@ -78,7 +80,7 @@ const SessionSummaryPreview: React.FC = () => {
 
       {/* Footer CTA */}
       <footer className="p-6 pt-2">
-         <Button fullWidth variant="primary" size="lg">EMPEZAR CALENTAMIENTO</Button>
+         <Button fullWidth variant="primary" size="lg" onClick={() => navigate('/warmup')}>EMPEZAR CALENTAMIENTO</Button>
       </footer>
     </div>
   );

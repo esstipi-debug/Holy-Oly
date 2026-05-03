@@ -1,15 +1,18 @@
 import React from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import Card from '../components/Card';
 import Badge from '../components/Badge';
 import Button from '../components/Button';
 
 const AthleteDeepDive: React.FC = () => {
+  const navigate = useNavigate();
+  const { id } = useParams();
   return (
     <div className="flex flex-col h-full bg-[#07070F]">
       {/* Top Profile Header */}
       <div className="bg-holy-surface px-6 pt-12 pb-8 rounded-b-[40px] border-b border-slate-800">
          <header className="flex justify-between items-start mb-6">
-            <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400">←</div>
+            <button onClick={() => navigate('/coach')} className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white" aria-label="Volver">←</button>
             <Badge variant="success">ACTIVO</Badge>
          </header>
          
@@ -86,8 +89,8 @@ const AthleteDeepDive: React.FC = () => {
 
       {/* Floating Action Buttons */}
       <footer className="fixed bottom-10 left-10 right-10 flex gap-3">
-         <Button variant="danger" fullWidth size="lg">RESET MACRO</Button>
-         <Button variant="gold" fullWidth size="lg">ENVIAR FEEDBACK</Button>
+         <Button variant="danger" fullWidth size="lg" onClick={() => navigate(`/coach/assign?athlete=${id ?? ''}`)}>RESET MACRO</Button>
+         <Button variant="gold" fullWidth size="lg" onClick={() => navigate('/coach')}>ENVIAR FEEDBACK</Button>
       </footer>
     </div>
   );

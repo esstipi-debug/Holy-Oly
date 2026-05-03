@@ -1,9 +1,11 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Card from '../components/Card';
 import Badge from '../components/Badge';
 import Button from '../components/Button';
 
 const AtletaHome: React.FC = () => {
+  const navigate = useNavigate();
   return (
     <div className="px-6 py-4 space-y-8">
       {/* Header Section */}
@@ -12,9 +14,13 @@ const AtletaHome: React.FC = () => {
           <h2 className="text-white text-2xl font-black">Hola, Juan</h2>
           <p className="text-slate-500 text-xs font-bold uppercase mt-0.5">Semana 4 · Día 3</p>
         </div>
-        <div className="w-10 h-10 rounded-xl bg-holy-gold/20 flex items-center justify-center border border-holy-gold/30">
+        <button
+          onClick={() => navigate('/oly-index')}
+          className="w-10 h-10 rounded-xl bg-holy-gold/20 flex items-center justify-center border border-holy-gold/30 transition hover:brightness-125"
+          aria-label="Oly Index"
+        >
           <span className="text-holy-gold text-sm font-black">74</span>
-        </div>
+        </button>
       </header>
 
       {/* Main Action Card */}
@@ -31,7 +37,7 @@ const AtletaHome: React.FC = () => {
           </div>
 
           <div className="pt-2">
-            <Button fullWidth variant="primary" size="lg">
+            <Button fullWidth variant="primary" size="lg" onClick={() => navigate('/summary')}>
               INICIAR SESIÓN →
             </Button>
           </div>
@@ -65,14 +71,14 @@ const AtletaHome: React.FC = () => {
           <h4 className="text-white text-sm font-bold">Injury Shield</h4>
           <p className="text-slate-500 text-[11px]">Tendón de Aquiles (L) cargado.</p>
         </div>
-        <Button variant="ghost" size="sm" className="text-red-400">Ver</Button>
+        <Button variant="ghost" size="sm" className="text-red-400" onClick={() => navigate('/pulse')}>Ver</Button>
       </Card>
 
       {/* Social / Motivation */}
       <div className="space-y-4 pt-2">
         <div className="flex justify-between items-center">
           <h4 className="text-slate-400 text-xs font-black uppercase">Actividad Club</h4>
-          <span className="text-holy-primary text-[10px] font-bold cursor-pointer">Ver todo</span>
+          <span className="text-holy-primary text-[10px] font-bold cursor-pointer" onClick={() => navigate('/social')}>Ver todo</span>
         </div>
         
         <div className="flex gap-3 overflow-x-auto pb-4 custom-scrollbar scrollbar-hide">

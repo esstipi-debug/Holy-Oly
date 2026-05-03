@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Peak Qual — Design System</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          'holy-bg': '#07070F',
+          'holy-surface': '#111118',
+          'holy-primary': '#22C55E',
+          'holy-gold': '#F59E0B',
+          'holy-cyan': '#06B6D4',
+          'holy-indigo': '#818cf8',
+        },
+        fontFamily: { sans: ['Inter','system-ui','sans-serif'] },
+      },
+    },
+  };
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  body { background:#07070F; color:#94a3b8; font-family:'Inter',system-ui,sans-serif; }
+  .tab-btn[data-active="true"] { background:#22C55E1a; color:#22C55E; border-color:#22C55E40; }
+  .swatch { aspect-ratio:1; }
+  .scroll-shadow { background:linear-gradient(#07070F,#07070F) center/100% 24px no-repeat; }
+  iframe { color-scheme: dark; }
+</style>
+</head>
+<body class="min-h-screen">
+
+<header class="max-w-[1600px] mx-auto px-8 pt-10 pb-6 flex items-end justify-between">
+  <div>
+    <p class="text-[11px] tracking-[0.3em] text-slate-500 font-bold">PEAK QUAL</p>
+    <h1 class="text-white text-3xl font-black italic tracking-tighter mt-1">Design System</h1>
+    <p class="text-slate-500 text-xs mt-2">Tokens · Componentes · Wireframes — entorno único de diseño</p>
+  </div>
+  <div class="flex gap-2">
+    <span class="text-[10px] font-bold px-3 py-1 rounded-full border border-[#FFD70030] bg-[#1a1400] text-[#FFD700]">HOLY OLY</span>
+    <span class="text-[10px] font-bold px-3 py-1 rounded-full border border-[#00E5FF30] bg-[#00090d] text-[#00E5FF]">VOLTA</span>
+    <span class="text-[10px] font-bold px-3 py-1 rounded-full border border-[#A855F730] bg-[#0d0318] text-[#A855F7] opacity-50">AXON</span>
+  </div>
+</header>
+
+<nav class="max-w-[1600px] mx-auto px-8 mb-8 flex gap-2 border-b border-white/5 pb-3 sticky top-0 bg-holy-bg z-50">
+  <button class="tab-btn px-4 py-2 text-xs font-bold uppercase tracking-wider border border-transparent rounded-lg text-slate-400 hover:text-white" data-tab="tokens" data-active="true">Tokens</button>
+  <button class="tab-btn px-4 py-2 text-xs font-bold uppercase tracking-wider border border-transparent rounded-lg text-slate-400 hover:text-white" data-tab="components">Componentes</button>
+  <button class="tab-btn px-4 py-2 text-xs font-bold uppercase tracking-wider border border-transparent rounded-lg text-slate-400 hover:text-white" data-tab="wireframes">Wireframes</button>
+  <button class="tab-btn px-4 py-2 text-xs font-bold uppercase tracking-wider border border-transparent rounded-lg text-slate-400 hover:text-white" data-tab="screens">Pantallas React</button>
+</nav>
+
+<main class="max-w-[1600px] mx-auto px-8 pb-24">
+
+  <!-- TOKENS -->
+  <section data-panel="tokens" class="space-y-12">
+    <div>
+      <h2 class="text-white text-xl font-black italic mb-4">Paleta</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <div><div class="swatch rounded-2xl bg-holy-bg border border-white/10"></div><p class="text-white text-xs font-bold mt-2">holy-bg</p><p class="text-slate-500 text-[10px] font-mono">#07070F</p></div>
+        <div><div class="swatch rounded-2xl bg-holy-surface border border-white/10"></div><p class="text-white text-xs font-bold mt-2">holy-surface</p><p class="text-slate-500 text-[10px] font-mono">#111118</p></div>
+        <div><div class="swatch rounded-2xl bg-holy-primary"></div><p class="text-white text-xs font-bold mt-2">holy-primary</p><p class="text-slate-500 text-[10px] font-mono">#22C55E</p></div>
+        <div><div class="swatch rounded-2xl bg-holy-gold"></div><p class="text-white text-xs font-bold mt-2">holy-gold</p><p class="text-slate-500 text-[10px] font-mono">#F59E0B</p></div>
+        <div><div class="swatch rounded-2xl bg-holy-cyan"></div><p class="text-white text-xs font-bold mt-2">holy-cyan</p><p class="text-slate-500 text-[10px] font-mono">#06B6D4</p></div>
+        <div><div class="swatch rounded-2xl bg-holy-indigo"></div><p class="text-white text-xs font-bold mt-2">holy-indigo</p><p class="text-slate-500 text-[10px] font-mono">#818CF8</p></div>
+      </div>
+    </div>
+
+    <div>
+      <h2 class="text-white text-xl font-black italic mb-4">Escala de grises (slate)</h2>
+      <div class="grid grid-cols-5 md:grid-cols-10 gap-2">
+        <div class="space-y-1"><div class="swatch rounded-xl bg-slate-50"></div><p class="text-[10px] font-mono text-slate-500">50</p></div>
+        <div class="space-y-1"><div class="swatch rounded-xl bg-slate-200"></div><p class="text-[10px] font-mono text-slate-500">200</p></div>
+        <div class="space-y-1"><div class="swatch rounded-xl bg-slate-400"></div><p class="text-[10px] font-mono text-slate-500">400</p></div>
+        <div class="space-y-1"><div class="swatch rounded-xl bg-slate-500"></div><p class="text-[10px] font-mono text-slate-500">500</p></div>
+        <div class="space-y-1"><div class="swatch rounded-xl bg-slate-600"></div><p class="text-[10px] font-mono text-slate-500">600</p></div>
+        <div class="space-y-1"><div class="swatch rounded-xl bg-slate-700"></div><p class="text-[10px] font-mono text-slate-500">700</p></div>
+        <div class="space-y-1"><div class="swatch rounded-xl bg-slate-800"></div><p class="text-[10px] font-mono text-slate-500">800</p></div>
+        <div class="space-y-1"><div class="swatch rounded-xl bg-slate-900"></div><p class="text-[10px] font-mono text-slate-500">900</p></div>
+        <div class="space-y-1"><div class="swatch rounded-xl bg-slate-950"></div><p class="text-[10px] font-mono text-slate-500">950</p></div>
+        <div class="space-y-1"><div class="swatch rounded-xl bg-black border border-white/10"></div><p class="text-[10px] font-mono text-slate-500">black</p></div>
+      </div>
+    </div>
+
+    <div>
+      <h2 class="text-white text-xl font-black italic mb-4">Tipografía — Inter</h2>
+      <div class="space-y-4 bg-holy-surface border border-slate-800 rounded-2xl p-8">
+        <p class="text-white text-5xl font-black italic tracking-tighter">Display 5xl · Black Italic</p>
+        <p class="text-white text-3xl font-black italic tracking-tighter">Heading 3xl · Black Italic</p>
+        <p class="text-white text-xl font-bold">Title xl · Bold</p>
+        <p class="text-white text-base font-bold">Body base · Bold</p>
+        <p class="text-slate-400 text-sm">Body sm · Regular para descripciones</p>
+        <p class="text-slate-500 text-xs font-bold uppercase tracking-widest">Label xs · Bold uppercase</p>
+        <p class="text-slate-600 text-[10px] font-black uppercase tracking-[0.2em]">Caption 10px · Black</p>
+      </div>
+    </div>
+
+    <div>
+      <h2 class="text-white text-xl font-black italic mb-4">Radios &amp; sombras</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-holy-surface border border-slate-800 rounded-lg p-6 text-center text-xs text-slate-400">rounded-lg</div>
+        <div class="bg-holy-surface border border-slate-800 rounded-xl p-6 text-center text-xs text-slate-400">rounded-xl</div>
+        <div class="bg-holy-surface border border-slate-800 rounded-2xl p-6 text-center text-xs text-slate-400">rounded-2xl</div>
+        <div class="bg-holy-surface border border-slate-800 rounded-3xl p-6 text-center text-xs text-slate-400">rounded-3xl</div>
+        <div class="bg-holy-primary text-white shadow-lg shadow-holy-primary/20 rounded-xl p-6 text-center text-xs font-bold">shadow primary</div>
+        <div class="bg-holy-gold text-holy-bg shadow-lg shadow-holy-gold/20 rounded-xl p-6 text-center text-xs font-bold">shadow gold</div>
+        <div class="bg-holy-cyan text-holy-bg shadow-lg shadow-holy-cyan/20 rounded-xl p-6 text-center text-xs font-bold">shadow cyan</div>
+        <div class="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 text-center text-xs text-slate-400">glass</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPONENTES -->
+  <section data-panel="components" class="space-y-12 hidden">
+    <div>
+      <h2 class="text-white text-xl font-black italic mb-4">Botones</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-holy-surface border border-slate-800 rounded-2xl p-6 space-y-3">
+          <p class="text-slate-500 text-[10px] font-black uppercase tracking-widest">Variants</p>
+          <button class="w-full px-5 py-3 text-sm font-bold rounded-xl bg-holy-primary text-white shadow-lg shadow-holy-primary/20">primary</button>
+          <button class="w-full px-5 py-3 text-sm font-bold rounded-xl bg-holy-gold text-holy-bg shadow-lg shadow-holy-gold/20">gold</button>
+          <button class="w-full px-5 py-3 text-sm font-bold rounded-xl bg-holy-surface border border-slate-800 text-slate-300">secondary</button>
+          <button class="w-full px-5 py-3 text-sm font-bold rounded-xl bg-transparent text-slate-400 hover:bg-white/5">ghost</button>
+          <button class="w-full px-5 py-3 text-sm font-bold rounded-xl bg-red-500/10 border border-red-500/50 text-red-500">danger</button>
+        </div>
+        <div class="bg-holy-surface border border-slate-800 rounded-2xl p-6 space-y-3">
+          <p class="text-slate-500 text-[10px] font-black uppercase tracking-widest">Tamaños</p>
+          <button class="px-3 py-1.5 text-xs font-bold rounded-lg bg-holy-primary text-white">sm</button>
+          <br><button class="px-5 py-3 text-sm font-bold rounded-xl bg-holy-primary text-white">md</button>
+          <br><button class="px-6 py-4 text-base font-bold rounded-xl bg-holy-primary text-white">lg</button>
+          <br><button class="px-8 py-5 text-lg font-bold rounded-2xl bg-holy-primary text-white">xl</button>
+        </div>
+        <div class="bg-holy-surface border border-slate-800 rounded-2xl p-6 space-y-3">
+          <p class="text-slate-500 text-[10px] font-black uppercase tracking-widest">Estados</p>
+          <button class="w-full px-5 py-3 text-sm font-bold rounded-xl bg-holy-primary text-white">default</button>
+          <button class="w-full px-5 py-3 text-sm font-bold rounded-xl bg-holy-primary text-white brightness-110">hover</button>
+          <button class="w-full px-5 py-3 text-sm font-bold rounded-xl bg-holy-primary text-white scale-95">active</button>
+          <button class="w-full px-5 py-3 text-sm font-bold rounded-xl bg-holy-primary text-white opacity-50 pointer-events-none">disabled</button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h2 class="text-white text-xl font-black italic mb-4">Badges</h2>
+      <div class="bg-holy-surface border border-slate-800 rounded-2xl p-6 flex flex-wrap gap-3">
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase border bg-green-500/10 text-green-400 border-green-500/20"><span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>success</span>
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase border bg-amber-500/10 text-amber-500 border-amber-500/20"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>warning</span>
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase border bg-red-500/10 text-red-500 border-red-500/20"><span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>danger</span>
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase border bg-blue-500/10 text-blue-400 border-blue-500/20">info</span>
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase border bg-holy-gold/10 text-holy-gold border-holy-gold/20">gold</span>
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase border bg-white/5 text-slate-500 border-white/10">ghost</span>
+      </div>
+    </div>
+
+    <div>
+      <h2 class="text-white text-xl font-black italic mb-4">Cards</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-5">
+          <p class="text-slate-500 text-[10px] font-black uppercase mb-2">Glass</p>
+          <p class="text-white text-sm">Capa translúcida con blur. Para overlays sobre contenido.</p>
+        </div>
+        <div class="bg-holy-surface border border-slate-800 rounded-2xl p-5">
+          <p class="text-slate-500 text-[10px] font-black uppercase mb-2">Solid</p>
+          <p class="text-white text-sm">Superficie principal. Listas, formularios, contenido denso.</p>
+        </div>
+        <div class="bg-transparent border border-slate-800 rounded-2xl p-5">
+          <p class="text-slate-500 text-[10px] font-black uppercase mb-2">Outline</p>
+          <p class="text-white text-sm">Solo borde. Para énfasis sutil o agrupar.</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h2 class="text-white text-xl font-black italic mb-4">Inputs</h2>
+      <div class="bg-holy-surface border border-slate-800 rounded-2xl p-6 max-w-md space-y-4">
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Email</label>
+          <input class="w-full bg-holy-surface border border-slate-800 rounded-xl px-4 py-3.5 text-white placeholder:text-slate-700 text-sm focus:outline-none focus:border-holy-primary/50" placeholder="atleta@holyoly.com">
+        </div>
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Contraseña</label>
+          <input type="password" class="w-full bg-holy-surface border border-slate-800 rounded-xl px-4 py-3.5 text-white text-sm" value="••••••••">
+        </div>
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Con error</label>
+          <input class="w-full bg-holy-surface border border-red-500/50 rounded-xl px-4 py-3.5 text-white text-sm" value="invalido">
+          <p class="text-[10px] font-bold text-red-400 mt-1 ml-1 uppercase">Debe ser un email válido</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WIREFRAMES -->
+  <section data-panel="wireframes" class="space-y-8 hidden">
+    <div class="flex items-center justify-between">
+      <h2 class="text-white text-xl font-black italic">Wireframes (HTML estáticos)</h2>
+      <p class="text-slate-500 text-xs">40+ pantallas · Holy Oly &amp; Volta</p>
+    </div>
+    <div id="wireframes-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6"></div>
+  </section>
+
+  <!-- PANTALLAS REACT -->
+  <section data-panel="screens" class="space-y-8 hidden">
+    <div>
+      <h2 class="text-white text-xl font-black italic mb-2">Pantallas React (app navegable)</h2>
+      <p class="text-slate-500 text-xs mb-6">17 páginas portadas con React Router. Ejecuta <code class="text-holy-primary bg-holy-surface px-2 py-0.5 rounded">npm run dev</code> en <code class="text-holy-primary bg-holy-surface px-2 py-0.5 rounded">/frontend</code> para verlas en vivo.</p>
+      <div id="screens-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </div>
+  </section>
+</main>
+
+<footer class="max-w-[1600px] mx-auto px-8 py-8 border-t border-white/5 text-slate-600 text-[10px] font-bold uppercase tracking-widest">
+  Peak Qual · Design System · v1
+</footer>
+
+<script>
+  // Tabs
+  const tabs = document.querySelectorAll('.tab-btn');
+  const panels = document.querySelectorAll('[data-panel]');
+  tabs.forEach(t => t.addEventListener('click', () => {
+    tabs.forEach(x => x.dataset.active = 'false');
+    t.dataset.active = 'true';
+    panels.forEach(p => p.classList.toggle('hidden', p.dataset.panel !== t.dataset.tab));
+  }));
+
+  // Wireframe gallery
+  const WIREFRAMES = [
+    { group:'Holy Oly · Auth & Onboarding', items:[
+      { f:'A1_A2_A3_auth.html', t:'Auth' },
+      { f:'D1_onboarding_atleta.html', t:'Onboarding atleta' },
+      { f:'D2_free_premium_transition.html', t:'Free → Premium' },
+    ]},
+    { group:'Holy Oly · Atleta', items:[
+      { f:'B1_dashboard_atleta.html', t:'Dashboard' },
+      { f:'B3_injury_shield.html', t:'Injury Shield' },
+      { f:'B4_session_summary.html', t:'Session Summary' },
+      { f:'B5_warmup_generator.html', t:'Warmup' },
+      { f:'B6_active_session.html', t:'Active Session' },
+      { f:'B7_B8_victory_screen.html', t:'Victory' },
+      { f:'B9_social_card.html', t:'Social Card' },
+      { f:'B9b_viral_card_stitch.html', t:'Viral Card' },
+      { f:'B9c_wise_card_stitch.html', t:'Wise Card' },
+      { f:'B9d_hybrid_card_stitch.html', t:'Hybrid Card' },
+      { f:'B9e_efficiency_card_stitch.html', t:'Efficiency Card' },
+      { f:'B10_performance_deep_dive.html', t:'Performance' },
+      { f:'B11_oly_index.html', t:'Oly Index' },
+      { f:'B12_B13_pulse_hub.html', t:'Pulse Hub' },
+      { f:'B14_pildoras_stories.html', t:'Pildoras' },
+      { f:'B15_perfil_atleta.html', t:'Perfil' },
+      { f:'B_cns_battery.html', t:'CNS Battery' },
+      { f:'B_stress_3layers.html', t:'Stress 3 Layers' },
+      { f:'B_stress_correlations.html', t:'Stress Correlations' },
+    ]},
+    { group:'Holy Oly · Coach', items:[
+      { f:'C1_command_center_coach.html', t:'Command Center' },
+      { f:'C4_athlete_deep_dive.html', t:'Athlete Deep Dive' },
+      { f:'C5_C6_add_athlete_assign_macro.html', t:'Add / Assign Macro' },
+      { f:'C7_C8_C9_coach_tools.html', t:'Coach Tools' },
+    ]},
+    { group:'Volta', items:[
+      { f:'V1_volta_dashboard_alerts.html', t:'Dashboard alerts' },
+      { f:'V1A_volta_dashboard.html', t:'Dashboard' },
+      { f:'V1B_volta_prewod.html', t:'Pre-WOD' },
+      { f:'V1C_volta_coach.html', t:'Coach' },
+      { f:'V1D_volta_deepdive.html', t:'Deep Dive' },
+      { f:'V1E_volta_session_active.html', t:'Session Active' },
+      { f:'V1F_volta_victory.html', t:'Victory' },
+      { f:'V1G_volta_wisescore.html', t:'WiseScore' },
+      { f:'V2_volta_onboarding.html', t:'Onboarding' },
+      { f:'V3_volta_wod_log.html', t:'WOD Log' },
+      { f:'V4_volta_perfil.html', t:'Perfil' },
+      { f:'V5_volta_ia_chat.html', t:'IA Chat' },
+      { f:'V6_volta_social_card.html', t:'Social Card' },
+      { f:'V7_volta_pildoras.html', t:'Pildoras' },
+      { f:'V8_volta_coach_command.html', t:'Coach Command' },
+      { f:'V9_volta_free_premium.html', t:'Free → Premium' },
+    ]},
+  ];
+
+  const wgrid = document.getElementById('wireframes-grid');
+  WIREFRAMES.forEach(group => {
+    const header = document.createElement('div');
+    header.className = 'col-span-full mt-4 mb-1';
+    header.innerHTML = `<p class="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">${group.group}</p><div class="h-px bg-white/5 mt-2"></div>`;
+    wgrid.appendChild(header);
+    group.items.forEach(item => {
+      const card = document.createElement('a');
+      card.href = `../wireframes/${item.f}`;
+      card.target = '_blank';
+      card.className = 'group cursor-pointer';
+      card.innerHTML = `
+        <div class="rounded-3xl border-2 border-slate-800 bg-[#0a0a18] overflow-hidden aspect-[220/476] relative group-hover:border-holy-primary/40 transition-all">
+          <iframe src="../wireframes/${item.f}" class="w-[390px] h-[844px] origin-top-left scale-[0.564] pointer-events-none" loading="lazy"></iframe>
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+            <p class="text-white text-xs font-bold">Abrir →</p>
+          </div>
+        </div>
+        <p class="text-slate-300 text-xs font-bold mt-3">${item.t}</p>
+        <p class="text-slate-600 text-[10px] font-mono">${item.f}</p>
+      `;
+      wgrid.appendChild(card);
+    });
+  });
+
+  // React screens index
+  const SCREENS = [
+    { group:'Public', items:[ { p:'/login', t:'Login' } ] },
+    { group:'Athlete', items:[
+      { p:'/onboarding', t:'Onboarding' },
+      { p:'/home', t:'Home' },
+      { p:'/summary', t:'Session Summary' },
+      { p:'/warmup', t:'Warmup' },
+      { p:'/session', t:'Active Session' },
+      { p:'/victory', t:'Victory' },
+      { p:'/performance', t:'Performance' },
+      { p:'/oly-index', t:'Oly Index' },
+      { p:'/schedule', t:'Schedule' },
+      { p:'/pulse', t:'Pulse Hub' },
+      { p:'/pills', t:'Knowledge Pills' },
+      { p:'/social', t:'Social Card' },
+      { p:'/profile', t:'Profile' },
+    ]},
+    { group:'Coach', items:[
+      { p:'/coach', t:'Command Center' },
+      { p:'/coach/athlete', t:'Athlete Deep Dive' },
+      { p:'/coach/assign', t:'Assign Macrocycle' },
+    ]},
+  ];
+  const sgrid = document.getElementById('screens-grid');
+  SCREENS.forEach(g => {
+    const h = document.createElement('div');
+    h.className = 'col-span-full mt-4';
+    h.innerHTML = `<p class="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">${g.group}</p>`;
+    sgrid.appendChild(h);
+    g.items.forEach(it => {
+      const c = document.createElement('div');
+      c.className = 'bg-holy-surface border border-slate-800 rounded-xl px-4 py-3 flex items-center justify-between';
+      c.innerHTML = `<div><p class="text-white text-sm font-bold">${it.t}</p><p class="text-slate-600 text-[10px] font-mono">${it.p}</p></div><span class="text-slate-600 text-xs">→</span>`;
+      sgrid.appendChild(c);
+    });
+  });
+</script>
+</body>
+</html>

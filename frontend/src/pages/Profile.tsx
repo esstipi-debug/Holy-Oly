@@ -1,9 +1,16 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Card from '../components/Card';
 import Button from '../components/Button';
-import Badge from '../components/Badge';
+import { useAuth } from '../auth/AuthContext';
 
 const Profile: React.FC = () => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
   return (
     <div className="flex flex-col h-full bg-[#07070F]">
       <div className="px-6 py-10 flex-1 overflow-y-auto">
@@ -51,7 +58,7 @@ const Profile: React.FC = () => {
            ))}
         </div>
 
-        <Button variant="danger" fullWidth className="opacity-50 hover:opacity-100">CERRAR SESIÓN</Button>
+        <Button variant="danger" fullWidth className="opacity-50 hover:opacity-100" onClick={handleLogout}>CERRAR SESIÓN</Button>
       </div>
     </div>
   );
