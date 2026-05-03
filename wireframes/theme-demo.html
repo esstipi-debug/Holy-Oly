@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Theme Demo — Peak Qual</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@400;700;800&family=Bebas+Neue&family=Playfair+Display:wght@700;900&family=Cinzel:wght@700;900&family=Press+Start+2P&family=Caveat:wght@700&family=Bungee&family=Audiowide&family=Black+Ops+One&family=Anton&family=Special+Elite&family=Major+Mono+Display&family=Cormorant+Garamond:wght@700&family=Lobster&family=UnifrakturCook:wght@700&family=Permanent+Marker&family=Orbitron:wght@700;900&family=Russo+One&family=Cormorant+SC:wght@700&family=Faster+One&family=Architects+Daughter&family=Allerta+Stencil&family=Italianno&family=Megrim&family=Old+Standard+TT:wght@700&family=Yuji+Mai&family=Rubik+Mono+One&family=Monoton&family=Codystar:wght@700&family=Pirata+One&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-body, 'Inter', system-ui);
+      background: var(--bg, #f5f5f5);
+      color: var(--text, #333);
+      padding: 40px 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .header h1 {
+      font-size: 32px;
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+    .header p {
+      font-size: 14px;
+      opacity: .7;
+      margin-bottom: 20px;
+    }
+
+    .theme-selector {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+    }
+    .theme-btn {
+      padding: 10px 20px;
+      border: 2px solid var(--text, #000);
+      background: transparent;
+      color: var(--text, #000);
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 12px;
+      transition: all .2s;
+    }
+    .theme-btn.active {
+      background: var(--primary, #000);
+      color: var(--bg, #fff);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 40px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .demo-card {
+      background: var(--surface, #fff);
+      border: 2px solid var(--border, #000);
+      padding: 24px;
+      border-radius: var(--border-radius, 4px);
+    }
+
+    .demo-card h2 {
+      font-size: 18px;
+      font-weight: 900;
+      margin-bottom: 16px;
+      font-family: var(--font-display, 'Anton', sans-serif);
+    }
+
+    .readiness-stat {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 12px 0;
+      padding: 12px;
+      background: var(--bg, #f9f9f9);
+      border-radius: 4px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      opacity: .7;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 900;
+      font-family: var(--font-display, 'Anton', sans-serif);
+    }
+
+    .button {
+      background: var(--primary, #000);
+      color: var(--bg, #fff);
+      border: 2px solid var(--primary, #000);
+      padding: 12px 24px;
+      border-radius: var(--border-radius, 4px);
+      cursor: pointer;
+      font-weight: 700;
+      width: 100%;
+      margin-top: 16px;
+      font-family: var(--font-display, 'Anton', sans-serif);
+    }
+
+    .button:hover {
+      opacity: .8;
+      transform: translateY(-2px);
+    }
+
+    .card {
+      background: var(--surface, #fff);
+      border: 1px solid var(--border, #ddd);
+      padding: 16px;
+      margin: 12px 0;
+      border-radius: var(--border-radius, 4px);
+    }
+
+    .badge {
+      display: inline-block;
+      background: var(--accent, #ff4500);
+      color: var(--bg, #fff);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <script src="theme-system.js"></script>
+
+  <div class="header">
+    <h1>🎨 THEME DEMO</h1>
+    <p>Cambia de tema en tiempo real para ver cómo se ve toda la app</p>
+
+    <div class="theme-selector">
+      <button class="theme-btn active" onclick="themeManager.applyTheme('brutalist')">Brutalist</button>
+      <button class="theme-btn" onclick="themeManager.applyTheme('deco')">Art Deco 💎</button>
+      <button class="theme-btn" onclick="themeManager.applyTheme('cyberpunk')">Cyberpunk 💎</button>
+      <button class="theme-btn" onclick="themeManager.applyTheme('comic')">Comic 💎</button>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- Card 1: Dashboard -->
+    <div class="demo-card">
+      <h2>Dashboard Atleta</h2>
+      <div class="readiness-stat">
+        <div class="stat-label">Readiness</div>
+        <div class="stat-value">84</div>
+      </div>
+      <div class="readiness-stat">
+        <div class="stat-label">IMR Score</div>
+        <div class="stat-value">7.4</div>
+      </div>
+      <div class="readiness-stat">
+        <div class="stat-label">Compliance</div>
+        <div class="stat-value">96%</div>
+      </div>
+      <button class="button">Iniciar Sesión</button>
+    </div>
+
+    <!-- Card 2: Victory Screen -->
+    <div class="demo-card">
+      <h2>Victory Screen</h2>
+      <div class="card">
+        <div class="stat-label">PR Personal</div>
+        <div class="stat-value" style="color: var(--accent, #ff4500);">185 kg</div>
+        <div class="badge">+3 kg desde hace 2 semanas</div>
+      </div>
+      <div class="card">
+        <div class="stat-label">Wise Score</div>
+        <div class="stat-value">+15 pts</div>
+      </div>
+      <button class="button">Compartir en Social</button>
+    </div>
+
+    <!-- Card 3: Injury Shield -->
+    <div class="demo-card">
+      <h2>Injury Shield Modal</h2>
+      <div class="card">
+        <div class="stat-label">⚠️ Risk Level</div>
+        <div class="stat-value" style="color: var(--accent, #ff4500);">ALTO</div>
+      </div>
+      <p style="font-size: 12px; margin: 12px 0; opacity: .7;">
+        Tu CNS está elevado. Recomendamos sesión ligera hoy.
+      </p>
+      <div class="card">
+        <div class="stat-label">CNS Fatigue</div>
+        <div class="stat-value">72%</div>
+      </div>
+      <button class="button">Ver Programas Alternativos</button>
+    </div>
+
+    <!-- Card 4: Session Summary -->
+    <div class="demo-card">
+      <h2>Session Summary</h2>
+      <div class="readiness-stat">
+        <div class="stat-label">Duración</div>
+        <div class="stat-value">45 min</div>
+      </div>
+      <div class="readiness-stat">
+        <div class="stat-label">Volumen Total</div>
+        <div class="stat-value">8,400 kg</div>
+      </div>
+      <div class="readiness-stat">
+        <div class="stat-label">Intensidad</div>
+        <div class="stat-value">8.2</div>
+      </div>
+      <button class="button">Comenzar Sesión</button>
+    </div>
+
+    <!-- Card 5: OLY Index -->
+    <div class="demo-card">
+      <h2>OLY Index</h2>
+      <div class="card">
+        <div class="stat-label">Tu Ranking</div>
+        <div class="stat-value">#247</div>
+      </div>
+      <div class="readiness-stat">
+        <div class="stat-label">Percentil</div>
+        <div class="stat-value">78%</div>
+      </div>
+      <button class="button">Ver Leaderboard</button>
+    </div>
+
+    <!-- Card 6: Pulse Hub -->
+    <div class="demo-card">
+      <h2>Pulse Hub</h2>
+      <div class="card">
+        <div class="stat-label">EMOM Activo</div>
+        <div class="stat-value">8/10 min</div>
+      </div>
+      <div class="readiness-stat">
+        <div class="stat-label">RPE Promedio</div>
+        <div class="stat-value">7.5</div>
+      </div>
+      <button class="button">Ver Tiempo Real</button>
+    </div>
+
+    <!-- Card 7: Gamification -->
+    <div class="demo-card">
+      <h2>Píldoras & Gamificación</h2>
+      <div class="card">
+        <div class="stat-label">XP Esta Semana</div>
+        <div class="stat-value">+450 XP</div>
+      </div>
+      <div class="readiness-stat">
+        <div class="stat-label">Nivel</div>
+        <div class="stat-value">12</div>
+      </div>
+      <button class="button">Reclamar Recompensas</button>
+    </div>
+
+    <!-- Card 8: Coach Command Center -->
+    <div class="demo-card">
+      <h2>Coach Command Center</h2>
+      <div class="card">
+        <div class="stat-label">Atletas Monitoreados</div>
+        <div class="stat-value">12</div>
+      </div>
+      <div class="readiness-stat">
+        <div class="stat-label">Riesgo Alto</div>
+        <div class="stat-value">3</div>
+      </div>
+      <button class="button">Ver Heatmap</button>
+    </div>
+
+    <!-- Card 9: Premium Unlock -->
+    <div class="demo-card">
+      <h2>Premium Features</h2>
+      <div class="card">
+        <div class="stat-label">Planes Disponibles</div>
+        <div class="stat-value">3</div>
+      </div>
+      <p style="font-size: 12px; margin: 12px 0; opacity: .7;">
+        Acceso a IA Coach, Skins Premium, y más.
+      </p>
+      <button class="button">Suscribirse $2.99/mes</button>
+    </div>
+  </div>
+
+  <script>
+    // Cargar tema guardado
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedTheme = localStorage.getItem('appTheme') || 'brutalist';
+      themeManager.applyTheme(savedTheme);
+    });
+
+    // Actualizar selector visual
+    window.addEventListener('themeChanged', (e) => {
+      document.querySelectorAll('.theme-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.includes(
+          Object.values(themeManager.getCatalog())
+            .find(t => t === THEME_CATALOG[e.detail.theme])?.label || ''
+        ));
+      });
+    });
+  </script>
+</body>
+</html>
