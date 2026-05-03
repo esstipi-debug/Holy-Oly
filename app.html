@@ -187,7 +187,9 @@
   <!-- PHONE FRAME -->
   <div class="stage">
     <div class="phone">
-      <iframe id="frame" src="A1_A2_A3_auth.html" allow="*"></iframe>
+      <iframe id="frame" src="A1_A2_A3_auth.html"
+        allow="scripts; same-origin; forms; pointer-lock; popups"
+        referrerpolicy="same-origin"></iframe>
     </div>
   </div>
 
@@ -248,18 +250,19 @@
       backDot.classList.toggle('visible', stack.length > 0);
     }
 
-    // ── Exposed to iframes via window.parent ──
-    window.openModal = function(file, title) {
+    function setFrame(file, title) {
+      // Resolve to absolute URL so iframe.src comparison is consistent
+      var abs = new URL(file, location.href).href;
       stack.push({ src: frame.src, name: nameEl.textContent });
-      frame.src = file;
+      frame.src = abs;
       nameEl.textContent = title || file.replace('.html', '').replace(/_/g, ' ');
       updateBack();
       closeSidebar();
-    };
+    }
 
-    window.closeModal = function() {
-      goBack();
-    };
+    // ── Exposed to iframes via window.parent ──
+    window.openModal = setFrame;
+    window.closeModal = function() { goBack(); };
 
     // ── Controls ──
     function goBack() {
@@ -273,17 +276,20 @@
 
     function goHome() {
       stack = [];
-      frame.src = 'A1_A2_A3_auth.html';
+      frame.src = new URL('A1_A2_A3_auth.html', location.href).href;
       nameEl.textContent = 'PeakQual';
       updateBack();
     }
 
-    function nav(file, title) {
-      window.openModal(file, title);
-    }
+    function nav(file, title) { setFrame(file, title); }
 
     function openSidebar()  { document.getElementById('overlay').classList.add('open'); }
     function closeSidebar() { document.getElementById('overlay').classList.remove('open'); }
+
+    // Detectar si el iframe falló (error de carga) y redirigir directo
+    frame.addEventListener('error', function() {
+      console.warn('[app] iframe load error');
+    });
   </script>
 
 </body>
