@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Peak Qual — Wireframes</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #07070F;
+      font-family: 'Inter', system-ui, sans-serif;
+      padding: 40px 32px 80px;
+      min-height: 100vh;
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      max-width: 1600px; margin: 0 auto 48px;
+      display: flex; align-items: flex-end; justify-content: space-between;
+    }
+    .brand { font-size: 28px; font-weight: 900; letter-spacing: 4px; color: #fff; }
+    .brand .cyan { color: #00E5FF; }
+    .brand-sub { font-size: 12px; color: #52527A; margin-top: 4px; }
+    .pills { display: flex; gap: 10px; }
+    .pill {
+      font-size: 11px; font-weight: 700; padding: 4px 14px;
+      border-radius: 20px; border: 1px solid;
+    }
+    .pill-ho   { background: #1a1400; border-color: #FFD70030; color: #FFD700; }
+    .pill-vol  { background: #00090d; border-color: #00E5FF30; color: #00E5FF; }
+    .pill-axon { background: #0d0318; border-color: #A855F730; color: #A855F7; opacity:.5; }
+
+    /* ── PRODUCT SECTION ── */
+    .product-section { max-width: 1600px; margin: 0 auto 60px; }
+    .product-title {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 20px; border-radius: 14px;
+      margin-bottom: 28px;
+    }
+    .pt-ho  { background: #0f0d00; border: 1px solid #FFD70020; }
+    .pt-vol { background: #00090d; border: 1px solid #00E5FF20; }
+    .pt-axon{ background: #0d0318; border: 1px solid #A855F720; opacity:.5; }
+
+    .pt-logo {
+      width: 38px; height: 38px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 13px;
+    }
+    .logo-ho   { background: linear-gradient(135deg,#FFD700,#B8860B); clip-path: polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%); color:#07070F; }
+    .logo-vol  { background: linear-gradient(135deg,#00E5FF,#0070FF); clip-path: polygon(50% 0%,95% 25%,95% 75%,50% 100%,5% 75%,5% 25%);  color:#03030A; }
+    .logo-axon { background: linear-gradient(135deg,#A855F7,#7C3AED); clip-path: polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%); color:#fff; }
+
+    .pt-name { font-size: 18px; font-weight: 900; letter-spacing: 3px; }
+    .ho-name  { color: #FFD700; }
+    .vol-name { color: #00E5FF; }
+    .ax-name  { color: #A855F7; }
+    .pt-desc  { font-size: 11px; margin-top: 2px; color: #52527A; }
+
+    /* ── GROUP LABEL ── */
+    .group-row {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 20px; margin-top: 8px;
+    }
+    .group-label {
+      font-size: 9px; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; color: #334155; white-space: nowrap;
+    }
+    .group-line { flex: 1; height: 1px; background: #1a1a2e; }
+
+    /* ── PHONE GRID ── */
+    .phone-grid {
+      display: flex; flex-wrap: wrap; gap: 28px;
+      margin-bottom: 36px;
+    }
+
+    /* ── PHONE FRAME ── */
+    .phone-wrap {
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      cursor: pointer;
+    }
+    .phone-wrap:hover .phone-shell { box-shadow: 0 0 0 2px var(--accent), 0 16px 40px rgba(0,0,0,.5); }
+
+    .phone-shell {
+      width: 220px;
+      height: 476px; /* 220 / 390 * 844 */
+      background: #0a0a18;
+      border-radius: 28px;
+      border: 2px solid #2a2a3a;
+      overflow: hidden;
+      position: relative;
+      transition: box-shadow .2s;
+      flex-shrink: 0;
+    }
+    .phone-shell .notch {
+      position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      width: 80px; height: 22px;
+      background: #0a0a18; border-radius: 0 0 14px 14px;
+      z-index: 10;
+    }
+    .phone-shell iframe {
+      width: 390px; height: 844px;
+      border: none;
+      transform: scale(0.5641);
+      transform-origin: top left;
+      pointer-events: none;
+    }
+
+    .phone-label { text-align: center; }
+    .phone-code  { font-size: 11px; font-weight: 800; letter-spacing: .04em; }
+    .ho-code     { color: #FFD700; }
+    .vol-code    { color: #00E5FF; }
+    .phone-name  { font-size: 11px; font-weight: 600; color: #EAEAF5; margin-top: 2px; max-width: 220px; text-align: center; line-height: 1.3; }
+    .phone-sub   { font-size: 9px; color: #52527A; margin-top: 2px; }
+
+    /* click to expand overlay */
+    .phone-overlay {
+      position: absolute; inset: 0; z-index: 20;
+      display: flex; align-items: flex-end; justify-content: center;
+      padding-bottom: 14px;
+      opacity: 0; transition: opacity .2s;
+    }
+    .phone-wrap:hover .phone-overlay { opacity: 1; }
+    .phone-overlay-btn {
+      font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+      padding: 5px 14px; border-radius: 20px;
+      background: rgba(0,0,0,.7); border: 1px solid rgba(255,255,255,.15); color: #fff;
+    }
+
+    /* modal */
+    #modal {
+      display: none; position: fixed; inset: 0; z-index: 100;
+      background: rgba(0,0,0,.85);
+      align-items: center; justify-content: center;
+    }
+    #modal.open { display: flex; }
+    #modal-inner {
+      width: 90vw; height: 90vh;
+      background: #0B0B18; border-radius: 20px;
+      border: 1px solid #2a2a3a;
+      overflow: hidden; position: relative;
+      display: flex; flex-direction: column;
+    }
+    #modal-bar {
+      padding: 12px 20px; background: #0B0B18;
+      border-bottom: 1px solid #1E1E32;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    #modal-title { font-size: 13px; font-weight: 700; color: #EAEAF5; }
+    #modal-close {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: #1E1E32; border: none; color: #EAEAF5;
+      cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center;
+    }
+    #modal-frame { flex: 1; border: none; }
+  </style>
+</head>
+<body>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div>
+      <div class="brand">PEAK<span class="cyan">QUAL</span></div>
+      <div class="brand-sub">Smart training intelligence · Wireframes · 2026-04-29</div>
+    </div>
+    <div class="pills">
+      <div class="pill pill-ho">HOLY OLY · 28 pantallas ✅</div>
+      <div class="pill pill-vol">VOLTA · 15 pantallas 🚧</div>
+      <div class="pill pill-axon">AXON · Próximamente</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════ HOLY OLY ═══════════════════════════ -->
+  <div class="product-section">
+    <div class="product-title pt-ho">
+      <div class="pt-logo logo-ho">HO</div>
+      <div>
+        <div class="pt-name ho-name">HOLY OLY <span style="font-size:12px;font-weight:400;color:#8a6a00;letter-spacing:0;">Halterofilia · IMR Score · Macrociclos</span></div>
+        <div class="pt-desc">27 pantallas · Fase 1 completa · Smart training, zero burnout</div>
+      </div>
+    </div>
+
+    <!-- A: Auth -->
+    <div class="group-row"><span class="group-label" style="color:#8a6a00;">A — Autenticación</span><div class="group-line"></div></div>
+    <div class="phone-grid">
+      <div class="phone-wrap" style="--accent:#FFD700;" onclick="openModal('A1_A2_A3_auth.html','A1–A3 · Login / Register / Password')">
+        <div class="phone-shell">
+          <div class="notch"></div>
+          <iframe src="A1_A2_A3_auth.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code ho-code">A1–A3</div>
+          <div class="phone-name">Login / Register / Password</div>
+          <div class="phone-sub">JWT · OTP · roles</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- B: Atleta -->
+    <div class="group-row"><span class="group-label" style="color:#8a6a00;">B — Atleta (16 pantallas)</span><div class="group-line"></div></div>
+    <div class="phone-grid">
+      <div class="phone-wrap" style="--accent:#FFD700;" onclick="openModal('B1_dashboard_atleta.html','B1 · Dashboard Atleta')">
+        <div class="phone-shell">
+          <div class="notch"></div>
+          <iframe src="B1_dashboard_atleta.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code ho-code">B1</div>
+          <div class="phone-name">Dashboard Atleta</div>
+          <div class="phone-sub">Readiness · OLY Index · Sesión</div>
+        </div>
+      </div>
+      <div class="phone-wrap" style="--accent:#FFD700;" onclick="openModal('B6_active_session.html','B2 · Pre-Check')">
+        <div class="phone-shell">
+          <div class="notch"></div>
+          <iframe src="B6_active_session.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code ho-code">B2</div>
+          <div class="phone-name">Pre-Check (5 sliders)</div>
+          <div class="phone-sub">Risk Score · Injury Shield</div>
+        </div>
+      </div>
+      <div class="phone-wrap" style="--accent:#FFD700;" onclick="openModal('B3_injury_shield.html','B3 · Injury Shield Modal')">
+        <div class="phone-shell">
+          <div class="notch"></div>
+          <iframe src="B3_injury_shield.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code ho-code">B3</div>
+          <div class="phone-name">Injury Shield Modal</div>
+          <div class="phone-sub">Rojo · Amarillo · Guardian</div>
+        </div>
+      </div>
+      <div class="phone-wrap" style="--accent:#FFD700;" onclick="openModal('B4_session_summary.html','B4 · Session Summary')">
+        <div class="phone-shell">
+          <div class="notch"></div>
+          <iframe src="B4_session_summary.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code ho-code">B4</div>
+          <div class="phone-name">Session Summary Preview</div>
+          <div class="phone-sub">Vista previa antes de arrancar</div>
+        </div>
+      </div>
+      <div class="phone-wrap" style="--accent:#FFD700;" onclick="openModal('B5_warmup_generator.html','B5 · Warmup Generator')">
+        <div class="phone-shell">
+          <div class="notch"></div>
+          <iframe src="B5_warmup_generator.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code ho-code">B5</div>
+          <div class="phone-name">Warmup Generator</div>
+          <div class="phone-sub">Pesos calculados · Skip</div>
+        </div>
+      </div>
+      <div class="phone-wrap" style="--accent:#FFD700;" onclick="openModal('B6_active_session.html','B6 · Sesión Activa')">
+        <div class="phone-shell">
+          <div class="notch"></div>
+          <iframe src="B6_active_session.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code ho-code">B6</div>
+          <div class="phone-name">Sesión Activa</div>
+          <div class="phone-sub">Logging · RPE · PR flash</div>
+        </div>
+      </div>
+      <div class="phone-wrap" style="--accent:#FFD700;" onclick="openModal('B7_B8_victory_screen.html','B7/B8 · Victory Screen')">
+        <div class="phone-shell">
+          <div class="notch"></div>
+          <iframe src="B7_B8_victory_screen.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code ho-code">B7/B8</div>
+          <div class="phone-name">Victory Screen</div>
+          <div class="phone-sub">4 temas · Epic PR · Smart Victory</div>
+        </div>
+      </div>
+      <div class="phone-wrap" style="--accent:#FFD700;" onclick="openModal('B9_social_card.html','B9 · Social Card Generator')">
+        <div class="phone-shell">
+          <div class="notch"></div>
+          <iframe src="B9_social_card.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code ho-code">B9</div>
+          <div class="phone-name">Social Card Generator</div>
+          <div class="phone-sub">PR · Smart · Streak · Belt</div>
+        </div>
+      </div>
+      <div class="phone-wrap" style="--accent:#FFD700;" onclick="openModal('B10_performance_deep_dive.html','B10 · Performance Deep Dive')">
+        <div class="phone-shell">
+          <div class="notch"></div>
+          <iframe src="B10_performance_deep_dive.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code ho-code">B10</div>
+          <div class="phone-name">Performance Deep Dive</div>
+          <div class="phone-sub">Radar · Sueño · Cafeína · Alcohol</div>
+        </div>
+      </div>
+      <div class="phone-wrap" style="--accent:#FFD700;" onclick="openModal('B11_oly_index.html','B11 · OLY Index')">
+        <div class="phone-shell">
+          <div class="notch"></div>
+          <iframe src="B11_oly_index.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code ho-code">B11</div>
+          <div class="phone-name">OLY Index</div>
+          <div class="phone-sub">Percentiles · Leaderboard</div>
+        </div>
+      </div>
+      <div class="phone-wrap" style="--accent:#FFD700;" onclick="openModal('B12_B13_pulse_hub.html','B12–B13 · Pulse Hub')">
+        <div class="phone-shell">
+          <div class="notch"></div>
+          <iframe src="B12_B13_pulse_hub.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code ho-code">B12–B13</div>
+          <div class="phone-name">Pulse Hub</div>
+          <div class="phone-sub">EMOM · AMRAP · Drop-off alert</div>
+        </div>
+      </div>
+      <div class="phone-wrap" style="--accent:#FFD700;" onclick="openModal('B14_pildoras_stories.html','B14 · Píldoras Stories')">
+        <div class="phone-shell">
+          <div class="notch"></div>
+          <iframe src="B14_pildoras_stories.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code ho-code">B14</div>
+          <div class="phone-name">Píldoras / Stories</div>
+          <div class="phone-sub">+50 XP · 5 segundos</div>
+        </div>
+      </div>
+      <div class="phone-wrap" style="--accent:#FFD700;" onclick="openModal('B15_perfil_atleta.html','B15 · Perfil del Atleta')">
+        <div class="phone-shell">
+          <div class="notch"></div>
+          <iframe src="B15_perfil_atleta.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code ho-code">B15</div>
+          <div class="phone-name">Perfil del Atleta</div>
+          <div class="phone-sub">1RMs · Temas · Wearables</div>
+        </div>
+      </div>
+      <div class="phone-wrap" style="--accent:#FFD700;" onclick="openModal('B16_theme_gallery.html','B16 · Theme Gallery')">
+        <div class="phone-shell">
+          <div class="notch"></div>
+          <iframe src="B16_theme_gallery.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code ho-code">B16</div>
+          <div class="phone-name">Theme Gallery</div>
+          <div class="phone-sub">6 temas · Free + Premium · A11y</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- C: Coach -->
+    <div class="group-row"><span class="group-label" style="color:#8a6a00;">C — Coach (9 pantallas)</span><div class="group-line"></div></div>
+    <div class="phone-grid">
+      <div class="phone-wrap" style="--accent:#FFD700;" onclick="openModal('C1_command_center_coach.html','C1–C3 · Command Center')">
+        <div class="phone-shell">
+          <div class="notch"></div>
+          <iframe src="C1_command_center_coach.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code ho-code">C1–C3</div>
+          <div class="phone-name">Command Center</div>
+          <div class="phone-sub">Heatmap · Risk · Adjustment Hub</div>
+        </div>
+      </div>
+      <div class="phone-wrap" style="--accent:#FFD700;" onclick="openModal('C4_athlete_deep_dive.html','C4 · Athlete Deep Dive 360°')">
+        <div class="phone-shell">
+          <div class="notch"></div>
+          <iframe src="C4_athlete_deep_dive.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code ho-code">C4</div>
+          <div class="phone-name">Athlete Deep Dive 360°</div>
+          <div class="phone-sub">Scatter · Radar · Smart Coach</div>
+        </div>
+      </div>
+      <div class="phone-wrap" style="--accent:#FFD700;" onclick="openModal('C5_C6_add_athlete_assign_macro.html','C5–C6 · Add Athlete + Macrocycle')">
+        <div class="phone-shell">
+          <div class="notch"></div>
+          <iframe src="C5_C6_add_athlete_assign_macro.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code ho-code">C5–C6</div>
+          <div class="phone-name">Add Athlete + Macrocycle</div>
+          <div class="phone-sub">19 programas · ML selector</div>
+        </div>
+      </div>
+      <div class="phone-wrap" style="--accent:#FFD700;" onclick="openModal('C7_C8_C9_coach_tools.html','C7–C9 · Herramientas Coach')">
+        <div class="phone-shell">
+          <div class="notch"></div>
+          <iframe src="C7_C8_C9_coach_tools.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code ho-code">C7–C9</div>
+          <div class="phone-name">Herramientas Coach</div>
+          <div class="phone-sub">Admin · Programación · Alertas</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- D: Onboarding -->
+    <div class="group-row"><span class="group-label" style="color:#8a6a00;">D — Onboarding</span><div class="group-line"></div></div>
+    <div class="phone-grid">
+      <div class="phone-wrap" style="--accent:#FFD700;" onclick="openModal('D1_onboarding_atleta.html','D1 · Onboarding Atleta')">
+        <div class="phone-shell">
+          <div class="notch"></div>
+          <iframe src="D1_onboarding_atleta.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code ho-code">D1</div>
+          <div class="phone-name">Onboarding Atleta</div>
+          <div class="phone-sub">4 pasos · 45-Day Trial</div>
+        </div>
+      </div>
+      <div class="phone-wrap" style="--accent:#FFD700;" onclick="openModal('D2_free_premium_transition.html','D2 · Free → Premium')">
+        <div class="phone-shell">
+          <div class="notch"></div>
+          <iframe src="D2_free_premium_transition.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code ho-code">D2</div>
+          <div class="phone-name">Free → Premium</div>
+          <div class="phone-sub">Upsell · Fear of Loss</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════ VOLTA ═══════════════════════════ -->
+  <div class="product-section">
+    <div class="product-title pt-vol">
+      <div class="pt-logo logo-vol">V</div>
+      <div>
+        <div class="pt-name vol-name">VOLTA <span style="font-size:12px;font-weight:400;color:#006070;letter-spacing:0;">CrossFit · Wise Score · V-Form</span></div>
+        <div class="pt-desc">15 pantallas · Engines 25–29 · En desarrollo</div>
+      </div>
+    </div>
+
+    <!-- V1: Alerts system -->
+    <div class="group-row"><span class="group-label" style="color:#006070;">V1 — Sistema de alertas (4 pantallas)</span><div class="group-line" style="background:#00E5FF15;"></div></div>
+    <div class="phone-grid">
+      <!-- V1-A -->
+      <div class="phone-wrap" style="--accent:#00E5FF;" onclick="openModal('V1A_volta_dashboard.html','V1-A · Dashboard Atleta')">
+        <div class="phone-shell" style="border-color:#00E5FF25;">
+          <div class="notch"></div>
+          <iframe src="V1A_volta_dashboard.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code vol-code">V1-A</div>
+          <div class="phone-name">Dashboard Atleta</div>
+          <div class="phone-sub">Alert strip · Wise Score · V-Form</div>
+        </div>
+      </div>
+      <!-- V1-B -->
+      <div class="phone-wrap" style="--accent:#00E5FF;" onclick="openModal('V1B_volta_prewod.html','V1-B · Pre-WOD Check')">
+        <div class="phone-shell" style="border-color:#00E5FF25;">
+          <div class="notch"></div>
+          <iframe src="V1B_volta_prewod.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code vol-code">V1-B</div>
+          <div class="phone-name">Pre-WOD Check</div>
+          <div class="phone-sub">HRV · Sleep · RPE · Caffeine log</div>
+        </div>
+      </div>
+      <!-- V1-C -->
+      <div class="phone-wrap" style="--accent:#00E5FF;" onclick="openModal('V1C_volta_coach.html','V1-C · Coach Bandeja Alertas')">
+        <div class="phone-shell" style="border-color:#00E5FF25;">
+          <div class="notch"></div>
+          <iframe src="V1C_volta_coach.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code vol-code">V1-C</div>
+          <div class="phone-name">Coach — Bandeja Alertas</div>
+          <div class="phone-sub">Marco CRÍTICO · Carla · Diego · Equipo</div>
+        </div>
+      </div>
+      <!-- V1-D -->
+      <div class="phone-wrap" style="--accent:#00E5FF;" onclick="openModal('V1D_volta_deepdive.html','V1-D · Athlete Deep Dive')">
+        <div class="phone-shell" style="border-color:#00E5FF25;">
+          <div class="notch"></div>
+          <iframe src="V1D_volta_deepdive.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code vol-code">V1-D</div>
+          <div class="phone-name">Athlete Deep Dive</div>
+          <div class="phone-sub">Wellness bars · Macro · Wise Score trend</div>
+        </div>
+      </div>
+      <!-- V1-E -->
+      <div class="phone-wrap" style="--accent:#00E5FF;" onclick="openModal('V1E_volta_session_active.html','V1-E · WOD en Progreso')">
+        <div class="phone-shell" style="border-color:#00E5FF25;">
+          <div class="notch"></div>
+          <iframe src="V1E_volta_session_active.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code vol-code">V1-E</div>
+          <div class="phone-name">WOD en Progreso</div>
+          <div class="phone-sub">Timer · Rondas · Intensidad capeada</div>
+        </div>
+      </div>
+      <!-- V1-F -->
+      <div class="phone-wrap" style="--accent:#00E5FF;" onclick="openModal('V1F_volta_victory.html','V1-F · Victory Post-WOD')">
+        <div class="phone-shell" style="border-color:#00E5FF25;">
+          <div class="notch"></div>
+          <iframe src="V1F_volta_victory.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code vol-code">V1-F</div>
+          <div class="phone-name">Victory Post-WOD</div>
+          <div class="phone-sub">Wise Score +1 · NSDR · Volumen</div>
+        </div>
+      </div>
+      <!-- V1-G -->
+      <div class="phone-wrap" style="--accent:#00E5FF;" onclick="openModal('V1G_volta_wisescore.html','V1-G · Wise Score Breakdown')">
+        <div class="phone-shell" style="border-color:#00E5FF25;">
+          <div class="notch"></div>
+          <iframe src="V1G_volta_wisescore.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code vol-code">V1-G</div>
+          <div class="phone-name">CF Index + Wise Score</div>
+          <div class="phone-sub">Rendimiento · Compliance · Historial</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- V5: IA Chat -->
+    <div class="group-row"><span class="group-label" style="color:#006070;">V5 — IA Coach Chat</span><div class="group-line" style="background:#00E5FF15;"></div></div>
+    <div class="phone-grid">
+      <div class="phone-wrap" style="--accent:#00E5FF;" onclick="openModal('V5_volta_ia_chat.html','V5 · IA Coach Chat')">
+        <div class="phone-shell" style="border-color:#00E5FF25;">
+          <div class="notch"></div>
+          <iframe src="V5_volta_ia_chat.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code vol-code">V5</div>
+          <div class="phone-name">IA Coach Chat</div>
+          <div class="phone-sub">Contexto HRV · Proyección · Quick replies</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- V6–V9: Social, Gamif, Coach, Premium -->
+    <div class="group-row"><span class="group-label" style="color:#006070;">V6–V9 — Social · Gamificación · Coach CC · Premium</span><div class="group-line" style="background:#00E5FF15;"></div></div>
+    <div class="phone-grid">
+      <div class="phone-wrap" style="--accent:#00E5FF;" onclick="openModal('V6_volta_social_card.html','V6 · Social Card Post-WOD')">
+        <div class="phone-shell" style="border-color:#00E5FF25;">
+          <div class="notch"></div>
+          <iframe src="V6_volta_social_card.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code vol-code">V6</div>
+          <div class="phone-name">Social Card Post-WOD</div>
+          <div class="phone-sub">4 temas · CF Index · Wise pts · Share</div>
+        </div>
+      </div>
+      <div class="phone-wrap" style="--accent:#00E5FF;" onclick="openModal('V7_volta_pildoras.html','V7 · Píldoras + Gamificación')">
+        <div class="phone-shell" style="border-color:#00E5FF25;">
+          <div class="notch"></div>
+          <iframe src="V7_volta_pildoras.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code vol-code">V7</div>
+          <div class="phone-name">Píldoras + Gamificación</div>
+          <div class="phone-sub">Wise XP · Niveles · Badges · Píldoras</div>
+        </div>
+      </div>
+      <div class="phone-wrap" style="--accent:#00E5FF;" onclick="openModal('V8_volta_coach_command.html','V8 · Coach Command Center')">
+        <div class="phone-shell" style="border-color:#00E5FF25;">
+          <div class="notch"></div>
+          <iframe src="V8_volta_coach_command.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code vol-code">V8</div>
+          <div class="phone-name">Coach Command Center</div>
+          <div class="phone-sub">Heatmap 12 atletas · Wise ⌀ · Acciones</div>
+        </div>
+      </div>
+      <div class="phone-wrap" style="--accent:#00E5FF;" onclick="openModal('V9_volta_free_premium.html','V9 · Free → Premium')">
+        <div class="phone-shell" style="border-color:#00E5FF25;">
+          <div class="notch"></div>
+          <iframe src="V9_volta_free_premium.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code vol-code">V9</div>
+          <div class="phone-name">Free → Premium</div>
+          <div class="phone-sub">Fear of loss · 7 días gratis · Upsell</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- V2–V4: Onboarding, WOD Log, Perfil -->
+    <div class="group-row"><span class="group-label" style="color:#006070;">V2–V4 — Onboarding · WOD Log · Perfil (3 pantallas)</span><div class="group-line" style="background:#00E5FF15;"></div></div>
+    <div class="phone-grid">
+      <!-- V2 -->
+      <div class="phone-wrap" style="--accent:#00E5FF;" onclick="openModal('V2_volta_onboarding.html','V2 · Onboarding Volta')">
+        <div class="phone-shell" style="border-color:#00E5FF25;">
+          <div class="notch"></div>
+          <iframe src="V2_volta_onboarding.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code vol-code">V2</div>
+          <div class="phone-name">Onboarding</div>
+          <div class="phone-sub">Rx/Scaled · 1RMs · Wise Score inicial</div>
+        </div>
+      </div>
+      <!-- V3 -->
+      <div class="phone-wrap" style="--accent:#00E5FF;" onclick="openModal('V3_volta_wod_log.html','V3 · WOD Log Activo')">
+        <div class="phone-shell" style="border-color:#00E5FF25;">
+          <div class="notch"></div>
+          <iframe src="V3_volta_wod_log.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code vol-code">V3</div>
+          <div class="phone-name">WOD Log Activo</div>
+          <div class="phone-sub">Rondas · Tap reps · AMRAP/EMOM</div>
+        </div>
+      </div>
+      <!-- V4 -->
+      <div class="phone-wrap" style="--accent:#00E5FF;" onclick="openModal('V4_volta_perfil.html','V4 · Perfil Atleta')">
+        <div class="phone-shell" style="border-color:#00E5FF25;">
+          <div class="notch"></div>
+          <iframe src="V4_volta_perfil.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code vol-code">V4</div>
+          <div class="phone-name">Perfil Atleta</div>
+          <div class="phone-sub">Wise Score history · Wearables · Benchmarks</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════ AXON ═══════════════════════════ -->
+  <div class="product-section" style="opacity:.4;pointer-events:none;">
+    <div class="product-title pt-axon">
+      <div class="pt-logo logo-axon">AX</div>
+      <div>
+        <div class="pt-name ax-name">AXON <span style="font-size:12px;font-weight:400;color:#4a1a7a;letter-spacing:0;">Hyrox · Axon Score · Race Pace</span></div>
+        <div class="pt-desc">Próximamente</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL -->
+  <div id="modal" onclick="closeModal(event)">
+    <div id="modal-inner">
+      <div id="modal-bar">
+        <span id="modal-title"></span>
+        <button id="modal-close" onclick="closeModalBtn()">✕</button>
+      </div>
+      <iframe id="modal-frame" src=""></iframe>
+    </div>
+  </div>
+
+  <script>
+    window.openModal = function(file, title) {
+      document.getElementById('modal-title').textContent = title || '';
+      document.getElementById('modal-frame').src = file;
+      document.getElementById('modal').classList.add('open');
+    };
+    window.closeModalBtn = function() {
+      document.getElementById('modal').classList.remove('open');
+      document.getElementById('modal-frame').src = '';
+    };
+    // closeModal acepta un event (clic en backdrop) o ningún argumento (desde iframe).
+    window.closeModal = function(e) {
+      if (!e || e.target === document.getElementById('modal')) window.closeModalBtn();
+    };
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') window.closeModalBtn(); });
+  </script>
+
+</body>
+</html>

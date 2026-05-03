@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volta V1-F · Victory Screen Post-WOD</title>
+<style>
+  :root { --bg:#07070F;--surface:#0F0F1C;--surface2:#161626;--line:#1E1E32;--text:#EAEAF5;--muted:#52527A;--cyan:#00E5FF;--amber:#FFB300;--red:#FF3D00;--green:#00E676;--font:'Inter','Helvetica Neue',Arial,sans-serif; }
+  * { box-sizing:border-box;margin:0;padding:0;font-family:var(--font); }
+  body { background:#03030A;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:32px 16px; }
+  .phone { width:360px;min-height:780px;background:var(--bg);border-radius:40px;border:1.5px solid #1E1E38;overflow:hidden;position:relative;flex-shrink:0;box-shadow:0 0 0 1px #12121E,0 0 60px rgba(0,229,255,0.15),0 24px 80px rgba(0,0,0,0.7);display:flex;flex-direction:column; }
+  .scroll-area { flex:1;overflow-y:auto;padding-bottom:80px;scrollbar-width:none; }
+  .scroll-area::-webkit-scrollbar { display:none; }
+  .badge { display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border-radius:20px;font-size:10px;font-weight:700; }
+  .badge-warn { background:rgba(255,179,0,0.15);color:var(--amber);border:1px solid rgba(255,179,0,0.3); }
+  .badge-cyan { background:rgba(0,229,255,0.1);color:var(--cyan);border:1px solid rgba(0,229,255,0.25); }
+  .badge-green { background:rgba(0,230,118,0.1);color:var(--green);border:1px solid rgba(0,230,118,0.25); }
+  .card { background:var(--surface);border:1px solid var(--line);border-radius:16px; }
+  .sec { font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted); }
+  .stat-box { flex:1;background:var(--surface2);border:1px solid var(--line);border-radius:14px;padding:14px;text-align:center; }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- Victory header -->
+  <div style="background:linear-gradient(180deg,rgba(0,229,255,0.08),transparent);padding:28px 20px 20px;text-align:center;border-bottom:1px solid var(--line);">
+    <div style="font-size:40px;margin-bottom:8px;">⚡</div>
+    <div style="font-size:24px;font-weight:900;color:var(--cyan);letter-spacing:2px;">WOD COMPLETADO</div>
+    <div style="font-size:13px;color:var(--muted);margin-top:4px;">AMRAP 20min · Semana 4 · Día 3</div>
+    <div style="display:flex;justify-content:center;gap:8px;margin-top:12px;">
+      <div class="badge badge-warn">⚠ Sesión modificada</div>
+      <div class="badge badge-green">✓ +1 Racha</div>
+    </div>
+  </div>
+
+  <div class="scroll-area" style="padding:16px 16px 80px;">
+
+    <!-- Stats principales -->
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <div class="stat-box">
+        <div class="sec" style="margin-bottom:6px;">Rondas</div>
+        <div style="font-size:32px;font-weight:900;color:var(--cyan);line-height:1;">8</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px;">+ 5 reps</div>
+      </div>
+      <div class="stat-box">
+        <div class="sec" style="margin-bottom:6px;">Tiempo</div>
+        <div style="font-size:28px;font-weight:900;color:var(--text);line-height:1;">20:00</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px;">AMRAP completo</div>
+      </div>
+      <div class="stat-box">
+        <div class="sec" style="margin-bottom:6px;">Intensidad</div>
+        <div style="font-size:28px;font-weight:900;color:var(--amber);line-height:1;">80%</div>
+        <div style="font-size:10px;color:var(--amber);margin-top:4px;">HRV ajustado</div>
+      </div>
+    </div>
+
+    <!-- CF Index delta + Wise Score earned -->
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <!-- CF Index -->
+      <div style="flex:1;background:rgba(0,229,255,0.04);border:1px solid rgba(0,229,255,0.2);border-radius:14px;padding:14px;">
+        <div class="sec" style="margin-bottom:8px;">CF Index</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:24px;font-weight:900;color:var(--muted);">72</span>
+          <span style="font-size:16px;color:var(--cyan);">→</span>
+          <span style="font-size:24px;font-weight:900;color:var(--cyan);">73</span>
+          <div style="background:rgba(0,230,118,0.12);color:var(--green);border:1px solid rgba(0,230,118,0.25);padding:2px 7px;border-radius:20px;font-size:10px;font-weight:800;">+1</div>
+        </div>
+        <div style="font-size:9px;color:var(--muted);margin-top:4px;">Rendimiento atlético</div>
+      </div>
+      <!-- Wise Score earned -->
+      <div style="flex:1;background:rgba(0,230,118,0.04);border:1px solid rgba(0,230,118,0.2);border-radius:14px;padding:14px;">
+        <div class="sec" style="margin-bottom:8px;color:rgba(0,230,118,0.6);">Wise Score</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:24px;font-weight:900;color:var(--muted);">84</span>
+          <span style="font-size:16px;color:var(--green);">→</span>
+          <span style="font-size:24px;font-weight:900;color:var(--green);">114</span>
+          <div style="background:rgba(0,230,118,0.12);color:var(--green);border:1px solid rgba(0,230,118,0.25);padding:2px 7px;border-radius:20px;font-size:10px;font-weight:800;">+30</div>
+        </div>
+        <div style="font-size:9px;color:var(--muted);margin-top:4px;">Seguiste la carga 80%</div>
+      </div>
+    </div>
+
+    <!-- Wise Score breakdown -->
+    <div style="background:rgba(0,230,118,0.03);border:1px solid rgba(0,230,118,0.15);border-radius:12px;padding:12px 14px;margin-bottom:14px;">
+      <div style="font-size:11px;font-weight:800;color:var(--green);margin-bottom:8px;">⚡ Cómo ganaste 30 pts Wise</div>
+      <div style="display:flex;flex-direction:column;gap:5px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:11px;color:var(--muted);">Sistema recomendó 80% — cumpliste</span>
+          <span style="font-size:11px;font-weight:700;color:var(--green);">+30</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:11px;color:var(--muted);">Sin overrides en la sesión</span>
+          <span style="font-size:11px;font-weight:700;color:var(--green);">+0 bonus</span>
+        </div>
+      </div>
+      <div style="margin-top:8px;padding:6px 10px;background:rgba(0,229,255,0.05);border-radius:8px;border:1px solid rgba(0,229,255,0.1);">
+        <div style="font-size:10px;color:var(--cyan);">💡 Toma el rest day de mañana → +50 Wise pts adicionales</div>
+      </div>
+    </div>
+
+    <!-- Alerta post-WOD -->
+    <div style="background:rgba(255,179,0,0.05);border:1px solid rgba(255,179,0,0.2);border-radius:14px;padding:14px;margin-bottom:14px;">
+      <div style="font-size:12px;font-weight:800;color:var(--amber);margin-bottom:6px;">⚠ HRV bajo durante la sesión</div>
+      <div style="font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:10px;">Tu sistema nervioso trabajó al límite hoy. La recuperación post-sesión es crítica para mañana.</div>
+      <div style="background:rgba(0,229,255,0.05);border:1px solid rgba(0,229,255,0.15);border-radius:10px;padding:11px;">
+        <div style="font-size:11px;font-weight:700;color:var(--cyan);margin-bottom:4px;">🧘 Protocolo NSDR recomendado</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.5;">Non-Sleep Deep Rest · 20 minutos · Estimula recuperación del SNC sin dormir.</div>
+        <button style="margin-top:9px;padding:8px 14px;background:rgba(0,229,255,0.1);color:var(--cyan);border:1px solid rgba(0,229,255,0.25);border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;width:100%;">Ver protocolo NSDR →</button>
+      </div>
+    </div>
+
+    <!-- Resumen movimientos -->
+    <div class="sec" style="margin-bottom:8px;">Volumen total</div>
+    <div class="card" style="padding:14px;margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div style="font-size:12px;font-weight:700;color:var(--text);">Clean &amp; Jerk</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:12px;color:var(--amber);">48kg</span>
+          <span style="font-size:12px;font-weight:700;color:var(--cyan);">40 reps</span>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div style="font-size:12px;font-weight:700;color:var(--text);">Pull-ups</div>
+        <span style="font-size:12px;font-weight:700;color:var(--cyan);">85 reps</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div style="font-size:12px;font-weight:700;color:var(--text);">Box Jumps</div>
+        <span style="font-size:12px;font-weight:700;color:var(--cyan);">125 reps</span>
+      </div>
+    </div>
+
+    <!-- Mañana preview -->
+    <div style="background:rgba(0,229,255,0.03);border:1px solid var(--line);border-radius:14px;padding:13px;">
+      <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:4px;">📅 Mañana</div>
+      <div style="font-size:11px;color:var(--muted);">Rest day recomendado. Si HRV mejora → Sesión técnica o movilidad.</div>
+    </div>
+  </div>
+
+  <!-- FAB IA Coach -->
+  <div style="position:absolute;bottom:80px;right:16px;z-index:50;cursor:pointer;">
+    <div style="width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,#00E5FF,#0070FF);box-shadow:0 0 0 3px rgba(0,229,255,0.12),0 0 28px rgba(0,229,255,0.4),0 4px 16px rgba(0,0,0,0.5);display:flex;flex-direction:column;align-items:center;justify-content:center;">
+      <span style="font-size:20px;line-height:1;">✦</span>
+      <span style="font-size:7px;font-weight:900;color:#07070F;letter-spacing:.06em;margin-top:1px;">IA</span>
+    </div>
+  </div>
+
+  <!-- Bottom actions -->
+  <div style="position:absolute;bottom:0;left:0;right:0;padding:12px 16px;background:rgba(7,7,15,0.97);border-top:1px solid var(--line);display:flex;gap:8px;">
+    <button onclick="go('V6_volta_social_card.html')" style="flex:1;padding:13px;background:var(--cyan);color:#07070F;border:none;border-radius:13px;font-size:13px;font-weight:900;cursor:pointer;">Compartir resultado</button>
+    <button onclick="go('V1A_volta_dashboard.html')" style="padding:13px 14px;background:var(--surface2);color:var(--muted);border:1px solid var(--line);border-radius:13px;font-size:12px;font-weight:700;cursor:pointer;">Inicio</button>
+  </div>
+
+</div>
+<script src="_nav.js"></script>
+</body>
+</html>

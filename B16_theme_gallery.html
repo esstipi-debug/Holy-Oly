@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>B16 — Theme Gallery</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #050510;
+      min-height: 100vh;
+      font-family: 'Inter', system-ui, sans-serif;
+      padding: 40px 20px 80px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .phone {
+      width: 390px;
+      height: 844px;
+      background: var(--theme-bg, #0B1326);
+      border-radius: 44px;
+      border: 2px solid #2a2a3a;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 0 1px #1a1a28;
+      position: relative;
+      transition: background-color .35s ease;
+    }
+
+    .status-bar {
+      height: 44px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px; flex-shrink: 0;
+      color: var(--theme-text, #fff);
+      font-size: 12px; font-weight: 600;
+    }
+    .status-dot { width:14px; height:14px; border-radius:50%; border:1px solid #475569; opacity:.6; }
+    .status-bat { width:18px; height:9px; border-radius:2px; background: var(--theme-primary, #22C55E); }
+
+    .header {
+      padding: 8px 24px 18px;
+      display: flex; align-items: center; gap: 10px;
+      flex-shrink: 0;
+    }
+    .back {
+      width: 34px; height: 34px; border-radius: 10px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--theme-border, #1E293B);
+      color: var(--theme-text, #fff);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+    }
+    .title-block { flex:1; }
+    .h-title {
+      color: var(--theme-text, #fff);
+      font-size: 18px; font-weight: 900; letter-spacing: -.5px; line-height: 1;
+    }
+    .h-sub {
+      color: #94a3b8;
+      font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .scroll {
+      flex: 1; overflow-y: auto; padding: 6px 20px 100px;
+      scrollbar-width: none;
+    }
+    .scroll::-webkit-scrollbar { display: none; }
+
+    .section-label {
+      color: #475569;
+      font-size: 9px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase;
+      padding: 14px 4px 10px;
+    }
+
+    .current-card {
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--theme-border, #1E293B);
+      border-radius: 18px;
+      padding: 14px 16px;
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 8px;
+    }
+    .swatch-row { display: flex; gap: 6px; }
+    .swatch {
+      width: 22px; height: 22px; border-radius: 7px;
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .current-meta { flex:1; }
+    .current-name { color: var(--theme-text, #fff); font-size: 13px; font-weight: 800; }
+    .current-tag { color: #94a3b8; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; margin-top: 2px; }
+    .check {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--theme-primary, #22C55E);
+      color: #07070F; font-size: 12px; font-weight: 900;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* Theme grid */
+    .theme-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 10px; margin-top: 6px;
+    }
+    .theme-card {
+      position: relative;
+      border-radius: 16px;
+      padding: 12px;
+      cursor: pointer;
+      border: 1.5px solid transparent;
+      transition: transform .15s, border-color .15s;
+      overflow: hidden;
+    }
+    .theme-card:hover { transform: translateY(-2px); }
+    .theme-card.active {
+      border-color: var(--theme-primary, #22C55E);
+      box-shadow: 0 0 0 3px rgba(34,197,94,.15);
+    }
+    .tc-preview {
+      height: 64px; border-radius: 10px;
+      display: flex; align-items: flex-end; justify-content: space-between;
+      padding: 8px; margin-bottom: 10px; position: relative; overflow: hidden;
+    }
+    .tc-mini-bar {
+      width: 28px; height: 8px; border-radius: 4px; opacity: .9;
+    }
+    .tc-mini-dot {
+      width: 16px; height: 16px; border-radius: 50%;
+    }
+    .tc-name { color: #EAEAF5; font-size: 11px; font-weight: 800; letter-spacing: -.2px; }
+    .tc-desc { color: #64748b; font-size: 9px; font-weight: 600; margin-top: 2px; line-height: 1.3; }
+    .tc-lock {
+      position: absolute; top: 8px; right: 8px;
+      background: rgba(0,0,0,.6); backdrop-filter: blur(8px);
+      border: 1px solid rgba(250,204,21,.35);
+      color: #FACC15;
+      font-size: 8px; font-weight: 800; letter-spacing: .1em;
+      padding: 2px 6px; border-radius: 6px;
+      display: flex; align-items: center; gap: 3px;
+    }
+
+    /* Premium banner */
+    .premium-banner {
+      margin-top: 18px;
+      background: linear-gradient(135deg, rgba(250,204,21,.08), rgba(250,204,21,.02));
+      border: 1px solid rgba(250,204,21,.25);
+      border-radius: 16px;
+      padding: 14px 16px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .pb-icon {
+      width: 38px; height: 38px; flex-shrink: 0;
+      border-radius: 12px; background: rgba(250,204,21,.12);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .pb-text { flex:1; }
+    .pb-title { color: #FACC15; font-size: 12px; font-weight: 800; }
+    .pb-sub { color: #94a3b8; font-size: 10px; margin-top: 2px; line-height: 1.3; }
+    .pb-btn {
+      background: #FACC15; color: #07070F;
+      font-size: 10px; font-weight: 900; letter-spacing: .05em;
+      padding: 7px 12px; border-radius: 9px; border: none;
+    }
+
+    /* A11y row */
+    .toggle-row {
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--theme-border, #1E293B);
+      border-radius: 14px;
+      padding: 12px 14px;
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 8px;
+    }
+    .tr-icon {
+      width: 30px; height: 30px; border-radius: 9px;
+      background: rgba(255,255,255,.04);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+    }
+    .tr-text { flex:1; }
+    .tr-title { color: var(--theme-text, #fff); font-size: 12px; font-weight: 700; }
+    .tr-sub { color: #64748b; font-size: 10px; font-weight: 500; }
+    .switch {
+      width: 32px; height: 18px; border-radius: 999px;
+      background: #1E293B; position: relative; flex-shrink: 0;
+      transition: background .15s;
+    }
+    .switch.on { background: var(--theme-primary, #22C55E); }
+    .switch::after {
+      content: ''; position: absolute; top: 2px; left: 2px;
+      width: 14px; height: 14px; border-radius: 50%;
+      background: #fff; transition: transform .15s;
+    }
+    .switch.on::after { transform: translateX(14px); }
+
+    .bottom-nav {
+      position: absolute; bottom:0; left:0; right:0;
+      height: 76px;
+      background: rgba(7,7,15,.6); backdrop-filter: blur(20px);
+      border-top: 1px solid var(--theme-border, #1E293B);
+      display:flex; align-items:center; justify-content:space-around;
+      padding-bottom: 12px;
+    }
+    .nav-item { display:flex; flex-direction:column; align-items:center; gap:3px; opacity:.45; }
+    .nav-item.active { opacity:1; }
+    .nav-icon { width:22px; height:22px; border-radius:7px; background: rgba(255,255,255,.08); }
+    .nav-icon.active { background: var(--theme-primary, #22C55E); }
+    .nav-label { font-size:9px; font-weight:800; color:#475569; letter-spacing:.06em; text-transform:uppercase; }
+    .nav-label.active { color: var(--theme-primary, #22C55E); }
+
+    .phone-tag {
+      width: 390px; text-align: center; margin-top: 14px;
+      font-size: 11px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: #475569;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <div class="phone" id="phone">
+      <div class="status-bar">
+        <span>9:41</span>
+        <div style="display:flex; gap:6px; align-items:center;">
+          <div class="status-dot"></div>
+          <div class="status-bat"></div>
+        </div>
+      </div>
+
+      <div class="header">
+        <div class="back" onclick="back('B15_perfil_atleta.html')" style="cursor:pointer;">←</div>
+        <div class="title-block">
+          <div class="h-title">Apariencia</div>
+          <div class="h-sub">Settings · Theme Gallery</div>
+        </div>
+      </div>
+
+      <div class="scroll">
+        <div class="section-label">Tema actual</div>
+        <div class="current-card">
+          <div class="swatch-row">
+            <div class="swatch" id="cur-bg"></div>
+            <div class="swatch" id="cur-primary"></div>
+            <div class="swatch" id="cur-accent"></div>
+          </div>
+          <div class="current-meta">
+            <div class="current-name" id="cur-name">Holy Oly Classic</div>
+            <div class="current-tag" id="cur-desc">El estilo original</div>
+          </div>
+          <div class="check">✓</div>
+        </div>
+
+        <div class="section-label">Gratis</div>
+        <div class="theme-grid" id="grid-free"></div>
+
+        <div class="section-label" style="display:flex; align-items:center; gap:6px;">
+          Premium <span style="color:#FACC15; font-size:10px;">💎</span>
+        </div>
+        <div class="theme-grid" id="grid-premium"></div>
+
+        <div class="premium-banner">
+          <div class="pb-icon">💎</div>
+          <div class="pb-text">
+            <div class="pb-title">Desbloquea Premium</div>
+            <div class="pb-sub">3 temas exclusivos · $2.99/mes</div>
+          </div>
+          <button class="pb-btn">UPGRADE</button>
+        </div>
+
+        <div class="section-label">Accesibilidad</div>
+        <div class="toggle-row">
+          <div class="tr-icon">🔆</div>
+          <div class="tr-text">
+            <div class="tr-title">Alto contraste</div>
+            <div class="tr-sub">Para mejor visibilidad</div>
+          </div>
+          <div class="switch" data-toggle></div>
+        </div>
+        <div class="toggle-row">
+          <div class="tr-icon">⏸</div>
+          <div class="tr-text">
+            <div class="tr-title">Reducir animaciones</div>
+            <div class="tr-sub">Sigue ajuste del sistema</div>
+          </div>
+          <div class="switch on" data-toggle></div>
+        </div>
+        <div class="toggle-row">
+          <div class="tr-icon">🔠</div>
+          <div class="tr-text">
+            <div class="tr-title">Tamaño de texto</div>
+            <div class="tr-sub">Normal</div>
+          </div>
+          <div style="color:#64748b; font-size:14px;">›</div>
+        </div>
+      </div>
+
+      <div class="bottom-nav">
+        <div class="nav-item"><div class="nav-icon"></div><div class="nav-label">Home</div></div>
+        <div class="nav-item"><div class="nav-icon"></div><div class="nav-label">Train</div></div>
+        <div class="nav-item"><div class="nav-icon"></div><div class="nav-label">Stats</div></div>
+        <div class="nav-item active"><div class="nav-icon active"></div><div class="nav-label active">Perfil</div></div>
+      </div>
+    </div>
+    <div class="phone-tag">B16 · Theme Gallery</div>
+  </div>
+
+<script>
+  const THEMES = [
+    { code:'classic', name:'Holy Oly Classic', isPremium:false,
+      bg:'#0B1326', primary:'#22C55E', accent:'#22C55E', text:'#FFFFFF', border:'#1E293B',
+      desc:'El estilo original. Limpio y enfocado.' },
+    { code:'arctic', name:'Arctic Chill', isPremium:false,
+      bg:'#0B1A24', primary:'#14B8A6', accent:'#14B8A6', text:'#E0F2FE', border:'#134E4A',
+      desc:'Frío, calmado, focus extremo.' },
+    { code:'inferno', name:'Inferno', isPremium:false,
+      bg:'#1A0F0A', primary:'#84CC16', accent:'#84CC16', text:'#FEF7CD', border:'#3F2E1A',
+      desc:'Energía intensa, alto rendimiento.' },
+    { code:'lux', name:'Olympic Gold', isPremium:true,
+      bg:'#0A0A12', primary:'#FACC15', accent:'#FACC15', text:'#FFFFFF', border:'#3F2A06',
+      desc:'Edición lujo. Solo campeones.' },
+    { code:'carbon', name:'Carbon Stealth', isPremium:true,
+      bg:'#0B0B10', primary:'#B4C5FF', accent:'#B4C5FF', text:'#E2E8F0', border:'#1E1E26',
+      desc:'Industrial. Minimalismo total.' },
+    { code:'cyber', name:'Cyber Neon', isPremium:true,
+      bg:'#0A0F1A', primary:'#22D3EE', accent:'#22D3EE', text:'#F0F9FF', border:'#0E2A3A',
+      desc:'Futurista. Luces de neón.' },
+  ];
+
+  const phone = document.getElementById('phone');
+  const curName = document.getElementById('cur-name');
+  const curDesc = document.getElementById('cur-desc');
+  const curBg = document.getElementById('cur-bg');
+  const curPri = document.getElementById('cur-primary');
+  const curAcc = document.getElementById('cur-accent');
+  const gridFree = document.getElementById('grid-free');
+  const gridPrem = document.getElementById('grid-premium');
+
+  let active = 'classic';
+
+  function applyTheme(code) {
+    const t = THEMES.find(x => x.code === code);
+    if (!t) return;
+    active = code;
+    phone.style.setProperty('--theme-bg', t.bg);
+    phone.style.setProperty('--theme-primary', t.primary);
+    phone.style.setProperty('--theme-accent', t.accent);
+    phone.style.setProperty('--theme-text', t.text);
+    phone.style.setProperty('--theme-border', t.border);
+
+    curName.textContent = t.name;
+    curDesc.textContent = t.desc;
+    curBg.style.background = t.bg;
+    curPri.style.background = t.primary;
+    curAcc.style.background = t.accent;
+
+    document.querySelectorAll('.theme-card').forEach(c => {
+      c.classList.toggle('active', c.dataset.code === code);
+    });
+  }
+
+  function renderCard(t) {
+    const card = document.createElement('div');
+    card.className = 'theme-card';
+    card.dataset.code = t.code;
+    card.style.background = t.bg;
+    card.style.borderColor = t.border;
+    card.innerHTML = `
+      ${t.isPremium ? `<div class="tc-lock">💎 PREMIUM</div>` : ''}
+      <div class="tc-preview" style="background: linear-gradient(135deg, ${t.bg} 0%, ${t.border} 100%);">
+        <div class="tc-mini-bar" style="background:${t.primary}"></div>
+        <div class="tc-mini-dot" style="background:${t.accent}; box-shadow:0 0 12px ${t.primary}80;"></div>
+      </div>
+      <div class="tc-name" style="color:${t.text}">${t.name}</div>
+      <div class="tc-desc">${t.desc}</div>
+    `;
+    card.addEventListener('click', () => applyTheme(t.code));
+    return card;
+  }
+
+  THEMES.filter(t => !t.isPremium).forEach(t => gridFree.appendChild(renderCard(t)));
+  THEMES.filter(t => t.isPremium).forEach(t => gridPrem.appendChild(renderCard(t)));
+
+  applyTheme('classic');
+
+  // Toggle switches
+  document.querySelectorAll('[data-toggle]').forEach(s => {
+    s.addEventListener('click', () => s.classList.toggle('on'));
+  });
+</script>
+<script src="_nav.js"></script>
+</body>
+</html>

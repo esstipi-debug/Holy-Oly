@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volta V4 · Perfil Atleta</title>
+<style>
+  :root { --bg:#07070F;--surface:#0F0F1C;--surface2:#161626;--line:#1E1E32;--text:#EAEAF5;--muted:#52527A;--cyan:#00E5FF;--cyan-dim:#00B8CC;--amber:#FFB300;--red:#FF3D00;--green:#00E676;--font:'Inter','Helvetica Neue',Arial,sans-serif; }
+  * { box-sizing:border-box;margin:0;padding:0;font-family:var(--font); }
+  body { background:#03030A;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:32px 16px; }
+  .phone { width:360px;min-height:780px;background:var(--bg);border-radius:40px;border:1.5px solid #1E1E38;overflow:hidden;position:relative;flex-shrink:0;box-shadow:0 0 0 1px #12121E,0 0 60px rgba(0,229,255,0.08),0 24px 80px rgba(0,0,0,0.7);display:flex;flex-direction:column; }
+  .scroll-area { flex:1;overflow-y:auto;padding-bottom:80px;scrollbar-width:none; }
+  .scroll-area::-webkit-scrollbar { display:none; }
+  .card { background:var(--surface);border:1px solid var(--line);border-radius:16px; }
+  .sec { font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted); }
+  .badge { display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700; }
+  .badge-cyan { background:rgba(0,229,255,0.1);color:var(--cyan);border:1px solid rgba(0,229,255,0.25); }
+  .badge-green { background:rgba(0,230,118,0.1);color:var(--green);border:1px solid rgba(0,230,118,0.25); }
+  .badge-amber { background:rgba(255,179,0,0.12);color:var(--amber);border:1px solid rgba(255,179,0,0.25); }
+  .wbar { height:4px;border-radius:2px;background:var(--line);overflow:hidden; }
+  .wbar-fill { height:100%;border-radius:2px; }
+  .wearable-row { display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--line); }
+  .wearable-row:last-child { border-bottom:none; }
+  .toggle { width:40px;height:22px;border-radius:11px;background:var(--cyan);position:relative;flex-shrink:0; }
+  .toggle-off { background:var(--surface2);border:1px solid var(--line); }
+  .toggle::after { content:'';position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:#07070F; }
+  .toggle-off::after { right:auto;left:2px;background:var(--muted); }
+  .stat-mini { flex:1;background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center; }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- Hero perfil -->
+  <div style="background:linear-gradient(180deg,rgba(0,229,255,0.07),transparent);padding:20px 20px 16px;border-bottom:1px solid var(--line);">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;">
+      <div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),#0070FF);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;color:#07070F;flex-shrink:0;box-shadow:0 0 20px rgba(0,229,255,0.25);">M</div>
+      <div style="flex:1;">
+        <div style="font-size:19px;font-weight:900;color:var(--text);">Marco Torres</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
+          <div class="badge badge-cyan">Rx</div>
+          <span style="font-size:11px;color:var(--muted);">28 años · 80kg · CrossFit Norte</span>
+      </div>
+      <div style="font-size:14px;cursor:pointer;color:var(--muted);" onclick="go('A1_A2_A3_auth.html')">⚙ Cerrar sesión</div>
+        </div>
+      </div>
+       <div style="font-size:14px;cursor:pointer;color:var(--muted);" onclick="go('B16_theme_gallery.html')">⚙ Apariencia/Tema</div>
+    </div>
+
+    <!-- CF Index + Wise Score hero -->
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="width:66px;height:66px;border-radius:50%;border:3px solid var(--cyan);background:radial-gradient(circle at 50%,rgba(0,229,255,0.08),transparent);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 20px rgba(0,229,255,0.2);">
+        <span style="font-size:20px;font-weight:900;color:var(--cyan);line-height:1;">73</span>
+        <span style="font-size:7px;font-weight:700;color:var(--cyan-dim);letter-spacing:.04em;">CF IDX</span>
+      </div>
+      <div style="width:66px;height:66px;border-radius:50%;border:3px solid #00E676;background:radial-gradient(circle at 50%,rgba(0,230,118,0.08),transparent);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 20px rgba(0,230,118,0.2);">
+        <span style="font-size:20px;font-weight:900;color:#00E676;line-height:1;">84</span>
+        <span style="font-size:7px;font-weight:700;color:rgba(0,230,118,0.5);letter-spacing:.04em;">WISE</span>
+      </div>
+      <div style="flex:1;display:flex;gap:8px;">
+        <div class="stat-mini">
+          <div style="font-size:18px;font-weight:900;color:#f97316;">🔥</div>
+          <div style="font-size:16px;font-weight:900;color:var(--text);">11</div>
+          <div style="font-size:8px;color:var(--muted);margin-top:1px;">RACHA</div>
+        </div>
+        <div class="stat-mini">
+          <div style="font-size:18px;">⚡</div>
+          <div style="font-size:16px;font-weight:900;color:var(--text);">48</div>
+          <div style="font-size:8px;color:var(--muted);margin-top:1px;">WODs</div>
+        </div>
+        <div class="stat-mini">
+          <div style="font-size:18px;">🏅</div>
+          <div style="font-size:16px;font-weight:900;color:var(--text);">P68</div>
+          <div style="font-size:8px;color:var(--muted);margin-top:1px;">PERCENTIL</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scroll-area" style="padding:14px 16px 80px;">
+
+    <!-- CF Index history -->
+    <div class="sec" style="margin-bottom:8px;">CF Index — 12 semanas</div>
+    <div class="card" style="padding:14px;margin-bottom:14px;">
+      <div style="display:flex;align-items:flex-end;gap:3px;height:52px;margin-bottom:6px;">
+        <div style="flex:1;border-radius:3px 3px 0 0;background:rgba(0,229,255,0.2);height:55%;"></div>
+        <div style="flex:1;border-radius:3px 3px 0 0;background:rgba(0,229,255,0.25);height:58%;"></div>
+        <div style="flex:1;border-radius:3px 3px 0 0;background:rgba(0,229,255,0.2);height:55%;"></div>
+        <div style="flex:1;border-radius:3px 3px 0 0;background:rgba(0,229,255,0.3);height:62%;"></div>
+        <div style="flex:1;border-radius:3px 3px 0 0;background:rgba(0,229,255,0.35);height:64%;"></div>
+        <div style="flex:1;border-radius:3px 3px 0 0;background:rgba(0,229,255,0.3);height:60%;"></div>
+        <div style="flex:1;border-radius:3px 3px 0 0;background:rgba(0,229,255,0.35);height:65%;"></div>
+        <div style="flex:1;border-radius:3px 3px 0 0;background:rgba(0,229,255,0.4);height:68%;"></div>
+        <div style="flex:1;border-radius:3px 3px 0 0;background:rgba(0,229,255,0.45);height:70%;"></div>
+        <div style="flex:1;border-radius:3px 3px 0 0;background:rgba(0,229,255,0.4);height:67%;"></div>
+        <div style="flex:1;border-radius:3px 3px 0 0;background:rgba(0,229,255,0.5);height:72%;"></div>
+        <div style="flex:1;border-radius:3px 3px 0 0;background:var(--cyan);height:74%;box-shadow:0 0 8px rgba(0,229,255,0.4);"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+        <span style="font-size:9px;color:var(--muted);">S1 · 69</span>
+        <span style="font-size:9px;color:var(--muted);">S4 · 70</span>
+        <span style="font-size:9px;color:var(--muted);">S8 · 71</span>
+        <span style="font-size:9px;color:var(--cyan);font-weight:700;">S12 · 73 ↑</span>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <div class="badge badge-green">↑ +4 en 12 sem</div>
+        <div class="badge badge-amber">Engine débil</div>
+      </div>
+    </div>
+
+    <!-- Wise Score compliance -->
+    <div class="sec" style="margin-bottom:8px;color:rgba(0,230,118,0.6);">Wise Score — compliance</div>
+    <div style="background:rgba(0,230,118,0.03);border:1px solid rgba(0,230,118,0.15);border-radius:16px;padding:14px;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;">
+        <div style="width:56px;height:56px;border-radius:50%;border:3px solid #00E676;background:radial-gradient(circle,rgba(0,230,118,0.1),transparent);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 16px rgba(0,230,118,0.2);">
+          <span style="font-size:18px;font-weight:900;color:#00E676;line-height:1;">84</span>
+          <span style="font-size:7px;font-weight:700;color:rgba(0,230,118,0.5);">WISE</span>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:800;color:#00E676;">Smart trainer ✓</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px;line-height:1.4;">Seguiste 8 de las últimas 10 recomendaciones del sistema.</div>
+        </div>
+      </div>
+      <!-- Wise Score history sparkline -->
+      <div style="display:flex;align-items:flex-end;gap:3px;height:36px;margin-bottom:5px;">
+        <div style="flex:1;border-radius:2px 2px 0 0;background:rgba(0,230,118,0.3);height:45%;"></div>
+        <div style="flex:1;border-radius:2px 2px 0 0;background:rgba(255,61,0,0.4);height:35%;"></div>
+        <div style="flex:1;border-radius:2px 2px 0 0;background:rgba(0,230,118,0.35);height:52%;"></div>
+        <div style="flex:1;border-radius:2px 2px 0 0;background:rgba(0,230,118,0.4);height:60%;"></div>
+        <div style="flex:1;border-radius:2px 2px 0 0;background:rgba(255,179,0,0.3);height:40%;"></div>
+        <div style="flex:1;border-radius:2px 2px 0 0;background:rgba(0,230,118,0.45);height:65%;"></div>
+        <div style="flex:1;border-radius:2px 2px 0 0;background:rgba(0,230,118,0.5);height:70%;"></div>
+        <div style="flex:1;border-radius:2px 2px 0 0;background:rgba(255,61,0,0.35);height:50%;"></div>
+        <div style="flex:1;border-radius:2px 2px 0 0;background:rgba(0,230,118,0.5);height:72%;"></div>
+        <div style="flex:1;border-radius:2px 2px 0 0;background:rgba(0,230,118,0.55);height:76%;"></div>
+        <div style="flex:1;border-radius:2px 2px 0 0;background:rgba(0,230,118,0.6);height:80%;"></div>
+        <div style="flex:1;border-radius:2px 2px 0 0;background:#00E676;height:84%;box-shadow:0 0 6px rgba(0,230,118,0.4);"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-size:9px;color:var(--muted);">S1 · 40</span>
+        <span style="font-size:9px;color:var(--muted);">S4 · 55</span>
+        <span style="font-size:9px;color:var(--muted);">S8 · 70</span>
+        <span style="font-size:9px;color:#00E676;font-weight:700;">S12 · 84 ↑</span>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <div style="flex:1;background:var(--surface2);border:1px solid rgba(0,230,118,0.15);border-radius:10px;padding:8px;text-align:center;">
+          <div style="font-size:9px;color:var(--muted);margin-bottom:2px;">Seguidas</div>
+          <div style="font-size:16px;font-weight:900;color:#00E676;">8/10</div>
+          <div style="font-size:8px;color:var(--muted);">últimas recom.</div>
+        </div>
+        <div style="flex:1;background:var(--surface2);border:1px solid rgba(255,61,0,0.1);border-radius:10px;padding:8px;text-align:center;">
+          <div style="font-size:9px;color:var(--muted);margin-bottom:2px;">Overrides</div>
+          <div style="font-size:16px;font-weight:900;color:var(--red);">2</div>
+          <div style="font-size:8px;color:var(--muted);">−40 pts</div>
+        </div>
+        <div style="flex:1;background:var(--surface2);border:1px solid rgba(0,230,118,0.15);border-radius:10px;padding:8px;text-align:center;">
+          <div style="font-size:9px;color:var(--muted);margin-bottom:2px;">Racha</div>
+          <div style="font-size:16px;font-weight:900;color:#00E676;">5</div>
+          <div style="font-size:8px;color:var(--muted);">días ×1.5</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sub-indices summary -->
+    <div class="sec" style="margin-bottom:8px;">CF Index — sub-índices</div>
+    <div class="card" style="padding:14px;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-size:11px;font-weight:700;color:var(--text);width:90px;">Strength</span>
+        <div style="flex:1;margin:0 10px;"><div class="wbar"><div class="wbar-fill" style="width:78%;background:var(--cyan);"></div></div></div>
+        <span style="font-size:11px;font-weight:700;color:var(--cyan);">78</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-size:11px;font-weight:700;color:var(--text);width:90px;">Engine</span>
+        <div style="flex:1;margin:0 10px;"><div class="wbar"><div class="wbar-fill" style="width:46%;background:var(--amber);"></div></div></div>
+        <span style="font-size:11px;font-weight:700;color:var(--amber);">46 ⚠</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-size:11px;font-weight:700;color:var(--text);width:90px;">Gymnastics</span>
+        <div style="flex:1;margin:0 10px;"><div class="wbar"><div class="wbar-fill" style="width:82%;background:var(--cyan);"></div></div></div>
+        <span style="font-size:11px;font-weight:700;color:var(--cyan);">82</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-size:11px;font-weight:700;color:var(--text);width:90px;">Benchmark</span>
+        <div style="flex:1;margin:0 10px;"><div class="wbar"><div class="wbar-fill" style="width:70%;background:var(--cyan);"></div></div></div>
+        <span style="font-size:11px;font-weight:700;color:var(--cyan);">70</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-size:11px;font-weight:700;color:var(--text);width:90px;">Consistency</span>
+        <div style="flex:1;margin:0 10px;"><div class="wbar"><div class="wbar-fill" style="width:76%;background:var(--cyan);"></div></div></div>
+        <span style="font-size:11px;font-weight:700;color:var(--cyan);">76</span>
+      </div>
+    </div>
+
+    <!-- Wearables -->
+    <div class="sec" style="margin-bottom:8px;">Wearables conectados</div>
+    <div class="card" style="padding:4px 14px;margin-bottom:14px;">
+      <div class="wearable-row">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:20px;">⌚</span>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--text);">Apple Watch</div>
+            <div style="font-size:10px;color:var(--green);">● Activo · HRV + Sleep + Actividad</div>
+          </div>
+        </div>
+        <div class="toggle"></div>
+      </div>
+      <div class="wearable-row">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:20px;">💍</span>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--text);">Oura Ring</div>
+            <div style="font-size:10px;color:var(--green);">● Activo · Prioridad 1 HRV + Sueño</div>
+          </div>
+        </div>
+        <div class="toggle"></div>
+      </div>
+      <div class="wearable-row">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:20px;">🏃</span>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--text);">Garmin</div>
+            <div style="font-size:10px;color:var(--muted);">● Desconectado</div>
+          </div>
+        </div>
+        <div class="toggle toggle-off"></div>
+      </div>
+    </div>
+
+    <!-- Benchmarks personales -->
+    <div class="sec" style="margin-bottom:8px;">Benchmarks personales</div>
+    <div class="card" style="padding:14px;margin-bottom:14px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:10px;">
+          <div style="font-size:9px;color:var(--muted);font-weight:700;">FRAN</div>
+          <div style="font-size:16px;font-weight:900;color:var(--cyan);margin-top:2px;">4:22</div>
+          <div class="badge badge-cyan" style="margin-top:4px;font-size:8px;">Top 30%</div>
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:10px;">
+          <div style="font-size:9px;color:var(--muted);font-weight:700;">MURPH</div>
+          <div style="font-size:16px;font-weight:900;color:var(--cyan);margin-top:2px;">42:18</div>
+          <div class="badge badge-cyan" style="margin-top:4px;font-size:8px;">Top 35%</div>
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:10px;">
+          <div style="font-size:9px;color:var(--muted);font-weight:700;">GRACE</div>
+          <div style="font-size:16px;font-weight:900;color:var(--cyan);margin-top:2px;">3:10</div>
+          <div class="badge badge-cyan" style="margin-top:4px;font-size:8px;">Top 25%</div>
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:10px;">
+          <div style="font-size:9px;color:var(--muted);font-weight:700;">CINDY</div>
+          <div style="font-size:16px;font-weight:900;color:var(--amber);margin-top:2px;">16 rds</div>
+          <div class="badge badge-amber" style="margin-top:4px;font-size:8px;">Top 55%</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FAB IA Coach -->
+  <div style="position:absolute;bottom:76px;right:16px;z-index:50;cursor:pointer;">
+    <div style="width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,#00E5FF,#0070FF);box-shadow:0 0 0 3px rgba(0,229,255,0.12),0 0 28px rgba(0,229,255,0.4),0 4px 16px rgba(0,0,0,0.5);display:flex;flex-direction:column;align-items:center;justify-content:center;">
+      <span style="font-size:20px;line-height:1;">✦</span>
+      <span style="font-size:7px;font-weight:900;color:#07070F;letter-spacing:.06em;margin-top:1px;">IA</span>
+    </div>
+  </div>
+
+  <!-- Bottom nav -->
+  <div style="position:absolute;bottom:0;left:0;right:0;height:64px;background:rgba(7,7,15,0.97);border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-around;padding-bottom:6px;">
+    <div onclick="go('V1A_volta_dashboard.html')" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;"><span style="font-size:18px;">🏠</span><span style="font-size:9px;color:var(--muted);font-weight:700;">Inicio</span></div>
+    <div onclick="go('V3_volta_wod_log.html')" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;"><span style="font-size:18px;">⚡</span><span style="font-size:9px;color:var(--muted);font-weight:700;">WOD Log</span></div>
+    <div onclick="go('V5_volta_ia_chat.html')" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;"><span style="font-size:18px;">📊</span><span style="font-size:9px;color:var(--muted);font-weight:700;">Chat IA</span></div>
+    <div onclick="go('V7_volta_pildoras.html')" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;"><span style="font-size:18px;">🏅</span><span style="font-size:9px;color:var(--muted);font-weight:700;">Logros</span></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;" onclick="go('V4_volta_perfil.html')">
+      <span style="font-size:18px;">👤</span>
+      <span style="font-size:9px;font-weight:700;color:var(--cyan);">Perfil</span>
+      <div style="width:4px;height:4px;border-radius:50%;background:var(--cyan);box-shadow:0 0 6px var(--cyan);"></div>
+    </div>
+  </div>
+
+</div>
+<script src="_nav.js"></script>
+</body>
+</html>
