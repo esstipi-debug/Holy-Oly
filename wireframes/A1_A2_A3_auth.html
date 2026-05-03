@@ -163,7 +163,7 @@
               <div>
                 <div class="flex justify-between mb-1.5">
                   <label class="text-xs text-slate-500 font-bold">Contraseña</label>
-                  <button class="text-xs text-indigo-400 font-bold">¿Olvidaste tu contraseña?</button>
+                  <button class="text-xs text-indigo-400 font-bold" onclick="document.querySelector('#btn-email')?.click()">¿Olvidaste tu contraseña?</button>
                 </div>
                 <input class="input-field" type="password" placeholder="••••••••" value="••••••••"/>
               </div>
@@ -171,7 +171,7 @@
 
             <!-- CTA -->
             <div class="space-y-3 fade-in" style="animation-delay:.15s">
-              <button class="btn-primary">Iniciar sesión</button>
+              <button class="btn-primary" onclick="go('B1_dashboard_atleta.html')">Iniciar sesión</button>
 
               <div class="divider">
                 <span class="text-slate-600 text-xs">o continúa con</span>
@@ -191,7 +191,7 @@
             <div class="text-center mt-6 fade-in" style="animation-delay:.2s">
               <p class="text-slate-500 text-sm">
                 ¿Primera vez?
-                <button class="text-indigo-400 font-bold">Crear cuenta</button>
+                <button class="text-indigo-400 font-bold" onclick="go('D1_onboarding_atleta.html')">Crear cuenta</button>
               </p>
             </div>
 
@@ -302,7 +302,7 @@
 
             <!-- CTA -->
             <div class="space-y-3 fade-in" style="animation-delay:.2s">
-              <button class="btn-primary">Crear mi cuenta → Paso 2</button>
+              <button class="btn-primary" onclick="go('D1_onboarding_atleta.html')">Crear mi cuenta → Paso 2</button>
 
               <div class="divider">
                 <span class="text-slate-600 text-xs">o regístrate con</span>
@@ -316,7 +316,7 @@
 
             <!-- Login link -->
             <div class="text-center mt-5">
-              <p class="text-slate-500 text-sm">¿Ya tienes cuenta? <button class="text-indigo-400 font-bold">Iniciar sesión</button></p>
+              <p class="text-slate-500 text-sm">¿Ya tienes cuenta? <button class="text-indigo-400 font-bold" onclick="go('B1_dashboard_atleta.html')">Iniciar sesión</button></p>
             </div>
           </div>
         </div>
@@ -422,7 +422,7 @@
                 </div>
               </div>
 
-              <button class="btn-primary mb-3">🔒 Guardar nueva contraseña</button>
+              <button class="btn-primary mb-3" onclick="go('B1_dashboard_atleta.html')">🔒 Guardar nueva contraseña</button>
 
               <!-- Success hint -->
               <div class="bg-green-900/20 border border-green-500/30 rounded-2xl p-3 text-center">
@@ -454,5 +454,6 @@
       document.getElementById(btnId)?.classList.replace('text-slate-400','text-white');
     }
   </script>
+  <script src="_nav.js"></script>
 </body>
 </html>

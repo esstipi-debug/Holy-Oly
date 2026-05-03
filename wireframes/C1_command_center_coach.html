@@ -263,7 +263,7 @@
             <button id="btn-semana" class="toggle-btn" style="background:transparent;color:#64748b;font-size:10px;font-weight:700;padding:6px 10px;border-radius:8px;border:none;cursor:pointer;">Semana</button>
             <button id="btn-28d" class="toggle-btn" style="background:transparent;color:#64748b;font-size:10px;font-weight:700;padding:6px 10px;border-radius:8px;border:none;cursor:pointer;">28d</button>
           </div>
-          <button style="background:#111118;border:1px solid #3730a3;border-radius:12px;padding:8px 12px;color:#818cf8;font-size:12px;font-weight:700;cursor:pointer;">+ Atleta</button>
+          <button onclick="go('C5_C6_add_athlete_assign_macro.html')" style="background:#111118;border:1px solid #3730a3;border-radius:12px;padding:8px 12px;color:#818cf8;font-size:12px;font-weight:700;cursor:pointer;">+ Atleta</button>
           <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8B5CF6);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:white;">R</div>
         </div>
       </div>
@@ -302,7 +302,7 @@
         </div>
         <div style="padding:0 24px;display:flex;flex-direction:column;gap:8px;">
 
-          <div class="athlete-card danger">
+          <div class="athlete-card danger" onclick="go(\'C4_athlete_deep_dive.html\')" style="cursor:pointer">
             <div style="width:38px;height:38px;border-radius:50%;background:#1c0a0a;border:2px solid #EF4444;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#f87171;flex-shrink:0;">J</div>
             <div style="flex:1;min-width:0;">
               <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
@@ -314,7 +314,7 @@
             <div class="readiness-dot dot-red">22</div>
           </div>
 
-          <div class="athlete-card danger">
+          <div class="athlete-card danger" onclick="go(\'C4_athlete_deep_dive.html\')" style="cursor:pointer">
             <div style="width:38px;height:38px;border-radius:50%;background:#1c0a0a;border:2px solid #EF4444;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#f87171;flex-shrink:0;">M</div>
             <div style="flex:1;min-width:0;">
               <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
@@ -326,7 +326,7 @@
             <div class="readiness-dot dot-red">31</div>
           </div>
 
-          <div class="athlete-card danger">
+          <div class="athlete-card danger" onclick="go(\'C4_athlete_deep_dive.html\')" style="cursor:pointer">
             <div style="width:38px;height:38px;border-radius:50%;background:#1c0a0a;border:2px solid #EF4444;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#f87171;flex-shrink:0;">C</div>
             <div style="flex:1;min-width:0;">
               <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
@@ -350,7 +350,7 @@
         </div>
         <div style="padding:0 24px;display:flex;flex-direction:column;gap:8px;">
 
-          <div class="athlete-card warning">
+          <div class="athlete-card warning" onclick="go(\'C4_athlete_deep_dive.html\')" style="cursor:pointer">
             <div style="width:38px;height:38px;border-radius:50%;background:#1c1500;border:2px solid #EAB308;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fbbf24;flex-shrink:0;">L</div>
             <div style="flex:1;min-width:0;">
               <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
@@ -362,7 +362,7 @@
             <div class="readiness-dot dot-yellow">52</div>
           </div>
 
-          <div class="athlete-card warning" style="opacity:.6;">
+          <div class="athlete-card warning" onclick="go(\'C4_athlete_deep_dive.html\')" style="cursor:pointer" style="opacity:.6;">
             <div style="width:38px;height:38px;border-radius:50%;background:#1c1500;border:2px solid #EAB308;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fbbf24;flex-shrink:0;">+4</div>
             <div style="flex:1;">
               <p style="font-size:12px;color:#94a3b8;">4 atletas más en monitoreo</p>
@@ -381,7 +381,7 @@
           <span class="section-count count-grey">4</span>
         </div>
         <div style="padding:0 24px;display:flex;flex-direction:column;gap:8px;">
-          <div class="athlete-card absent">
+          <div class="athlete-card absent" onclick="go(\'C4_athlete_deep_dive.html\')" style="cursor:pointer">
             <div style="width:38px;height:38px;border-radius:50%;background:#1a1a28;border:2px solid #475569;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#64748b;flex-shrink:0;">P</div>
             <div style="flex:1;min-width:0;">
               <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
@@ -791,5 +791,6 @@
   });
 </script>
 
+<script src="_nav.js"></script>
 </body>
 </html>

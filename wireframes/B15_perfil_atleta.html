@@ -167,6 +167,7 @@
         <div style="background:#111118;border:1px solid #1e1e30;border-radius:20px;padding:16px;margin-bottom:16px;">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
             <p style="font-size:11px;font-weight:700;color:#475569;letter-spacing:.08em;text-transform:uppercase;flex:1;">Tema de la App</p>
+            <button onclick="go('B16_theme_gallery.html')" style="font-size:10px;font-weight:700;color:#22C55E;background:none;border:none;cursor:pointer;">Ver galería →</button>
             <span style="font-size:9px;font-weight:700;color:#a78bfa;background:#1e1b4b;border:1px solid #3730a3;border-radius:8px;padding:2px 8px;">PREMIUM</span>
           </div>
           <div style="display:flex;flex-direction:column;gap:8px;">
@@ -395,15 +396,16 @@
 
     <!-- Bottom Nav -->
     <div class="bottom-nav">
-      <div class="nav-item"><svg width="22" height="22" fill="none" stroke="#475569" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span class="nav-label">Inicio</span></div>
-      <div class="nav-item"><svg width="22" height="22" fill="none" stroke="#475569" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg><span class="nav-label">Sesión</span></div>
-      <div class="nav-item"><svg width="22" height="22" fill="none" stroke="#475569" stroke-width="2" viewBox="0 0 24 24"><path d="M3 20l4-8 4 4 4-6 4 10"/></svg><span class="nav-label">Progreso</span></div>
-      <div class="nav-item"><svg width="22" height="22" fill="none" stroke="#22C55E" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span class="nav-label active">Perfil</span></div>
+      <div class="nav-item" onclick="go('B1_dashboard_atleta.html')" style="cursor:pointer;"><svg width="22" height="22" fill="none" stroke="#475569" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span class="nav-label">Inicio</span></div>
+      <div class="nav-item" onclick="go('B4_session_summary.html')" style="cursor:pointer;"><svg width="22" height="22" fill="none" stroke="#475569" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg><span class="nav-label">Sesión</span></div>
+      <div class="nav-item" onclick="go('B10_performance_deep_dive.html')" style="cursor:pointer;"><svg width="22" height="22" fill="none" stroke="#475569" stroke-width="2" viewBox="0 0 24 24"><path d="M3 20l4-8 4 4 4-6 4 10"/></svg><span class="nav-label">Progreso</span></div>
+      <div class="nav-item" onclick="go('B15_perfil_atleta.html')" style="cursor:pointer;"><svg width="22" height="22" fill="none" stroke="#22C55E" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span class="nav-label active">Perfil</span></div>
     </div>
   </div>
 </div>
 
 <a href="index.html" style="position:fixed;top:20px;left:20px;background:#1e1e30;color:#94a3b8;font-size:13px;padding:8px 14px;border-radius:10px;text-decoration:none;border:1px solid #2a2a3a;z-index:99;">← Volver</a>
 
+<script src="_nav.js"></script>
 </body>
 </html>

@@ -696,19 +696,20 @@
   </div>
 
   <script>
-    function openModal(file, title) {
-      document.getElementById('modal-title').textContent = title;
+    window.openModal = function(file, title) {
+      document.getElementById('modal-title').textContent = title || '';
       document.getElementById('modal-frame').src = file;
       document.getElementById('modal').classList.add('open');
-    }
-    function closeModalBtn() {
+    };
+    window.closeModalBtn = function() {
       document.getElementById('modal').classList.remove('open');
       document.getElementById('modal-frame').src = '';
-    }
-    function closeModal(e) {
-      if (e.target === document.getElementById('modal')) closeModalBtn();
-    }
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModalBtn(); });
+    };
+    // closeModal acepta un event (clic en backdrop) o ningún argumento (desde iframe).
+    window.closeModal = function(e) {
+      if (!e || e.target === document.getElementById('modal')) window.closeModalBtn();
+    };
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') window.closeModalBtn(); });
   </script>
 
 </body>

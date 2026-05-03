@@ -123,7 +123,7 @@
 
           <!-- Back nav -->
           <div class="flex items-center gap-3 px-5 pb-3">
-            <button class="text-slate-400 text-lg">←</button>
+            <button onclick="back('C1_command_center_coach.html')" class="text-slate-400 text-lg">←</button>
             <span class="text-slate-400 text-xs">Mi Equipo</span>
           </div>
 
@@ -467,7 +467,7 @@
 
           <!-- Athlete mini header -->
           <div class="flex items-center gap-3 px-5 pb-4">
-            <button class="text-slate-400 text-lg">←</button>
+            <button onclick="back('C1_command_center_coach.html')" class="text-slate-400 text-lg">←</button>
             <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-black text-sm">M</div>
             <div>
               <p class="text-white font-bold text-sm">Mariana López</p>
@@ -699,5 +699,6 @@
       document.getElementById('tab-' + tabId).classList.remove('hidden');
     }
   </script>
+<script src="_nav.js"></script>
 </body>
 </html>

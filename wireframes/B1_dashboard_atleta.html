@@ -303,7 +303,7 @@
 
         <!-- CTA -->
         <div style="padding:14px 16px;">
-          <button onclick="window.location='B2_precheck.html'" style="width:100%; background:linear-gradient(135deg,#16a34a,#15803d); color:white; font-size:15px; font-weight:800; padding:14px; border-radius:14px; border:none; cursor:pointer; letter-spacing:.02em;">
+          <button onclick="go('B4_session_summary.html')" style="width:100%; background:linear-gradient(135deg,#16a34a,#15803d); color:white; font-size:15px; font-weight:800; padding:14px; border-radius:14px; border:none; cursor:pointer; letter-spacing:.02em;">
             Iniciar Sesión →
           </button>
         </div>
@@ -346,19 +346,19 @@
 
   <!-- Bottom Nav -->
   <div class="bottom-nav">
-    <div class="nav-item">
+    <div class="nav-item" onclick="go('B1_dashboard_atleta.html')">
       <svg width="22" height="22" fill="none" stroke="#22C55E" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
       <span class="nav-label active">Inicio</span>
     </div>
-    <div class="nav-item">
+    <div class="nav-item" onclick="go('B4_session_summary.html')">
       <svg width="22" height="22" fill="none" stroke="#475569" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
       <span class="nav-label">Sesión</span>
     </div>
-    <div class="nav-item">
+    <div class="nav-item" onclick="go('B10_performance_deep_dive.html')">
       <svg width="22" height="22" fill="none" stroke="#475569" stroke-width="2" viewBox="0 0 24 24"><path d="M3 20l4-8 4 4 4-6 4 10"/></svg>
       <span class="nav-label">Progreso</span>
     </div>
-    <div class="nav-item">
+    <div class="nav-item" onclick="go('B15_perfil_atleta.html')">
       <svg width="22" height="22" fill="none" stroke="#475569" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
       <span class="nav-label">Perfil</span>
     </div>
@@ -369,5 +369,6 @@
 <!-- Back link -->
 <a href="index.html" style="position:fixed;top:20px;left:20px;background:#1e1e30;color:#94a3b8;font-size:13px;padding:8px 14px;border-radius:10px;text-decoration:none;border:1px solid #2a2a3a;">← Volver</a>
 
+<script src="_nav.js"></script>
 </body>
 </html>

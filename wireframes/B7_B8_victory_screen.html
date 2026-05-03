@@ -378,10 +378,10 @@
 
       <!-- ─── CTA BUTTONS ─── -->
       <div style="display:flex; flex-direction:column; gap:10px;">
-        <button id="shareBtn" onclick="window.location='B9_social_card.html'" style="width:100%; padding:15px; border-radius:16px; font-size:15px; font-weight:800; cursor:pointer; border:none; background:linear-gradient(135deg,#0e4c56,#155e75); color:#06B6D4; letter-spacing:.03em;">
+        <button id="shareBtn" onclick="go('B9_social_card.html')" style="width:100%; padding:15px; border-radius:16px; font-size:15px; font-weight:800; cursor:pointer; border:none; background:linear-gradient(135deg,#0e4c56,#155e75); color:#06B6D4; letter-spacing:.03em;">
           📲 Compartir mi Victoria
         </button>
-        <button style="width:100%; padding:12px; border-radius:14px; font-size:13px; font-weight:600; cursor:pointer; background:transparent; border:1px solid #1e1e30; color:#475569;">
+        <button onclick="go('B1_dashboard_atleta.html')" style="width:100%; padding:12px; border-radius:14px; font-size:13px; font-weight:600; cursor:pointer; background:transparent; border:1px solid #1e1e30; color:#475569;">
           Volver al Dashboard
         </button>
       </div>
@@ -613,5 +613,6 @@
   setTheme('carbon');
   setMode('pr');
 </script>
+<script src="_nav.js"></script>
 </body>
 </html>
