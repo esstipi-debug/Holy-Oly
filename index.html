@@ -25,10 +25,18 @@
     .pill {
       font-size: 11px; font-weight: 700; padding: 4px 14px;
       border-radius: 20px; border: 1px solid;
+      cursor: pointer; transition: all .2s;
     }
     .pill-ho   { background: #1a1400; border-color: #FFD70030; color: #FFD700; }
     .pill-vol  { background: #00090d; border-color: #00E5FF30; color: #00E5FF; }
     .pill-axon { background: #0d0318; border-color: #A855F730; color: #A855F7; opacity:.5; }
+
+    .theme-option {
+      background: #0d0318; border-color: #39FF1430; color: #39FF14;
+      font-size: 11px; font-weight: 700; padding: 6px 14px;
+    }
+    .theme-option:hover { border-color: #39FF1460; box-shadow: 0 0 12px rgba(57, 255, 20, 0.2); }
+    .theme-option.active { background: #39FF1420; border-color: #39FF14; box-shadow: 0 0 12px rgba(57, 255, 20, 0.4); }
 
     /* ── PRODUCT SECTION ── */
     .product-section { max-width: 1600px; margin: 0 auto 60px; }
@@ -160,12 +168,13 @@
   <div class="page-header">
     <div>
       <div class="brand">PEAK<span class="cyan">QUAL</span></div>
-      <div class="brand-sub">Smart training intelligence · Wireframes · 2026-04-29</div>
+      <div class="brand-sub">📐 WIREFRAMES PANEL · Theme Customization Preview · 2026-05-03</div>
     </div>
     <div class="pills">
-      <div class="pill pill-ho">HOLY OLY · 28 pantallas ✅</div>
-      <div class="pill pill-vol">VOLTA · 15 pantallas 🚧</div>
-      <div class="pill pill-axon">AXON · Próximamente</div>
+      <button class="pill theme-option" data-theme="brutalist" onclick="applyGlobalTheme('brutalist')" style="cursor:pointer;">⬜ Brutalist</button>
+      <button class="pill theme-option" data-theme="deco" onclick="applyGlobalTheme('deco')" style="cursor:pointer;">💛 Art Deco</button>
+      <button class="pill theme-option" data-theme="cyberpunk" onclick="applyGlobalTheme('cyberpunk')" style="cursor:pointer;">💜 Cyberpunk</button>
+      <button class="pill theme-option" data-theme="comic" onclick="applyGlobalTheme('comic')" style="cursor:pointer;">💥 Comic</button>
     </div>
   </div>
 
@@ -196,8 +205,37 @@
       </div>
     </div>
 
+    <!-- B16: Theme Gallery (MONETIZATION) -->
+    <div class="group-row"><span class="group-label" style="color:#8a6a00;">B16 — 🎨 THEME GALLERY (Monetización)</span><div class="group-line"></div></div>
+    <div class="phone-grid">
+      <div class="phone-wrap" style="--accent:#FFD700;" onclick="window.open('B16_theme_gallery.html', '_blank')">
+        <div class="phone-shell">
+          <div class="notch"></div>
+          <iframe src="B16_theme_gallery.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir galería completa</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code ho-code">B16</div>
+          <div class="phone-name">Theme Gallery</div>
+          <div class="phone-sub">Brutalist · Art Deco · Cyberpunk · Comic</div>
+        </div>
+      </div>
+      <div class="phone-wrap" style="--accent:#FFD700;" onclick="window.open('theme-demo.html', '_blank')">
+        <div class="phone-shell">
+          <div class="notch"></div>
+          <iframe src="theme-demo.html" loading="lazy"></iframe>
+          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir demo interactivo</span></div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-code ho-code">DEMO</div>
+          <div class="phone-name">Theme Demo</div>
+          <div class="phone-sub">Cambiar temas en tiempo real</div>
+        </div>
+      </div>
+    </div>
+
     <!-- B: Atleta -->
-    <div class="group-row"><span class="group-label" style="color:#8a6a00;">B — Atleta (16 pantallas)</span><div class="group-line"></div></div>
+    <div class="group-row"><span class="group-label" style="color:#8a6a00;">B — Atleta (15 pantallas)</span><div class="group-line"></div></div>
     <div class="phone-grid">
       <div class="phone-wrap" style="--accent:#FFD700;" onclick="openModal('B1_dashboard_atleta.html','B1 · Dashboard Atleta')">
         <div class="phone-shell">
@@ -353,18 +391,6 @@
           <div class="phone-code ho-code">B15</div>
           <div class="phone-name">Perfil del Atleta</div>
           <div class="phone-sub">1RMs · Temas · Wearables</div>
-        </div>
-      </div>
-      <div class="phone-wrap" style="--accent:#FFD700;" onclick="openModal('B16_theme_gallery.html','B16 · Theme Gallery')">
-        <div class="phone-shell">
-          <div class="notch"></div>
-          <iframe src="B16_theme_gallery.html" loading="lazy"></iframe>
-          <div class="phone-overlay"><span class="phone-overlay-btn">Abrir pantalla completa</span></div>
-        </div>
-        <div class="phone-label">
-          <div class="phone-code ho-code">B16</div>
-          <div class="phone-name">Theme Gallery</div>
-          <div class="phone-sub">6 temas · Free + Premium · A11y</div>
         </div>
       </div>
     </div>
@@ -695,21 +721,94 @@
     </div>
   </div>
 
+  <script src="themes.js"></script>
+  <script src="theme-system.js"></script>
   <script>
-    window.openModal = function(file, title) {
-      document.getElementById('modal-title').textContent = title || '';
+    // Helper to apply theme to an iframe
+    function applyThemeToIframe(iframe, themeName) {
+      const theme = THEME_CATALOG[themeName];
+      if (!theme) return;
+      try {
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+        if (iframeDoc && iframeDoc.documentElement) {
+          let styleEl = iframeDoc.getElementById('theme-styles');
+          if (!styleEl) {
+            styleEl = iframeDoc.createElement('style');
+            styleEl.id = 'theme-styles';
+            iframeDoc.head.appendChild(styleEl);
+          }
+          styleEl.textContent = theme.css;
+        }
+      } catch (e) {
+        // Cross-origin iframe — skip
+      }
+    }
+
+    // Apply theme to all iframes and main doc
+    function applyGlobalTheme(themeName) {
+      const theme = THEME_CATALOG[themeName];
+      if (!theme) return;
+
+      // Apply to main document
+      const styleId = 'theme-styles';
+      let styleEl = document.getElementById(styleId);
+      if (!styleEl) {
+        styleEl = document.createElement('style');
+        styleEl.id = styleId;
+        document.head.appendChild(styleEl);
+      }
+      styleEl.textContent = theme.css;
+
+      // Apply to all iframes (same-origin only)
+      document.querySelectorAll('iframe').forEach(iframe => {
+        applyThemeToIframe(iframe, themeName);
+      });
+
+      // Update button states
+      document.querySelectorAll('.theme-option').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.theme === themeName);
+      });
+
+      // Save preference
+      localStorage.setItem('appTheme', themeName);
+    }
+
+    // Load theme on startup
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedTheme = localStorage.getItem('appTheme') || 'brutalist';
+      applyGlobalTheme(savedTheme);
+
+      // Re-apply theme when iframes load
+      document.querySelectorAll('iframe').forEach(iframe => {
+        iframe.addEventListener('load', () => {
+          const currentTheme = localStorage.getItem('appTheme') || 'brutalist';
+          applyThemeToIframe(iframe, currentTheme);
+        });
+      });
+
+      // Also monitor modal iframe for theme application
+      const modalFrame = document.getElementById('modal-frame');
+      if (modalFrame) {
+        modalFrame.addEventListener('load', () => {
+          const currentTheme = localStorage.getItem('appTheme') || 'brutalist';
+          applyThemeToIframe(modalFrame, currentTheme);
+        });
+      }
+    });
+
+    function openModal(file, title) {
+      document.getElementById('modal-title').textContent = title;
       document.getElementById('modal-frame').src = file;
       document.getElementById('modal').classList.add('open');
-    };
-    window.closeModalBtn = function() {
+    }
+    function closeModalBtn() {
       document.getElementById('modal').classList.remove('open');
       document.getElementById('modal-frame').src = '';
-    };
-    // closeModal acepta un event (clic en backdrop) o ningún argumento (desde iframe).
-    window.closeModal = function(e) {
-      if (!e || e.target === document.getElementById('modal')) window.closeModalBtn();
-    };
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') window.closeModalBtn(); });
+    }
+    function closeModal(e) {
+      if (e.target === document.getElementById('modal')) closeModalBtn();
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModalBtn(); });
   </script>
 
 </body>
