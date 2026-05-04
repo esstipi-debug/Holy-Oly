@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Card from '../components/Card';
-import Badge from '../components/Badge';
 import Button from '../components/Button';
 
 const AssignMacrocycle: React.FC = () => {

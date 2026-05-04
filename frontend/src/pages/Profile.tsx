@@ -1,9 +1,10 @@
+import { useState } from 'react';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import ThemeGallery from '../components/ThemeGallery';
 
 const Profile: React.FC = () => {
-  const [showThemes, setShowThemes] = React.useState(false);
+  const [showThemes, setShowThemes] = useState(false);
 
   if (showThemes) {
     return (

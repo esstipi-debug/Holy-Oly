@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import Card from '../components/Card';
 import Button from '../components/Button';
-import Badge from '../components/Badge';
 
 const WarmupGenerator: React.FC = () => {
   const [phase, setPhase] = useState<'MOBILITY' | 'SPECIFIC' | 'RAMP'>('SPECIFIC');
