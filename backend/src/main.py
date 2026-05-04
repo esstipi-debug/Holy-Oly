@@ -13,20 +13,7 @@ from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from .api.router import router
 from .api.auth import auth_router, verify_token
-from .rag.router import router as rag_router
-from .rag.feedback import router as rag_feedback_router
-from .coach.router import router as coach_router
 from .api.middleware import SecurityLoggingMiddleware, RateLimitMiddleware
-from .agents.response_agent.router import router as response_router, set_handlers
-from .agents.router import router as agents_router
-from .agents.response_agent.email_handler import EmailInboundHandler
-from .agents.response_agent.webchat import WebChatHandler
-from .agents.response_agent.lead_capture import LeadCapture
-from .agents.response_agent.intent_classifier import IntentClassifier
-from .agents.response_agent.response_generator import ResponseGenerator
-from .scheduler import init_scheduler, scheduler_lifespan, get_all_jobs_status
-from .agents.github_researcher import get_researcher
-from .agents.budget import get_budget_manager
 import logging
 
 logging.basicConfig(
@@ -35,68 +22,130 @@ logging.basicConfig(
 )
 logger = logging.getLogger("motor25")
 
+# Importaciones opcionales (agentes, RAG, coach, scheduler)
+_rag_router = None
+_rag_feedback_router = None
+_coach_router = None
+_response_router = None
+_agents_router = None
+_set_handlers = None
+_init_scheduler = None
+_scheduler_lifespan = None
+
+try:
+    from .rag.router import router as rag_router_import
+    from .rag.feedback import router as rag_feedback_router_import
+    _rag_router = rag_router_import
+    _rag_feedback_router = rag_feedback_router_import
+except Exception as e:
+    logger.warning(f"RAG routers not loaded (optional): {e}")
+
+try:
+    from .coach.router import router as coach_router_import
+    _coach_router = coach_router_import
+except Exception as e:
+    logger.warning(f"Coach router not loaded (optional): {e}")
+
+try:
+    from .agents.response_agent.router import router as response_router_import, set_handlers as set_handlers_import
+    from .agents.router import router as agents_router_import
+    _response_router = response_router_import
+    _agents_router = agents_router_import
+    _set_handlers = set_handlers_import
+except Exception as e:
+    logger.warning(f"Agents routers not loaded (optional): {e}")
+
+try:
+    from .scheduler import init_scheduler as init_scheduler_import, scheduler_lifespan as scheduler_lifespan_import
+    _init_scheduler = init_scheduler_import
+    _scheduler_lifespan = scheduler_lifespan_import
+except Exception as e:
+    logger.warning(f"Scheduler not loaded (optional): {e}")
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
-    Lifespan: init agents + scheduler on startup, cleanup on shutdown.
+    Lifespan: init DB + agents (opcional) + scheduler on startup, cleanup on shutdown.
     """
-    logger.info("[Motor25] Initializing agents...")
+    # --- Init DB ---
+    try:
+        from .database import init_db
+        await init_db()
+        logger.info("[Motor25] Database tables created/verified.")
+    except Exception as e:
+        logger.warning(f"DB init failed (optional): {e}")
 
-    # DB pool (si esta configurado)
-    db_pool = getattr(app, "db_pool", None)
+    # --- Agents init (todos opcionales) ---
+    try:
+        logger.info("[Motor25] Initializing agents...")
 
-    # Gemini client (si esta configurado)
-    gemini_client = getattr(app, "gemini_client", None)
+        db_pool = getattr(app, "db_pool", None)
+        gemini_client = getattr(app, "gemini_client", None)
 
-    # --- Budget Manager (self-funding agents) ---
-    budget_manager = get_budget_manager(db_pool)
-    logger.info("[Motor25] Budget manager initialized. All agents start at Starter tier.")
+        from .agents.budget import get_budget_manager
+        budget_manager = get_budget_manager(db_pool)
+        logger.info("[Motor25] Budget manager initialized.")
 
-    # --- Response Agent ---
-    intent_classifier = IntentClassifier(gemini_client=gemini_client)
-    response_generator = ResponseGenerator(gemini_client=gemini_client, budget_manager=budget_manager)
-    lead_capture = LeadCapture(db_pool=db_pool)
+        from .agents.response_agent.email_handler import EmailInboundHandler
+        from .agents.response_agent.webchat import WebChatHandler
+        from .agents.response_agent.lead_capture import LeadCapture
+        from .agents.response_agent.intent_classifier import IntentClassifier
+        from .agents.response_agent.response_generator import ResponseGenerator
 
-    email_handler = EmailInboundHandler(
-        intent_classifier=intent_classifier,
-        response_generator=response_generator,
-        lead_capture=lead_capture,
-        resend_api_key=os.getenv("RESEND_API_KEY"),
-        budget_manager=budget_manager,
-    )
+        intent_classifier = IntentClassifier(gemini_client=gemini_client)
+        response_generator = ResponseGenerator(gemini_client=gemini_client, budget_manager=budget_manager)
+        lead_capture = LeadCapture(db_pool=db_pool)
 
-    webchat_handler = WebChatHandler(
-        intent_classifier=intent_classifier,
-        response_generator=response_generator,
-        lead_capture=lead_capture,
-    )
+        email_handler = EmailInboundHandler(
+            intent_classifier=intent_classifier,
+            response_generator=response_generator,
+            lead_capture=lead_capture,
+            resend_api_key=os.getenv("RESEND_API_KEY"),
+            budget_manager=budget_manager,
+        )
 
-    # Set handlers en el router
-    set_handlers(email_handler, webchat_handler, lead_capture)
+        webchat_handler = WebChatHandler(
+            intent_classifier=intent_classifier,
+            response_generator=response_generator,
+            lead_capture=lead_capture,
+        )
 
-    # --- Other Agents ---
-    from .agents.security_agent import SecurityAgent
-    from .agents.growth_agent import GrowthAgent
-    from .agents.content_agent import ContentAgent
+        if _set_handlers:
+            _set_handlers(email_handler, webchat_handler, lead_capture)
 
-    agents = {
-        "test": None,  # Test Agent se crea on-demand
-        "security": SecurityAgent(db_pool=db_pool, gemini_client=gemini_client),
-        "growth": GrowthAgent(db_pool=db_pool, gemini_client=gemini_client, resend_api_key=os.getenv("RESEND_API_KEY"), budget_manager=budget_manager),
-        "content": ContentAgent(db_pool=db_pool, gemini_client=gemini_client),
-    }
+        from .agents.security_agent import SecurityAgent
+        from .agents.growth_agent import GrowthAgent
+        from .agents.content_agent import ContentAgent
 
-    # --- GitHub Research Agent (disponible para todos los agentes) ---
-    researcher = get_researcher()
-    researcher.token = os.getenv("GITHUB_TOKEN")
+        agents = {
+            "test": None,
+            "security": SecurityAgent(db_pool=db_pool, gemini_client=gemini_client),
+            "growth": GrowthAgent(db_pool=db_pool, gemini_client=gemini_client, resend_api_key=os.getenv("RESEND_API_KEY"), budget_manager=budget_manager),
+            "content": ContentAgent(db_pool=db_pool, gemini_client=gemini_client),
+        }
 
-    # --- Scheduler ---
-    init_scheduler(db_pool=db_pool, agents=agents)
+        from .agents.github_researcher import get_researcher
+        researcher = get_researcher()
+        researcher.token = os.getenv("GITHUB_TOKEN")
 
-    logger.info("[Motor25] Agents initialized. Starting scheduler...")
+        if _init_scheduler:
+            _init_scheduler(db_pool=db_pool, agents=agents)
 
-    async with scheduler_lifespan(app):
+        logger.info("[Motor25] Agents initialized.")
+    except Exception as e:
+        logger.warning(f"Agents initialization failed (optional): {e}")
+        agents = {}
+
+    # --- Scheduler lifespan ---
+    if _scheduler_lifespan:
+        try:
+            async with _scheduler_lifespan(app):
+                yield
+        except Exception as e:
+            logger.warning(f"Scheduler lifespan failed (optional): {e}")
+            yield
+    else:
         yield
 
     logger.info("[Motor25] Shutdown complete.")
@@ -129,11 +178,25 @@ app.add_middleware(
 
 app.include_router(auth_router)
 app.include_router(router)
-app.include_router(rag_router)
-app.include_router(rag_feedback_router)
-app.include_router(coach_router)
-app.include_router(response_router)
-app.include_router(agents_router)
+
+# Routers opcionales
+if _rag_router:
+    app.include_router(_rag_router)
+if _rag_feedback_router:
+    app.include_router(_rag_feedback_router)
+if _coach_router:
+    app.include_router(_coach_router)
+if _response_router:
+    app.include_router(_response_router)
+if _agents_router:
+    app.include_router(_agents_router)
+
+# Router de atleta (siempre activo)
+try:
+    from .api.athlete_router import router as athlete_router
+    app.include_router(athlete_router)
+except Exception as e:
+    logger.warning(f"Athlete router not loaded: {e}")
 
 @app.get("/health")
 def health_check():

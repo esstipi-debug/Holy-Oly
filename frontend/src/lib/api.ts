@@ -87,7 +87,19 @@ export const api = {
         form: true,
         body: { username: email, password },
       }),
+    register: (email: string, password: string) =>
+      request<LoginResponse>('/v1/auth/register', {
+        method: 'POST',
+        auth: false,
+        body: { email, password },
+      }),
     me: () => request<User>('/v1/auth/me'),
     refresh: () => request<LoginResponse>('/v1/auth/refresh', { method: 'POST' }),
+  },
+
+  athlete: {
+    dashboard: () => request<unknown>('/v1/athlete/dashboard'),
+    createSession: (data: unknown) =>
+      request<unknown>('/v1/athlete/sessions', { method: 'POST', body: data }),
   },
 };

@@ -1,14 +1,10 @@
-import sys
-import os
 from datetime import datetime, timedelta
 from typing import Optional
 from jose import JWTError, jwt
 import bcrypt
 from pydantic import BaseModel
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
-
-from config import settings
+from ...config import settings
 
 # Configuración desde settings
 SECRET_KEY = settings.JWT_SECRET_KEY
@@ -109,7 +105,7 @@ def authenticate_user(email: str, password: str) -> Optional[User]:
     )
 
 def get_user(user_id: str) -> Optional[User]:
-    """Obtiene un usuario por su ID."""
+    """Obtiene un usuario por su ID (fallback mock)."""
     for user_dict in MOCK_USERS.values():
         if user_dict["id"] == user_id:
             return User(
@@ -120,3 +116,55 @@ def get_user(user_id: str) -> Optional[User]:
                 is_active=user_dict["is_active"]
             )
     return None
+
+
+# ---------------------------------------------------------------------------
+# Funciones async que usan la base de datos real (SQLAlchemy)
+# ---------------------------------------------------------------------------
+
+async def authenticate_user_db(email: str, password: str) -> Optional[User]:
+    """Autentica un usuario contra la base de datos PostgreSQL."""
+    try:
+        from sqlalchemy import select
+        from ...models import User as UserModel
+        from ...database import AsyncSessionLocal
+
+        async with AsyncSessionLocal() as db:
+            result = await db.execute(select(UserModel).where(UserModel.email == email))
+            user_db = result.scalar_one_or_none()
+            if not user_db or not verify_password(password, user_db.hashed_password):
+                return None
+            return User(
+                id=user_db.id,
+                email=user_db.email,
+                role=user_db.role,
+                coach_id=user_db.coach_id,
+                is_active=user_db.is_active,
+            )
+    except Exception:
+        # DB no disponible — fallback silencioso
+        return None
+
+
+async def get_user_db(user_id: str) -> Optional[User]:
+    """Obtiene un usuario por ID desde la base de datos PostgreSQL."""
+    try:
+        from sqlalchemy import select
+        from ...models import User as UserModel
+        from ...database import AsyncSessionLocal
+
+        async with AsyncSessionLocal() as db:
+            result = await db.execute(select(UserModel).where(UserModel.id == user_id))
+            user_db = result.scalar_one_or_none()
+            if not user_db:
+                return None
+            return User(
+                id=user_db.id,
+                email=user_db.email,
+                role=user_db.role,
+                coach_id=user_db.coach_id,
+                is_active=user_db.is_active,
+            )
+    except Exception:
+        # DB no disponible — fallback silencioso
+        return None

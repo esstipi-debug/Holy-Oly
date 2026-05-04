@@ -22,6 +22,13 @@ import Profile from './pages/Profile';
 import CommandCenter from './pages/CommandCenter';
 import AthleteDeepDive from './pages/AthleteDeepDive';
 import AssignMacrocycle from './pages/AssignMacrocycle';
+import InjuryShield from './pages/InjuryShield';
+import ThemeGallery from './pages/ThemeGallery';
+import CoachTools from './pages/CoachTools';
+import FreePremium from './pages/FreePremium';
+import VoltaDashboard from './pages/volta/VoltaDashboard';
+import VoltaSession from './pages/volta/VoltaSession';
+import VoltaVictory from './pages/volta/VoltaVictory';
 
 const RootRedirect: React.FC = () => {
   const { user, loading } = useAuth();
@@ -69,6 +76,14 @@ const App: React.FC = () => (
         <Route path="/coach/athlete" element={<Coach><AthleteDeepDive /></Coach>} />
         <Route path="/coach/athlete/:id" element={<Coach><AthleteDeepDive /></Coach>} />
         <Route path="/coach/assign" element={<Coach><AssignMacrocycle /></Coach>} />
+        <Route path="/coach/tools" element={<Coach><CoachTools /></Coach>} />
+
+        <Route path="/injury" element={<Athlete><InjuryShield /></Athlete>} />
+        <Route path="/themes" element={<Athlete><ThemeGallery /></Athlete>} />
+        <Route path="/premium" element={<Athlete><FreePremium /></Athlete>} />
+        <Route path="/volta" element={<Athlete><VoltaDashboard /></Athlete>} />
+        <Route path="/volta/session" element={<Athlete><VoltaSession /></Athlete>} />
+        <Route path="/volta/victory" element={<Athlete><VoltaVictory /></Athlete>} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

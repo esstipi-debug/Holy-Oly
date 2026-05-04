@@ -2,13 +2,11 @@ from fastapi import HTTPException, Security, Depends, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer, OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from typing import Optional, List
 from .jwt_utils import (
-    decode_token, authenticate_user, create_access_token, 
-    get_user, User, TokenData
+    decode_token, authenticate_user, create_access_token,
+    get_user, User, TokenData,
+    authenticate_user_db, get_user_db, get_password_hash,
 )
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
-from context import current_user_id_var
+from ...context import current_user_id_var
 
 # Esquemas de seguridad
 security = HTTPBearer()
@@ -18,55 +16,60 @@ async def verify_token(credentials: HTTPAuthorizationCredentials = Depends(secur
     """Verifica el token JWT y retorna el usuario autenticado."""
     token = credentials.credentials
     token_data = decode_token(token)
-    
+
     if token_data is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token inválido o expirado",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
-    user = get_user(token_data.user_id)
+
+    # Intenta DB real, fallback a mock
+    user = await get_user_db(token_data.user_id)
+    if user is None:
+        user = get_user(token_data.user_id)
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Usuario no encontrado",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     if not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Usuario desactivado"
         )
-    
+
     # Establecemos el ID del usuario en el contexto para RLS
     current_user_id_var.set(user.id)
-    
+
     return user
 
 async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
     """Obtiene el usuario actual desde el token OAuth2."""
     token_data = decode_token(token)
-    
+
     if token_data is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token inválido o expirado",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
-    user = get_user(token_data.user_id)
+
+    user = await get_user_db(token_data.user_id)
+    if user is None:
+        user = get_user(token_data.user_id)
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Usuario no encontrado",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     # Establecemos el ID del usuario en el contexto para RLS
     current_user_id_var.set(user.id)
-    
+
     return user
 
 def authorize_role(required_roles: List[str]):
@@ -131,33 +134,65 @@ def can_access_athlete_data(athlete_id: str, current_user: User = Depends(verify
 from fastapi import APIRouter
 auth_router = APIRouter(prefix="/v1/auth", tags=["auth"])
 
+@auth_router.post("/register")
+async def register(form_data: OAuth2PasswordRequestForm = Depends()):
+    """Registro de nuevo usuario."""
+    from ...database import AsyncSessionLocal
+    from ...models import User as UserModel
+    from sqlalchemy import select
+
+    async with AsyncSessionLocal() as db:
+        existing = await db.execute(select(UserModel).where(UserModel.email == form_data.username))
+        if existing.scalar_one_or_none():
+            raise HTTPException(status_code=400, detail="Email ya registrado")
+
+        user = UserModel(
+            email=form_data.username,
+            hashed_password=get_password_hash(form_data.password),
+            role="athlete",
+        )
+        db.add(user)
+        await db.commit()
+        await db.refresh(user)
+
+    token = create_access_token({"sub": user.id, "email": user.email, "role": user.role})
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "user": {"id": user.id, "email": user.email, "role": user.role},
+    }
+
+
 @auth_router.post("/login")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     """Endpoint para obtener token JWT."""
-    user = authenticate_user(form_data.username, form_data.password)
+    # Intenta DB real primero, fallback a mock
+    user = await authenticate_user_db(form_data.username, form_data.password)
+    if not user:
+        user = authenticate_user(form_data.username, form_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Email o contraseña incorrectos",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     access_token = create_access_token(
         data={
             "sub": user.id,
             "email": user.email,
-            "role": user.role
+            "role": user.role,
         }
     )
-    
+
     return {
         "access_token": access_token,
         "token_type": "bearer",
         "user": {
             "id": user.id,
             "email": user.email,
-            "role": user.role
-        }
+            "role": user.role,
+        },
     }
 
 @auth_router.post("/refresh")

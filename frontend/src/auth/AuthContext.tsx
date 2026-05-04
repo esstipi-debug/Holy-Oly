@@ -5,6 +5,7 @@ interface AuthState {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<User>;
+  register: (email: string, password: string) => Promise<User>;
   logout: () => void;
   hasRole: (...roles: Role[]) => boolean;
   mockLogin: (role: Role) => void;
@@ -32,6 +33,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return res.user;
   }, []);
 
+  const register = useCallback(async (email: string, password: string) => {
+    const res = await api.auth.register(email, password);
+    tokenStore.set(res.access_token);
+    setUser(res.user);
+    return res.user;
+  }, []);
+
   const logout = useCallback(() => {
     tokenStore.clear();
     setUser(null);
@@ -47,7 +55,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, hasRole, mockLogin }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, hasRole, mockLogin }}>
       {children}
     </AuthContext.Provider>
   );

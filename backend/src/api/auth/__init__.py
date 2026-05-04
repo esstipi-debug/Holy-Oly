@@ -27,7 +27,9 @@ from .jwt_utils import (
     create_access_token,
     decode_token,
     authenticate_user,
+    authenticate_user_db,
     get_user,
+    get_user_db,
     verify_password,
     get_password_hash,
 )
@@ -45,7 +47,9 @@ __all__ = [
     "create_access_token",
     "decode_token",
     "authenticate_user",
+    "authenticate_user_db",
     "get_user",
+    "get_user_db",
     "verify_password",
     "get_password_hash",
 ]
