@@ -10,7 +10,7 @@ from .response_generator import ResponseGenerator
 from .lead_capture import LeadCapture
 from .email_handler import EmailInboundHandler
 from .webchat import WebChatHandler
-from .router import ResponseRouter
+from .router import router, set_handlers
 
 __all__ = [
     "IntentClassifier",
@@ -18,5 +18,6 @@ __all__ = [
     "LeadCapture",
     "EmailInboundHandler",
     "WebChatHandler",
-    "ResponseRouter",
+    "router",
+    "set_handlers",
 ]
