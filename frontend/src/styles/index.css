@@ -3,30 +3,114 @@
 @tailwind utilities;
 
 :root {
-  --color-bg: #07070F;
-  --color-surface: #111118;
-  --color-surface2: #1A1A26;
-  --color-primary: #22C55E;
-  --color-gold: #F59E0B;
-  --color-cyan: #06B6D4;
+  --bg: #07070F;
+  --surface: #111118;
+  --surface2: #1A1A26;
+  --text: #94a3b8;
+  --text-secondary: #64748b;
+  --primary: #22C55E;
+  --primary-text: #fff;
+  --status-bg: #22C55E;
+  --status-text: #fff;
+  --card-bg: rgba(255,255,255,.05);
+  --card-border: rgba(255,255,255,.1);
+  --card-shadow: none;
+  --card-clip: none;
+  --status-clip: none;
+  --status-border: transparent;
+  --cta-bg: #22C55E;
+  --cta-text: #fff;
+  --cta-border: transparent;
+  --cta-shadow: 0 4px 14px rgba(34,197,94,.2);
+  --cta-clip: none;
+  --radius: 16px;
+  --font-family: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 }
 
 @layer base {
   body {
-    @apply bg-holy-bg text-slate-400 font-sans antialiased;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-family);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
 @layer components {
   .phone-frame {
-    @apply w-[390px] h-[844px] bg-holy-bg rounded-[44px] border-2 border-slate-800 overflow-hidden relative shadow-2xl flex flex-col mx-auto;
+    width: 390px;
+    height: 844px;
+    background: var(--bg);
+    border-radius: 44px;
+    border: 2px solid rgba(255,255,255,.1);
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,.5);
+    display: flex;
+    flex-direction: column;
+    margin-left: auto;
+    margin-right: auto;
   }
   
   .glass-card {
-    @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl;
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
   }
 
   .btn-primary {
-    @apply px-6 py-3 bg-holy-primary text-white font-bold rounded-xl transition-all hover:brightness-110 active:scale-95 shadow-lg shadow-holy-primary/20;
+    background: var(--cta-bg);
+    color: var(--cta-text);
+    font-weight: bold;
+    padding: 12px 24px;
+    border-radius: var(--radius);
+    border: 1px solid var(--cta-border);
+    box-shadow: var(--cta-shadow);
+    transition: all 0.2s;
+    clip-path: var(--cta-clip);
+  }
+  .btn-primary:hover {
+    filter: brightness(1.1);
+  }
+  .btn-primary:active {
+    transform: scale(0.95);
+  }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    box-shadow: var(--card-shadow);
+    clip-path: var(--card-clip);
+  }
+
+  .status-badge {
+    background: var(--status-bg);
+    color: var(--status-text);
+    border: 1px solid var(--status-border);
+    clip-path: var(--status-clip);
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: bold;
+    border-radius: var(--radius);
+  }
+
+  .theme-text {
+    color: var(--text);
+  }
+  .theme-text-secondary {
+    color: var(--text-secondary);
+  }
+  .theme-primary {
+    color: var(--primary);
+  }
+  .theme-bg {
+    background: var(--bg);
+  }
+  .theme-surface {
+    background: var(--surface);
   }
 }

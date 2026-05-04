@@ -38,8 +38,8 @@ class Chunker:
         return chunks
 
     @staticmethod
-    def generate_metadata(brand: str, sport: str, topic: str, source: str, section: str, text: str) -> Dict[str, Any]:
-        return {
+    def generate_metadata(brand: str, sport: str, topic: str, source: str, section: str, text: str, tags: str = "") -> Dict[str, Any]:
+        meta = {
             "brand": brand,
             "sport": sport,
             "topic": topic,
@@ -49,6 +49,9 @@ class Chunker:
             "token_count": len(text.split()) + (len(text) // 10), # Approximation
             "lang": "es" if any(word in text.lower() for word in ["entrenamiento", "fuerza", "pausa"]) else "en"
         }
+        if tags:
+            meta["tags"] = tags
+        return meta
 
     @staticmethod
     def generate_deterministic_id(brand: str, source: str, index: int) -> str:

@@ -1,21 +1,10 @@
 # rag/chain.py
 # Holy Oly — RAG Chain
-# Stack: Vertex AI Gemini 2.5 Flash + pgvector
+# Stack: Mistral + pgvector
 
-import os
 from typing import Optional
-import vertexai
-from vertexai.generative_models import GenerativeModel, GenerationConfig
 from .service import search_documents
-from ..config import settings
-
-# Inicializar Vertex AI
-vertexai.init(
-    project=settings.GOOGLE_PROJECT_ID,
-    location=settings.GOOGLE_LOCATION,
-)
-
-MODEL_ID = "gemini-2.5-flash"
+from ..infrastructure.mistral_provider import mistral_provider
 
 RAG_PROMPT_TEMPLATE = """\
 Eres el asistente inteligente de Holy Oly, una plataforma de entrenamiento de alto rendimiento.
@@ -53,21 +42,14 @@ def query_rag(
     Pipeline RAG completo:
     1. Búsqueda semántica en pgvector
     2. Construcción del prompt con contexto
-    3. Generación con Gemini 2.5 Flash
+    3. Generación con Mistral
     """
-    # 1. Recuperar contexto relevante
     results = search_documents(query=question, k=k, filters=filters)
     context = _format_context(results)
 
-    # 2. Construir prompt
     prompt = RAG_PROMPT_TEMPLATE.format(context=context, question=question)
 
-    # 3. Generar respuesta
-    model = GenerativeModel(MODEL_ID)
-    config = GenerationConfig(temperature=temperature, max_output_tokens=1024)
-    response = model.generate_content(prompt, generation_config=config)
-
-    return response.text
+    return mistral_provider.generate(prompt, model="mistral-small-2603")
 
 
 def query_rag_with_sources(
@@ -82,15 +64,12 @@ def query_rag_with_sources(
     context = _format_context(results)
 
     prompt = RAG_PROMPT_TEMPLATE.format(context=context, question=question)
-
-    model = GenerativeModel(MODEL_ID)
-    config = GenerationConfig(temperature=0.2, max_output_tokens=1024)
-    response = model.generate_content(prompt, generation_config=config)
+    answer = mistral_provider.generate(prompt, model="mistral-small-latest")
 
     sources = list({r.get("source", "") for r in results if r.get("source")})
 
     return {
-        "answer": response.text,
+        "answer": answer,
         "sources": sources,
         "chunks_used": len(results),
     }

@@ -35,13 +35,19 @@ def ingest_caffeine():
             continue
 
         chunk_uuid = chunker.generate_deterministic_id("caffeine", source.name, i)
+        # Detectar tags por contenido
+        tags = ["caffeine"]
+        if any(kw in chunk_text.lower() for kw in ["sueño", "dormir", "sleep", "rem", "recuperaci"]):
+            tags.append("sleep")
+
         metadata = chunker.generate_metadata(
             brand="peak_qual",
             sport="shared",
             topic="caffeine_protocol",
             source=source.name,
             section="header",
-            text=chunk_text
+            text=chunk_text,
+            tags=",".join(tags)
         )
 
         vs.upsert_chunk(chunk_uuid, chunk_text, metadata)

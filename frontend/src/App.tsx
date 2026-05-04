@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { ThemeProvider } from './context/ThemeContext';
 import PhoneLayout from './layouts/PhoneLayout';
 import AtletaHome from './pages/AtletaHome';
 import Login from './pages/Login';
@@ -11,7 +12,7 @@ import CommandCenter from './pages/CommandCenter';
 import AthleteDeepDive from './pages/AthleteDeepDive';
 import AssignMacrocycle from './pages/AssignMacrocycle';
 import Onboarding from './pages/Onboarding';
-import Premium from './pages/Premium';
+import Premium from './pages/PreMium';
 import PulseHub from './pages/PulseHub';
 import Profile from './pages/Profile';
 import PerformanceDeepDive from './pages/PerformanceDeepDive';
@@ -19,9 +20,9 @@ import SessionSchedule from './pages/SessionSchedule';
 import KnowledgePills from './pages/KnowledgePills';
 import SocialCard from './pages/SocialCard';
 
-type View = 
+type View =
   | 'LOGIN' | 'ONBOARDING' | 'PREMIUM'
-  | 'HOME' | 'SUMMARY' | 'WARMUP' | 'SESSION' | 'VICTORY' 
+  | 'HOME' | 'SUMMARY' | 'WARMUP' | 'SESSION' | 'VICTORY'
   | 'PERFORMANCE' | 'INDEX' | 'SCHEDULE' | 'PULSE' | 'PILLS' | 'SOCIAL' | 'PROFILE'
   | 'COACH_DASH' | 'ATHLETE_DETAIL' | 'ASSIGN_MACRO';
 
@@ -60,53 +61,55 @@ function App() {
   ];
 
   return (
-    <div className="relative">
-      <PhoneLayout>
-        {renderView()}
-      </PhoneLayout>
+    <ThemeProvider>
+      <div className="relative">
+        <PhoneLayout>
+          {renderView()}
+        </PhoneLayout>
 
-      {/* Extreme Prototyper - Sidebar navigation for all implemented screens */}
-      <div className="hidden 2xl:flex fixed right-10 top-10 bottom-10 w-64 bg-holy-surface/90 backdrop-blur-3xl border border-white/10 rounded-3xl p-6 flex-col gap-6 overflow-y-auto z-50 shadow-2xl">
-         <div>
-            <h2 className="text-white text-xs font-black italic mb-1">BECCTTOR UI EXPLORER</h2>
-            <p className="text-holy-primary text-[9px] font-bold uppercase tracking-widest">PROTOTIPO 100% REACT</p>
-         </div>
-         
-         {navGroups.map((group) => (
-           <div key={group.title} className="space-y-2">
+        {/* Extreme Prototyper - Sidebar navigation for all implemented screens */}
+        <div className="hidden 2xl:flex fixed right-10 top-10 bottom-10 w-64 bg-[var(--surface)]/90 backdrop-blur-3xl border border-white/10 rounded-3xl p-6 flex-col gap-6 overflow-y-auto z-50 shadow-2xl">
+          <div>
+            <h2 className="text-white text-xs font-black italic mb-1">BECCTOR UI EXPLORER</h2>
+            <p className="text-[var(--primary)] text-[9px] font-bold uppercase tracking-widest">PROTOTIPO 100% REACT</p>
+          </div>
+
+          {navGroups.map((group) => (
+            <div key={group.title} className="space-y-2">
               <h3 className="text-slate-600 text-[9px] font-black uppercase tracking-tighter border-b border-white/5 pb-1">{group.title}</h3>
               <div className="flex flex-col gap-1">
-                 {group.views.map(v => (
-                   <button 
+                {group.views.map(v => (
+                  <button
                     key={v}
                     onClick={() => setCurrentView(v as View)}
                     className={`text-left px-3 py-2 rounded-lg text-[10px] font-bold transition-all ${
-                      currentView === v ? 'bg-holy-primary/10 text-holy-primary border border-holy-primary/20' : 'text-slate-500 hover:text-white hover:bg-white/5'
+                      currentView === v ? 'bg-[var(--primary)]/10 text-[var(--primary)] border border-[var(--primary)]/20' : 'text-slate-500 hover:text-white hover:bg-white/5'
                     }`}
-                   >
-                     {v}
-                   </button>
-                 ))}
+                  >
+                    {v}
+                  </button>
+                ))}
               </div>
-           </div>
-         ))}
-      </div>
+            </div>
+          ))}
+        </div>
 
-      {/* Mobile view switcher (visible on smaller screens) */}
-      <div className="2xl:hidden fixed bottom-4 left-4 right-4 flex gap-2 z-50 overflow-x-auto bg-black/80 p-3 rounded-2xl border border-white/10 backdrop-blur-md">
-         {navGroups.flatMap(g => g.views).map(v => (
-           <button 
-            key={v}
-            onClick={() => setCurrentView(v as View)}
-            className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-[9px] font-black ${
-              currentView === v ? 'bg-holy-primary text-white' : 'bg-white/5 text-slate-500'
-            }`}
-           >
-             {v}
-           </button>
-         ))}
+        {/* Mobile view switcher (visible on smaller screens) */}
+        <div className="2xl:hidden fixed bottom-4 left-4 right-4 flex gap-2 z-50 overflow-x-auto bg-black/80 p-3 rounded-2xl border border-white/10 backdrop-blur-md">
+          {navGroups.flatMap(g => g.views).map(v => (
+            <button
+              key={v}
+              onClick={() => setCurrentView(v as View)}
+              className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-[9px] font-black ${
+                currentView === v ? 'bg-[var(--primary)] text-white' : 'bg-white/5 text-slate-500'
+              }`}
+            >
+              {v}
+            </button>
+          ))}
+        </div>
       </div>
-    </div>
+    </ThemeProvider>
   );
 }
 

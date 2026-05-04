@@ -1,10 +1,13 @@
 # coach/smart_coach.py
 # Holy Oly — Smart Coach Pipeline
-# RAG (knowledge base) + Athlete DB data -> Gemini personalized answer
+# RAG (knowledge base) + Athlete DB data -> Mistral personalized answer
 
 from __future__ import annotations
 from typing import Optional
 from dataclasses import dataclass, field
+
+from ..infrastructure.mistral_provider import mistral_provider
+from ..rag.service import search_documents
 
 
 @dataclass
@@ -90,15 +93,8 @@ def run_smart_coach(
     Pipeline completo:
     1. Recuperar contexto RAG
     2. Armar profile del atleta
-    3. Llamar Gemini con prompt combinado
+    3. Llamar Mistral con prompt combinado
     """
-    import vertexai
-    from vertexai.generative_models import GenerativeModel, GenerationConfig
-    from ..config import settings
-    from ..rag.service import search_documents
-
-    vertexai.init(project=settings.GOOGLE_PROJECT_ID, location=settings.GOOGLE_LOCATION)
-
     # 1. RAG
     results = search_documents(query=question, k=k)
     rag_parts = []
@@ -112,21 +108,19 @@ def run_smart_coach(
         athlete_ctx.snatch_1rm or athlete_ctx.readiness is not None
     )
 
-    # 3. Prompt + Gemini
+    # 3. Prompt + Mistral
     prompt = SMART_COACH_PROMPT.format(
         athlete_profile=athlete_profile,
         rag_context=rag_context,
         question=question,
     )
 
-    model = GenerativeModel("gemini-2.5-flash")
-    config = GenerationConfig(temperature=temperature, max_output_tokens=1024)
-    response = model.generate_content(prompt, generation_config=config)
+    answer = mistral_provider.generate(prompt, model="mistral-small-2603")
 
     sources = list({r.get("source", "") for r in results if r.get("source")})
 
     return CoachResponse(
-        answer=response.text,
+        answer=answer,
         athlete_id=athlete_ctx.athlete_id,
         sources=sources,
         chunks_used=len(results),

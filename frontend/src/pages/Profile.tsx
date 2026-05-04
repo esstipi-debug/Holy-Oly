@@ -1,9 +1,24 @@
-import React from 'react';
 import Card from '../components/Card';
 import Button from '../components/Button';
-import Badge from '../components/Badge';
+import ThemeGallery from '../components/ThemeGallery';
 
 const Profile: React.FC = () => {
+  const [showThemes, setShowThemes] = React.useState(false);
+
+  if (showThemes) {
+    return (
+      <div className="flex flex-col h-full bg-[var(--bg)]">
+        <div className="px-6 py-4 border-b border-white/10 flex items-center gap-4">
+          <button onClick={() => setShowThemes(false)} className="text-[var(--text-secondary)] hover:text-[var(--text)]">← Volver</button>
+          <h2 className="text-[var(--text)] text-lg font-black">Temas</h2>
+        </div>
+        <div className="flex-1 overflow-y-auto">
+          <ThemeGallery />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-full bg-[#07070F]">
       <div className="px-6 py-10 flex-1 overflow-y-auto">
@@ -34,14 +49,15 @@ const Profile: React.FC = () => {
         <div className="space-y-3 mb-12">
            <h3 className="text-slate-500 text-[10px] font-black uppercase tracking-widest pl-1">Configuración</h3>
            
-           {[
-             { id: 'biometrics', label: 'Datos Biométricos', icon: '⚖️' },
-             { id: 'equipment', label: 'Equipo Disponible', icon: '🏋️' },
-             { id: 'coach', label: 'Mi Entrenador', icon: '🕴️' },
-             { id: 'units', label: 'Unidades (KG / LBS)', icon: '📐' },
-             { id: 'notifications', label: 'Notificaciones', icon: '🔔' },
-           ].map((item) => (
-             <div key={item.id} className="flex justify-between items-center p-4 bg-holy-surface rounded-2xl border border-slate-800/50 hover:bg-white/[0.03] transition-colors cursor-pointer group">
+            {[
+              { id: 'biometrics', label: 'Datos Biométricos', icon: '⚖️' },
+              { id: 'equipment', label: 'Equipo Disponible', icon: '🏋️' },
+              { id: 'coach', label: 'Mi Entrenador', icon: '🕴️' },
+              { id: 'units', label: 'Unidades (KG / LBS)', icon: '📐' },
+              { id: 'notifications', label: 'Notificaciones', icon: '🔔' },
+              { id: 'themes', label: 'Temas', icon: '🎨' },
+            ].map((item) => (
+              <div key={item.id} onClick={() => item.id === 'themes' ? setShowThemes(true) : null} className="flex justify-between items-center p-4 bg-holy-surface rounded-2xl border border-slate-800/50 hover:bg-white/[0.03] transition-colors cursor-pointer group">
                 <div className="flex items-center gap-4">
                    <span className="text-lg">{item.icon}</span>
                    <p className="text-white text-sm font-bold group-hover:text-holy-primary transition-colors">{item.label}</p>

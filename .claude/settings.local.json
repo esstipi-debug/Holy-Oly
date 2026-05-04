@@ -3,7 +3,12 @@
     "allow": [
       "mcp__Desktop_Commander__create_directory",
       "Bash(git fetch *)",
-      "Bash(git pull *)"
+      "Bash(git pull *)",
+      "mcp__plugin_claude-mem_mcp-search__smart_outline",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "mcp__Desktop_Commander__start_process",
+      "mcp__Desktop_Commander__read_process_output"
     ]
   }
 }

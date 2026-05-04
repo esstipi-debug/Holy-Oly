@@ -58,6 +58,42 @@ C_total(t) = Σ C_i(t - t_i) × H(t - t_i)
 
 ---
 
+## 3b. Dosis útil para rendimiento
+
+Para la mayoría de los adultos sanos, **1–3 mg/kg** de peso es el rango que aumenta fuerza, potencia y percepción de esfuerzo sin tanto "cafeínado" innecesario.
+
+Ejemplo: 70 kg ≈ 70–210 mg por sesión.
+
+Más allá de unos ~400 mg/día se empieza a subir el riesgo de ansiedad, temblor, insomnio y arritmias, sin que el beneficio aumente linealmente.
+
+### Timing alrededor del entrenamiento
+- Tomarla **30–60 minutos antes** del entrenamiento te da el pico de concentración/activación cuando empiezas.
+- Evita dosis importantes a **< 6 horas** de la hora de dormir, porque retrasa el sueño, reduce la fase profunda y baja la calidad de recuperación.
+- Si entrenas en la noche, mejor dosis baja o nula; si no, jugamos con más estrés y menos anabolismo adormilado.
+
+### Dónde te bloquea el rendimiento
+- Mezclar alta cafeína con poco sueño, mucha carga de estrés crónico o mucha carga de entrenamiento te hace más "nervioso" que más fuerte: peor control técnico, más riesgo de error y peor recuperación.
+- Si el entrenamiento es muy intenso, una cafeína alta puede empujar la frecuencia cardiaca a límites incómodos, aumentar percepción de fatiga y reducir la capacidad de escuchar a tu cuerpo.
+
+### Cuándo NO tomar cafeína
+- Si ya tienes ansiedad, trastornos de ritmo cardiaco, hipertensión poco controlada o alteraciones de sueño importantes, la cafeína suele empeorar más de lo que ayuda.
+- Si llevas varios días seguidos de mala noche + alta carga de entrenamiento, una dosis grande puede tirarte del lado del sobrecalentamiento y de la fatiga redundante.
+- Si el objetivo del día es recovery, técnica o sesiones muy largas y de bajo volumen, la cafeína puede ser innecesaria y solo te dejará más revuelto después.
+
+### Cómo usarla como "herramienta", no como muleta
+- Reserva la cafeína para sesiones clave: pesas pesadas, WODs de alta intensidad, pruebas de fuerza o competencias.
+- Usa la dosis baja–media (por ejemplo, 1–2 mg/kg) y déjate un margen de seguridad en vez de siempre ir al máximo.
+- Registra en tu app:
+  - Dosis
+  - Hora
+  - Huella de sueño
+  - Sensación de estrés
+  - Rendimiento objetivo (kg movidos, tiempo completado, etc.)
+  
+  Así sabrás si realmente te está ayudando o solo te "revolviendo".
+
+---
+
 ## 4. Cuándo NO usar cafeína
 
 | Condición | Umbral | Razón |

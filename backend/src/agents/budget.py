@@ -238,12 +238,13 @@ class SpendingRecord:
 
 
 # Costos estimados por unidad (para tracking)
+# Mistral pricing: small $0.10/1M input, $0.30/1M output
 UNIT_COSTS_USD = {
-    "tokens_flash_lite": 0.00000015,   # $0.15 / 1M tokens
-    "tokens_flash": 0.00000035,        # $0.35 / 1M tokens
-    "tokens_pro": 0.00000175,          # $1.75 / 1M tokens
-    "email_sent": 0.0,                  # Resend: 3000/mo gratis
-    "github_api_call": 0.0,             # GitHub API: gratis (rate limited)
+    "tokens_mistral_small": 0.00000010,   # $0.10 / 1M tokens input
+    "tokens_mistral_medium": 0.00000020,  # $0.20 / 1M tokens input
+    "tokens_mistral_large": 0.00000200,   # $2.00 / 1M tokens input
+    "email_sent": 0.0,                     # Resend: 3000/mo gratis
+    "github_api_call": 0.0,                # GitHub API: gratis (rate limited)
 }
 
 

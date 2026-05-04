@@ -4,6 +4,12 @@ dist/
 .env.local
 .DS_Store
 *.log
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.sqlite3
 
 # Secrets
 apps/api/gcp-service-account.json
@@ -14,3 +20,21 @@ CREDENTIALS_BACKUP.md
 .obsidian/workspace.json
 .obsidian/workspace-mobile.json
 .obsidian/cache
+
+# Render
+.render/
+
+# Temp files
+backend/alloydb-auth-proxy.exe
+backend/check_env.py
+backend/check_self_healing.py
+backend/query_context.py
+backend/query_more.py
+backend/query_self_healing.py
+backend/search_healing.py
+backend/test_rag.py
+backend/test_rag_full.py
+backend/verify_security.py
+backend/verify_self_healing.py
+backend/etl_out.txt
+backend/ingest_self_healing.py
