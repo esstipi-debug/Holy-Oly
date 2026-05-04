@@ -140,4 +140,3 @@ function ThemeCard({ theme, isActive, onSelect, preview }: {
     </div>
     );
   }
-}
