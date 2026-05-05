@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { themes } from '../themes';
 import { useTheme } from '../context/ThemeContext';
 
@@ -69,17 +68,6 @@ const PREVIEWS: Record<string, { greeting: string; status: string; cta: string }
 
 export default function ThemeGallery() {
   const { currentTheme, setTheme } = useTheme();
-
-  // Inject B16 CSS once
-  useEffect(() => {
-    const id = 'b16-theme-css';
-    if (document.getElementById(id)) return;
-    const link = document.createElement('link');
-    link.id = id;
-    link.rel = 'stylesheet';
-    link.href = '/b16-themes.css';
-    document.head.appendChild(link);
-  }, []);
 
   return (
     <div style={{ background: '#050510', minHeight: '100%', padding: '20px 16px 80px' }}>
