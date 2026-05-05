@@ -46,7 +46,7 @@ function AppInner() {
   const { isAuthenticated, logout } = useAuth();
   const [currentView, setCurrentView] = useState<View>('HOME');
 
-  const go = (v: View) => setCurrentView(v);
+  const go = (v: string) => setCurrentView(v as View);
 
   if (!isAuthenticated) {
     return (

@@ -232,7 +232,7 @@ const AtletaHome: React.FC<Props> = ({ onNavigate }) => {
             <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(239,68,68,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>🛡️</div>
             <div style={{ flex: 1 }}>
               <p style={{ fontSize: 10, color: '#f87171', fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase' }}>Injury Shield</p>
-              <p style={{ fontSize: 13, fontWeight: 700, ...S.text, marginTop: 2 }}>{typeof injuries[0] === 'string' ? injuries[0] : injuries[0]?.body_part ?? ''}</p>
+              <p style={{ fontSize: 13, fontWeight: 700, ...S.text, marginTop: 2 }}>{String(injuries[0])}</p>
             </div>
             <span style={{ fontSize: 11, color: '#f87171', fontWeight: 700, border: '1px solid rgba(239,68,68,0.3)', borderRadius: 8, padding: '4px 8px', cursor: 'pointer' }}>Ver →</span>
           </div>
