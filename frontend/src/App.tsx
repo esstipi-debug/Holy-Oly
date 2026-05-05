@@ -63,7 +63,7 @@ function AppInner() {
       case 'PREMIUM':      return <Premium />;
       case 'HOME':         return <AtletaHome onNavigate={go} />;
       case 'SUMMARY':      return <SessionSummaryPreview />;
-      case 'WARMUP':       return <WarmupGenerator />;
+      case 'WARMUP':       return <WarmupGenerator onNavigate={go} />;
       case 'SESSION':      return <ActiveSession />;
       case 'VICTORY':      return <VictoryScreen />;
       case 'PERFORMANCE':  return <PerformanceDeepDive />;

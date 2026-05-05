@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import Card from '../components/Card';
 import Button from '../components/Button';
 
-const WarmupGenerator: React.FC = () => {
+interface Props { onNavigate?: (v: string) => void; }
+
+const WarmupGenerator: React.FC<Props> = ({ onNavigate }) => {
   const [phase, setPhase] = useState<'MOBILITY' | 'SPECIFIC' | 'RAMP'>('SPECIFIC');
 
   const items = [
@@ -17,13 +19,13 @@ const WarmupGenerator: React.FC = () => {
         {/* Header */}
         <header className="flex justify-between items-center mb-8">
           <div className="flex items-center gap-3">
-             <div className="w-8 h-8 rounded-lg bg-holy-surface border border-slate-800 flex items-center justify-center text-slate-400">←</div>
+             <div onClick={() => onNavigate?.('HOME')} className="w-8 h-8 rounded-lg bg-holy-surface border border-slate-800 flex items-center justify-center text-slate-400 cursor-pointer">←</div>
              <div>
                <h2 className="text-white text-lg font-black">Calentamiento</h2>
                <p className="text-holy-primary text-[10px] font-bold">READYNESS_AWARE</p>
              </div>
           </div>
-          <button className="text-slate-500 text-xs font-bold hover:text-white transition-colors">OMITIR</button>
+          <button onClick={() => onNavigate?.('SESSION')} className="text-slate-500 text-xs font-bold hover:text-white transition-colors">OMITIR</button>
         </header>
 
         {/* Phase Tabs */}
@@ -99,7 +101,7 @@ const WarmupGenerator: React.FC = () => {
 
       {/* Footer CTA */}
       <footer className="absolute bottom-6 left-6 right-6">
-        <Button fullWidth variant="primary" size="lg">FINALIZAR CALENTAMIENTO →</Button>
+        <Button fullWidth variant="primary" size="lg" onClick={() => onNavigate?.('SESSION')}>FINALIZAR CALENTAMIENTO →</Button>
       </footer>
     </div>
   );
