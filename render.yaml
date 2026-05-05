@@ -33,11 +33,6 @@ services:
     name: holy-oly-web
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: ./frontend/dist
-    routes:
-      - path: /
-        destination: /index.html
-      - path: /api/*
-        destination: https://holy-oly-api.onrender.com/api/:splat
 
 databases:
   - name: holy-oly-postgres
