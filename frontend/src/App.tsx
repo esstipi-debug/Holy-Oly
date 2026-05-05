@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { AthleteProvider } from './context/AthleteContext';
 import PhoneLayout from './layouts/PhoneLayout';
 import AtletaHome from './pages/AtletaHome';
 import Login from './pages/Login';
@@ -132,7 +133,9 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <AppInner />
+        <AthleteProvider>
+          <AppInner />
+        </AthleteProvider>
       </AuthProvider>
     </ThemeProvider>
   );
