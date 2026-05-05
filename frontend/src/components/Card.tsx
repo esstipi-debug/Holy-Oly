@@ -6,34 +6,40 @@ interface CardProps {
   variant?: 'glass' | 'solid' | 'outline';
   padding?: 'none' | 'sm' | 'md' | 'lg';
   hover?: boolean;
+  onClick?: () => void;
 }
 
-const Card: React.FC<CardProps> = ({ 
-  children, 
-  className = '', 
+const Card: React.FC<CardProps> = ({
+  children,
+  className = '',
   variant = 'glass',
   padding = 'md',
-  hover = false
+  hover = false,
+  onClick,
 }) => {
-  const baseStyles = 'rounded-2xl transition-all duration-300 overflow-hidden';
-  
-  const variants = {
-    glass: 'bg-white/5 backdrop-blur-md border border-white/10',
-    solid: 'bg-holy-surface border border-slate-800',
-    outline: 'bg-transparent border border-slate-800',
+  const paddings = { none: '', sm: 'p-3', md: 'p-5', lg: 'p-8' };
+
+  const base = 'transition-all duration-300 overflow-hidden';
+  const style: React.CSSProperties = {
+    borderRadius: 'var(--radius)',
+    boxShadow: 'var(--card-shadow)',
   };
 
-  const paddings = {
-    none: '',
-    sm: 'p-3',
-    md: 'p-5',
-    lg: 'p-8',
-  };
-
-  const hoverStyles = hover ? 'hover:border-holy-primary/30 hover:bg-white/[0.08] cursor-pointer' : '';
+  if (variant === 'glass' || variant === 'solid') {
+    style.background = variant === 'solid' ? 'var(--surface)' : 'var(--card-bg)';
+    style.border = '1px solid var(--card-border)';
+    if (variant === 'glass') style.backdropFilter = 'blur(12px)';
+  } else {
+    style.background = 'transparent';
+    style.border = '1px solid var(--card-border)';
+  }
 
   return (
-    <div className={`${baseStyles} ${variants[variant]} ${paddings[padding]} ${hoverStyles} ${className}`}>
+    <div
+      className={`${base} ${paddings[padding]} ${hover ? 'cursor-pointer hover:brightness-110' : ''} ${className}`}
+      style={style}
+      onClick={onClick}
+    >
       {children}
     </div>
   );

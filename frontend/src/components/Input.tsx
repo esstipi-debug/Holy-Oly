@@ -6,49 +6,52 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   icon?: React.ReactNode;
 }
 
-const Input = React.forwardRef<HTMLInputElement, InputProps>(({ 
-  label, 
-  error, 
-  icon, 
-  className = '', 
-  ...props 
+const Input = React.forwardRef<HTMLInputElement, InputProps>(({
+  label,
+  error,
+  icon,
+  className = '',
+  style,
+  ...props
 }, ref) => {
   return (
     <div className="w-full space-y-1.5">
       {label && (
-        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">
+        <label
+          className="block text-xs font-bold uppercase tracking-wider ml-1"
+          style={{ color: 'var(--text-secondary)' }}
+        >
           {label}
         </label>
       )}
       <div className="relative group">
         {icon && (
-          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-holy-primary transition-colors">
+          <div
+            className="absolute left-4 top-1/2 -translate-y-1/2 transition-colors"
+            style={{ color: 'var(--text-secondary)' }}
+          >
             {icon}
           </div>
         )}
         <input
           ref={ref}
-          className={`
-            w-full bg-holy-surface border border-slate-800 rounded-xl px-4 py-3.5
-            text-white placeholder:text-slate-700 text-sm
-            focus:outline-none focus:border-holy-primary/50 focus:ring-1 focus:ring-holy-primary/20
-            transition-all group-hover:border-slate-700
-            ${icon ? 'pl-11' : ''}
-            ${error ? 'border-red-500/50' : ''}
-            ${className}
-          `}
+          className={`w-full rounded-xl px-4 py-3.5 text-sm transition-all outline-none ${icon ? 'pl-11' : ''} ${className}`}
+          style={{
+            background: 'var(--surface)',
+            border: `1px solid ${error ? 'rgba(239,68,68,0.5)' : 'var(--card-border)'}`,
+            color: 'var(--text)',
+            borderRadius: 'var(--radius)',
+            ...style,
+          }}
           {...props}
         />
       </div>
       {error && (
-        <p className="text-[10px] font-bold text-red-400 mt-1 ml-1 uppercase">
-          {error}
-        </p>
+        <p className="text-[10px] font-bold text-red-400 mt-1 ml-1 uppercase">{error}</p>
       )}
     </div>
   );
 });
 
 Input.displayName = 'Input';
-
 export default Input;

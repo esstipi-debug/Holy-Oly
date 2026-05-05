@@ -2,38 +2,52 @@ import React from 'react';
 
 interface BadgeProps {
   children: React.ReactNode;
-  variant?: 'success' | 'warning' | 'danger' | 'info' | 'gold' | 'ghost';
+  variant?: 'success' | 'warning' | 'danger' | 'info' | 'gold' | 'ghost' | 'primary';
   dot?: boolean;
   className?: string;
 }
 
-const Badge: React.FC<BadgeProps> = ({ 
-  children, 
-  variant = 'info', 
+const Badge: React.FC<BadgeProps> = ({
+  children,
+  variant = 'info',
   dot = false,
-  className = ''
+  className = '',
 }) => {
-  const variants = {
-    success: 'bg-green-500/10 text-green-400 border-green-500/20',
-    warning: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
-    danger: 'bg-red-500/10 text-red-500 border-red-500/20',
-    info: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-    gold: 'bg-holy-gold/10 text-holy-gold border-holy-gold/20',
-    ghost: 'bg-white/5 text-slate-500 border-white/10',
-  };
+  const style: React.CSSProperties =
+    variant === 'success' || variant === 'primary'
+      ? {
+          background: 'var(--status-bg)',
+          color: 'var(--status-text)',
+          border: '1px solid var(--status-border)',
+        }
+      : variant === 'warning'
+      ? { background: 'rgba(245,158,11,0.1)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.2)' }
+      : variant === 'danger'
+      ? { background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)' }
+      : variant === 'info'
+      ? { background: 'rgba(59,130,246,0.1)', color: '#60a5fa', border: '1px solid rgba(59,130,246,0.2)' }
+      : variant === 'gold'
+      ? { background: 'rgba(245,158,11,0.1)', color: '#F59E0B', border: '1px solid rgba(245,158,11,0.2)' }
+      : { background: 'rgba(255,255,255,0.05)', color: 'var(--text-secondary)', border: '1px solid var(--card-border)' };
 
-  const dotColors = {
-    success: 'bg-green-500',
-    warning: 'bg-amber-500',
-    danger: 'bg-red-500',
-    info: 'bg-blue-500',
-    gold: 'bg-holy-gold',
-    ghost: 'bg-slate-500',
-  };
+  const dotColor =
+    variant === 'success' || variant === 'primary' ? 'var(--primary)'
+    : variant === 'warning' ? '#f59e0b'
+    : variant === 'danger' ? '#ef4444'
+    : variant === 'gold' ? '#F59E0B'
+    : '#64748b';
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase border ${variants[variant]} ${className}`}>
-      {dot && <span className={`w-1.5 h-1.5 rounded-full ${dotColors[variant]}`} />}
+    <span
+      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[10px] font-black uppercase rounded-full ${className}`}
+      style={style}
+    >
+      {dot && (
+        <span
+          className="w-1.5 h-1.5 rounded-full"
+          style={{ background: dotColor }}
+        />
+      )}
       {children}
     </span>
   );

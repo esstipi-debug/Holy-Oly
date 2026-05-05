@@ -28,98 +28,128 @@ type View =
   | 'PERFORMANCE' | 'INDEX' | 'SCHEDULE' | 'PULSE' | 'PILLS' | 'SOCIAL' | 'PROFILE'
   | 'COACH_DASH' | 'ATHLETE_DETAIL' | 'ASSIGN_MACRO';
 
+const NAV_MAP: Record<string, 'home' | 'train' | 'stats' | 'profile'> = {
+  HOME: 'home',
+  WARMUP: 'train', SESSION: 'train', SUMMARY: 'train', VICTORY: 'train',
+  PERFORMANCE: 'stats', INDEX: 'stats', SCHEDULE: 'stats', PULSE: 'stats', PILLS: 'stats', SOCIAL: 'stats',
+  PROFILE: 'profile', ONBOARDING: 'profile', PREMIUM: 'profile',
+};
+
+const navGroups = [
+  { title: 'Core Flow', views: ['ONBOARDING', 'PREMIUM'] },
+  { title: 'Atleta', views: ['HOME', 'SUMMARY', 'WARMUP', 'SESSION', 'VICTORY'] },
+  { title: 'Stats & Social', views: ['PERFORMANCE', 'INDEX', 'SCHEDULE', 'PULSE', 'PILLS', 'SOCIAL', 'PROFILE'] },
+  { title: 'Coach', views: ['COACH_DASH', 'ATHLETE_DETAIL', 'ASSIGN_MACRO'] },
+];
+
 function AppInner() {
   const { isAuthenticated, logout } = useAuth();
   const [currentView, setCurrentView] = useState<View>('HOME');
 
+  const go = (v: View) => setCurrentView(v);
+
   if (!isAuthenticated) {
     return (
       <PhoneLayout>
-        <Login onSuccess={() => setCurrentView('HOME')} />
+        <Login onSuccess={() => go('HOME')} />
       </PhoneLayout>
     );
   }
 
   const renderView = () => {
-    switch(currentView) {
-      case 'LOGIN': return <Login onSuccess={() => setCurrentView('HOME')} />;
-      case 'ONBOARDING': return <Onboarding />;
-      case 'PREMIUM': return <Premium />;
-      case 'HOME': return <AtletaHome />;
-      case 'SUMMARY': return <SessionSummaryPreview />;
-      case 'WARMUP': return <WarmupGenerator />;
-      case 'SESSION': return <ActiveSession />;
-      case 'VICTORY': return <VictoryScreen />;
-      case 'PERFORMANCE': return <PerformanceDeepDive />;
-      case 'INDEX': return <OlyIndex />;
-      case 'SCHEDULE': return <SessionSchedule />;
-      case 'PULSE': return <PulseHub />;
-      case 'PILLS': return <KnowledgePills />;
-      case 'SOCIAL': return <SocialCard />;
-      case 'PROFILE': return <Profile />;
-      case 'COACH_DASH': return <CommandCenter />;
+    switch (currentView) {
+      case 'LOGIN':         return <Login onSuccess={() => go('HOME')} />;
+      case 'ONBOARDING':   return <Onboarding />;
+      case 'PREMIUM':      return <Premium />;
+      case 'HOME':         return <AtletaHome />;
+      case 'SUMMARY':      return <SessionSummaryPreview />;
+      case 'WARMUP':       return <WarmupGenerator />;
+      case 'SESSION':      return <ActiveSession />;
+      case 'VICTORY':      return <VictoryScreen />;
+      case 'PERFORMANCE':  return <PerformanceDeepDive />;
+      case 'INDEX':        return <OlyIndex />;
+      case 'SCHEDULE':     return <SessionSchedule />;
+      case 'PULSE':        return <PulseHub />;
+      case 'PILLS':        return <KnowledgePills />;
+      case 'SOCIAL':       return <SocialCard />;
+      case 'PROFILE':      return <Profile />;
+      case 'COACH_DASH':   return <CommandCenter />;
       case 'ATHLETE_DETAIL': return <AthleteDeepDive />;
       case 'ASSIGN_MACRO': return <AssignMacrocycle />;
-      default: return <AtletaHome />;
+      default:             return <AtletaHome />;
     }
   };
 
-  const navGroups = [
-    { title: 'Core Flow', views: ['ONBOARDING', 'PREMIUM'] },
-    { title: 'Athlete', views: ['HOME', 'SUMMARY', 'WARMUP', 'SESSION', 'VICTORY'] },
-    { title: 'Stats & Social', views: ['PERFORMANCE', 'INDEX', 'SCHEDULE', 'PULSE', 'PILLS', 'SOCIAL', 'PROFILE'] },
-    { title: 'Coach Portal', views: ['COACH_DASH', 'ATHLETE_DETAIL', 'ASSIGN_MACRO'] },
-  ];
+  const handleNavChange = (tab: 'home' | 'train' | 'stats' | 'profile') => {
+    const map: Record<typeof tab, View> = {
+      home: 'HOME', train: 'WARMUP', stats: 'PERFORMANCE', profile: 'PROFILE',
+    };
+    go(map[tab]);
+  };
 
   return (
     <div className="relative">
-      <PhoneLayout>
+      <PhoneLayout
+        activeNav={NAV_MAP[currentView] ?? 'home'}
+        onNavChange={handleNavChange}
+      >
         {renderView()}
       </PhoneLayout>
 
-      {/* Sidebar navigation — desktop only */}
-      <div className="hidden 2xl:flex fixed right-10 top-10 bottom-10 w-64 bg-[var(--surface)]/90 backdrop-blur-3xl border border-white/10 rounded-3xl p-6 flex-col gap-6 overflow-y-auto z-50 shadow-2xl">
+      {/* Dev sidebar — desktop only */}
+      <div
+        className="hidden 2xl:flex fixed right-10 top-10 bottom-10 w-56 flex-col gap-4 overflow-y-auto z-50 p-5 rounded-2xl"
+        style={{ background: 'var(--surface)', border: '1px solid var(--card-border)' }}
+      >
         <div>
-          <h2 className="text-white text-xs font-black italic mb-1">BECCTOR UI EXPLORER</h2>
-          <p className="text-[var(--primary)] text-[9px] font-bold uppercase tracking-widest">PROTOTIPO 100% REACT</p>
+          <p className="text-[9px] font-black uppercase tracking-widest" style={{ color: 'var(--primary)' }}>
+            UI Explorer
+          </p>
         </div>
-
         {navGroups.map((group) => (
-          <div key={group.title} className="space-y-2">
-            <h3 className="text-slate-600 text-[9px] font-black uppercase tracking-tighter border-b border-white/5 pb-1">{group.title}</h3>
-            <div className="flex flex-col gap-1">
-              {group.views.map(v => (
-                <button
-                  key={v}
-                  onClick={() => setCurrentView(v as View)}
-                  className={`text-left px-3 py-2 rounded-lg text-[10px] font-bold transition-all ${
-                    currentView === v ? 'bg-[var(--primary)]/10 text-[var(--primary)] border border-[var(--primary)]/20' : 'text-slate-500 hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  {v}
-                </button>
-              ))}
-            </div>
+          <div key={group.title} className="space-y-1">
+            <p className="text-[9px] font-black uppercase tracking-tighter pb-1" style={{ color: 'var(--text-secondary)', borderBottom: '1px solid var(--card-border)' }}>
+              {group.title}
+            </p>
+            {group.views.map(v => (
+              <button
+                key={v}
+                onClick={() => go(v as View)}
+                className="w-full text-left px-2 py-1.5 rounded-lg text-[10px] font-bold transition-all"
+                style={{
+                  background: currentView === v ? 'rgba(34,197,94,0.08)' : 'transparent',
+                  color: currentView === v ? 'var(--primary)' : 'var(--text-secondary)',
+                  border: currentView === v ? '1px solid rgba(34,197,94,0.2)' : '1px solid transparent',
+                }}
+              >
+                {v}
+              </button>
+            ))}
           </div>
         ))}
-
         <button
           onClick={logout}
-          className="mt-auto text-[10px] font-bold text-slate-600 hover:text-red-400 transition-colors text-left"
+          className="mt-auto text-[10px] font-bold transition-colors text-left"
+          style={{ color: 'var(--text-secondary)' }}
+          onMouseEnter={e => (e.currentTarget.style.color = '#ef4444')}
+          onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-secondary)')}
         >
           CERRAR SESIÓN
         </button>
       </div>
 
-      {/* Mobile view switcher */}
-      <div className="2xl:hidden fixed bottom-4 left-4 right-4 flex gap-2 z-50 overflow-x-auto bg-black/80 p-3 rounded-2xl border border-white/10 backdrop-blur-md">
+      {/* Mobile switcher — below phone on small screens */}
+      <div className="2xl:hidden fixed bottom-2 left-2 right-2 flex gap-1 z-50 overflow-x-auto p-2 rounded-xl backdrop-blur-md"
+        style={{ background: 'rgba(0,0,0,0.85)', border: '1px solid var(--card-border)' }}>
         {navGroups.flatMap(g => g.views).map(v => (
           <button
             key={v}
-            onClick={() => setCurrentView(v as View)}
-            className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-[9px] font-black ${
-              currentView === v ? 'bg-[var(--primary)] text-white' : 'bg-white/5 text-slate-500'
-            }`}
+            onClick={() => go(v as View)}
+            className="flex-shrink-0 px-2 py-1 rounded-lg text-[8px] font-black transition-all"
+            style={{
+              background: currentView === v ? 'var(--primary)' : 'rgba(255,255,255,0.05)',
+              color: currentView === v ? 'var(--primary-text)' : 'var(--text-secondary)',
+            }}
           >
             {v}
           </button>

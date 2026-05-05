@@ -9,6 +9,38 @@ export interface ThemeDefinition {
 }
 
 export const themes: ThemeDefinition[] = [
+  // 0. HOLY OLY DARK (default)
+  {
+    id: 'holy-dark',
+    name: 'Holy Oly Dark',
+    font: 'Inter',
+    premium: false,
+    variables: {
+      '--bg': '#07070F',
+      '--surface': '#111118',
+      '--surface2': '#1A1A26',
+      '--text': '#ffffff',
+      '--text-secondary': '#64748b',
+      '--primary': '#22C55E',
+      '--primary-text': '#ffffff',
+      '--status-bg': 'rgba(34,197,94,0.15)',
+      '--status-text': '#4ade80',
+      '--status-border': 'rgba(34,197,94,0.3)',
+      '--card-bg': 'rgba(255,255,255,0.04)',
+      '--card-border': 'rgba(255,255,255,0.08)',
+      '--card-shadow': 'none',
+      '--card-clip': 'none',
+      '--status-clip': 'none',
+      '--cta-bg': '#22C55E',
+      '--cta-text': '#ffffff',
+      '--cta-border': 'transparent',
+      '--cta-shadow': '0 4px 20px rgba(34,197,94,0.25)',
+      '--cta-clip': 'none',
+      '--radius': '16px',
+      '--font-family': "'Inter', system-ui, sans-serif",
+      '--font-mono': "'JetBrains Mono', monospace",
+    }
+  },
   // 1. BRUTALIST
   {
     id: 't-brutal',
@@ -822,7 +854,7 @@ export const themes: ThemeDefinition[] = [
   },
 ];
 
-export const defaultTheme = themes[0]; // Brutalist as default
+export const defaultTheme = themes[0]; // Holy Oly Dark as default
 
 export function getThemeById(id: string): ThemeDefinition {
   return themes.find(t => t.id === id) || defaultTheme;
