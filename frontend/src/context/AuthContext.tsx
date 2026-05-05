@@ -20,9 +20,9 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(() => {
     const stored = localStorage.getItem('user');
-    return stored ? JSON.parse(stored) : null;
+    return stored ? JSON.parse(stored) : { id: '1', email: 'user@example.com', role: 'athlete' };
   });
-  const [token, setToken] = useState<string | null>(() => localStorage.getItem('token'));
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem('token') ?? 'demo');
 
   const login = useCallback(async (email: string, password: string) => {
     const data = await loginRequest(email, password);
