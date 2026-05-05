@@ -61,7 +61,7 @@ function AppInner() {
       case 'LOGIN':         return <Login onSuccess={() => go('HOME')} />;
       case 'ONBOARDING':   return <Onboarding />;
       case 'PREMIUM':      return <Premium />;
-      case 'HOME':         return <AtletaHome />;
+      case 'HOME':         return <AtletaHome onNavigate={go} />;
       case 'SUMMARY':      return <SessionSummaryPreview />;
       case 'WARMUP':       return <WarmupGenerator />;
       case 'SESSION':      return <ActiveSession />;
