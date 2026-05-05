@@ -1,142 +1,181 @@
-import { themes, type ThemeDefinition } from '../themes';
+import { useEffect } from 'react';
+import { themes } from '../themes';
 import { useTheme } from '../context/ThemeContext';
 
-const themePreviews: Record<string, { greeting: string; status: string; cta: string }> = {
-  't-brutal': { greeting: '// USER: JUAN', status: 'READY', cta: 'START SESSION →' },
-  't-deco': { greeting: 'Bienvenido, Juan', status: 'LISTO', cta: 'EMPEZAR' },
-  't-cyber': { greeting: 'user_juan.exe', status: 'ONLINE', cta: 'JACK IN ▸' },
-  't-comic': { greeting: '¡Hey, Juan!', status: '¡POW!', cta: '¡VAMOS!' },
-  't-wood': { greeting: 'Hola, Juan', status: '// LISTO', cta: 'EMPEZAR SESIÓN' },
-  't-rpg': { greeting: 'P1: JUAN', status: 'READY', cta: '▶ START' },
-  't-editorial': { greeting: 'Buenos días, Juan', status: 'LISTO', cta: 'Empezar sesión' },
-  't-industrial': { greeting: 'UNIT // JUAN', status: 'ARMED', cta: 'DEPLOY' },
-  't-organic': { greeting: '¡Hola, Juan!', status: 'listo ✨', cta: 'empezar ✨' },
-  't-terminal': { greeting: 'whoami', status: 'READY', cta: 'run start.sh' },
-  't-marble': { greeting: 'Bienvenido, Juan', status: 'listo', cta: 'Comenzar' },
-  't-arcade': { greeting: 'PLAYER 1 · JUAN', status: 'READY', cta: 'PRESS START' },
-  't-vapor': { greeting: 'aesthetic, juan', status: 'VIBE', cta: 'エンター ▸' },
-  't-glass': { greeting: 'Sir Juan', status: 'Listo', cta: 'Adelante' },
-  't-news': { greeting: '— Mar 15, 2026 — Sr. Juan Pérez', status: 'EXTRA', cta: 'Begin Session →' },
-  't-graffiti': { greeting: 'YO! JUAN', status: 'RAW', cta: '¡VAMOS! ▸' },
-  't-mercury': { greeting: 'USR // JUAN', status: 'ACTIVE', cta: 'INITIATE' },
-  't-zen': { greeting: '道 · Juan', status: '禅 ZEN', cta: '始める · COMENZAR' },
-  't-cosmic': { greeting: '★ Hola, Juan ★', status: 'ALIGNED', cta: '⋆ LIFTOFF ⋆' },
-  't-lego': { greeting: 'HOLA JUAN', status: 'GO', cta: 'JUGAR ▸' },
-  't-velvet': { greeting: 'Sr. Juan Pérez', status: 'VIP', cta: 'ENTRAR' },
-  't-lava': { greeting: 'JUAN INFERNO', status: 'BURN', cta: 'IGNITE ▸' },
-  't-sketch': { greeting: 'hola, Juan!', status: 'ready', cta: '¡vamos!' },
-  't-leather': { greeting: 'JUAN P.', status: 'READY', cta: 'RIDE' },
-  't-floral': { greeting: 'Hola, Juan', status: 'listo', cta: 'comenzar' },
-  't-holo': { greeting: 'USER · JUAN', status: 'SYNCED', cta: 'START' },
-  't-mono': { greeting: 'JUAN', status: 'READY', cta: 'START' },
-  't-pirate': { greeting: 'Capitán Juan', status: 'A BORDO', cta: '¡ZARPAR!' },
+// Map theme id → B16 CSS class name
+const THEME_CLASS: Record<string, string> = {
+  'holy-dark':   '',          // default, no B16 class
+  't-brutal':    't-brutal',
+  't-deco':      't-deco',
+  't-cyber':     't-cyber',
+  't-comic':     't-comic',
+  't-wood':      't-wood',
+  't-rpg':       't-rpg',
+  't-editorial': 't-editorial',
+  't-industrial':'t-industrial',
+  't-organic':   't-organic',
+  't-terminal':  't-terminal',
+  't-marble':    't-marble',
+  't-arcade':    't-arcade',
+  't-vapor':     't-vapor',
+  't-glass':     't-glass',
+  't-news':      't-news',
+  't-graffiti':  't-graffiti',
+  't-mercury':   't-mercury',
+  't-zen':       't-zen',
+  't-cosmic':    't-cosmic',
+  't-lego':      't-lego',
+  't-velvet':    't-velvet',
+  't-lava':      't-lava',
+  't-sketch':    't-sketch',
+  't-leather':   't-leather',
+  't-floral':    't-floral',
+  't-holo':      't-holo',
+  't-mono':      't-mono',
+  't-pirate':    't-pirate',
+};
+
+const PREVIEWS: Record<string, { greeting: string; status: string; cta: string }> = {
+  'holy-dark':   { greeting: 'Hola, Matías', status: 'VERDE', cta: 'INICIAR SESIÓN →' },
+  't-brutal':    { greeting: '// USER: MATIAS', status: 'READY', cta: 'START SESSION →' },
+  't-deco':      { greeting: 'Bienvenido, Matías', status: 'LISTO', cta: 'EMPEZAR' },
+  't-cyber':     { greeting: 'user_matias.exe', status: 'ONLINE', cta: 'JACK IN ▸' },
+  't-comic':     { greeting: '¡Hey, Matías!', status: '¡POW!', cta: '¡VAMOS!' },
+  't-wood':      { greeting: 'Hola, Matías', status: '// LISTO', cta: 'EMPEZAR SESIÓN' },
+  't-rpg':       { greeting: 'P1: MATIAS', status: 'READY', cta: '▶ START' },
+  't-editorial': { greeting: 'Buenos días, Matías', status: 'LISTO', cta: 'Empezar sesión' },
+  't-industrial':{ greeting: 'UNIT // MATIAS', status: 'ARMED', cta: 'DEPLOY' },
+  't-organic':   { greeting: '¡Hola, Matías!', status: 'listo ✨', cta: 'empezar ✨' },
+  't-terminal':  { greeting: 'whoami', status: 'READY', cta: 'run start.sh' },
+  't-marble':    { greeting: 'Bienvenido, Matías', status: 'listo', cta: 'Comenzar' },
+  't-arcade':    { greeting: 'PLAYER 1 · MATIAS', status: 'READY', cta: 'PRESS START' },
+  't-vapor':     { greeting: 'aesthetic, matias', status: 'VIBE', cta: 'エンター ▸' },
+  't-glass':     { greeting: 'Sir Matías', status: 'Listo', cta: 'Adelante' },
+  't-news':      { greeting: '— 5 May 2026 — Sr. Matías', status: 'EXTRA', cta: 'Begin Session →' },
+  't-graffiti':  { greeting: 'YO! MATIAS', status: 'RAW', cta: '¡VAMOS! ▸' },
+  't-mercury':   { greeting: 'USR // MATIAS', status: 'ACTIVE', cta: 'INITIATE' },
+  't-zen':       { greeting: '道 · Matías', status: '禅 ZEN', cta: '始める · COMENZAR' },
+  't-cosmic':    { greeting: '★ Hola, Matías ★', status: 'ALIGNED', cta: '⋆ LIFTOFF ⋆' },
+  't-lego':      { greeting: 'HOLA MATIAS', status: 'GO', cta: 'JUGAR ▸' },
+  't-velvet':    { greeting: 'Sr. Matías P.', status: 'VIP', cta: 'ENTRAR' },
+  't-lava':      { greeting: 'MATIAS INFERNO', status: 'BURN', cta: 'IGNITE ▸' },
+  't-sketch':    { greeting: 'hola, Matías!', status: 'ready', cta: '¡vamos!' },
+  't-leather':   { greeting: 'MATIAS P.', status: 'READY', cta: 'RIDE' },
+  't-floral':    { greeting: 'Hola, Matías', status: 'listo', cta: 'comenzar' },
+  't-holo':      { greeting: 'USER · MATIAS', status: 'SYNCED', cta: 'START' },
+  't-mono':      { greeting: 'MATIAS', status: 'READY', cta: 'START' },
+  't-pirate':    { greeting: 'Capitán Matías', status: 'A BORDO', cta: '¡ZARPAR!' },
 };
 
 export default function ThemeGallery() {
   const { currentTheme, setTheme } = useTheme();
 
+  // Inject B16 CSS once
+  useEffect(() => {
+    const id = 'b16-theme-css';
+    if (document.getElementById(id)) return;
+    const link = document.createElement('link');
+    link.id = id;
+    link.rel = 'stylesheet';
+    link.href = '/b16-themes.css';
+    document.head.appendChild(link);
+  }, []);
+
   return (
-    <div className="p-6 pb-24">
-      <div className="text-center mb-8">
-        <h1 className="text-2xl font-black text-white mb-2">Theme Gallery</h1>
-        <p className="text-slate-400 text-sm">28 personalidades visuales · Elige tu estilo</p>
+    <div style={{ background: '#050510', minHeight: '100%', padding: '20px 16px 80px' }}>
+      {/* Header */}
+      <div style={{ textAlign: 'center', marginBottom: 20 }}>
+        <h1 style={{ fontSize: 22, fontWeight: 900, color: '#fff', letterSpacing: '-.02em' }}>
+          Theme <span style={{ background: 'linear-gradient(90deg,#FFD700,#00E5FF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Gallery</span>
+        </h1>
+        <p style={{ fontSize: 12, color: '#475569', marginTop: 6 }}>
+          {themes.length} personalidades visuales · Elige tu estilo
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto">
-        {themes.map((theme) => (
-          <ThemeCard
-            key={theme.id}
-            theme={theme}
-            isActive={currentTheme.id === theme.id}
-            onSelect={() => setTheme(theme.id)}
-            preview={themePreviews[theme.id]}
-          />
-        ))}
+      {/* Grid 2 cols */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        {themes.map((theme) => {
+          const isActive = currentTheme.id === theme.id;
+          const cls = THEME_CLASS[theme.id] ?? '';
+          const pv = PREVIEWS[theme.id] ?? { greeting: 'Hola', status: 'LISTO', cta: 'EMPEZAR' };
+
+          return (
+            <div
+              key={theme.id}
+              className={`theme-card ${cls}`}
+              onClick={() => setTheme(theme.id)}
+              style={
+                cls === ''
+                  ? {
+                      // Holy Oly Dark — manual preview since no B16 class
+                      background: '#07070F',
+                      color: '#fff',
+                      fontFamily: 'Inter, system-ui, sans-serif',
+                      outline: isActive ? '2px solid #22C55E' : undefined,
+                    }
+                  : {
+                      outline: isActive ? '2px solid #22C55E' : undefined,
+                    }
+              }
+            >
+              {cls === '' ? (
+                // Holy Oly Dark manual preview
+                <div className="preview" style={{ background: '#07070F' }}>
+                  <div className="pv-top">
+                    <div className="pv-greeting" style={{ color: '#94a3b8', opacity: 1 }}>{pv.greeting}</div>
+                    <div className="pv-status" style={{ background: 'rgba(34,197,94,.15)', color: '#4ade80', padding: '3px 8px', borderRadius: 20, border: '1px solid rgba(34,197,94,.3)' }}>{pv.status}</div>
+                  </div>
+                  <div>
+                    <div className="pv-label" style={{ color: '#64748b' }}>READINESS</div>
+                    <div className="pv-stat-big" style={{ fontSize: 80, fontWeight: 900, color: '#22C55E', lineHeight: 1 }}>84</div>
+                  </div>
+                  <div className="pv-card" style={{ background: '#111118', border: '1px solid #1e1e30', borderRadius: 14, padding: '10px 14px' }}>
+                    <div><div className="pv-card-num" style={{ fontSize: 18, fontWeight: 800, color: '#F59E0B' }}>7.4</div><div className="pv-card-lbl" style={{ color: '#64748b' }}>OLY INDEX</div></div>
+                  </div>
+                  <div className="pv-bottom-cta" style={{ background: 'linear-gradient(135deg,#16a34a,#15803d)', color: '#fff', padding: '12px', borderRadius: 14, fontWeight: 800, fontSize: 13, marginTop: 'auto', textAlign: 'center' }}>{pv.cta}</div>
+                </div>
+              ) : (
+                <div className="preview">
+                  <div className="pv-top">
+                    <div className="pv-greeting">{pv.greeting}</div>
+                    <div className="pv-status">{pv.status}</div>
+                  </div>
+                  <div>
+                    <div className="pv-label">READINESS</div>
+                    <div className="pv-stat-big">84</div>
+                  </div>
+                  <div className="pv-card">
+                    <div><div className="pv-card-num">7.4</div><div className="pv-card-lbl">OLY INDEX</div></div>
+                  </div>
+                  <div className="pv-card">
+                    <div><div className="pv-card-num">15D</div><div className="pv-card-lbl">RACHA</div></div>
+                  </div>
+                  <div className="pv-bottom-cta">{pv.cta}</div>
+                </div>
+              )}
+
+              <div className="label-bar">
+                <div>
+                  <div className="lbl-name">{theme.name}</div>
+                  <div className="lbl-font">{theme.font}</div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
+                  {isActive && (
+                    <span className="lbl-tag" style={{ background: '#22C55E', color: '#07070F' }}>✓ ACTIVO</span>
+                  )}
+                  {theme.premium && !isActive && (
+                    <span className="lbl-tag prem">💎 PRO</span>
+                  )}
+                  {!theme.premium && !isActive && (
+                    <span className="lbl-tag">FREE</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
 }
-
-function ThemeCard({ theme, isActive, onSelect, preview }: {
-  theme: ThemeDefinition;
-  isActive: boolean;
-  onSelect: () => void;
-  preview?: { greeting: string; status: string; cta: string };
-}) {
-
-  return (
-    <div
-      className={`relative rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 ${
-        isActive ? 'ring-2 ring-[var(--primary)] scale-105' : 'hover:scale-102'
-      }`}
-      style={{
-        background: theme.variables['--bg'],
-        fontFamily: theme.variables['--font-family'],
-        color: theme.variables['--text'],
-      }}
-      onClick={onSelect}
-    >
-      {/* Mini preview */}
-      <div className="p-4 space-y-3 min-h-[280px] flex flex-col">
-        <div className="flex justify-between items-center text-xs">
-          <span style={{ fontFamily: theme.variables['--font-mono'] }}>{preview?.greeting || 'User'}</span>
-          <span
-            className="px-2 py-1 rounded text-xs font-bold"
-            style={{
-              background: theme.variables['--status-bg'],
-              color: theme.variables['--status-text'],
-              clipPath: theme.variables['--status-clip'] || 'none',
-            }}
-          >
-            {preview?.status || 'OK'}
-          </span>
-        </div>
-
-        <div className="text-4xl font-black" style={{ color: theme.variables['--text'] }}>
-          84
-        </div>
-
-        <div
-          className="p-3 rounded"
-          style={{
-            background: theme.variables['--card-bg'],
-            border: `1px solid ${theme.variables['--card-border']}`,
-            clipPath: theme.variables['--card-clip'] || 'none',
-          }}
-        >
-          <div className="text-xs opacity-60">OLY INDEX</div>
-          <div className="text-lg font-bold">7.4</div>
-        </div>
-
-        <div
-          className="mt-auto text-center py-2 rounded-lg font-bold text-sm"
-          style={{
-            background: theme.variables['--cta-bg'],
-            color: theme.variables['--cta-text'],
-            clipPath: theme.variables['--cta-clip'] || 'none',
-          }}
-        >
-          {preview?.cta || 'SELECT'}
-        </div>
-      </div>
-
-      {/* Label bar */}
-      <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/90 to-transparent flex justify-between items-center">
-        <div>
-          <div className="text-white text-xs font-bold">{theme.name}</div>
-          <div className="text-[10px] text-slate-400">{theme.font}</div>
-        </div>
-        {theme.premium && (
-          <span className="text-[9px] font-bold px-2 py-1 rounded bg-gradient-to-r from-yellow-600 to-yellow-400 text-black">
-            PREMIUM
-          </span>
-        )}
-        {isActive && (
-          <span className="text-[9px] font-bold px-2 py-1 rounded bg-[var(--primary)] text-white">
-            ACTIVE
-          </span>
-        )}
-      </div>
-    </div>
-    );
-  }
