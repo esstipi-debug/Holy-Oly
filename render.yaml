@@ -11,9 +11,23 @@ services:
         fromDatabase:
           name: holy-oly-postgres
           property: connectionString
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: GOOGLE_PROJECT_ID
+        value: liftai-evolved-strength
+      - key: GOOGLE_LOCATION
+        value: us-central1
+      - key: LOG_LEVEL
+        value: "INFO"
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: "200"
+      - key: RATE_LIMIT_WINDOW_SECONDS
+        value: "60"
     healthCheckPath: /health
     preDeployCommand: |
-      cd backend && python -m alembic upgrade head || true
+      cd backend && python -c "import psycopg2; conn = psycopg2.connect('$DATABASE_URL'); cur = conn.cursor(); [cur.execute(open(f'migrations/{f}').read()) for f in ['001_enable_rls.sql','002_enable_pgvector.sql','003_wise_score.sql','004_rag_self_healing.sql'] if f.endswith('.sql')]; conn.commit()" || true
 
   - type: static site
     name: holy-oly-web
@@ -30,3 +44,4 @@ databases:
     databaseName: holy_oly_db
     user: holy_oly_user
     region: oregon
+    postgresMajorVersion: "15"
