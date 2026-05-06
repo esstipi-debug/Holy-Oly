@@ -31,8 +31,10 @@ services:
 
   - type: static site
     name: holy-oly-web
-    buildCommand: cd frontend && npm install && npm run build
-    staticPublishPath: ./frontend/dist
+    runtime: node
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
 
 databases:
   - name: holy-oly-postgres
