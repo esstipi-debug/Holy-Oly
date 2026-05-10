@@ -3,14 +3,16 @@ import Card from '../components/Card';
 import Button from '../components/Button';
 import Badge from '../components/Badge';
 import Input from '../components/Input';
+import { useNav } from '../context/NavigationContext';
 
 const ActiveSession: React.FC = () => {
+  const { navigate } = useNav();
   return (
     <div className="flex flex-col h-full">
       {/* Header / Timer */}
       <header className="px-6 py-4 flex justify-between items-center bg-holy-surface/50 backdrop-blur-md sticky top-0 z-10">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-holy-surface border border-slate-800 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-holy-surface border border-slate-800 flex items-center justify-center" onClick={() => navigate('HOME')}>
              <span className="text-slate-400 text-xs">←</span>
           </div>
           <div>
@@ -77,10 +79,12 @@ const ActiveSession: React.FC = () => {
       </div>
 
       {/* Persistence Bar / Footer CTA */}
-      <footer className="absolute bottom-20 left-6 right-6 pb-4">
+      <footer className="absolute bottom-20 left-6 right-6 pb-4 space-y-2">
         <Button variant="gold" fullWidth size="lg">
           SIGUIENTE EJERCICIO →
         </Button>
+        <Button variant="primary" fullWidth size="lg" onClick={() => navigate('VICTORY')}>FINALIZAR SESIÓN</Button>
+        <Button variant="ghost" fullWidth onClick={() => navigate('SUMMARY')}>VER RESUMEN</Button>
       </footer>
     </div>
   );

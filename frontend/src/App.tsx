@@ -1,7 +1,7 @@
-import { useState } from 'react';
 import { ThemeProvider } from './context/ThemeContext';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthProvider } from './context/AuthContext';
 import { AthleteProvider } from './context/AthleteContext';
+import { NavigationProvider, useNav } from './context/NavigationContext';
 import PhoneLayout from './layouts/PhoneLayout';
 import AtletaHome from './pages/AtletaHome';
 import Login from './pages/Login';
@@ -21,12 +21,7 @@ import PerformanceDeepDive from './pages/PerformanceDeepDive';
 import SessionSchedule from './pages/SessionSchedule';
 import KnowledgePills from './pages/KnowledgePills';
 import SocialCard from './pages/SocialCard';
-
-type View =
-  | 'LOGIN' | 'ONBOARDING' | 'PREMIUM'
-  | 'HOME' | 'SUMMARY' | 'WARMUP' | 'SESSION' | 'VICTORY'
-  | 'PERFORMANCE' | 'INDEX' | 'SCHEDULE' | 'PULSE' | 'PILLS' | 'SOCIAL' | 'PROFILE'
-  | 'COACH_DASH' | 'ATHLETE_DETAIL' | 'ASSIGN_MACRO';
+import type { View } from './context/NavigationContext';
 
 const NAV_MAP: Record<string, 'home' | 'train' | 'stats' | 'profile'> = {
   HOME: 'home',
@@ -36,47 +31,36 @@ const NAV_MAP: Record<string, 'home' | 'train' | 'stats' | 'profile'> = {
 };
 
 const navGroups = [
-  { title: 'Core Flow', views: ['ONBOARDING', 'PREMIUM'] },
-  { title: 'Atleta', views: ['HOME', 'SUMMARY', 'WARMUP', 'SESSION', 'VICTORY'] },
-  { title: 'Stats & Social', views: ['PERFORMANCE', 'INDEX', 'SCHEDULE', 'PULSE', 'PILLS', 'SOCIAL', 'PROFILE'] },
-  { title: 'Coach', views: ['COACH_DASH', 'ATHLETE_DETAIL', 'ASSIGN_MACRO'] },
+  { title: 'Core Flow',   views: ['ONBOARDING', 'PREMIUM'] },
+  { title: 'Atleta',      views: ['HOME', 'SUMMARY', 'WARMUP', 'SESSION', 'VICTORY'] },
+  { title: 'Stats',       views: ['PERFORMANCE', 'INDEX', 'SCHEDULE', 'PULSE', 'PILLS', 'SOCIAL', 'PROFILE'] },
+  { title: 'Coach',       views: ['COACH_DASH', 'ATHLETE_DETAIL', 'ASSIGN_MACRO'] },
 ];
 
 function AppInner() {
-  const { isAuthenticated, logout } = useAuth();
-  const [currentView, setCurrentView] = useState<View>('HOME');
-
-  const go = (v: string) => setCurrentView(v as View);
-
-  if (!isAuthenticated) {
-    return (
-      <PhoneLayout>
-        <Login onSuccess={() => go('HOME')} />
-      </PhoneLayout>
-    );
-  }
+  const { currentView, navigate } = useNav();
 
   const renderView = () => {
     switch (currentView) {
-      case 'LOGIN':         return <Login onSuccess={() => go('HOME')} />;
-      case 'ONBOARDING':   return <Onboarding />;
-      case 'PREMIUM':      return <Premium />;
-      case 'HOME':         return <AtletaHome onNavigate={go} />;
-      case 'SUMMARY':      return <SessionSummaryPreview />;
-      case 'WARMUP':       return <WarmupGenerator onNavigate={go} />;
-      case 'SESSION':      return <ActiveSession />;
-      case 'VICTORY':      return <VictoryScreen />;
-      case 'PERFORMANCE':  return <PerformanceDeepDive />;
-      case 'INDEX':        return <OlyIndex />;
-      case 'SCHEDULE':     return <SessionSchedule />;
-      case 'PULSE':        return <PulseHub />;
-      case 'PILLS':        return <KnowledgePills />;
-      case 'SOCIAL':       return <SocialCard />;
-      case 'PROFILE':      return <Profile />;
-      case 'COACH_DASH':   return <CommandCenter />;
+      case 'LOGIN':           return <Login onSuccess={() => navigate('HOME')} />;
+      case 'ONBOARDING':     return <Onboarding />;
+      case 'PREMIUM':        return <Premium />;
+      case 'HOME':           return <AtletaHome />;
+      case 'SUMMARY':        return <SessionSummaryPreview />;
+      case 'WARMUP':         return <WarmupGenerator />;
+      case 'SESSION':        return <ActiveSession />;
+      case 'VICTORY':        return <VictoryScreen />;
+      case 'PERFORMANCE':    return <PerformanceDeepDive />;
+      case 'INDEX':          return <OlyIndex />;
+      case 'SCHEDULE':       return <SessionSchedule />;
+      case 'PULSE':          return <PulseHub />;
+      case 'PILLS':          return <KnowledgePills />;
+      case 'SOCIAL':         return <SocialCard />;
+      case 'PROFILE':        return <Profile />;
+      case 'COACH_DASH':     return <CommandCenter />;
       case 'ATHLETE_DETAIL': return <AthleteDeepDive />;
-      case 'ASSIGN_MACRO': return <AssignMacrocycle />;
-      default:             return <AtletaHome />;
+      case 'ASSIGN_MACRO':   return <AssignMacrocycle />;
+      default:               return <AtletaHome />;
     }
   };
 
@@ -84,7 +68,7 @@ function AppInner() {
     const map: Record<typeof tab, View> = {
       home: 'HOME', train: 'WARMUP', stats: 'PERFORMANCE', profile: 'PROFILE',
     };
-    go(map[tab]);
+    navigate(map[tab]);
   };
 
   return (
@@ -101,11 +85,9 @@ function AppInner() {
         className="hidden 2xl:flex fixed right-10 top-10 bottom-10 w-56 flex-col gap-4 overflow-y-auto z-50 p-5 rounded-2xl"
         style={{ background: 'var(--surface)', border: '1px solid var(--card-border)' }}
       >
-        <div>
-          <p className="text-[9px] font-black uppercase tracking-widest" style={{ color: 'var(--primary)' }}>
-            UI Explorer
-          </p>
-        </div>
+        <p className="text-[9px] font-black uppercase tracking-widest" style={{ color: 'var(--primary)' }}>
+          UI Explorer
+        </p>
         {navGroups.map((group) => (
           <div key={group.title} className="space-y-1">
             <p className="text-[9px] font-black uppercase tracking-tighter pb-1" style={{ color: 'var(--text-secondary)', borderBottom: '1px solid var(--card-border)' }}>
@@ -114,7 +96,7 @@ function AppInner() {
             {group.views.map(v => (
               <button
                 key={v}
-                onClick={() => go(v as View)}
+                onClick={() => navigate(v as View)}
                 className="w-full text-left px-2 py-1.5 rounded-lg text-[10px] font-bold transition-all"
                 style={{
                   background: currentView === v ? 'rgba(34,197,94,0.08)' : 'transparent',
@@ -127,28 +109,19 @@ function AppInner() {
             ))}
           </div>
         ))}
-        <button
-          onClick={logout}
-          className="mt-auto text-[10px] font-bold transition-colors text-left"
-          style={{ color: 'var(--text-secondary)' }}
-          onMouseEnter={e => (e.currentTarget.style.color = '#ef4444')}
-          onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-secondary)')}
-        >
-          CERRAR SESIÓN
-        </button>
       </div>
 
-      {/* Mobile switcher — below phone on small screens */}
+      {/* Mobile switcher */}
       <div className="2xl:hidden fixed bottom-2 left-2 right-2 flex gap-1 z-50 overflow-x-auto p-2 rounded-xl backdrop-blur-md"
         style={{ background: 'rgba(0,0,0,0.85)', border: '1px solid var(--card-border)' }}>
         {navGroups.flatMap(g => g.views).map(v => (
           <button
             key={v}
-            onClick={() => go(v as View)}
+            onClick={() => navigate(v as View)}
             className="flex-shrink-0 px-2 py-1 rounded-lg text-[8px] font-black transition-all"
             style={{
               background: currentView === v ? 'var(--primary)' : 'rgba(255,255,255,0.05)',
-              color: currentView === v ? 'var(--primary-text)' : 'var(--text-secondary)',
+              color: currentView === v ? 'var(--bg)' : 'var(--text-secondary)',
             }}
           >
             {v}
@@ -164,7 +137,9 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <AthleteProvider>
-          <AppInner />
+          <NavigationProvider>
+            <AppInner />
+          </NavigationProvider>
         </AthleteProvider>
       </AuthProvider>
     </ThemeProvider>

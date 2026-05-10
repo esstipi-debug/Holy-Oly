@@ -2,8 +2,10 @@ import React from 'react';
 import Card from '../components/Card';
 import Badge from '../components/Badge';
 import Button from '../components/Button';
+import { useNav } from '../context/NavigationContext';
 
 const CommandCenter: React.FC = () => {
+  const { navigate } = useNav();
   const athletes = [
     { name: 'Miguel Arias', readiness: 9.4, status: 'TRAINING', block: 'Snatch 85%', mood: '🔥' },
     { name: 'Lorena C.', readiness: 4.2, status: 'FATIGUED', block: 'Rest Advised', mood: '😴' },
@@ -49,11 +51,12 @@ const CommandCenter: React.FC = () => {
            </div>
 
            {athletes.map((athlete, i) => (
-             <Card 
-               key={i} 
-               variant="solid" 
-               padding="sm" 
+             <Card
+               key={i}
+               variant="solid"
+               padding="sm"
                className="hover:border-holy-cyan/30 cursor-pointer group"
+               onClick={() => navigate('ATHLETE_DETAIL')}
              >
                 <div className="flex items-center gap-4">
                    <div className="relative">

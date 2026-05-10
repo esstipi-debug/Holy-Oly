@@ -2,15 +2,20 @@ import React from 'react';
 import Card from '../components/Card';
 import Badge from '../components/Badge';
 import Button from '../components/Button';
+import { useNav } from '../context/NavigationContext';
 
 const PulseHub: React.FC = () => {
+  const { navigate } = useNav();
   return (
     <div className="flex flex-col h-full bg-[#07070F]">
       <div className="px-6 py-8 flex-1 overflow-y-auto">
         <header className="flex justify-between items-center mb-8">
-           <div>
-              <h1 className="text-white text-2xl font-black italic tracking-tighter">PULSE HUB</h1>
-              <Badge variant="danger" dot>8 Atletas Online</Badge>
+           <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-holy-surface border border-slate-800 flex items-center justify-center text-slate-400 cursor-pointer" onClick={() => navigate('HOME')}>←</div>
+              <div>
+                 <h1 className="text-white text-2xl font-black italic tracking-tighter">PULSE HUB</h1>
+                 <Badge variant="danger" dot>8 Atletas Online</Badge>
+              </div>
            </div>
            <div className="w-10 h-10 rounded-full bg-holy-primary/10 border border-holy-primary/20 flex items-center justify-center animate-pulse">
               <span className="text-holy-primary text-lg">📡</span>

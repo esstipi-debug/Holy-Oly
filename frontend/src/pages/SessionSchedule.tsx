@@ -2,8 +2,10 @@ import React from 'react';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import Badge from '../components/Badge';
+import { useNav } from '../context/NavigationContext';
 
 const SessionSchedule: React.FC = () => {
+  const { navigate } = useNav();
   const days = [
     { day: 'LUN', date: 15, status: 'DONE', label: 'Snatch + OHS' },
     { day: 'MAR', date: 16, status: 'DONE', label: 'C&J + Front Squat' },
@@ -17,9 +19,12 @@ const SessionSchedule: React.FC = () => {
   return (
     <div className="flex flex-col h-full bg-[#07070F]">
       <div className="px-6 py-8 flex-1 overflow-y-auto">
-        <header className="mb-8">
-           <h1 className="text-white text-2xl font-black">Planificación</h1>
-           <p className="text-holy-primary text-[10px] font-black uppercase mt-1">Semana 4 · Macrociclo Búlgaro</p>
+        <header className="mb-8 flex items-center gap-3">
+           <div className="w-8 h-8 rounded-lg bg-holy-surface border border-slate-800 flex items-center justify-center text-slate-400 cursor-pointer" onClick={() => navigate('HOME')}>←</div>
+           <div>
+              <h1 className="text-white text-2xl font-black">Planificación</h1>
+              <p className="text-holy-primary text-[10px] font-black uppercase mt-1">Semana 4 · Macrociclo Búlgaro</p>
+           </div>
         </header>
 
         {/* Calendar Strip */}
@@ -43,7 +48,7 @@ const SessionSchedule: React.FC = () => {
         <div className="space-y-4 mb-20">
            <h3 className="text-slate-500 text-[10px] font-black uppercase tracking-widest pl-1">Próximas Sesiones</h3>
            {days.filter(d => d.status === 'PENDING' || d.status === 'ACTIVE').map((d, i) => (
-             <Card key={i} variant={d.status === 'ACTIVE' ? 'glass' : 'solid'} className={d.status === 'ACTIVE' ? 'border-holy-primary/30' : ''}>
+             <Card key={i} variant={d.status === 'ACTIVE' ? 'glass' : 'solid'} className={`${d.status === 'ACTIVE' ? 'border-holy-primary/30' : ''} cursor-pointer`} onClick={() => navigate('WARMUP')}>
                 <div className="flex justify-between items-center">
                    <div className="flex items-center gap-4">
                       <div className={`w-2 h-10 rounded-full ${d.label === 'Rest Day' ? 'bg-slate-800' : 'bg-holy-primary'}`} />

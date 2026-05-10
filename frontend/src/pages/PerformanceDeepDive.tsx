@@ -1,15 +1,20 @@
 import React from 'react';
 import Card from '../components/Card';
 import Badge from '../components/Badge';
+import { useNav } from '../context/NavigationContext';
 
 const PerformanceDeepDive: React.FC = () => {
+  const { navigate } = useNav();
   return (
     <div className="flex flex-col h-full bg-[#07070F]">
       <div className="px-6 py-8 flex-1 overflow-y-auto">
         <header className="mb-8 flex justify-between items-center">
-           <div>
-              <h1 className="text-white text-2xl font-black italic tracking-tighter">PERFORMANCE</h1>
-              <p className="text-holy-primary text-[10px] font-black uppercase mt-1">ANÁLISIS DE DATOS HISTÓRICOS</p>
+           <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-holy-surface border border-slate-800 flex items-center justify-center text-slate-400 cursor-pointer" onClick={() => navigate('HOME')}>←</div>
+              <div>
+                 <h1 className="text-white text-2xl font-black italic tracking-tighter">PERFORMANCE</h1>
+                 <p className="text-holy-primary text-[10px] font-black uppercase mt-1">ANÁLISIS DE DATOS HISTÓRICOS</p>
+              </div>
            </div>
            <div className="flex gap-1 bg-white/5 p-1 rounded-lg">
               <button className="px-3 py-1 bg-slate-800 text-white text-[9px] font-bold rounded-md">W</button>

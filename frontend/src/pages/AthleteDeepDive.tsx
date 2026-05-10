@@ -2,14 +2,16 @@ import React from 'react';
 import Card from '../components/Card';
 import Badge from '../components/Badge';
 import Button from '../components/Button';
+import { useNav } from '../context/NavigationContext';
 
 const AthleteDeepDive: React.FC = () => {
+  const { navigate } = useNav();
   return (
     <div className="flex flex-col h-full bg-[#07070F]">
       {/* Top Profile Header */}
       <div className="bg-holy-surface px-6 pt-12 pb-8 rounded-b-[40px] border-b border-slate-800">
          <header className="flex justify-between items-start mb-6">
-            <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400">←</div>
+            <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400 cursor-pointer" onClick={() => navigate('COACH_DASH')}>←</div>
             <Badge variant="success">ACTIVO</Badge>
          </header>
          

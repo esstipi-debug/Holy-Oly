@@ -2,8 +2,10 @@ import React from 'react';
 import Card from '../components/Card';
 import Badge from '../components/Badge';
 import Button from '../components/Button';
+import { useNav } from '../context/NavigationContext';
 
 const KnowledgePills: React.FC = () => {
+  const { navigate } = useNav();
   return (
     <div className="flex flex-col h-full bg-[#07070F] relative overflow-hidden">
       {/* Immersive Background (Simulating a Story) */}
@@ -43,7 +45,7 @@ const KnowledgePills: React.FC = () => {
 
       <footer className="absolute bottom-10 left-8 right-8 z-30 space-y-4">
          <Button fullWidth variant="primary" size="lg">SIGUIENTE TIP →</Button>
-         <button className="w-full text-white/40 text-[10px] font-black uppercase tracking-widest">CERRAR PÍLDORA</button>
+         <button className="w-full text-white/40 text-[10px] font-black uppercase tracking-widest" onClick={() => navigate('HOME')}>CERRAR PÍLDORA</button>
       </footer>
     </div>
   );

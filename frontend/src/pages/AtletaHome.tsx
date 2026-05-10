@@ -1,11 +1,6 @@
 import React from 'react';
 import { useAthlete } from '../context/AthleteContext';
-
-type View = 'HOME' | 'WARMUP' | 'SESSION' | 'SUMMARY' | 'VICTORY' | 'PERFORMANCE' | 'INDEX' | 'SCHEDULE' | 'PULSE' | 'PILLS' | 'SOCIAL' | 'PROFILE' | string;
-
-interface Props {
-  onNavigate?: (view: View) => void;
-}
+import { useNav } from '../context/NavigationContext';
 
 const ringColor = (r: number) => r >= 70 ? '#22C55E' : r >= 50 ? '#F59E0B' : '#EF4444';
 const ringLabel = (r: number) => r >= 70 ? 'VERDE' : r >= 50 ? 'AMARILLO' : 'ROJO';
@@ -35,7 +30,8 @@ const S = {
   muted: { color: 'var(--text-secondary)' } as React.CSSProperties,
 };
 
-const AtletaHome: React.FC<Props> = ({ onNavigate }) => {
+const AtletaHome: React.FC = () => {
+  const { navigate } = useNav();
   const { athlete, stress, stressLoading } = useAthlete();
   if (!athlete) return null;
 
@@ -128,7 +124,7 @@ const AtletaHome: React.FC<Props> = ({ onNavigate }) => {
 
         {/* Right col */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
-          <div style={{ ...S.card, padding: 14, flex: 1, cursor: 'pointer' }} onClick={() => onNavigate?.('INDEX')}>
+          <div style={{ ...S.card, padding: 14, flex: 1, cursor: 'pointer' }} onClick={() => navigate('INDEX')}>
             <p style={S.label}>OLY Index</p>
             <p style={{ fontSize: 28, fontWeight: 900, color: '#F59E0B', letterSpacing: '-.03em', lineHeight: 1 }}>{olyIndex}</p>
             <p style={{ fontSize: 10, ...S.muted, marginTop: 2 }}>{athlete.weight_class} · {athlete.club.split(' ').slice(-1)[0]}</p>
@@ -205,7 +201,7 @@ const AtletaHome: React.FC<Props> = ({ onNavigate }) => {
           {/* CTA */}
           <div style={{ padding: 14 }}>
             <button
-              onClick={() => onNavigate?.('WARMUP')}
+              onClick={() => navigate('WARMUP')}
               style={{
                 width: '100%',
                 background: 'var(--cta-bg)',
@@ -243,7 +239,7 @@ const AtletaHome: React.FC<Props> = ({ onNavigate }) => {
       <div style={{ padding: '0 20px 14px' }}>
         <div
           style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 20, padding: 16, display: 'flex', alignItems: 'center', gap: 14, cursor: 'pointer' }}
-          onClick={() => onNavigate?.('PULSE')}
+          onClick={() => navigate('PULSE')}
         >
           <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(99,102,241,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>⚡</div>
           <div style={{ flex: 1 }}>

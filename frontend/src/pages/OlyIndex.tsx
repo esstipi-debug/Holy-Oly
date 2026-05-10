@@ -1,8 +1,10 @@
 import React from 'react';
 import Card from '../components/Card';
 import Badge from '../components/Badge';
+import { useNav } from '../context/NavigationContext';
 
 const OlyIndex: React.FC = () => {
+  const { navigate } = useNav();
   const leaderboards = [
     { rank: 1, name: 'Miguel Arias', level: 'Elite', score: 9.8, initials: 'MA', color: 'bg-purple-600' },
     { rank: 2, name: 'Lorena C.', level: 'Elite', score: 9.5, initials: 'LC', color: 'bg-pink-600' },
@@ -13,7 +15,7 @@ const OlyIndex: React.FC = () => {
     <div className="flex flex-col h-full bg-[#07070F] overflow-hidden">
       <div className="px-6 py-6 flex-1 overflow-y-auto">
         <header className="mb-8 flex items-center gap-3">
-           <div className="w-8 h-8 rounded-lg bg-holy-surface border border-slate-800 flex items-center justify-center text-slate-400">←</div>
+           <div className="w-8 h-8 rounded-lg bg-holy-surface border border-slate-800 flex items-center justify-center text-slate-400 cursor-pointer" onClick={() => navigate('HOME')}>←</div>
            <h1 className="text-white text-xl font-black">OLY Index</h1>
         </header>
 
