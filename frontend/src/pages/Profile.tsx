@@ -2,6 +2,7 @@ import { useState } from 'react';
 import ThemeGallery from '../components/ThemeGallery';
 import { useAthlete } from '../context/AthleteContext';
 import { useAuth } from '../context/AuthContext';
+import { useNav } from '../context/NavigationContext';
 
 const SETTINGS = [
   { id: 'biometrics', label: 'Datos Biométricos', icon: '⚖️' },
@@ -16,6 +17,7 @@ const Profile: React.FC = () => {
   const [showThemes, setShowThemes] = useState(false);
   const { athlete } = useAthlete();
   const { logout } = useAuth();
+  const { navigate } = useNav();
 
   const firstName = athlete?.name.split(' ')[0] ?? 'Atleta';
   const lastInitial = athlete?.name.split(' ')[1]?.[0] ?? '';
@@ -62,11 +64,12 @@ const Profile: React.FC = () => {
         {/* Stats grid */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
           {[
-            { icon: '🏆', label: 'Logros', sub: '12 Desbloqueados' },
-            { icon: '💳', label: 'Pagos',  sub: 'PRO Expira en 12d' },
+            { icon: '🏆', label: 'Logros', sub: '12 Desbloqueados', onClick: () => undefined },
+            { icon: '💳', label: 'Pagos',  sub: 'PRO Expira en 12d', onClick: () => navigate('PREMIUM') },
           ].map((item) => (
             <div
               key={item.label}
+              onClick={item.onClick}
               style={{
                 background: 'var(--surface)',
                 border: '1px solid var(--card-border)',
@@ -91,7 +94,11 @@ const Profile: React.FC = () => {
           {SETTINGS.map((item) => (
             <div
               key={item.id}
-              onClick={() => item.id === 'themes' ? setShowThemes(true) : undefined}
+              onClick={() => {
+                if (item.id === 'themes') setShowThemes(true);
+                else if (item.id === 'coach') navigate('COACH_DASH');
+                else if (item.id === 'biometrics') navigate('ONBOARDING');
+              }}
               style={{
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                 padding: '14px 16px',
@@ -112,7 +119,7 @@ const Profile: React.FC = () => {
 
         {/* Logout */}
         <button
-          onClick={logout}
+          onClick={() => { logout(); navigate('LOGIN'); }}
           style={{
             width: '100%',
             background: 'rgba(239,68,68,0.08)',

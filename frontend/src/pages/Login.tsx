@@ -3,6 +3,7 @@ import Card from '../components/Card';
 import Input from '../components/Input';
 import Button from '../components/Button';
 import { useAuth } from '../context/AuthContext';
+import { useNav } from '../context/NavigationContext';
 
 interface LoginProps {
   onSuccess: () => void;
@@ -10,6 +11,7 @@ interface LoginProps {
 
 const Login: React.FC<LoginProps> = ({ onSuccess }) => {
   const { login } = useAuth();
+  const { navigate } = useNav();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -68,6 +70,12 @@ const Login: React.FC<LoginProps> = ({ onSuccess }) => {
       </Card>
 
       <div className="mt-8 text-center space-y-4">
+        <button
+          onClick={() => navigate('ONBOARDING')}
+          className="text-slate-400 text-xs font-bold uppercase tracking-widest hover:text-white transition-colors"
+        >
+          Crear cuenta →
+        </button>
         <p className="text-slate-700 text-[10px] font-bold uppercase tracking-widest">v1.0.0-alpha</p>
       </div>
     </div>

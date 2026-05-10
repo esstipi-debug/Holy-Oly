@@ -1,5 +1,6 @@
 import React from 'react';
 import Button from '../components/Button';
+import { useNav } from '../context/NavigationContext';
 
 interface Feature {
   label: string;
@@ -26,6 +27,11 @@ const Cell: React.FC<{ value: boolean | string }> = ({ value }) => {
 };
 
 const PreMium: React.FC = () => {
+  const { navigate } = useNav();
+  const choose = (plan: 'free' | 'pro' | 'elite') => {
+    try { localStorage.setItem('subscription', plan); } catch { /* ignore */ }
+    navigate('HOME');
+  };
   return (
     <div className="flex flex-col min-h-full bg-[#07070F]">
       {/* Header */}
@@ -83,13 +89,13 @@ const PreMium: React.FC = () => {
 
       {/* Footer CTAs */}
       <footer className="px-6 pb-8 space-y-3">
-        <Button fullWidth variant="gold" size="lg" onClick={() => alert('Próximamente')}>
+        <Button fullWidth variant="gold" size="lg" onClick={() => choose('elite')}>
           Elegir Elite — $49/mes
         </Button>
-        <Button fullWidth variant="primary" size="lg" onClick={() => alert('Próximamente')}>
+        <Button fullWidth variant="primary" size="lg" onClick={() => choose('pro')}>
           Elegir Pro — $19/mes
         </Button>
-        <Button fullWidth variant="ghost" className="text-slate-500" onClick={() => alert('Continuar gratis')}>
+        <Button fullWidth variant="ghost" className="text-slate-500" onClick={() => choose('free')}>
           Continuar gratis
         </Button>
       </footer>

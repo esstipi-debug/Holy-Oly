@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 
 export type View =
   | 'LOGIN' | 'ONBOARDING' | 'PREMIUM'
@@ -9,14 +9,53 @@ export type View =
 interface NavContextType {
   currentView: View;
   navigate: (v: View) => void;
+  back: () => void;
+  canGoBack: boolean;
 }
 
 const NavContext = createContext<NavContextType | null>(null);
 
+const STORAGE_KEY = 'nav:currentView';
+
+function readInitial(): View {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY) as View | null;
+    return stored ?? 'HOME';
+  } catch {
+    return 'HOME';
+  }
+}
+
 export function NavigationProvider({ children }: { children: ReactNode }) {
-  const [currentView, setCurrentView] = useState<View>('HOME');
+  const [stack, setStack] = useState<View[]>([readInitial()]);
+  const currentView = stack[stack.length - 1];
+
+  useEffect(() => {
+    try { localStorage.setItem(STORAGE_KEY, currentView); } catch { /* ignore */ }
+    if (window.history.state?.view !== currentView) {
+      window.history.pushState({ view: currentView }, '', `#${currentView.toLowerCase()}`);
+    }
+  }, [currentView]);
+
+  useEffect(() => {
+    const onPop = (e: PopStateEvent) => {
+      const v = e.state?.view as View | undefined;
+      if (v) setStack((s) => (s[s.length - 1] === v ? s : [...s.slice(0, -1), v]));
+    };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+
+  const navigate = useCallback((v: View) => {
+    setStack((s) => (s[s.length - 1] === v ? s : [...s, v]));
+  }, []);
+
+  const back = useCallback(() => {
+    setStack((s) => (s.length > 1 ? s.slice(0, -1) : s));
+  }, []);
+
   return (
-    <NavContext.Provider value={{ currentView, navigate: setCurrentView }}>
+    <NavContext.Provider value={{ currentView, navigate, back, canGoBack: stack.length > 1 }}>
       {children}
     </NavContext.Provider>
   );

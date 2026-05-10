@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import Input from '../components/Input';
+import { useNav } from '../context/NavigationContext';
 
 const Onboarding: React.FC = () => {
   const [step, setStep] = useState(1);
+  const { navigate } = useNav();
 
   const renderStep = () => {
     switch(step) {
@@ -84,7 +86,7 @@ const Onboarding: React.FC = () => {
             CONTINUAR →
           </Button>
         ) : (
-          <Button fullWidth variant="gold" size="lg">ENTRAR AL DASHBOARD</Button>
+          <Button fullWidth variant="gold" size="lg" onClick={() => navigate('PREMIUM')}>ENTRAR AL DASHBOARD</Button>
         )}
         {step > 1 && step < 3 && (
           <button 
