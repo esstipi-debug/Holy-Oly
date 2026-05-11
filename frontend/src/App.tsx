@@ -28,13 +28,20 @@ import VoltaPreWod from './pages/VoltaPreWod';
 import VoltaCoachDash from './pages/VoltaCoachDash';
 import type { View } from './context/NavigationContext';
 
-const NAV_MAP: Record<string, NavTab> = {
+const NAV_MAP_HO: Record<string, NavTab> = {
   HOME: 'home',
   WARMUP: 'train', SESSION: 'train', SUMMARY: 'train', VICTORY: 'train',
   PERFORMANCE: 'stats', INDEX: 'stats', SCHEDULE: 'stats', PULSE: 'stats', PILLS: 'stats', SOCIAL: 'stats',
   PROFILE: 'profile', ONBOARDING: 'profile', PREMIUM: 'profile',
   COACH_DASH: 'home', ATHLETE_DETAIL: 'home', ASSIGN_MACRO: 'home',
-  VOLTA_HOME: 'home', VOLTA_PREWOD: 'wod', VOLTA_COACH: 'home',
+};
+
+const NAV_MAP_VOLTA: Record<string, NavTab> = {
+  VOLTA_HOME: 'home', VOLTA_COACH: 'home',
+  VOLTA_PREWOD: 'wod', WARMUP: 'wod', SESSION: 'wod', SUMMARY: 'wod', VICTORY: 'wod',
+  PERFORMANCE: 'stats', INDEX: 'stats', SCHEDULE: 'stats', PULSE: 'stats', PILLS: 'stats',
+  SOCIAL: 'logros',
+  PROFILE: 'profile',
 };
 
 // Home-set: vistas que NO deben mostrar back
@@ -171,6 +178,8 @@ function AppInner() {
     if (product === 'volta') {
       if (tab === 'home') navigate(role === 'coach' ? 'VOLTA_COACH' : 'VOLTA_HOME');
       else if (tab === 'wod') navigate('VOLTA_PREWOD');
+      else if (tab === 'stats') navigate('PERFORMANCE');
+      else if (tab === 'logros') navigate('SOCIAL');
       else if (tab === 'profile') navigate('PROFILE');
       return;
     }
@@ -185,7 +194,7 @@ function AppInner() {
   return (
     <div className="relative">
       <PhoneLayout
-        activeNav={NAV_MAP[currentView] ?? 'home'}
+        activeNav={(product === 'volta' ? NAV_MAP_VOLTA : NAV_MAP_HO)[currentView] ?? 'home'}
         onNavChange={handleNavChange}
         product={product}
         showBack={showBack}
