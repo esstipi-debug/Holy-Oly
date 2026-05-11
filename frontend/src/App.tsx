@@ -26,6 +26,7 @@ import SocialCard from './pages/SocialCard';
 import VoltaDashboard from './pages/VoltaDashboard';
 import VoltaPreWod from './pages/VoltaPreWod';
 import VoltaCoachDash from './pages/VoltaCoachDash';
+import VoltaCoachWod from './pages/VoltaCoachWod';
 import type { View } from './context/NavigationContext';
 
 const NAV_MAP_HO: Record<string, NavTab> = {
@@ -38,7 +39,8 @@ const NAV_MAP_HO: Record<string, NavTab> = {
 
 const NAV_MAP_VOLTA: Record<string, NavTab> = {
   VOLTA_HOME: 'home', VOLTA_COACH: 'home',
-  VOLTA_PREWOD: 'wod', WARMUP: 'wod', SESSION: 'wod', SUMMARY: 'wod', VICTORY: 'wod',
+  VOLTA_PREWOD: 'wod', VOLTA_COACH_WOD: 'wod', WARMUP: 'wod', SESSION: 'wod', SUMMARY: 'wod', VICTORY: 'wod',
+  VOLTA_COACH_MACRO: 'stats', VOLTA_COACH_INVENTORY: 'stats',
   PERFORMANCE: 'stats', INDEX: 'stats', SCHEDULE: 'stats', PULSE: 'stats', PILLS: 'stats',
   SOCIAL: 'logros',
   PROFILE: 'profile',
@@ -48,11 +50,12 @@ const NAV_MAP_VOLTA: Record<string, NavTab> = {
 const HOME_VIEWS = new Set<View>(['HOME', 'COACH_DASH', 'VOLTA_HOME', 'VOLTA_COACH', 'LOGIN']);
 
 const navGroups = [
-  { title: 'Core',      views: ['LOGIN', 'ONBOARDING', 'PREMIUM'] },
-  { title: 'HO Atleta', views: ['HOME', 'SUMMARY', 'WARMUP', 'SESSION', 'VICTORY'] },
-  { title: 'HO Stats',  views: ['PERFORMANCE', 'INDEX', 'SCHEDULE', 'PULSE', 'PILLS', 'SOCIAL', 'PROFILE'] },
-  { title: 'HO Coach',  views: ['COACH_DASH', 'ATHLETE_DETAIL', 'ASSIGN_MACRO'] },
-  { title: 'Volta',     views: ['VOLTA_HOME', 'VOLTA_PREWOD', 'VOLTA_COACH'] },
+  { title: 'Core',         views: ['LOGIN', 'ONBOARDING', 'PREMIUM'] },
+  { title: 'HO Atleta',    views: ['HOME', 'SUMMARY', 'WARMUP', 'SESSION', 'VICTORY'] },
+  { title: 'HO Stats',     views: ['PERFORMANCE', 'INDEX', 'SCHEDULE', 'PULSE', 'PILLS', 'SOCIAL', 'PROFILE'] },
+  { title: 'HO Coach',     views: ['COACH_DASH', 'ATHLETE_DETAIL', 'ASSIGN_MACRO'] },
+  { title: 'Volta Atleta', views: ['VOLTA_HOME', 'VOLTA_PREWOD'] },
+  { title: 'Volta Coach',  views: ['VOLTA_COACH', 'VOLTA_COACH_WOD', 'VOLTA_COACH_MACRO', 'VOLTA_COACH_INVENTORY'] },
 ];
 
 function ProductRoleSwitcher() {
@@ -138,11 +141,16 @@ function AppInner() {
     // VOLTA
     if (product === 'volta') {
       switch (currentView) {
-        case 'VOLTA_PREWOD': return <VoltaPreWod />;
-        case 'VOLTA_COACH':  return <VoltaCoachDash />;
-        case 'ATHLETE_DETAIL': return <AthleteDeepDive />;
-        case 'ASSIGN_MACRO': return <AssignMacrocycle />;
-        case 'PROFILE':      return <Profile />;
+        case 'VOLTA_COACH':           return <VoltaCoachDash />;
+        case 'VOLTA_COACH_WOD':       return <VoltaCoachWod />;
+        case 'VOLTA_COACH_MACRO':     return <AssignMacrocycle />;
+        case 'VOLTA_COACH_INVENTORY': return <VoltaCoachWod />; // TODO: dedicated inventory page
+        case 'VOLTA_PREWOD':          return <VoltaPreWod />;
+        case 'ATHLETE_DETAIL':        return <AthleteDeepDive />;
+        case 'ASSIGN_MACRO':          return <AssignMacrocycle />;
+        case 'PROFILE':               return <Profile />;
+        case 'PERFORMANCE':           return <PerformanceDeepDive />;
+        case 'SOCIAL':                return <SocialCard />;
         case 'VOLTA_HOME':
         case 'HOME':
         default:
@@ -177,8 +185,8 @@ function AppInner() {
   const handleNavChange = (tab: NavTab) => {
     if (product === 'volta') {
       if (tab === 'home') navigate(role === 'coach' ? 'VOLTA_COACH' : 'VOLTA_HOME');
-      else if (tab === 'wod') navigate('VOLTA_PREWOD');
-      else if (tab === 'stats') navigate('PERFORMANCE');
+      else if (tab === 'wod') navigate(role === 'coach' ? 'VOLTA_COACH_WOD' : 'VOLTA_PREWOD');
+      else if (tab === 'stats') navigate(role === 'coach' ? 'VOLTA_COACH_MACRO' : 'PERFORMANCE');
       else if (tab === 'logros') navigate('SOCIAL');
       else if (tab === 'profile') navigate('PROFILE');
       return;
