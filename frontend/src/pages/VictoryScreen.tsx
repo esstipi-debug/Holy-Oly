@@ -7,30 +7,30 @@ import { useNav } from '../context/NavigationContext';
 const VictoryScreen: React.FC = () => {
   const { navigate } = useNav();
   return (
-    <div className="flex flex-col h-full bg-holy-bg overflow-hidden relative">
+    <div className="flex flex-col h-full bg-holy-bg relative" style={{ paddingBottom: 20 }}>
       {/* Background Glows */}
-      <div className="absolute top-[-10%] left-[-10%] w-80 h-80 bg-holy-primary/10 rounded-full blur-[100px]" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-80 h-80 bg-holy-gold/10 rounded-full blur-[100px]" />
+      <div className="absolute top-[-10%] left-[-10%] w-80 h-80 bg-holy-primary/10 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-80 h-80 bg-holy-gold/10 rounded-full blur-[100px] pointer-events-none" />
 
-      <div className="px-6 py-12 flex-1 flex flex-col items-center justify-center text-center relative z-10">
+      <div className="px-6 pt-10 pb-6 flex flex-col items-center text-center relative z-10">
         {/* Main Trophy / Icon */}
-        <div className="relative mb-10 scale-125">
+        <div className="relative mb-6">
           <div className="absolute inset-0 bg-holy-gold/20 blur-3xl rounded-full" />
-          <div className="w-32 h-32 rounded-3xl bg-gradient-to-br from-holy-gold to-amber-700 flex items-center justify-center text-6xl shadow-2xl shadow-holy-gold/40 relative border border-white/20">
+          <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-holy-gold to-amber-700 flex items-center justify-center text-5xl shadow-2xl shadow-holy-gold/40 relative border border-white/20">
             🏆
           </div>
-          <div className="absolute -bottom-4 -right-4 bg-holy-primary text-white text-xs font-black px-3 py-1 rounded-full border-2 border-holy-bg shadow-xl">
+          <div className="absolute -bottom-3 -right-3 bg-holy-primary text-white text-[10px] font-black px-2 py-0.5 rounded-full border-2 border-holy-bg shadow-xl">
             PR!
           </div>
         </div>
 
-        <header className="space-y-2 mb-10">
-          <h1 className="text-white text-4xl font-black italic tracking-tighter uppercase leading-none">SESIÓN COMPLETADA</h1>
-          <p className="text-holy-gold text-sm font-bold tracking-[0.2em]">RECOMPENSA DE ÉLITE RECLAMADA</p>
+        <header className="space-y-1 mb-7">
+          <h1 className="text-white text-3xl font-black italic tracking-tighter uppercase leading-none">SESIÓN COMPLETADA</h1>
+          <p className="text-holy-gold text-xs font-bold tracking-[0.2em]">RECOMPENSA DE ÉLITE RECLAMADA</p>
         </header>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 gap-4 w-full mb-10">
+        <div className="grid grid-cols-2 gap-3 w-full mb-6">
           <Card variant="solid" className="bg-white/5 border-white/5">
             <p className="text-slate-500 text-[9px] font-black uppercase mb-1">XP GANADA</p>
             <p className="text-white text-2xl font-black">+450 XP</p>

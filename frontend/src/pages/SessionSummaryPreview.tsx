@@ -21,7 +21,7 @@ const SessionSummaryPreview: React.FC = () => {
       <div className="px-6 py-6 flex-1 overflow-y-auto">
         {/* Header */}
         <header className="mb-8">
-          <div className="w-8 h-8 rounded-lg bg-holy-surface border border-slate-800 flex items-center justify-center mb-4 cursor-pointer" onClick={() => navigate('HOME')}><span className="text-slate-400 text-xs">←</span></div>
+          
           <Badge variant="gold" dot className="mb-3">Sesión Programada</Badge>
           <h1 className="text-white text-3xl font-black italic tracking-tighter leading-none">{workout.title}</h1>
           <div className="flex gap-2 mt-4">

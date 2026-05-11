@@ -6,6 +6,8 @@ import WiseAssistant from '../components/WiseAssistant';
 const ringColor = (r: number) => r >= 70 ? '#22C55E' : r >= 50 ? '#F59E0B' : '#EF4444';
 const ringLabel = (r: number) => r >= 70 ? 'Listo para carga alta' : r >= 50 ? 'Carga moderada' : 'Tu cuerpo pide descanso';
 const ringTag = (r: number) => r >= 70 ? 'ÓPTIMO' : r >= 50 ? 'MODERADO' : 'BAJO';
+const EMPTY_LABEL = 'Sin datos · conectá un wearable';
+const EMPTY_TAG = 'SIN DATOS';
 
 const RADIUS = 86;
 const STROKE = 10;
@@ -62,8 +64,8 @@ const AtletaHome: React.FC = () => {
 
   const readiness = stress ? Math.round(stress.readiness) : null;
   const rc = readiness !== null ? ringColor(readiness) : 'var(--text-secondary)';
-  const rl = readiness !== null ? ringLabel(readiness) : 'Calculando…';
-  const rtag = readiness !== null ? ringTag(readiness) : '—';
+  const rl = stressLoading ? 'Calculando…' : (readiness !== null ? ringLabel(readiness) : EMPTY_LABEL);
+  const rtag = readiness !== null ? ringTag(readiness) : (stressLoading ? '—' : EMPTY_TAG);
 
   const completedSessions = athlete.sessions_last_7.filter((s) => s.completed);
   const sesiones = completedSessions.length;

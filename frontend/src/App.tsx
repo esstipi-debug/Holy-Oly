@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AthleteProvider } from './context/AthleteContext';
@@ -147,9 +148,13 @@ function AppInner() {
   const { isAuthenticated } = useAuth();
 
   // Gate: forzar LOGIN si no autenticado y la vista actual no es pública
-  if (!isAuthenticated && !PUBLIC_VIEWS.has(currentView)) {
-    if (currentView !== 'LOGIN') navigate('LOGIN');
-  }
+  useEffect(() => {
+    if (!isAuthenticated && !PUBLIC_VIEWS.has(currentView) && currentView !== 'LOGIN') {
+      navigate('LOGIN');
+    }
+  }, [isAuthenticated, currentView, navigate]);
+
+  const isPublic = PUBLIC_VIEWS.has(currentView);
 
   const renderView = () => {
     // PUBLIC views (sin auth)
@@ -229,13 +234,15 @@ function AppInner() {
         activeNav={(product === 'volta' ? NAV_MAP_VOLTA : NAV_MAP_HO)[currentView] ?? 'home'}
         onNavChange={handleNavChange}
         product={product}
-        showBack={showBack}
+        showBack={showBack && !isPublic}
+        hideNav={isPublic}
       >
-        <ProductRoleSwitcher />
+        {!isPublic && <ProductRoleSwitcher />}
         {renderView()}
       </PhoneLayout>
 
-      {/* Dev sidebar */}
+      {/* Dev sidebar — solo cuando autenticado */}
+      {!isPublic && (
       <div
         className="hidden 2xl:flex fixed right-10 top-10 bottom-10 w-56 flex-col gap-4 overflow-y-auto z-50 p-5 rounded-2xl"
         style={{ background: 'var(--surface)', border: '1px solid var(--card-border)' }}
@@ -266,7 +273,10 @@ function AppInner() {
         ))}
       </div>
 
-      {/* Mobile switcher */}
+      )}
+
+      {/* Mobile switcher — solo cuando autenticado */}
+      {!isPublic && (
       <div className="2xl:hidden fixed bottom-2 left-2 right-2 flex gap-1 z-50 overflow-x-auto p-2 rounded-xl backdrop-blur-md"
         style={{ background: 'rgba(0,0,0,0.85)', border: '1px solid var(--card-border)' }}>
         {navGroups.flatMap(g => g.views).map(v => (
@@ -283,6 +293,7 @@ function AppInner() {
           </button>
         ))}
       </div>
+      )}
     </div>
   );
 }

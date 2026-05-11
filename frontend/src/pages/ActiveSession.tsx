@@ -18,7 +18,7 @@ interface ExerciseDef {
 }
 
 const ActiveSession: React.FC = () => {
-  const { navigate, back } = useNav();
+  const { navigate } = useNav();
   const { athlete } = useAthlete();
 
   // Build exercises from athlete maxes
@@ -100,14 +100,6 @@ const ActiveSession: React.FC = () => {
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <button
-            onClick={back}
-            style={{
-              width: 32, height: 32, borderRadius: 10,
-              background: 'var(--surface)', border: '1px solid var(--card-border)',
-              color: 'var(--text-secondary)', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit',
-            }}
-          >←</button>
           <div>
             <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{current.name}</p>
             <p style={{ fontSize: 10, color: 'var(--primary)', fontWeight: 800, letterSpacing: '.08em' }}>
@@ -131,9 +123,10 @@ const ActiveSession: React.FC = () => {
             <div
               key={i}
               style={{
-                flex: 1, height: 6, borderRadius: 3,
-                background: i < setsDone ? 'var(--primary)' : 'var(--card-border)',
-                transition: 'background .3s ease',
+                flex: 1, height: 8, borderRadius: 4,
+                background: i < setsDone ? 'var(--primary)' : 'rgba(255,255,255,0.15)',
+                boxShadow: i < setsDone ? '0 0 8px rgba(34,197,94,0.4)' : 'none',
+                transition: 'background .3s ease, box-shadow .3s ease',
               }}
             />
           ))}

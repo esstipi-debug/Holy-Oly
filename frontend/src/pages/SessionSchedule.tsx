@@ -20,7 +20,7 @@ const SessionSchedule: React.FC = () => {
     <div className="flex flex-col h-full bg-holy-bg">
       <div className="px-6 py-8 flex-1 overflow-y-auto">
         <header className="mb-8 flex items-center gap-3">
-           <div className="w-8 h-8 rounded-lg bg-holy-surface border border-slate-800 flex items-center justify-center text-slate-400 cursor-pointer" onClick={() => navigate('HOME')}>←</div>
+           
            <div>
               <h1 className="text-white text-2xl font-black">Planificación</h1>
               <p className="text-holy-primary text-[10px] font-black uppercase mt-1">Semana 4 · Macrociclo Búlgaro</p>
@@ -45,7 +45,7 @@ const SessionSchedule: React.FC = () => {
         </div>
 
         {/* Detailed List */}
-        <div className="space-y-4 mb-20">
+        <div className="space-y-4 mb-6">
            <h3 className="text-slate-500 text-[10px] font-black uppercase tracking-widest pl-1">Próximas Sesiones</h3>
            {days.filter(d => d.status === 'PENDING' || d.status === 'ACTIVE').map((d, i) => (
              <Card key={i} variant={d.status === 'ACTIVE' ? 'glass' : 'solid'} className={`${d.status === 'ACTIVE' ? 'border-holy-primary/30' : ''} cursor-pointer`} onClick={() => navigate('WARMUP')}>
@@ -66,15 +66,15 @@ const SessionSchedule: React.FC = () => {
              </Card>
            ))}
         </div>
-      </div>
 
-      <footer className="absolute bottom-[88px] left-6 right-6 z-30">
-         <Button
-           fullWidth variant="secondary" size="lg"
-           className="border-holy-primary/20 text-holy-primary font-black italic"
-           onClick={() => navigate('PROFILE')}
-         >SOLICITAR REPROGRAMACIÓN</Button>
-      </footer>
+        <div className="px-1 pb-6">
+           <Button
+             fullWidth variant="secondary" size="lg"
+             className="border-holy-primary/20 text-holy-primary font-black italic"
+             onClick={() => navigate('PROFILE')}
+           >SOLICITAR REPROGRAMACIÓN</Button>
+        </div>
+      </div>
     </div>
   );
 };

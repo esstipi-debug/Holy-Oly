@@ -41,21 +41,13 @@ const Emoji: React.FC<{ children: React.ReactNode; active?: boolean; tint?: 'red
 };
 
 const VoltaPreWod: React.FC = () => {
-  const { navigate, back } = useNav();
+  const { navigate } = useNav();
 
   return (
     <div style={{ background: C.bg, minHeight: '100%', paddingBottom: 90, color: C.text }}>
 
       {/* HEADER */}
-      <div style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 14, borderBottom: `1px solid ${C.line}` }}>
-        <button
-          onClick={back}
-          style={{
-            width: 32, height: 32, borderRadius: 10,
-            background: C.surface2, border: `1px solid ${C.line}`,
-            color: C.text, fontSize: 16, cursor: 'pointer', fontFamily: 'inherit',
-          }}
-        >←</button>
+      <div style={{ padding: '48px 16px 12px', display: 'flex', alignItems: 'center', gap: 14, borderBottom: `1px solid ${C.line}` }}>
         <div>
           <div style={{ fontSize: 16, fontWeight: 900, color: C.text }}>Check pre-WOD</div>
           <div style={{ fontSize: 11, color: C.muted }}>AMRAP 20min · Hoy</div>

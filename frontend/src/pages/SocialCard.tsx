@@ -4,7 +4,7 @@ import { useNav } from '../context/NavigationContext';
 import { useAthlete } from '../context/AthleteContext';
 
 const SocialCard: React.FC = () => {
-  const { navigate } = useNav();
+  useNav();
   const { athlete } = useAthlete();
   const [toast, setToast] = useState<string | null>(null);
 
@@ -35,7 +35,7 @@ const SocialCard: React.FC = () => {
   };
   return (
     <div className="flex flex-col h-full bg-holy-bg px-8 py-10 items-center justify-center">
-      <div className="w-full flex mb-4"><div className="w-8 h-8 rounded-lg bg-holy-surface border border-slate-800 flex items-center justify-center text-slate-400 cursor-pointer" onClick={() => navigate('HOME')}>←</div></div>
+      
       {/* Shareable Card Area */}
       <div className="w-full aspect-[4/5] bg-gradient-to-br from-holy-bg to-holy-surface rounded-[40px] border border-white/10 p-8 flex flex-col items-center justify-between shadow-2xl relative overflow-hidden group">
          {/* Decorative Elements */}

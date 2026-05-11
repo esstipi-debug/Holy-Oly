@@ -13,7 +13,7 @@ const levelOf = (score: number) =>
 const COLORS = ['bg-purple-600', 'bg-pink-600', 'bg-emerald-600', 'bg-amber-600', 'bg-cyan-600'];
 
 const OlyIndex: React.FC = () => {
-  const { navigate } = useNav();
+  useNav();
   const { athlete, allAthletes } = useAthlete();
 
   const myScore = athlete ? olyScore(athlete) : 7.4;
@@ -48,7 +48,7 @@ const OlyIndex: React.FC = () => {
     <div className="flex flex-col h-full bg-holy-bg overflow-hidden">
       <div className="px-6 py-6 flex-1 overflow-y-auto">
         <header className="mb-8 flex items-center gap-3">
-           <div className="w-8 h-8 rounded-lg bg-holy-surface border border-slate-800 flex items-center justify-center text-slate-400 cursor-pointer" onClick={() => navigate('HOME')}>←</div>
+           
            <h1 className="text-white text-xl font-black">OLY Index</h1>
         </header>
 
@@ -74,11 +74,19 @@ const OlyIndex: React.FC = () => {
         <div className="space-y-6 mb-10">
            <h3 className="text-slate-500 text-[10px] font-black uppercase tracking-widest pl-1">Análisis de Rendimiento</h3>
            
-           {[
-             { label: '🏋️ Fuerza Absoluta', score: 8.2, percent: '82%' },
-             { label: '⚡ Eficiencia (S/C)', score: 6.9, percent: '69%' },
-             { label: '📉 Consistencia', score: 9.1, percent: '91%' },
-           ].map(item => (
+           {(() => {
+             const m = athlete?.maxes;
+             const bw = m?.body_weight ?? 80;
+             const strength = m ? Math.min(10, (m.clean + m.jerk - m.clean + m.snatch) / bw / 2 * 10) : 8.2;
+             const eff = m ? Math.min(10, (m.snatch / m.clean) * 12) : 6.9;
+             const sess = athlete?.sessions_last_7 ?? [];
+             const cons = sess.length > 0 ? +(sess.filter(s => s.completed).length / sess.length * 10).toFixed(1) : 9.1;
+             return [
+               { label: '🏋️ Fuerza Absoluta', score: +strength.toFixed(1), percent: `${Math.round(strength * 10)}%` },
+               { label: '⚡ Eficiencia (S/C)', score: +eff.toFixed(1),     percent: `${Math.round(eff * 10)}%` },
+               { label: '📉 Consistencia',     score: cons,                  percent: `${Math.round(cons * 10)}%` },
+             ];
+           })().map(item => (
              <div key={item.label} className="space-y-2">
                 <div className="flex justify-between items-end">
                    <span className="text-slate-200 text-xs font-bold">{item.label}</span>

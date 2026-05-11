@@ -56,7 +56,6 @@ const WarmupGenerator: React.FC = () => {
         {/* Header */}
         <header className="flex justify-between items-center mb-8">
           <div className="flex items-center gap-3">
-             <div onClick={() => navigate('HOME')} className="w-8 h-8 rounded-lg bg-holy-surface border border-slate-800 flex items-center justify-center text-slate-400 cursor-pointer">←</div>
              <div>
                <h2 className="text-white text-lg font-black">Calentamiento</h2>
                <p className="text-holy-primary text-[10px] font-bold">READYNESS_AWARE</p>

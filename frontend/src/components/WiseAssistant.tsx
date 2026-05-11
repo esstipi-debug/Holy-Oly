@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useRole } from '../context/RoleContext';
+import { useProduct } from '../context/ProductContext';
 
 const C = {
   cyan: '#00E5FF',
@@ -40,36 +42,65 @@ function wiseReply(q: string, ctx: string): string {
   return `Tengo el contexto del box y los 6 atletas activos. Puedo ayudarte con: estado de un atleta, sugerir WOD del día, revisar macrociclo, detectar riesgos, comparar atletas o resumir tendencias. ¿Por dónde arrancamos?`;
 }
 
-const SUGGESTIONS = [
+const SUGGESTIONS_COACH = [
   '¿Cómo está Marco?',
   'Sugerí el WOD de hoy',
   'Atletas en riesgo',
   'Top performers semana',
 ];
 
+const SUGGESTIONS_ATHLETE_HO = [
+  '¿Estoy listo para entrenar?',
+  '¿Cómo voy con la arrancada?',
+  'Tip de técnica',
+  'Plan de la semana',
+];
+
+const SUGGESTIONS_ATHLETE_VOLTA = [
+  '¿Cómo está mi HRV?',
+  'Sugerí escalado para hoy',
+  'Mi progreso del mes',
+  'Próximo nivel · pull-ups',
+];
+
+function wiseGreeting(role: 'atleta' | 'coach', product: 'holy-oly' | 'volta'): string {
+  if (role === 'coach') {
+    return `Hey coach. Soy WISE, tu asistente del box. Tengo el contexto de los 6 atletas activos, el WOD de hoy y el macrociclo en curso. ¿En qué te ayudo?`;
+  }
+  if (product === 'volta') {
+    return `Hola. Soy WISE, tu asistente. Te ayudo a leer tu HRV, escalar el WOD del día y trackear progresión. ¿Por dónde arrancamos?`;
+  }
+  return `Hola. Soy WISE, tu asistente. Conozco tu macrociclo, tus máximos y tu readiness. Preguntame si te conviene cargar hoy o necesitás tip técnico.`;
+}
+
 interface Props {
   context?: string; // ej. "Volta Coach · WOD Builder"
 }
 
 const WiseAssistant: React.FC<Props> = ({ context = 'Volta Coach' }) => {
+  const { role } = useRole();
+  const { product } = useProduct();
   const [open, setOpen] = useState(false);
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [input, setInput] = useState('');
   const [typing, setTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const suggestions = role === 'coach'
+    ? SUGGESTIONS_COACH
+    : (product === 'volta' ? SUGGESTIONS_ATHLETE_VOLTA : SUGGESTIONS_ATHLETE_HO);
+
   useEffect(() => {
     if (open && msgs.length === 0) {
-      // Greeting al abrir
       setTimeout(() => {
         setMsgs([{
           role: 'wise',
-          content: `Hey coach. Soy WISE, tu asistente del box. Tengo el contexto de los 6 atletas activos, el WOD de hoy y el macrociclo en curso. ¿En qué te ayudo?`,
+          content: wiseGreeting(role, product),
           ts: Date.now(),
         }]);
       }, 200);
     }
-  }, [open, msgs.length]);
+  }, [open, msgs.length, role, product]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
@@ -222,7 +253,7 @@ const WiseAssistant: React.FC<Props> = ({ context = 'Volta Coach' }) => {
                 display: 'flex', gap: 6, padding: '0 16px 10px',
                 overflowX: 'auto',
               }}>
-                {SUGGESTIONS.map(s => (
+                {suggestions.map(s => (
                   <button
                     key={s}
                     onClick={() => send(s)}

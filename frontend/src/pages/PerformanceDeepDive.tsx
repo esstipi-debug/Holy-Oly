@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Card from '../components/Card';
 import Badge from '../components/Badge';
 import { useNav } from '../context/NavigationContext';
+import { useAthlete } from '../context/AthleteContext';
 
 type Range = 'W' | 'M' | 'Y';
 const RANGE_DATA: Record<Range, { volume: string; trend: string; bars: number[]; labels: string[] }> = {
@@ -11,15 +12,19 @@ const RANGE_DATA: Record<Range, { volume: string; trend: string; bars: number[];
 };
 
 const PerformanceDeepDive: React.FC = () => {
-  const { navigate } = useNav();
+  useNav();
+  const { athlete } = useAthlete();
   const [range, setRange] = useState<Range>('W');
   const data = RANGE_DATA[range];
+  const snatchBest = athlete?.maxes.snatch ?? 112;
+  const cjBest = athlete ? (athlete.maxes.clean + athlete.maxes.jerk - athlete.maxes.clean) : 145;
+  const sRatio = athlete ? Math.round((athlete.maxes.snatch / athlete.maxes.clean) * 100) : 78;
   return (
     <div className="flex flex-col h-full bg-holy-bg">
       <div className="px-6 py-8 flex-1 overflow-y-auto">
         <header className="mb-8 flex justify-between items-center">
            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-holy-surface border border-slate-800 flex items-center justify-center text-slate-400 cursor-pointer" onClick={() => navigate('HOME')}>←</div>
+              
               <div>
                  <h1 className="text-white text-2xl font-black italic tracking-tighter">PERFORMANCE</h1>
                  <p className="text-holy-primary text-[10px] font-black uppercase mt-1">ANÁLISIS DE DATOS HISTÓRICOS</p>
@@ -75,16 +80,16 @@ const PerformanceDeepDive: React.FC = () => {
                     <span className="text-lg">🏋️</span>
                     <Badge variant="info">SNATCH</Badge>
                  </div>
-                 <p className="text-white text-xs font-bold">Best: 112 kg</p>
-                 <p className="text-slate-600 text-[10px]">Ratio S/C: 78%</p>
+                 <p className="text-white text-xs font-bold">Best: {snatchBest} kg</p>
+                 <p className="text-slate-600 text-[10px]">Ratio S/C: {sRatio}%</p>
               </Card>
               <Card variant="solid" className="p-4 bg-holy-surface border-slate-800">
                  <div className="flex justify-between items-center mb-4">
                     <span className="text-lg">💥</span>
                     <Badge variant="info">C&J</Badge>
                  </div>
-                 <p className="text-white text-xs font-bold">Best: 145 kg</p>
-                 <p className="text-slate-600 text-[10px]">Rep. Max: 130x3</p>
+                 <p className="text-white text-xs font-bold">Best: {cjBest} kg</p>
+                 <p className="text-slate-600 text-[10px]">Rep. Max: {Math.round(cjBest * 0.9)}x3</p>
               </Card>
            </div>
         </div>

@@ -28,7 +28,10 @@ export function AthleteProvider({ children }: { children: ReactNode }) {
   const [stress, setStress] = useState<StressResult | null>(null);
   const [stressLoading, setStressLoading] = useState(false);
 
-  const athlete = user ? (athleteByEmail[user.email] ?? null) : null;
+  // Match real user; fallback al primer atleta seeded para usuarios demo / nuevos
+  const athlete = user
+    ? (athleteByEmail[user.email] ?? athletes[0] ?? null)
+    : null;
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selectedAthlete = selectedId ? (athletes.find(a => a.id === selectedId) ?? null) : null;
   const selectAthlete = (id: string) => setSelectedId(id);

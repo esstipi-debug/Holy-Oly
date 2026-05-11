@@ -9,6 +9,7 @@ interface PhoneLayoutProps {
   onNavChange?: (tab: NavTab) => void;
   product?: 'holy-oly' | 'volta';
   showBack?: boolean;
+  hideNav?: boolean;
 }
 
 const NAV_ITEMS = [
@@ -80,6 +81,7 @@ const PhoneLayout: React.FC<PhoneLayoutProps> = ({
   onNavChange,
   product = 'holy-oly',
   showBack = false,
+  hideNav = false,
 }) => {
   const { back, canGoBack } = useNav();
   const now = new Date();
@@ -156,11 +158,12 @@ const PhoneLayout: React.FC<PhoneLayoutProps> = ({
         )}
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: 'none', paddingBottom: 76 }}>
+        <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: 'none', paddingBottom: hideNav ? 0 : 76 }}>
           {children}
         </div>
 
         {/* Bottom Nav */}
+        {!hideNav && (
         <div
           className="absolute bottom-0 left-0 right-0 flex items-center justify-around"
           style={{
@@ -211,6 +214,7 @@ const PhoneLayout: React.FC<PhoneLayoutProps> = ({
             })
           )}
         </div>
+        )}
       </div>
     </div>
   );
