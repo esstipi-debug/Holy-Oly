@@ -4,7 +4,8 @@ export type View =
   | 'LOGIN' | 'ONBOARDING' | 'PREMIUM'
   | 'HOME' | 'SUMMARY' | 'WARMUP' | 'SESSION' | 'VICTORY'
   | 'PERFORMANCE' | 'INDEX' | 'SCHEDULE' | 'PULSE' | 'PILLS' | 'SOCIAL' | 'PROFILE'
-  | 'COACH_DASH' | 'ATHLETE_DETAIL' | 'ASSIGN_MACRO';
+  | 'COACH_DASH' | 'ATHLETE_DETAIL' | 'ASSIGN_MACRO'
+  | 'VOLTA_HOME' | 'VOLTA_PREWOD';
 
 interface NavContextType {
   currentView: View;
@@ -22,6 +23,7 @@ const VALID_VIEWS: View[] = [
   'HOME','SUMMARY','WARMUP','SESSION','VICTORY',
   'PERFORMANCE','INDEX','SCHEDULE','PULSE','PILLS','SOCIAL','PROFILE',
   'COACH_DASH','ATHLETE_DETAIL','ASSIGN_MACRO',
+  'VOLTA_HOME','VOLTA_PREWOD',
 ];
 
 function readInitial(): View {

@@ -2,7 +2,8 @@ import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import { AthleteProvider } from './context/AthleteContext';
 import { NavigationProvider, useNav } from './context/NavigationContext';
-import PhoneLayout from './layouts/PhoneLayout';
+import { ProductProvider, useProduct } from './context/ProductContext';
+import PhoneLayout, { type NavTab } from './layouts/PhoneLayout';
 import AtletaHome from './pages/AtletaHome';
 import Login from './pages/Login';
 import ActiveSession from './pages/ActiveSession';
@@ -21,26 +22,75 @@ import PerformanceDeepDive from './pages/PerformanceDeepDive';
 import SessionSchedule from './pages/SessionSchedule';
 import KnowledgePills from './pages/KnowledgePills';
 import SocialCard from './pages/SocialCard';
+import VoltaDashboard from './pages/VoltaDashboard';
+import VoltaPreWod from './pages/VoltaPreWod';
 import type { View } from './context/NavigationContext';
 
-const NAV_MAP: Record<string, 'home' | 'train' | 'stats' | 'profile'> = {
+const NAV_MAP: Record<string, NavTab> = {
   HOME: 'home',
   WARMUP: 'train', SESSION: 'train', SUMMARY: 'train', VICTORY: 'train',
   PERFORMANCE: 'stats', INDEX: 'stats', SCHEDULE: 'stats', PULSE: 'stats', PILLS: 'stats', SOCIAL: 'stats',
   PROFILE: 'profile', ONBOARDING: 'profile', PREMIUM: 'profile',
+  VOLTA_HOME: 'home', VOLTA_PREWOD: 'wod',
 };
 
 const navGroups = [
-  { title: 'Core Flow',   views: ['ONBOARDING', 'PREMIUM'] },
-  { title: 'Atleta',      views: ['HOME', 'SUMMARY', 'WARMUP', 'SESSION', 'VICTORY'] },
-  { title: 'Stats',       views: ['PERFORMANCE', 'INDEX', 'SCHEDULE', 'PULSE', 'PILLS', 'SOCIAL', 'PROFILE'] },
-  { title: 'Coach',       views: ['COACH_DASH', 'ATHLETE_DETAIL', 'ASSIGN_MACRO'] },
+  { title: 'Core',     views: ['ONBOARDING', 'PREMIUM'] },
+  { title: 'HO Atleta', views: ['HOME', 'SUMMARY', 'WARMUP', 'SESSION', 'VICTORY'] },
+  { title: 'HO Stats',  views: ['PERFORMANCE', 'INDEX', 'SCHEDULE', 'PULSE', 'PILLS', 'SOCIAL', 'PROFILE'] },
+  { title: 'HO Coach',  views: ['COACH_DASH', 'ATHLETE_DETAIL', 'ASSIGN_MACRO'] },
+  { title: 'Volta',     views: ['VOLTA_HOME', 'VOLTA_PREWOD'] },
 ];
+
+function ProductSwitcher() {
+  const { product, setProduct } = useProduct();
+  const { navigate } = useNav();
+  return (
+    <div style={{
+      position: 'absolute', top: 8, left: '50%', transform: 'translateX(-50%)', zIndex: 50,
+      display: 'flex', gap: 4, padding: 3,
+      background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)',
+      borderRadius: 14, border: '1px solid rgba(255,255,255,0.08)',
+    }}>
+      <button
+        onClick={() => { setProduct('holy-oly'); navigate('HOME'); }}
+        style={{
+          padding: '4px 11px', borderRadius: 11,
+          fontSize: 10, fontWeight: 800, letterSpacing: '.06em',
+          background: product === 'holy-oly' ? 'linear-gradient(135deg,#FFD700,#B8860B)' : 'transparent',
+          color: product === 'holy-oly' ? '#07070F' : '#FFD700',
+          border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+        }}
+      >HOLY OLY</button>
+      <button
+        onClick={() => { setProduct('volta'); navigate('VOLTA_HOME'); }}
+        style={{
+          padding: '4px 11px', borderRadius: 11,
+          fontSize: 10, fontWeight: 800, letterSpacing: '.06em',
+          background: product === 'volta' ? 'linear-gradient(135deg,#00E5FF,#0070FF)' : 'transparent',
+          color: product === 'volta' ? '#07070F' : '#00E5FF',
+          border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+        }}
+      >VOLTA</button>
+    </div>
+  );
+}
 
 function AppInner() {
   const { currentView, navigate } = useNav();
+  const { product } = useProduct();
 
   const renderView = () => {
+    // Volta routes
+    if (product === 'volta') {
+      switch (currentView) {
+        case 'VOLTA_PREWOD': return <VoltaPreWod />;
+        case 'VOLTA_HOME':
+        case 'HOME':
+        default:             return <VoltaDashboard />;
+      }
+    }
+    // Holy Oly routes
     switch (currentView) {
       case 'LOGIN':           return <Login onSuccess={() => navigate('HOME')} />;
       case 'ONBOARDING':     return <Onboarding />;
@@ -64,11 +114,18 @@ function AppInner() {
     }
   };
 
-  const handleNavChange = (tab: 'home' | 'train' | 'stats' | 'profile') => {
-    const map: Record<typeof tab, View> = {
+  const handleNavChange = (tab: NavTab) => {
+    if (product === 'volta') {
+      if (tab === 'home') navigate('VOLTA_HOME');
+      else if (tab === 'wod') navigate('VOLTA_PREWOD');
+      // stats/logros/profile: future
+      return;
+    }
+    const map: Partial<Record<NavTab, View>> = {
       home: 'HOME', train: 'WARMUP', stats: 'PERFORMANCE', profile: 'PROFILE',
     };
-    navigate(map[tab]);
+    const dest = map[tab];
+    if (dest) navigate(dest);
   };
 
   return (
@@ -76,17 +133,19 @@ function AppInner() {
       <PhoneLayout
         activeNav={NAV_MAP[currentView] ?? 'home'}
         onNavChange={handleNavChange}
+        product={product}
       >
+        <ProductSwitcher />
         {renderView()}
       </PhoneLayout>
 
-      {/* Dev sidebar — desktop only */}
+      {/* Dev sidebar */}
       <div
         className="hidden 2xl:flex fixed right-10 top-10 bottom-10 w-56 flex-col gap-4 overflow-y-auto z-50 p-5 rounded-2xl"
         style={{ background: 'var(--surface)', border: '1px solid var(--card-border)' }}
       >
         <p className="text-[9px] font-black uppercase tracking-widest" style={{ color: 'var(--primary)' }}>
-          UI Explorer
+          UI Explorer · {product === 'volta' ? 'VOLTA' : 'HOLY OLY'}
         </p>
         {navGroups.map((group) => (
           <div key={group.title} className="space-y-1">
@@ -137,9 +196,11 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <AthleteProvider>
-          <NavigationProvider>
-            <AppInner />
-          </NavigationProvider>
+          <ProductProvider>
+            <NavigationProvider>
+              <AppInner />
+            </NavigationProvider>
+          </ProductProvider>
         </AthleteProvider>
       </AuthProvider>
     </ThemeProvider>

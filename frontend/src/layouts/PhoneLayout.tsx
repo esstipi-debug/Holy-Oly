@@ -1,9 +1,12 @@
 import React from 'react';
 
+export type NavTab = 'home' | 'train' | 'stats' | 'profile' | 'wod' | 'logros';
+
 interface PhoneLayoutProps {
   children: React.ReactNode;
-  activeNav?: 'home' | 'train' | 'stats' | 'profile';
-  onNavChange?: (tab: 'home' | 'train' | 'stats' | 'profile') => void;
+  activeNav?: NavTab;
+  onNavChange?: (tab: NavTab) => void;
+  product?: 'holy-oly' | 'volta';
 }
 
 const NAV_ITEMS = [
@@ -60,10 +63,20 @@ const NAV_ITEMS = [
   },
 ];
 
+// Volta nav: Inicio / WOD / Stats / Logros / Perfil — cyan accent
+const VOLTA_NAV: { id: NavTab; label: string; icon: string }[] = [
+  { id: 'home',    label: 'Inicio', icon: '🏠' },
+  { id: 'wod',     label: 'WOD',    icon: '⚡' },
+  { id: 'stats',   label: 'Stats',  icon: '📊' },
+  { id: 'logros',  label: 'Logros', icon: '🏅' },
+  { id: 'profile', label: 'Perfil', icon: '👤' },
+];
+
 const PhoneLayout: React.FC<PhoneLayoutProps> = ({
   children,
   activeNav = 'home',
   onNavChange,
+  product = 'holy-oly',
 }) => {
   const now = new Date();
   const time = now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
@@ -130,30 +143,51 @@ const PhoneLayout: React.FC<PhoneLayoutProps> = ({
           className="absolute bottom-0 left-0 right-0 flex items-center justify-around"
           style={{
             height: 76,
-            background: 'var(--surface)',
-            borderTop: '1px solid var(--card-border)',
+            background: product === 'volta' ? 'rgba(7,7,15,0.95)' : 'var(--surface)',
+            borderTop: `1px solid ${product === 'volta' ? '#1E1E32' : 'var(--card-border)'}`,
             paddingBottom: 12,
+            backdropFilter: product === 'volta' ? 'blur(12px)' : 'none',
           }}
         >
-          {NAV_ITEMS.map(({ id, label, icon }) => {
-            const active = activeNav === id;
-            return (
-              <button
-                key={id}
-                onClick={() => onNavChange?.(id)}
-                className="flex flex-col items-center gap-1 transition-opacity"
-                style={{ opacity: active ? 1 : 0.45 }}
-              >
-                {icon(active)}
-                <span
-                  className="text-[10px] font-bold"
-                  style={{ color: active ? 'var(--primary)' : '#475569' }}
+          {product === 'volta' ? (
+            VOLTA_NAV.map(({ id, label, icon }) => {
+              const active = activeNav === id;
+              return (
+                <button
+                  key={id}
+                  onClick={() => onNavChange?.(id)}
+                  className="flex flex-col items-center gap-1 transition-opacity"
+                  style={{ opacity: active ? 1 : 0.5, background: 'transparent', border: 'none', cursor: 'pointer' }}
                 >
-                  {label}
-                </span>
-              </button>
-            );
-          })}
+                  <span style={{ fontSize: 18, lineHeight: 1 }}>{icon}</span>
+                  <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '.04em', color: active ? '#00E5FF' : '#52527A' }}>
+                    {label}
+                  </span>
+                  {active && <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#00E5FF', boxShadow: '0 0 6px #00E5FF' }} />}
+                </button>
+              );
+            })
+          ) : (
+            NAV_ITEMS.map(({ id, label, icon }) => {
+              const active = activeNav === id;
+              return (
+                <button
+                  key={id}
+                  onClick={() => onNavChange?.(id)}
+                  className="flex flex-col items-center gap-1 transition-opacity"
+                  style={{ opacity: active ? 1 : 0.45 }}
+                >
+                  {icon(active)}
+                  <span
+                    className="text-[10px] font-bold"
+                    style={{ color: active ? 'var(--primary)' : '#475569' }}
+                  >
+                    {label}
+                  </span>
+                </button>
+              );
+            })
+          )}
         </div>
       </div>
     </div>
