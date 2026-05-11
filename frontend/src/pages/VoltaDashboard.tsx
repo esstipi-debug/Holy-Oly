@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNav } from '../context/NavigationContext';
+import WiseAssistant from '../components/WiseAssistant';
 
 const C = {
   bg: '#07070F',
@@ -287,20 +288,7 @@ const VoltaDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* FAB IA Coach */}
-      <button
-        style={{
-          position: 'fixed', bottom: 96, right: 24, zIndex: 50,
-          width: 54, height: 54, borderRadius: '50%',
-          background: 'linear-gradient(135deg,#00E5FF,#0070FF)',
-          boxShadow: '0 0 0 3px rgba(0,229,255,0.12), 0 0 28px rgba(0,229,255,0.4), 0 4px 16px rgba(0,0,0,0.5)',
-          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-          border: 'none', cursor: 'pointer', fontFamily: 'inherit',
-        }}
-      >
-        <span style={{ fontSize: 20, lineHeight: 1 }}>✦</span>
-        <span style={{ fontSize: 7, fontWeight: 900, color: '#07070F', letterSpacing: '.06em', marginTop: 1 }}>IA</span>
-      </button>
+      <WiseAssistant context="Volta Atleta · Dashboard" />
     </div>
   );
 };

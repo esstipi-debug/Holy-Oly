@@ -3,18 +3,37 @@ import Card from '../components/Card';
 import Badge from '../components/Badge';
 import Button from '../components/Button';
 import { useNav } from '../context/NavigationContext';
+import { useAthlete } from '../context/AthleteContext';
+
+const ACTIONS = [
+  'completó AMRAP 20 (Rx)',
+  'alcanzó PR en Snatch (+2kg)',
+  'inició sesión: Prep. Campeonato',
+  'logró 12 días de racha',
+  'pasó a Cinturón Púrpura',
+];
+const TIMES = ['2m', '15m', '1h', '3h', '5h'];
+const COLORS = ['bg-indigo-500', 'bg-pink-500', 'bg-amber-500', 'bg-emerald-500', 'bg-violet-500'];
 
 const PulseHub: React.FC = () => {
   const { navigate } = useNav();
+  const { athlete, allAthletes } = useAthlete();
+  const others = allAthletes.filter(a => a.id !== athlete?.id).slice(0, 5);
+  const feed = others.map((a, i) => ({
+    user: `${a.name.split(' ')[0]} ${a.name.split(' ')[1]?.[0] ?? ''}.`,
+    action: ACTIONS[i % ACTIONS.length],
+    time: TIMES[i % TIMES.length],
+    color: COLORS[i % COLORS.length],
+  }));
   return (
-    <div className="flex flex-col h-full bg-[#07070F]">
+    <div className="flex flex-col h-full bg-holy-bg">
       <div className="px-6 py-8 flex-1 overflow-y-auto">
         <header className="flex justify-between items-center mb-8">
            <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-holy-surface border border-slate-800 flex items-center justify-center text-slate-400 cursor-pointer" onClick={() => navigate('HOME')}>←</div>
               <div>
                  <h1 className="text-white text-2xl font-black italic tracking-tighter">PULSE HUB</h1>
-                 <Badge variant="danger" dot>8 Atletas Online</Badge>
+                 <Badge variant="danger" dot>{others.length} Atletas Online</Badge>
               </div>
            </div>
            <div className="w-10 h-10 rounded-full bg-holy-primary/10 border border-holy-primary/20 flex items-center justify-center animate-pulse">
@@ -50,11 +69,7 @@ const PulseHub: React.FC = () => {
         <section className="space-y-4 mb-20">
            <h3 className="text-slate-500 text-[10px] font-black uppercase tracking-widest pl-1">Actividad Reciente</h3>
            <div className="space-y-3">
-             {[
-               { user: 'Miguel A.', action: 'completó Mad Russian (W3)', time: '2m', color: 'bg-indigo-500' },
-               { user: 'Lorena C.', action: 'alcanzó PR en Snatch Balance (95kg)', time: '15m', color: 'bg-pink-500' },
-               { user: 'Dani G.', action: 'inició sesión: Prep. Campeonato', time: '1h', color: 'bg-amber-500' },
-             ].map((post, i) => (
+             {feed.map((post, i) => (
                <Card key={i} variant="solid" padding="sm" className="bg-white/[0.02]">
                   <div className="flex gap-4 items-center">
                      <div className={`w-10 h-10 rounded-2xl ${post.color} flex items-center justify-center text-white font-black text-xs shadow-lg shadow-black/40`}>

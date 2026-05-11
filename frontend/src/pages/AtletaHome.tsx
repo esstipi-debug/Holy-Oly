@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAthlete } from '../context/AthleteContext';
 import { useNav } from '../context/NavigationContext';
+import WiseAssistant from '../components/WiseAssistant';
 
 const ringColor = (r: number) => r >= 70 ? '#22C55E' : r >= 50 ? '#F59E0B' : '#EF4444';
 const ringLabel = (r: number) => r >= 70 ? 'Listo para carga alta' : r >= 50 ? 'Carga moderada' : 'Tu cuerpo pide descanso';
@@ -469,6 +470,7 @@ const AtletaHome: React.FC = () => {
         </div>
       </div>
 
+      <WiseAssistant context="Holy Oly · Dashboard Atleta" />
     </div>
   );
 };

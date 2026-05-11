@@ -7,7 +7,7 @@ import { useNav } from '../context/NavigationContext';
 const VictoryScreen: React.FC = () => {
   const { navigate } = useNav();
   return (
-    <div className="flex flex-col h-full bg-[#07070F] overflow-hidden relative">
+    <div className="flex flex-col h-full bg-holy-bg overflow-hidden relative">
       {/* Background Glows */}
       <div className="absolute top-[-10%] left-[-10%] w-80 h-80 bg-holy-primary/10 rounded-full blur-[100px]" />
       <div className="absolute bottom-[-10%] right-[-10%] w-80 h-80 bg-holy-gold/10 rounded-full blur-[100px]" />

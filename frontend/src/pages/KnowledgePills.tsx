@@ -40,7 +40,7 @@ const KnowledgePills: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#07070F] relative overflow-hidden">
+    <div className="flex flex-col h-full bg-holy-bg relative overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10" />
       <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center grayscale opacity-30" />
@@ -91,7 +91,7 @@ const KnowledgePills: React.FC = () => {
         </Card>
       </div>
 
-      <footer className="absolute bottom-10 left-8 right-8 z-30 space-y-3">
+      <footer className="absolute bottom-[88px] left-8 right-8 z-30 space-y-3">
         <Button fullWidth variant="primary" size="lg" onClick={next}>
           {isLast ? 'FINALIZAR · RECLAMAR XP →' : 'SIGUIENTE TIP →'}
         </Button>

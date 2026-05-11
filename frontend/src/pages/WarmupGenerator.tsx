@@ -138,7 +138,7 @@ const WarmupGenerator: React.FC = () => {
       </div>
 
       {/* Footer CTA */}
-      <footer className="absolute bottom-6 left-6 right-6">
+      <footer className="absolute bottom-[88px] left-6 right-6 z-30">
         <Button fullWidth variant="primary" size="lg" onClick={() => navigate('SESSION')}>FINALIZAR CALENTAMIENTO →</Button>
       </footer>
     </div>

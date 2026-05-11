@@ -2,17 +2,50 @@ import React from 'react';
 import Card from '../components/Card';
 import Badge from '../components/Badge';
 import { useNav } from '../context/NavigationContext';
+import { useAthlete } from '../context/AthleteContext';
+
+const olyScore = (a: { maxes: { snatch: number; body_weight: number } }) =>
+  a.maxes.body_weight > 0 ? +(a.maxes.snatch / a.maxes.body_weight * 2.5).toFixed(1) : 7.4;
+
+const levelOf = (score: number) =>
+  score >= 9 ? 'Elite' : score >= 7 ? 'Avanzado' : score >= 5 ? 'Intermedio' : 'Básico';
+
+const COLORS = ['bg-purple-600', 'bg-pink-600', 'bg-emerald-600', 'bg-amber-600', 'bg-cyan-600'];
 
 const OlyIndex: React.FC = () => {
   const { navigate } = useNav();
-  const leaderboards = [
-    { rank: 1, name: 'Miguel Arias', level: 'Elite', score: 9.8, initials: 'MA', color: 'bg-purple-600' },
-    { rank: 2, name: 'Lorena C.', level: 'Elite', score: 9.5, initials: 'LC', color: 'bg-pink-600' },
-    { rank: 12, name: 'Juan Pérez (Tú)', level: 'Avanzado', score: 7.4, initials: 'JP', color: 'bg-green-600', me: true },
-  ];
+  const { athlete, allAthletes } = useAthlete();
+
+  const myScore = athlete ? olyScore(athlete) : 7.4;
+  const ranked = [...allAthletes]
+    .map(a => ({ ...a, score: olyScore(a) }))
+    .sort((a, b) => b.score - a.score);
+  const myRank = Math.max(1, ranked.findIndex(a => a.id === athlete?.id) + 1);
+  const pctTop = Math.max(1, Math.round(myRank / ranked.length * 100));
+
+  const top = ranked.slice(0, 5).map((a, i) => ({
+    rank: i + 1,
+    name: a.id === athlete?.id ? `${a.name.split(' ')[0]} (Tú)` : a.name,
+    level: levelOf(a.score),
+    score: a.score,
+    initials: a.name.split(' ').slice(0, 2).map(n => n[0]).join(''),
+    color: COLORS[i % COLORS.length],
+    me: a.id === athlete?.id,
+  }));
+  const leaderboards = top.some(l => l.me) || !athlete
+    ? top
+    : [...top, {
+        rank: myRank,
+        name: `${athlete.name.split(' ')[0]} (Tú)`,
+        level: levelOf(myScore),
+        score: myScore,
+        initials: athlete.name.split(' ').slice(0, 2).map(n => n[0]).join(''),
+        color: 'bg-green-600',
+        me: true,
+      }];
 
   return (
-    <div className="flex flex-col h-full bg-[#07070F] overflow-hidden">
+    <div className="flex flex-col h-full bg-holy-bg overflow-hidden">
       <div className="px-6 py-6 flex-1 overflow-y-auto">
         <header className="mb-8 flex items-center gap-3">
            <div className="w-8 h-8 rounded-lg bg-holy-surface border border-slate-800 flex items-center justify-center text-slate-400 cursor-pointer" onClick={() => navigate('HOME')}>←</div>
@@ -22,17 +55,17 @@ const OlyIndex: React.FC = () => {
         {/* Global Score Card */}
         <Card variant="solid" className="bg-gradient-to-br from-holy-gold/10 to-transparent border-holy-gold/30 text-center py-8 mb-8">
            <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-2">Tu Puntuación Global</p>
-           <div className="text-holy-gold text-6xl font-black italic tracking-tighter">7.4</div>
-           <Badge variant="gold" className="mt-4 px-4">TOP 14% DEL CLUB</Badge>
-           
+           <div className="text-holy-gold text-6xl font-black italic tracking-tighter">{myScore}</div>
+           <Badge variant="gold" className="mt-4 px-4">TOP {pctTop}% DEL CLUB</Badge>
+
            <div className="grid grid-cols-2 gap-4 mt-8 pt-6 border-t border-holy-gold/10">
               <div>
                  <p className="text-slate-600 text-[9px] font-black uppercase">Ranking</p>
-                 <p className="text-white text-lg font-black">#12 / 85</p>
+                 <p className="text-white text-lg font-black">#{myRank} / {ranked.length}</p>
               </div>
               <div>
                  <p className="text-slate-600 text-[9px] font-black uppercase">Nivel</p>
-                 <p className="text-white text-lg font-black italic">AVANZADO</p>
+                 <p className="text-white text-lg font-black italic">{levelOf(myScore).toUpperCase()}</p>
               </div>
            </div>
         </Card>

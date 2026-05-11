@@ -33,7 +33,7 @@ const PreMium: React.FC = () => {
     navigate('HOME');
   };
   return (
-    <div className="flex flex-col min-h-full bg-[#07070F]">
+    <div className="flex flex-col min-h-full bg-holy-bg">
       {/* Header */}
       <header className="px-6 pt-6 pb-2 text-center relative">
         <h1 className="text-white text-2xl font-black">Elige tu plan</h1>

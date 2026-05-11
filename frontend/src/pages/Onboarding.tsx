@@ -68,7 +68,7 @@ const Onboarding: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#07070F] px-8 py-12">
+    <div className="flex flex-col h-full bg-holy-bg px-8 py-12">
       {/* Progress Dots */}
       <div className="flex justify-center gap-2 mb-12">
         {[1, 2, 3].map(s => (

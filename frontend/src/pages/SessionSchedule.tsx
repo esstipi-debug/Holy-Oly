@@ -17,7 +17,7 @@ const SessionSchedule: React.FC = () => {
   ];
 
   return (
-    <div className="flex flex-col h-full bg-[#07070F]">
+    <div className="flex flex-col h-full bg-holy-bg">
       <div className="px-6 py-8 flex-1 overflow-y-auto">
         <header className="mb-8 flex items-center gap-3">
            <div className="w-8 h-8 rounded-lg bg-holy-surface border border-slate-800 flex items-center justify-center text-slate-400 cursor-pointer" onClick={() => navigate('HOME')}>←</div>
@@ -68,7 +68,7 @@ const SessionSchedule: React.FC = () => {
         </div>
       </div>
 
-      <footer className="absolute bottom-20 left-6 right-6">
+      <footer className="absolute bottom-[88px] left-6 right-6 z-30">
          <Button
            fullWidth variant="secondary" size="lg"
            className="border-holy-primary/20 text-holy-primary font-black italic"

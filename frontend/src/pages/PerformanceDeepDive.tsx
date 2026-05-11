@@ -15,7 +15,7 @@ const PerformanceDeepDive: React.FC = () => {
   const [range, setRange] = useState<Range>('W');
   const data = RANGE_DATA[range];
   return (
-    <div className="flex flex-col h-full bg-[#07070F]">
+    <div className="flex flex-col h-full bg-holy-bg">
       <div className="px-6 py-8 flex-1 overflow-y-auto">
         <header className="mb-8 flex justify-between items-center">
            <div className="flex items-center gap-3">
