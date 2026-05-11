@@ -1,9 +1,11 @@
 from fastapi import HTTPException, Security, Depends, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer, OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from typing import Optional, List
+from pydantic import BaseModel, EmailStr, field_validator
+from typing import Optional, List, Literal
+import uuid
 from .jwt_utils import (
-    decode_token, authenticate_user, create_access_token, 
-    get_user, User, TokenData
+    decode_token, authenticate_user, create_access_token,
+    get_user, User, TokenData, MOCK_USERS, get_password_hash
 )
 import sys
 import os
@@ -185,4 +187,58 @@ async def get_me(current_user: User = Depends(verify_token)):
         "role": current_user.role,
         "coach_id": current_user.coach_id,
         "is_active": current_user.is_active
+    }
+
+
+class RegisterPayload(BaseModel):
+    email: EmailStr
+    password: str
+    name: str
+    role: Literal["athlete", "coach"] = "athlete"
+    product: Literal["holy-oly", "volta"] = "holy-oly"
+
+    @field_validator("password")
+    @classmethod
+    def password_min_length(cls, v: str) -> str:
+        if len(v) < 6:
+            raise ValueError("La contraseña debe tener al menos 6 caracteres")
+        return v
+
+
+@auth_router.post("/register")
+async def register(payload: RegisterPayload):
+    """Crea una nueva cuenta de atleta o coach. Devuelve token + user igual que /login."""
+    email = payload.email.lower().strip()
+    if email in MOCK_USERS:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Ya existe una cuenta con ese email",
+        )
+
+    user_id = f"{payload.role}_{uuid.uuid4().hex[:12]}"
+    MOCK_USERS[email] = {
+        "id": user_id,
+        "email": email,
+        "name": payload.name.strip(),
+        "hashed_password": get_password_hash(payload.password),
+        "role": payload.role,
+        "product": payload.product,
+        "coach_id": None,
+        "is_active": True,
+    }
+
+    access_token = create_access_token(
+        data={"sub": user_id, "email": email, "role": payload.role}
+    )
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": {
+            "id": user_id,
+            "email": email,
+            "name": payload.name.strip(),
+            "role": payload.role,
+            "product": payload.product,
+        },
     }

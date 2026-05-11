@@ -1,5 +1,5 @@
 import { ThemeProvider } from './context/ThemeContext';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { AthleteProvider } from './context/AthleteContext';
 import { NavigationProvider, useNav } from './context/NavigationContext';
 import { ProductProvider, useProduct } from './context/ProductContext';
@@ -7,6 +7,7 @@ import { RoleProvider, useRole } from './context/RoleContext';
 import PhoneLayout, { type NavTab } from './layouts/PhoneLayout';
 import AtletaHome from './pages/AtletaHome';
 import Login from './pages/Login';
+import Register from './pages/Register';
 import ActiveSession from './pages/ActiveSession';
 import WarmupGenerator from './pages/WarmupGenerator';
 import SessionSummaryPreview from './pages/SessionSummaryPreview';
@@ -51,10 +52,13 @@ const NAV_MAP_VOLTA: Record<string, NavTab> = {
 };
 
 // Home-set: vistas que NO deben mostrar back
-const HOME_VIEWS = new Set<View>(['HOME', 'COACH_DASH', 'VOLTA_HOME', 'VOLTA_COACH', 'LOGIN']);
+const HOME_VIEWS = new Set<View>(['HOME', 'COACH_DASH', 'VOLTA_HOME', 'VOLTA_COACH', 'LOGIN', 'REGISTER']);
+
+// Vistas accesibles sin autenticar
+const PUBLIC_VIEWS = new Set<View>(['LOGIN', 'REGISTER']);
 
 const navGroups = [
-  { title: 'Core',         views: ['LOGIN', 'ONBOARDING', 'PREMIUM'] },
+  { title: 'Core',         views: ['LOGIN', 'REGISTER', 'ONBOARDING', 'PREMIUM'] },
   { title: 'HO Atleta',    views: ['HOME', 'SUMMARY', 'WARMUP', 'SESSION', 'VICTORY'] },
   { title: 'HO Stats',     views: ['PERFORMANCE', 'INDEX', 'SCHEDULE', 'PULSE', 'PILLS', 'SOCIAL', 'PROFILE'] },
   { title: 'HO Coach',     views: ['COACH_DASH', 'ATHLETE_DETAIL', 'ASSIGN_MACRO'] },
@@ -140,8 +144,22 @@ function AppInner() {
   const { currentView, navigate } = useNav();
   const { product } = useProduct();
   const { role } = useRole();
+  const { isAuthenticated } = useAuth();
+
+  // Gate: forzar LOGIN si no autenticado y la vista actual no es pública
+  if (!isAuthenticated && !PUBLIC_VIEWS.has(currentView)) {
+    if (currentView !== 'LOGIN') navigate('LOGIN');
+  }
 
   const renderView = () => {
+    // PUBLIC views (sin auth)
+    if (currentView === 'LOGIN') {
+      return <Login onSuccess={() => navigate(role === 'coach'
+        ? (product === 'volta' ? 'VOLTA_COACH' : 'COACH_DASH')
+        : (product === 'volta' ? 'VOLTA_HOME' : 'HOME'))} />;
+    }
+    if (currentView === 'REGISTER') return <Register />;
+
     // VOLTA
     if (product === 'volta') {
       switch (currentView) {
@@ -165,7 +183,6 @@ function AppInner() {
     }
     // HOLY OLY
     switch (currentView) {
-      case 'LOGIN':           return <Login onSuccess={() => navigate(role === 'coach' ? 'COACH_DASH' : 'HOME')} />;
       case 'ONBOARDING':     return <Onboarding />;
       case 'PREMIUM':        return <Premium />;
       case 'SUMMARY':        return <SessionSummaryPreview />;

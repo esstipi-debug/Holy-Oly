@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 
 export type View =
-  | 'LOGIN' | 'ONBOARDING' | 'PREMIUM'
+  | 'LOGIN' | 'REGISTER' | 'ONBOARDING' | 'PREMIUM'
   | 'HOME' | 'SUMMARY' | 'WARMUP' | 'SESSION' | 'VICTORY'
   | 'PERFORMANCE' | 'INDEX' | 'SCHEDULE' | 'PULSE' | 'PILLS' | 'SOCIAL' | 'PROFILE'
   | 'COACH_DASH' | 'ATHLETE_DETAIL' | 'ASSIGN_MACRO'
@@ -20,7 +20,7 @@ const NavContext = createContext<NavContextType | null>(null);
 const STORAGE_KEY = 'nav:currentView';
 
 const VALID_VIEWS: View[] = [
-  'LOGIN','ONBOARDING','PREMIUM',
+  'LOGIN','REGISTER','ONBOARDING','PREMIUM',
   'HOME','SUMMARY','WARMUP','SESSION','VICTORY',
   'PERFORMANCE','INDEX','SCHEDULE','PULSE','PILLS','SOCIAL','PROFILE',
   'COACH_DASH','ATHLETE_DETAIL','ASSIGN_MACRO',
