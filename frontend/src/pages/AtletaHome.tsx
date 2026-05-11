@@ -6,34 +6,41 @@ const ringColor = (r: number) => r >= 70 ? '#22C55E' : r >= 50 ? '#F59E0B' : '#E
 const ringLabel = (r: number) => r >= 70 ? 'Listo para carga alta' : r >= 50 ? 'Carga moderada' : 'Tu cuerpo pide descanso';
 const ringTag = (r: number) => r >= 70 ? 'ÓPTIMO' : r >= 50 ? 'MODERADO' : 'BAJO';
 
-const PILLARS: { key: string; label: string; pct: number; color: string }[] = [
-  { key: 'mind',     label: 'Mental',     pct: 78, color: '#22C55E' },
-  { key: 'sleep',    label: 'Sueño',      pct: 64, color: '#06B6D4' },
-  { key: 'nutrition',label: 'Nutrición',  pct: 82, color: '#F59E0B' },
-  { key: 'tech',     label: 'Técnica',    pct: 45, color: '#A78BFA' },
+const RADIUS = 86;
+const STROKE = 10;
+const CIRCUM = 2 * Math.PI * RADIUS;
+
+const PILDORAS = [
+  { emoji: '🧠', label: 'Mentalidad',  ring: 'linear-gradient(135deg,#22C55E,#06B6D4)', active: true },
+  { emoji: '💤', label: 'Recuperación', ring: 'linear-gradient(135deg,#F59E0B,#EF4444)', active: true },
+  { emoji: '🎯', label: 'Técnica',      ring: 'var(--card-border)',                       active: false },
+  { emoji: '🥗', label: 'Nutrición',    ring: 'var(--card-border)',                       active: false },
 ];
 
-const PillarRing: React.FC<{ pct: number; color: string; label: string }> = ({ pct, color, label }) => {
-  const r = 20, c = 2 * Math.PI * r, off = c * (1 - pct / 100);
+const BELTS = [
+  { name: 'BLANCO',  next: 'AMARILLO',  color: '#E5E7EB' },
+  { name: 'AMARILLO',next: 'NARANJA',   color: '#FACC15' },
+  { name: 'NARANJA', next: 'AZUL',      color: '#FB923C' },
+  { name: 'AZUL',    next: 'PÚRPURA',   color: '#3B82F6' },
+  { name: 'PÚRPURA', next: 'MARRÓN',    color: '#A855F7' },
+  { name: 'MARRÓN',  next: 'NEGRO',     color: '#92400E' },
+  { name: 'NEGRO',   next: 'MAESTRO',   color: '#0A0A0A' },
+];
+
+const ReadinessRing: React.FC<{ value: number | null; color: string }> = ({ value, color }) => {
+  const pct = value !== null ? value / 100 : 0;
+  const offset = CIRCUM * (1 - pct);
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, flex: '0 0 auto' }}>
-      <div style={{ position: 'relative', width: 52, height: 52 }}>
-        <svg width={52} height={52} style={{ transform: 'rotate(-90deg)' }}>
-          <circle cx={26} cy={26} r={r} fill="none" stroke="var(--card-border)" strokeWidth={4} />
-          <circle
-            cx={26} cy={26} r={r} fill="none"
-            stroke={color} strokeWidth={4} strokeLinecap="round"
-            strokeDasharray={c} strokeDashoffset={off}
-            style={{ transition: 'stroke-dashoffset .8s ease' }}
-          />
-        </svg>
-        <span style={{
-          position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 11, fontWeight: 800, color: 'var(--text)', fontVariantNumeric: 'tabular-nums',
-        }}>{pct}</span>
-      </div>
-      <span style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 600 }}>{label}</span>
-    </div>
+    <svg width={RADIUS * 2 + STROKE * 2} height={RADIUS * 2 + STROKE * 2} style={{ display: 'block' }}>
+      <circle cx={RADIUS + STROKE} cy={RADIUS + STROKE} r={RADIUS} fill="none" stroke="var(--card-border)" strokeWidth={STROKE} />
+      <circle
+        cx={RADIUS + STROKE} cy={RADIUS + STROKE} r={RADIUS}
+        fill="none" stroke={color} strokeWidth={STROKE} strokeLinecap="round"
+        strokeDasharray={CIRCUM} strokeDashoffset={offset}
+        transform={`rotate(-90 ${RADIUS + STROKE} ${RADIUS + STROKE})`}
+        style={{ transition: 'stroke-dashoffset .8s ease, stroke .3s ease', filter: `drop-shadow(0 0 12px ${color}80)` }}
+      />
+    </svg>
   );
 };
 
@@ -42,76 +49,6 @@ const formatDate = (d: Date) => {
   const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
   return `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]}`;
 };
-
-const RADIUS = 86;
-const STROKE = 10;
-const CIRCUM = 2 * Math.PI * RADIUS;
-
-const ReadinessRing: React.FC<{ value: number | null; color: string }> = ({ value, color }) => {
-  const pct = value !== null ? value / 100 : 0;
-  const offset = CIRCUM * (1 - pct);
-  return (
-    <svg width={RADIUS * 2 + STROKE * 2} height={RADIUS * 2 + STROKE * 2} style={{ display: 'block' }}>
-      <circle
-        cx={RADIUS + STROKE}
-        cy={RADIUS + STROKE}
-        r={RADIUS}
-        fill="none"
-        stroke="var(--card-border)"
-        strokeWidth={STROKE}
-      />
-      <circle
-        cx={RADIUS + STROKE}
-        cy={RADIUS + STROKE}
-        r={RADIUS}
-        fill="none"
-        stroke={color}
-        strokeWidth={STROKE}
-        strokeLinecap="round"
-        strokeDasharray={CIRCUM}
-        strokeDashoffset={offset}
-        transform={`rotate(-90 ${RADIUS + STROKE} ${RADIUS + STROKE})`}
-        style={{ transition: 'stroke-dashoffset .8s ease, stroke .3s ease', filter: `drop-shadow(0 0 12px ${color}80)` }}
-      />
-    </svg>
-  );
-};
-
-const Chip: React.FC<{
-  label: string;
-  value: string | number;
-  accent?: string;
-  onClick?: () => void;
-}> = ({ label, value, accent, onClick }) => (
-  <button
-    onClick={onClick}
-    style={{
-      flex: '0 0 auto',
-      minWidth: 110,
-      background: 'var(--surface)',
-      border: '1px solid var(--card-border)',
-      borderRadius: 18,
-      padding: '12px 14px',
-      textAlign: 'left',
-      cursor: onClick ? 'pointer' : 'default',
-      transition: 'transform .15s ease, border-color .15s ease',
-      fontFamily: 'inherit',
-    }}
-    onMouseEnter={(e) => {
-      if (onClick) (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)';
-    }}
-    onMouseLeave={(e) => {
-      (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
-    }}
-  >
-    <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: 6 }}>
-      {label}
-    </p>
-    <p style={{ fontSize: 22, fontWeight: 900, color: accent ?? 'var(--text)', letterSpacing: '-.02em', lineHeight: 1 }}>
-      {value}
-    </p>
-  </button>
-);
 
 const AtletaHome: React.FC = () => {
   const { navigate } = useNav();
@@ -136,19 +73,29 @@ const AtletaHome: React.FC = () => {
     : '7.4';
 
   const sessionExercises = [
-    { name: 'Arrancada', sets: 5, reps: 3, pct: 0.85, max: maxes.snatch },
-    { name: 'Dos Tiempos', sets: 4, reps: 2, pct: 0.80, max: maxes.jerk },
-    { name: 'Sentadilla Frontal', sets: 4, reps: 4, pct: 0.75, max: maxes.front_squat },
+    { name: 'Arrancada',         sets: 5, reps: 3, pct: 0.85, max: maxes.snatch },
+    { name: 'Dos Tiempos',       sets: 4, reps: 2, pct: 0.80, max: maxes.jerk },
+    { name: 'Sentadilla Frontal',sets: 4, reps: 4, pct: 0.75, max: maxes.front_squat },
   ];
 
   const macroPct = Math.round((macrocycle.week / macrocycle.total_weeks) * 100);
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Buenos días' : hour < 19 ? 'Buenas tardes' : 'Buenas noches';
 
+  // Belt / XP derivation
+  const fitness = athlete.prior_fitness ?? 60;
+  const beltIdx = Math.min(BELTS.length - 1, Math.floor(fitness / 15));
+  const belt = BELTS[beltIdx];
+  const beltNext = BELTS[Math.min(BELTS.length - 1, beltIdx + 1)];
+  const xpNow = Math.round((fitness * 1500));
+  const xpCurrentBase = beltIdx * 22500;
+  const xpNextBase = (beltIdx + 1) * 22500;
+  const xpPct = Math.max(4, Math.min(100, Math.round(((xpNow - xpCurrentBase) / (xpNextBase - xpCurrentBase)) * 100)));
+
   return (
     <div style={{ background: 'var(--bg)', paddingBottom: 90, minHeight: '100%' }}>
 
-      {/* HEADER — minimal */}
+      {/* HEADER */}
       <div style={{ padding: '14px 20px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
           <p style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600, letterSpacing: '.04em' }}>
@@ -158,28 +105,36 @@ const AtletaHome: React.FC = () => {
             {firstName}
           </p>
         </div>
-        <button
-          onClick={() => navigate('PROFILE')}
-          style={{
-            width: 42, height: 42, borderRadius: '50%',
-            background: 'linear-gradient(135deg,var(--primary),#3B82F6)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 13, fontWeight: 900, color: 'var(--bg)',
-            border: 'none', cursor: 'pointer', fontFamily: 'inherit',
-            boxShadow: '0 4px 16px rgba(0,0,0,.25)',
-          }}
-        >
-          {firstName[0]}{lastInitial}
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{
+            background: `${belt.color}1a`, border: `1px solid ${belt.color}66`, borderRadius: 20, padding: '4px 10px',
+          }}>
+            <span style={{ fontSize: 9, color: belt.color, fontWeight: 800, letterSpacing: '.08em' }}>
+              CINTURÓN {belt.name}
+            </span>
+          </div>
+          <button
+            onClick={() => navigate('PROFILE')}
+            style={{
+              width: 42, height: 42, borderRadius: '50%',
+              background: 'linear-gradient(135deg,var(--primary),#3B82F6)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 13, fontWeight: 900, color: 'var(--bg)',
+              border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+              boxShadow: '0 4px 16px rgba(0,0,0,.25)',
+            }}
+          >
+            {firstName[0]}{lastInitial}
+          </button>
+        </div>
       </div>
 
-      {/* HERO — readiness */}
+      {/* HERO — readiness ring */}
       <div style={{
-        padding: '20px 20px 32px',
+        padding: '16px 20px 28px',
         display: 'flex', flexDirection: 'column', alignItems: 'center',
-        position: 'relative',
         background: readiness !== null
-          ? `radial-gradient(circle at 50% 40%, ${rc}18 0%, transparent 60%)`
+          ? `radial-gradient(circle at 50% 40%, ${rc}1f 0%, transparent 60%)`
           : 'transparent',
       }}>
         <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.18em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: 14 }}>
@@ -197,10 +152,7 @@ const AtletaHome: React.FC = () => {
           ) : (
             <>
               <ReadinessRing value={readiness} color={rc} />
-              <div style={{
-                position: 'absolute', inset: 0, display: 'flex',
-                flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              }}>
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                 <span style={{ fontSize: 56, fontWeight: 900, color: 'var(--text)', letterSpacing: '-.04em', lineHeight: 1 }}>
                   {readiness ?? '—'}
                 </span>
@@ -222,19 +174,127 @@ const AtletaHome: React.FC = () => {
             <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
               Fatiga <strong style={{ color: 'var(--text)', fontWeight: 700 }}>{Math.round(stress.fatigue)}</strong>
             </span>
-            <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
-              {athlete.weight_class}
-            </span>
+            <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{athlete.weight_class}</span>
           </div>
         )}
       </div>
 
-      {/* MACRO PROGRESS — slim full-width */}
+      {/* PÍLDORAS — story-style rings con emojis grandes */}
       <div style={{ padding: '0 20px 20px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
-          <p style={{ fontSize: 11, color: 'var(--text)', fontWeight: 700 }}>
-            {macrocycle.program_name}
+        <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: 12 }}>
+          Píldoras de hoy
+        </p>
+        <div className="scroll-x-no-bar" style={{ display: 'flex', gap: 14, overflowX: 'auto', paddingBottom: 4 }}>
+          {PILDORAS.map((p) => (
+            <button
+              key={p.label}
+              onClick={() => navigate('PILLS')}
+              style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                flexShrink: 0, background: 'transparent', border: 'none', cursor: 'pointer',
+                fontFamily: 'inherit', padding: 0,
+              }}
+            >
+              <div style={{
+                width: 60, height: 60, borderRadius: '50%',
+                padding: p.active ? 2.5 : 2,
+                background: p.ring,
+              }}>
+                <div style={{
+                  width: '100%', height: '100%', borderRadius: '50%',
+                  background: 'var(--surface)',
+                  border: '2px solid var(--bg)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24,
+                  opacity: p.active ? 1 : 0.55,
+                }}>
+                  {p.emoji}
+                </div>
+              </div>
+              <span style={{ fontSize: 10, color: p.active ? 'var(--text-secondary)' : 'var(--text-secondary)', opacity: p.active ? 1 : 0.6, fontWeight: 600 }}>
+                {p.label}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* OLY INDEX + RACHA row */}
+      <div style={{ padding: '0 20px 16px', display: 'flex', gap: 12 }}>
+        <button
+          onClick={() => navigate('INDEX')}
+          style={{
+            flex: 1, background: 'var(--surface)', border: '1px solid var(--card-border)',
+            borderRadius: 20, padding: '14px 16px', textAlign: 'left', cursor: 'pointer',
+            fontFamily: 'inherit',
+          }}
+        >
+          <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: 6 }}>
+            OLY Index
           </p>
+          <p style={{ fontSize: 28, fontWeight: 900, color: '#F59E0B', letterSpacing: '-.03em', lineHeight: 1 }}>
+            {olyIndex}
+          </p>
+          <p style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 4 }}>
+            Top 23% del club
+          </p>
+        </button>
+        <div style={{
+          flex: 1, background: 'var(--surface)', border: '1px solid var(--card-border)',
+          borderRadius: 20, padding: '14px 16px',
+        }}>
+          <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: 6 }}>
+            Racha
+          </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontSize: 22 }}>🔥</span>
+            <span style={{ fontSize: 28, fontWeight: 900, color: '#f97316', letterSpacing: '-.03em', lineHeight: 1 }}>
+              {sesiones}
+            </span>
+            <span style={{ fontSize: 10, color: '#92400e', fontWeight: 800, letterSpacing: '.08em' }}>SEM</span>
+          </div>
+        </div>
+      </div>
+
+      {/* BELT / XP PROGRESS */}
+      <div style={{ padding: '0 20px 18px' }}>
+        <div style={{
+          background: 'var(--surface)', border: '1px solid var(--card-border)',
+          borderRadius: 20, padding: '14px 16px',
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
+            <div>
+              <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
+                XP · {belt.name} → {beltNext.name}
+              </p>
+              <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', marginTop: 2, fontVariantNumeric: 'tabular-nums' }}>
+                {xpNow.toLocaleString('es')}{' '}
+                <span style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>/ {xpNextBase.toLocaleString('es')} XP</span>
+              </p>
+            </div>
+            <div style={{
+              background: `${beltNext.color}1a`, border: `1px solid ${beltNext.color}55`,
+              borderRadius: 10, padding: '4px 8px',
+            }}>
+              <span style={{ fontSize: 11, color: beltNext.color, fontWeight: 800 }}>{xpPct}%</span>
+            </div>
+          </div>
+          <div style={{ height: 6, borderRadius: 3, background: 'var(--card-border)', overflow: 'hidden' }}>
+            <div style={{
+              height: '100%', borderRadius: 3,
+              background: `linear-gradient(90deg, ${belt.color}, ${beltNext.color})`,
+              width: `${xpPct}%`, transition: 'width .8s ease',
+            }} />
+          </div>
+          <p style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 6, fontVariantNumeric: 'tabular-nums' }}>
+            {(xpNextBase - xpNow).toLocaleString('es')} XP para {beltNext.name}
+          </p>
+        </div>
+      </div>
+
+      {/* MACRO progress slim */}
+      <div style={{ padding: '0 20px 18px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
+          <p style={{ fontSize: 11, color: 'var(--text)', fontWeight: 700 }}>{macrocycle.program_name}</p>
           <p style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 600 }}>
             Sem {macrocycle.week}/{macrocycle.total_weeks} · {macroPct}%
           </p>
@@ -248,141 +308,147 @@ const AtletaHome: React.FC = () => {
         </div>
       </div>
 
-      {/* PILLARS — recovery / lifestyle rings */}
-      <div style={{ padding: '0 20px 22px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12 }}>
-          <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
-            Pilares de hoy
-          </p>
-          <button
-            onClick={() => navigate('PILLS')}
-            style={{ fontSize: 10, color: 'var(--primary)', fontWeight: 700, background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
-          >
-            Ver todos →
-          </button>
-        </div>
-        <div style={{ display: 'flex', gap: 16, justifyContent: 'space-between' }}>
-          {PILLARS.map((p) => (
-            <PillarRing key={p.key} pct={p.pct} color={p.color} label={p.label} />
-          ))}
-        </div>
-      </div>
-
-      {/* TODAY'S SESSION — hero card */}
-      <div style={{ padding: '0 20px 22px' }}>
+      {/* SESIÓN DE HOY */}
+      <div style={{ padding: '0 20px 20px' }}>
+        <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: 10 }}>
+          Sesión de hoy · Semana {macrocycle.week} · Día {macrocycle.day}
+        </p>
         <div style={{
-          background: 'var(--surface)',
-          border: '1px solid var(--card-border)',
-          borderRadius: 22,
-          overflow: 'hidden',
+          background: 'var(--surface)', border: '1px solid var(--card-border)',
+          borderRadius: 22, overflow: 'hidden',
         }}>
-          <div style={{ padding: '18px 18px 12px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
-              <div>
-                <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', color: 'var(--primary)', marginBottom: 4 }}>
-                  Sesión de hoy
-                </p>
-                <p style={{ fontSize: 19, fontWeight: 800, color: 'var(--text)', letterSpacing: '-.02em' }}>
-                  {macrocycle.focus}
-                </p>
-                <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>
-                  Día {macrocycle.day} · {sessionExercises.length} ejercicios
-                </p>
-              </div>
-              {injuries && injuries.length > 0 ? (
-                <span style={{ fontSize: 9, background: 'rgba(239,68,68,0.12)', color: '#f87171', padding: '4px 9px', borderRadius: 20, fontWeight: 800, letterSpacing: '.06em', border: '1px solid rgba(239,68,68,0.3)' }}>CARGA</span>
-              ) : (
-                <span style={{ fontSize: 9, background: 'rgba(34,197,94,0.1)', color: 'var(--primary)', padding: '4px 9px', borderRadius: 20, fontWeight: 800, letterSpacing: '.06em', border: '1px solid rgba(34,197,94,0.2)' }}>VERDE</span>
-              )}
+          <div style={{
+            padding: '14px 16px',
+            background: 'linear-gradient(135deg, rgba(34,197,94,0.08), transparent)',
+            borderBottom: '1px solid var(--card-border)',
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          }}>
+            <div>
+              <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>
+                {macrocycle.program_name} · {macrocycle.focus}
+              </p>
+              <p style={{ fontSize: 11, color: 'var(--primary)', marginTop: 2 }}>
+                {sessionExercises.length} ejercicios
+              </p>
             </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginTop: 14 }}>
-              {sessionExercises.map((ex, i) => (
-                <div key={i} style={{
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
-                  padding: '10px 0',
-                  borderBottom: i < sessionExercises.length - 1 ? '1px solid var(--card-border)' : 'none',
-                }}>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{ex.name}</span>
-                  <span style={{ fontSize: 12, color: 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums' }}>
-                    {ex.sets}×{ex.reps} · <strong style={{ color: 'var(--text)', fontWeight: 700 }}>{Math.round(ex.max * ex.pct)}kg</strong>
-                  </span>
-                </div>
-              ))}
-            </div>
+            {injuries && injuries.length > 0 ? (
+              <span style={{ fontSize: 10, background: 'rgba(239,68,68,0.15)', color: '#f87171', padding: '3px 10px', borderRadius: 20, fontWeight: 800, letterSpacing: '.06em', border: '1px solid rgba(239,68,68,0.3)' }}>
+                CARGA
+              </span>
+            ) : (
+              <span style={{ fontSize: 10, background: 'rgba(34,197,94,0.12)', color: 'var(--primary)', padding: '3px 10px', borderRadius: 20, fontWeight: 800, letterSpacing: '.06em', border: '1px solid rgba(34,197,94,0.25)' }}>
+                VERDE
+              </span>
+            )}
           </div>
 
-          <button
-            onClick={() => navigate('WARMUP')}
-            style={{
-              width: '100%',
-              background: 'var(--cta-bg)',
-              color: 'var(--cta-text)',
-              fontSize: 14,
-              fontWeight: 800,
-              padding: '15px 0',
-              border: 'none',
-              borderTop: '1px solid var(--card-border)',
-              cursor: 'pointer',
-              letterSpacing: '.04em',
-              textTransform: 'uppercase',
-              fontFamily: 'inherit',
-            }}
-          >
-            Empezar · Calentamiento
-          </button>
+          <div style={{ padding: '4px 16px' }}>
+            {sessionExercises.map((ex, i) => (
+              <div key={i} style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                padding: '12px 0',
+                borderBottom: i < sessionExercises.length - 1 ? '1px solid var(--card-border)' : 'none',
+              }}>
+                <div>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{ex.name}</p>
+                  <p style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 2, fontVariantNumeric: 'tabular-nums' }}>
+                    {ex.sets}×{ex.reps} @ <strong style={{ color: 'var(--text)', fontWeight: 700 }}>{Math.round(ex.max * ex.pct)}kg</strong>{' '}
+                    <span style={{ color: 'var(--primary)' }}>({Math.round(ex.pct * 100)}% 1RM)</span>
+                  </p>
+                </div>
+                {i < 2 ? <span style={{ fontSize: 18 }}>⭐</span> : <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>+ más</span>}
+              </div>
+            ))}
+          </div>
+
+          <div style={{ padding: 14 }}>
+            <button
+              onClick={() => navigate('WARMUP')}
+              style={{
+                width: '100%',
+                background: 'var(--cta-bg)',
+                color: 'var(--cta-text)',
+                fontSize: 15,
+                fontWeight: 800,
+                padding: '14px 0',
+                borderRadius: 14,
+                border: 'none',
+                cursor: 'pointer',
+                letterSpacing: '.02em',
+                fontFamily: 'inherit',
+              }}
+            >
+              Iniciar Sesión →
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* QUICK STATS — horizontal scroll chips */}
-      <div style={{ padding: '0 0 20px' }}>
-        <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--text-secondary)', padding: '0 20px 10px' }}>
-          Sigamos
-        </p>
-        <div style={{ display: 'flex', gap: 10, overflowX: 'auto', padding: '0 20px 4px', scrollbarWidth: 'none' }}>
-          <Chip label="OLY Index" value={olyIndex} accent="#F59E0B" onClick={() => navigate('INDEX')} />
-          <Chip label="Racha" value={`${sesiones}🔥`} accent="#f97316" />
-          <Chip label="Pulse" value="+300 XP" accent="#818cf8" onClick={() => navigate('PULSE')} />
-          <Chip label="Píldoras" value="4" accent="var(--primary)" onClick={() => navigate('PILLS')} />
-          <Chip label="Schedule" value="→" onClick={() => navigate('SCHEDULE')} />
-        </div>
-      </div>
-
-      {/* INJURY — only if exists */}
+      {/* INJURY SHIELD */}
       {injuries && injuries.length > 0 && (
-        <div style={{ padding: '0 20px 18px' }}>
+        <div style={{ padding: '0 20px 16px' }}>
           <div
             onClick={() => navigate('PERFORMANCE')}
             style={{
-              background: 'rgba(239,68,68,0.05)',
-              border: '1px solid rgba(239,68,68,0.18)',
-              borderRadius: 18,
-              padding: '14px 16px',
+              background: 'rgba(239,68,68,0.06)',
+              border: '1px solid rgba(239,68,68,0.22)',
+              borderRadius: 20, padding: 14,
               display: 'flex', alignItems: 'center', gap: 14, cursor: 'pointer',
             }}
           >
-            <div style={{ width: 36, height: 36, borderRadius: 12, background: 'rgba(239,68,68,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>🛡️</div>
+            <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(239,68,68,0.14)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>🛡️</div>
             <div style={{ flex: 1 }}>
-              <p style={{ fontSize: 9, color: '#f87171', fontWeight: 800, letterSpacing: '.1em', textTransform: 'uppercase' }}>Injury Shield</p>
-              <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginTop: 2 }}>{String(injuries[0])}</p>
+              <p style={{ fontSize: 10, color: '#f87171', fontWeight: 800, letterSpacing: '.1em', textTransform: 'uppercase' }}>Injury Shield</p>
+              <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', marginTop: 2 }}>{String(injuries[0])}</p>
             </div>
-            <span style={{ fontSize: 18, color: 'var(--text-secondary)' }}>›</span>
+            <span style={{ fontSize: 11, color: '#f87171', fontWeight: 700, border: '1px solid rgba(239,68,68,0.35)', borderRadius: 8, padding: '4px 8px' }}>Ver →</span>
           </div>
         </div>
       )}
 
-      {/* WEEK SUMMARY — inline row, not boxes */}
+      {/* PULSE WIDGET — gradiente índigo destacado */}
+      <div style={{ padding: '0 20px 18px' }}>
+        <div
+          onClick={() => navigate('PULSE')}
+          style={{
+            background: 'linear-gradient(135deg, rgba(99,102,241,0.18), rgba(168,85,247,0.08))',
+            border: '1px solid rgba(99,102,241,0.4)',
+            borderRadius: 20, padding: 16,
+            display: 'flex', alignItems: 'center', gap: 14, cursor: 'pointer',
+            boxShadow: '0 4px 24px rgba(99,102,241,0.12)',
+          }}
+        >
+          <div style={{
+            width: 48, height: 48, borderRadius: 14,
+            background: 'rgba(99,102,241,0.25)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0,
+          }}>⚡</div>
+          <div style={{ flex: 1 }}>
+            <p style={{ fontSize: 11, color: '#a5b4fc', fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase' }}>
+              Reto Semanal Pulse
+            </p>
+            <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', marginTop: 2 }}>
+              Snatch técnico · {maxes.snatch - 10}kg
+            </p>
+            <p style={{ fontSize: 10, color: '#818cf8', marginTop: 2 }}>
+              Caduca domingo · +300 XP
+            </p>
+          </div>
+          <span style={{ fontSize: 11, color: '#a5b4fc', fontWeight: 700, border: '1px solid rgba(99,102,241,0.5)', borderRadius: 8, padding: '4px 8px' }}>
+            Ver →
+          </span>
+        </div>
+      </div>
+
+      {/* ESTA SEMANA */}
       <div style={{ padding: '0 20px 24px' }}>
-        <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: 12 }}>
+        <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: 10 }}>
           Esta semana
         </p>
         <div style={{
-          background: 'var(--surface)',
-          border: '1px solid var(--card-border)',
-          borderRadius: 18,
-          padding: '16px 18px',
-          display: 'flex',
-          justifyContent: 'space-between',
+          background: 'var(--surface)', border: '1px solid var(--card-border)',
+          borderRadius: 18, padding: '16px 18px',
+          display: 'flex', justifyContent: 'space-between',
         }}>
           <div>
             <p style={{ fontSize: 24, fontWeight: 900, color: 'var(--text)', letterSpacing: '-.03em', lineHeight: 1 }}>{sesiones}</p>
@@ -390,7 +456,9 @@ const AtletaHome: React.FC = () => {
           </div>
           <div style={{ width: 1, background: 'var(--card-border)' }} />
           <div>
-            <p style={{ fontSize: 24, fontWeight: 900, color: '#F59E0B', letterSpacing: '-.03em', lineHeight: 1 }}>{tonelaje.toFixed(1)}<span style={{ fontSize: 13, color: 'var(--text-secondary)', marginLeft: 2 }}>t</span></p>
+            <p style={{ fontSize: 24, fontWeight: 900, color: '#F59E0B', letterSpacing: '-.03em', lineHeight: 1 }}>
+              {tonelaje.toFixed(1)}<span style={{ fontSize: 13, color: 'var(--text-secondary)', marginLeft: 2 }}>t</span>
+            </p>
             <p style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 4, fontWeight: 600 }}>Volumen</p>
           </div>
           <div style={{ width: 1, background: 'var(--card-border)' }} />
