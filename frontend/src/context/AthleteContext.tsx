@@ -17,6 +17,8 @@ interface AthleteContextType {
   stress: StressResult | null;
   stressLoading: boolean;
   allAthletes: AthleteProfile[];
+  selectedAthlete: AthleteProfile | null;
+  selectAthlete: (id: string) => void;
 }
 
 const AthleteContext = createContext<AthleteContextType | null>(null);
@@ -27,6 +29,9 @@ export function AthleteProvider({ children }: { children: ReactNode }) {
   const [stressLoading, setStressLoading] = useState(false);
 
   const athlete = user ? (athleteByEmail[user.email] ?? null) : null;
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selectedAthlete = selectedId ? (athletes.find(a => a.id === selectedId) ?? null) : null;
+  const selectAthlete = (id: string) => setSelectedId(id);
 
   useEffect(() => {
     if (!athlete) return;
@@ -57,7 +62,7 @@ export function AthleteProvider({ children }: { children: ReactNode }) {
   }, [athlete?.id]);
 
   return (
-    <AthleteContext.Provider value={{ athlete, stress, stressLoading, allAthletes: athletes }}>
+    <AthleteContext.Provider value={{ athlete, stress, stressLoading, allAthletes: athletes, selectedAthlete, selectAthlete }}>
       {children}
     </AthleteContext.Provider>
   );
