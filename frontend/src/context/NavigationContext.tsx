@@ -17,8 +17,20 @@ const NavContext = createContext<NavContextType | null>(null);
 
 const STORAGE_KEY = 'nav:currentView';
 
+const VALID_VIEWS: View[] = [
+  'LOGIN','ONBOARDING','PREMIUM',
+  'HOME','SUMMARY','WARMUP','SESSION','VICTORY',
+  'PERFORMANCE','INDEX','SCHEDULE','PULSE','PILLS','SOCIAL','PROFILE',
+  'COACH_DASH','ATHLETE_DETAIL','ASSIGN_MACRO',
+];
+
 function readInitial(): View {
   try {
+    const hash = (typeof window !== 'undefined' ? window.location.hash : '').replace(/^#/, '').toUpperCase();
+    if (hash) {
+      const match = VALID_VIEWS.find((v) => v === hash);
+      if (match) return match;
+    }
     const stored = localStorage.getItem(STORAGE_KEY) as View | null;
     return stored ?? 'HOME';
   } catch {
