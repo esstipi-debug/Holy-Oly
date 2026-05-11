@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext';
 import { AthleteProvider } from './context/AthleteContext';
 import { NavigationProvider, useNav } from './context/NavigationContext';
 import { ProductProvider, useProduct } from './context/ProductContext';
+import { RoleProvider, useRole } from './context/RoleContext';
 import PhoneLayout, { type NavTab } from './layouts/PhoneLayout';
 import AtletaHome from './pages/AtletaHome';
 import Login from './pages/Login';
@@ -24,6 +25,7 @@ import KnowledgePills from './pages/KnowledgePills';
 import SocialCard from './pages/SocialCard';
 import VoltaDashboard from './pages/VoltaDashboard';
 import VoltaPreWod from './pages/VoltaPreWod';
+import VoltaCoachDash from './pages/VoltaCoachDash';
 import type { View } from './context/NavigationContext';
 
 const NAV_MAP: Record<string, NavTab> = {
@@ -31,47 +33,91 @@ const NAV_MAP: Record<string, NavTab> = {
   WARMUP: 'train', SESSION: 'train', SUMMARY: 'train', VICTORY: 'train',
   PERFORMANCE: 'stats', INDEX: 'stats', SCHEDULE: 'stats', PULSE: 'stats', PILLS: 'stats', SOCIAL: 'stats',
   PROFILE: 'profile', ONBOARDING: 'profile', PREMIUM: 'profile',
-  VOLTA_HOME: 'home', VOLTA_PREWOD: 'wod',
+  COACH_DASH: 'home', ATHLETE_DETAIL: 'home', ASSIGN_MACRO: 'home',
+  VOLTA_HOME: 'home', VOLTA_PREWOD: 'wod', VOLTA_COACH: 'home',
 };
 
+// Home-set: vistas que NO deben mostrar back
+const HOME_VIEWS = new Set<View>(['HOME', 'COACH_DASH', 'VOLTA_HOME', 'VOLTA_COACH', 'LOGIN']);
+
 const navGroups = [
-  { title: 'Core',     views: ['ONBOARDING', 'PREMIUM'] },
+  { title: 'Core',      views: ['LOGIN', 'ONBOARDING', 'PREMIUM'] },
   { title: 'HO Atleta', views: ['HOME', 'SUMMARY', 'WARMUP', 'SESSION', 'VICTORY'] },
   { title: 'HO Stats',  views: ['PERFORMANCE', 'INDEX', 'SCHEDULE', 'PULSE', 'PILLS', 'SOCIAL', 'PROFILE'] },
   { title: 'HO Coach',  views: ['COACH_DASH', 'ATHLETE_DETAIL', 'ASSIGN_MACRO'] },
-  { title: 'Volta',     views: ['VOLTA_HOME', 'VOLTA_PREWOD'] },
+  { title: 'Volta',     views: ['VOLTA_HOME', 'VOLTA_PREWOD', 'VOLTA_COACH'] },
 ];
 
-function ProductSwitcher() {
+function ProductRoleSwitcher() {
   const { product, setProduct } = useProduct();
+  const { role, setRole } = useRole();
   const { navigate } = useNav();
+
+  const goHome = (p: typeof product, r: typeof role) => {
+    if (p === 'volta') navigate(r === 'coach' ? 'VOLTA_COACH' : 'VOLTA_HOME');
+    else navigate(r === 'coach' ? 'COACH_DASH' : 'HOME');
+  };
+
   return (
     <div style={{
-      position: 'absolute', top: 8, left: '50%', transform: 'translateX(-50%)', zIndex: 50,
-      display: 'flex', gap: 4, padding: 3,
-      background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)',
-      borderRadius: 14, border: '1px solid rgba(255,255,255,0.08)',
+      position: 'absolute', top: 8, left: '50%', transform: 'translateX(-50%)', zIndex: 55,
+      display: 'flex', gap: 6, alignItems: 'center',
     }}>
-      <button
-        onClick={() => { setProduct('holy-oly'); navigate('HOME'); }}
-        style={{
-          padding: '4px 11px', borderRadius: 11,
-          fontSize: 10, fontWeight: 800, letterSpacing: '.06em',
-          background: product === 'holy-oly' ? 'linear-gradient(135deg,#FFD700,#B8860B)' : 'transparent',
-          color: product === 'holy-oly' ? '#07070F' : '#FFD700',
-          border: 'none', cursor: 'pointer', fontFamily: 'inherit',
-        }}
-      >HOLY OLY</button>
-      <button
-        onClick={() => { setProduct('volta'); navigate('VOLTA_HOME'); }}
-        style={{
-          padding: '4px 11px', borderRadius: 11,
-          fontSize: 10, fontWeight: 800, letterSpacing: '.06em',
-          background: product === 'volta' ? 'linear-gradient(135deg,#00E5FF,#0070FF)' : 'transparent',
-          color: product === 'volta' ? '#07070F' : '#00E5FF',
-          border: 'none', cursor: 'pointer', fontFamily: 'inherit',
-        }}
-      >VOLTA</button>
+      {/* Product pill */}
+      <div style={{
+        display: 'flex', gap: 4, padding: 3,
+        background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(10px)',
+        borderRadius: 12, border: '1px solid rgba(255,255,255,0.08)',
+      }}>
+        <button
+          onClick={() => { setProduct('holy-oly'); goHome('holy-oly', role); }}
+          style={{
+            padding: '3px 9px', borderRadius: 10,
+            fontSize: 9, fontWeight: 800, letterSpacing: '.06em',
+            background: product === 'holy-oly' ? 'linear-gradient(135deg,#FFD700,#B8860B)' : 'transparent',
+            color: product === 'holy-oly' ? '#07070F' : '#FFD700',
+            border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+          }}
+        >HO</button>
+        <button
+          onClick={() => { setProduct('volta'); goHome('volta', role); }}
+          style={{
+            padding: '3px 9px', borderRadius: 10,
+            fontSize: 9, fontWeight: 800, letterSpacing: '.06em',
+            background: product === 'volta' ? 'linear-gradient(135deg,#00E5FF,#0070FF)' : 'transparent',
+            color: product === 'volta' ? '#07070F' : '#00E5FF',
+            border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+          }}
+        >VOL</button>
+      </div>
+
+      {/* Role pill */}
+      <div style={{
+        display: 'flex', gap: 4, padding: 3,
+        background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(10px)',
+        borderRadius: 12, border: '1px solid rgba(255,255,255,0.08)',
+      }}>
+        <button
+          onClick={() => { setRole('atleta'); goHome(product, 'atleta'); }}
+          style={{
+            padding: '3px 8px', borderRadius: 10,
+            fontSize: 9, fontWeight: 800, letterSpacing: '.06em',
+            background: role === 'atleta' ? 'rgba(255,255,255,0.95)' : 'transparent',
+            color: role === 'atleta' ? '#07070F' : 'rgba(255,255,255,0.7)',
+            border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+          }}
+        >ATL</button>
+        <button
+          onClick={() => { setRole('coach'); goHome(product, 'coach'); }}
+          style={{
+            padding: '3px 8px', borderRadius: 10,
+            fontSize: 9, fontWeight: 800, letterSpacing: '.06em',
+            background: role === 'coach' ? 'rgba(255,255,255,0.95)' : 'transparent',
+            color: role === 'coach' ? '#07070F' : 'rgba(255,255,255,0.7)',
+            border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+          }}
+        >COACH</button>
+      </div>
     </div>
   );
 }
@@ -79,23 +125,28 @@ function ProductSwitcher() {
 function AppInner() {
   const { currentView, navigate } = useNav();
   const { product } = useProduct();
+  const { role } = useRole();
 
   const renderView = () => {
-    // Volta routes
+    // VOLTA
     if (product === 'volta') {
       switch (currentView) {
         case 'VOLTA_PREWOD': return <VoltaPreWod />;
+        case 'VOLTA_COACH':  return <VoltaCoachDash />;
+        case 'ATHLETE_DETAIL': return <AthleteDeepDive />;
+        case 'ASSIGN_MACRO': return <AssignMacrocycle />;
+        case 'PROFILE':      return <Profile />;
         case 'VOLTA_HOME':
         case 'HOME':
-        default:             return <VoltaDashboard />;
+        default:
+          return role === 'coach' ? <VoltaCoachDash /> : <VoltaDashboard />;
       }
     }
-    // Holy Oly routes
+    // HOLY OLY
     switch (currentView) {
-      case 'LOGIN':           return <Login onSuccess={() => navigate('HOME')} />;
+      case 'LOGIN':           return <Login onSuccess={() => navigate(role === 'coach' ? 'COACH_DASH' : 'HOME')} />;
       case 'ONBOARDING':     return <Onboarding />;
       case 'PREMIUM':        return <Premium />;
-      case 'HOME':           return <AtletaHome />;
       case 'SUMMARY':        return <SessionSummaryPreview />;
       case 'WARMUP':         return <WarmupGenerator />;
       case 'SESSION':        return <ActiveSession />;
@@ -110,23 +161,26 @@ function AppInner() {
       case 'COACH_DASH':     return <CommandCenter />;
       case 'ATHLETE_DETAIL': return <AthleteDeepDive />;
       case 'ASSIGN_MACRO':   return <AssignMacrocycle />;
-      default:               return <AtletaHome />;
+      case 'HOME':
+      default:
+        return role === 'coach' ? <CommandCenter /> : <AtletaHome />;
     }
   };
 
   const handleNavChange = (tab: NavTab) => {
     if (product === 'volta') {
-      if (tab === 'home') navigate('VOLTA_HOME');
+      if (tab === 'home') navigate(role === 'coach' ? 'VOLTA_COACH' : 'VOLTA_HOME');
       else if (tab === 'wod') navigate('VOLTA_PREWOD');
-      // stats/logros/profile: future
+      else if (tab === 'profile') navigate('PROFILE');
       return;
     }
-    const map: Partial<Record<NavTab, View>> = {
-      home: 'HOME', train: 'WARMUP', stats: 'PERFORMANCE', profile: 'PROFILE',
-    };
-    const dest = map[tab];
-    if (dest) navigate(dest);
+    if (tab === 'home') navigate(role === 'coach' ? 'COACH_DASH' : 'HOME');
+    else if (tab === 'train') navigate('WARMUP');
+    else if (tab === 'stats') navigate('PERFORMANCE');
+    else if (tab === 'profile') navigate('PROFILE');
   };
+
+  const showBack = !HOME_VIEWS.has(currentView);
 
   return (
     <div className="relative">
@@ -134,8 +188,9 @@ function AppInner() {
         activeNav={NAV_MAP[currentView] ?? 'home'}
         onNavChange={handleNavChange}
         product={product}
+        showBack={showBack}
       >
-        <ProductSwitcher />
+        <ProductRoleSwitcher />
         {renderView()}
       </PhoneLayout>
 
@@ -145,7 +200,7 @@ function AppInner() {
         style={{ background: 'var(--surface)', border: '1px solid var(--card-border)' }}
       >
         <p className="text-[9px] font-black uppercase tracking-widest" style={{ color: 'var(--primary)' }}>
-          UI Explorer · {product === 'volta' ? 'VOLTA' : 'HOLY OLY'}
+          UI Explorer · {product === 'volta' ? 'VOLTA' : 'HOLY OLY'} · {role === 'coach' ? 'COACH' : 'ATLETA'}
         </p>
         {navGroups.map((group) => (
           <div key={group.title} className="space-y-1">
@@ -197,9 +252,11 @@ function App() {
       <AuthProvider>
         <AthleteProvider>
           <ProductProvider>
-            <NavigationProvider>
-              <AppInner />
-            </NavigationProvider>
+            <RoleProvider>
+              <NavigationProvider>
+                <AppInner />
+              </NavigationProvider>
+            </RoleProvider>
           </ProductProvider>
         </AthleteProvider>
       </AuthProvider>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNav } from '../context/NavigationContext';
 
 export type NavTab = 'home' | 'train' | 'stats' | 'profile' | 'wod' | 'logros';
 
@@ -7,6 +8,7 @@ interface PhoneLayoutProps {
   activeNav?: NavTab;
   onNavChange?: (tab: NavTab) => void;
   product?: 'holy-oly' | 'volta';
+  showBack?: boolean;
 }
 
 const NAV_ITEMS = [
@@ -77,7 +79,9 @@ const PhoneLayout: React.FC<PhoneLayoutProps> = ({
   activeNav = 'home',
   onNavChange,
   product = 'holy-oly',
+  showBack = false,
 }) => {
+  const { back, canGoBack } = useNav();
   const now = new Date();
   const time = now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
 
@@ -132,6 +136,24 @@ const PhoneLayout: React.FC<PhoneLayoutProps> = ({
             </div>
           </div>
         </div>
+
+        {/* Universal back button */}
+        {showBack && canGoBack && (
+          <button
+            onClick={back}
+            style={{
+              position: 'absolute', top: 50, left: 14, zIndex: 60,
+              width: 34, height: 34, borderRadius: '50%',
+              background: 'rgba(0,0,0,0.55)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              color: '#fff', fontSize: 16, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontFamily: 'inherit',
+            }}
+            aria-label="Atrás"
+          >←</button>
+        )}
 
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: 'none', paddingBottom: 76 }}>
