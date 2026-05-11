@@ -28,12 +28,14 @@ import VoltaPreWod from './pages/VoltaPreWod';
 import VoltaCoachDash from './pages/VoltaCoachDash';
 import VoltaCoachWod from './pages/VoltaCoachWod';
 import VoltaCoachTools from './pages/VoltaCoachTools';
+import MovementProgression from './pages/MovementProgression';
 import type { View } from './context/NavigationContext';
 
 const NAV_MAP_HO: Record<string, NavTab> = {
   HOME: 'home',
   WARMUP: 'train', SESSION: 'train', SUMMARY: 'train', VICTORY: 'train',
   PERFORMANCE: 'stats', INDEX: 'stats', SCHEDULE: 'stats', PULSE: 'stats', PILLS: 'stats', SOCIAL: 'stats',
+  PROGRESSION: 'stats',
   PROFILE: 'profile', ONBOARDING: 'profile', PREMIUM: 'profile',
   COACH_DASH: 'home', ATHLETE_DETAIL: 'home', ASSIGN_MACRO: 'home',
 };
@@ -42,6 +44,7 @@ const NAV_MAP_VOLTA: Record<string, NavTab> = {
   VOLTA_HOME: 'home', VOLTA_COACH: 'home',
   VOLTA_PREWOD: 'wod', VOLTA_COACH_WOD: 'wod', WARMUP: 'wod', SESSION: 'wod', SUMMARY: 'wod', VICTORY: 'wod',
   VOLTA_COACH_MACRO: 'stats', VOLTA_COACH_INVENTORY: 'stats', VOLTA_COACH_TOOLS: 'stats',
+  PROGRESSION: 'stats',
   PERFORMANCE: 'stats', INDEX: 'stats', SCHEDULE: 'stats', PULSE: 'stats', PILLS: 'stats',
   SOCIAL: 'logros',
   PROFILE: 'profile',
@@ -147,6 +150,7 @@ function AppInner() {
         case 'VOLTA_COACH_TOOLS':     return <VoltaCoachTools />;
         case 'VOLTA_COACH_MACRO':     return <VoltaCoachTools />;
         case 'VOLTA_COACH_INVENTORY': return <VoltaCoachTools />;
+        case 'PROGRESSION':           return <MovementProgression />;
         case 'VOLTA_PREWOD':          return <VoltaPreWod />;
         case 'ATHLETE_DETAIL':        return <AthleteDeepDive />;
         case 'ASSIGN_MACRO':          return <AssignMacrocycle />;
@@ -178,6 +182,7 @@ function AppInner() {
       case 'COACH_DASH':     return <CommandCenter />;
       case 'ATHLETE_DETAIL': return <AthleteDeepDive />;
       case 'ASSIGN_MACRO':   return <AssignMacrocycle />;
+      case 'PROGRESSION':    return <MovementProgression />;
       case 'HOME':
       default:
         return role === 'coach' ? <CommandCenter /> : <AtletaHome />;
@@ -188,7 +193,7 @@ function AppInner() {
     if (product === 'volta') {
       if (tab === 'home') navigate(role === 'coach' ? 'VOLTA_COACH' : 'VOLTA_HOME');
       else if (tab === 'wod') navigate(role === 'coach' ? 'VOLTA_COACH_WOD' : 'VOLTA_PREWOD');
-      else if (tab === 'stats') navigate(role === 'coach' ? 'VOLTA_COACH_TOOLS' : 'PERFORMANCE');
+      else if (tab === 'stats') navigate(role === 'coach' ? 'VOLTA_COACH_TOOLS' : 'PROGRESSION');
       else if (tab === 'logros') navigate('SOCIAL');
       else if (tab === 'profile') navigate('PROFILE');
       return;

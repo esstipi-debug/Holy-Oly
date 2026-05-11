@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNav } from '../context/NavigationContext';
 import WiseAssistant from '../components/WiseAssistant';
+import { MOVEMENTS } from '../data/movements';
 
 const C = {
   bg: '#07070F',
@@ -16,9 +17,10 @@ const C = {
   purple: '#A855F7',
 };
 
-type Tab = 'templates' | 'comparativa' | 'tendencias' | 'macro' | 'calendario' | 'notas' | 'bulk';
+type Tab = 'templates' | 'comparativa' | 'tendencias' | 'macro' | 'calendario' | 'notas' | 'bulk' | 'progresion';
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
+  { id: 'progresion', label: 'Progresión',    icon: '🎚️' },
   { id: 'templates',  label: 'Templates',     icon: '📋' },
   { id: 'bulk',       label: 'Masiva',        icon: '⚡' },
   { id: 'comparativa',label: 'Comparar',      icon: '⚖️' },
@@ -27,6 +29,18 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'calendario', label: 'Calendario',    icon: '📅' },
   { id: 'notas',      label: 'Notas',         icon: '💬' },
 ];
+
+// Matriz de progresión: nivel por atleta y movimiento (sample)
+const PROG_MATRIX: Record<string, Record<string, 1 | 2 | 3 | 4 | 5>> = {
+  m1: { pullup: 3, hspu: 2, du: 4, snatch: 3, cleanjerk: 3, backsquat: 3, row: 4, boxjump: 3 },
+  m2: { pullup: 4, hspu: 3, du: 5, snatch: 4, cleanjerk: 4, backsquat: 4, row: 4, boxjump: 4 },
+  m3: { pullup: 2, hspu: 2, du: 2, snatch: 2, cleanjerk: 2, backsquat: 3, row: 3, boxjump: 3 },
+  m4: { pullup: 5, hspu: 4, du: 5, snatch: 4, cleanjerk: 5, backsquat: 4, row: 5, boxjump: 4 },
+  m5: { pullup: 1, hspu: 1, du: 2, snatch: 2, cleanjerk: 2, backsquat: 2, row: 2, boxjump: 2 },
+  m6: { pullup: 3, hspu: 3, du: 3, snatch: 3, cleanjerk: 3, backsquat: 4, row: 3, boxjump: 3 },
+};
+
+const levelColor = (l: number) => l >= 5 ? '#22C55E' : l >= 4 ? '#00E5FF' : l >= 3 ? '#F59E0B' : l >= 2 ? '#A855F7' : '#EF4444';
 
 const WOD_TEMPLATES = [
   { kind: 'Girls', name: 'Fran',  desc: '21-15-9 Thrusters (95/65) · Pull-ups', intensity: 5 },
@@ -57,7 +71,7 @@ const COMPETITIONS = [
 
 const VoltaCoachTools: React.FC = () => {
   const { navigate } = useNav();
-  const [tab, setTab] = useState<Tab>('templates');
+  const [tab, setTab] = useState<Tab>('progresion');
   const [selA, setSelA] = useState<string | null>('m1');
   const [selB, setSelB] = useState<string | null>('m4');
   const [selectedAthletes, setSelectedAthletes] = useState<Set<string>>(new Set(['m1', 'm2', 'm4']));
@@ -112,6 +126,129 @@ const VoltaCoachTools: React.FC = () => {
       </div>
 
       <div style={{ padding: '16px' }}>
+
+        {/* PROGRESIÓN — Matriz atletas × movimientos */}
+        {tab === 'progresion' && (
+          <>
+            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: C.muted, marginBottom: 6 }}>
+              Skill Matrix · {ATHLETES.length} atletas × {MOVEMENTS.filter(m => m.product.includes('volta')).length} movimientos
+            </p>
+            <p style={{ fontSize: 10, color: C.muted, marginBottom: 12, lineHeight: 1.5 }}>
+              Cada celda = nivel actual (1-5). Tap en la cabecera para ver detalles del movimiento.
+            </p>
+
+            {/* Leyenda */}
+            <div style={{ display: 'flex', gap: 6, marginBottom: 12, flexWrap: 'wrap' }}>
+              {[1, 2, 3, 4, 5].map(l => (
+                <div key={l} style={{
+                  display: 'flex', alignItems: 'center', gap: 4,
+                  padding: '3px 8px', borderRadius: 8,
+                  background: `${levelColor(l)}15`, border: `1px solid ${levelColor(l)}55`,
+                }}>
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: levelColor(l) }} />
+                  <span style={{ fontSize: 9, color: levelColor(l), fontWeight: 800 }}>L{l}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Matriz scrollable */}
+            <div style={{
+              background: C.surface, border: `1px solid ${C.line}`, borderRadius: 14,
+              overflow: 'auto', marginBottom: 18,
+            }}>
+              <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: 11 }}>
+                <thead>
+                  <tr>
+                    <th style={{
+                      position: 'sticky', left: 0, top: 0, zIndex: 2,
+                      background: C.surface2,
+                      padding: '10px 12px', textAlign: 'left',
+                      borderRight: `1px solid ${C.line}`, borderBottom: `1px solid ${C.line}`,
+                      fontWeight: 800, fontSize: 9, color: C.muted, letterSpacing: '.06em', textTransform: 'uppercase',
+                    }}>Atleta</th>
+                    {MOVEMENTS.filter(m => m.product.includes('volta')).map(m => (
+                      <th key={m.id} style={{
+                        padding: '10px 8px', textAlign: 'center',
+                        borderRight: `1px solid ${C.line}`, borderBottom: `1px solid ${C.line}`,
+                        background: C.surface2,
+                        fontWeight: 700, fontSize: 9, color: C.text,
+                        minWidth: 50,
+                      }}>
+                        <div style={{ fontSize: 16 }}>{m.emoji}</div>
+                        <div style={{ fontSize: 8, color: C.muted, marginTop: 2, whiteSpace: 'nowrap' }}>{m.name.slice(0, 8)}</div>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {ATHLETES.map(a => {
+                    const row = PROG_MATRIX[a.id] ?? {};
+                    const avg = Object.values(row).reduce((acc, v) => acc + v, 0) / Math.max(1, Object.values(row).length);
+                    return (
+                      <tr key={a.id}>
+                        <td style={{
+                          position: 'sticky', left: 0,
+                          background: C.surface,
+                          padding: '10px 12px',
+                          borderRight: `1px solid ${C.line}`, borderBottom: `1px solid ${C.line}`,
+                          fontWeight: 700, color: C.text, fontSize: 11,
+                          whiteSpace: 'nowrap',
+                        }}>
+                          {a.name.split(' ')[0]}
+                          <span style={{ fontSize: 9, color: levelColor(avg), marginLeft: 6 }}>
+                            ø {avg.toFixed(1)}
+                          </span>
+                        </td>
+                        {MOVEMENTS.filter(m => m.product.includes('volta')).map(m => {
+                          const lvl = row[m.id] ?? 1;
+                          return (
+                            <td key={m.id} style={{
+                              padding: 6, textAlign: 'center',
+                              borderRight: `1px solid ${C.line}`, borderBottom: `1px solid ${C.line}`,
+                            }}>
+                              <div style={{
+                                width: 28, height: 28, borderRadius: 8, margin: '0 auto',
+                                background: levelColor(lvl),
+                                color: '#07070F',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                fontSize: 11, fontWeight: 900,
+                              }}>{lvl}</div>
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* CTA */}
+            <div style={{
+              background: 'rgba(0,229,255,0.04)', border: '1px solid rgba(0,229,255,0.25)',
+              borderRadius: 14, padding: 14, marginBottom: 12,
+            }}>
+              <p style={{ fontSize: 11, color: C.cyan, fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 6 }}>
+                Detección automática
+              </p>
+              <p style={{ fontSize: 11, color: C.text, lineHeight: 1.5 }}>
+                <strong style={{ color: '#EF4444' }}>Pablo I.</strong> tiene 6/8 movimientos en L1-L2 → considerá un macrociclo de fundamentos.{' '}
+                <strong style={{ color: '#22C55E' }}>Camila V.</strong> en 6/8 movimientos L4-L5 → lista para Open prescribed.
+              </p>
+            </div>
+
+            <button
+              onClick={() => navigate('PROGRESSION')}
+              style={{
+                width: '100%', padding: '12px 0',
+                background: C.cyan, color: '#07070F', border: 'none',
+                borderRadius: 12, fontSize: 12, fontWeight: 800,
+                letterSpacing: '.04em', textTransform: 'uppercase',
+                cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >Ver mi skill tree (atleta view)</button>
+          </>
+        )}
 
         {/* TEMPLATES */}
         {tab === 'templates' && (
