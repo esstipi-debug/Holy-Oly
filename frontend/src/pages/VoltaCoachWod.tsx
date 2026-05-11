@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNav } from '../context/NavigationContext';
+import WiseAssistant from '../components/WiseAssistant';
 
 const C = {
   bg: '#07070F',
@@ -276,6 +277,8 @@ const VoltaCoachWod: React.FC = () => {
           }}
         >Publicar al box</button>
       </div>
+
+      <WiseAssistant context="Coach · WOD Builder" />
     </div>
   );
 };

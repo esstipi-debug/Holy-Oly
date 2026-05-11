@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNav } from '../context/NavigationContext';
+import WiseAssistant from '../components/WiseAssistant';
 
 const C = {
   bg: '#07070F',
@@ -276,7 +277,7 @@ const VoltaCoachDash: React.FC = () => {
         </div>
 
         {/* ACCIONES PRINCIPALES */}
-        <Sec>Acciones</Sec>
+        <Sec>Acciones del coach</Sec>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 18 }}>
           <button
             onClick={() => navigate('VOLTA_COACH_WOD')}
@@ -292,6 +293,21 @@ const VoltaCoachDash: React.FC = () => {
             <div style={{ fontSize: 18, marginBottom: 4 }}>⚡</div>
             Crear WOD
             <div style={{ fontSize: 9, color: C.muted, fontWeight: 500, marginTop: 2 }}>Editor diario</div>
+          </button>
+          <button
+            onClick={() => navigate('VOLTA_COACH_TOOLS')}
+            style={{
+              padding: '14px 10px', borderRadius: 14,
+              background: `linear-gradient(135deg, ${C.green}22, transparent)`,
+              border: `1px solid ${C.green}55`,
+              color: C.green,
+              fontSize: 12, fontWeight: 800, textAlign: 'left',
+              cursor: 'pointer', fontFamily: 'inherit',
+            }}
+          >
+            <div style={{ fontSize: 18, marginBottom: 4 }}>🧰</div>
+            Toolbox
+            <div style={{ fontSize: 9, color: C.muted, fontWeight: 500, marginTop: 2 }}>7 herramientas</div>
           </button>
           <button
             onClick={() => navigate('VOLTA_COACH_MACRO')}
@@ -323,23 +339,10 @@ const VoltaCoachDash: React.FC = () => {
             Inventario
             <div style={{ fontSize: 9, color: C.muted, fontWeight: 500, marginTop: 2 }}>Equipamiento</div>
           </button>
-          <button
-            onClick={() => navigate('ATHLETE_DETAIL')}
-            style={{
-              padding: '14px 10px', borderRadius: 14,
-              background: `linear-gradient(135deg, ${C.green}22, transparent)`,
-              border: `1px solid ${C.green}55`,
-              color: C.green,
-              fontSize: 12, fontWeight: 800, textAlign: 'left',
-              cursor: 'pointer', fontFamily: 'inherit',
-            }}
-          >
-            <div style={{ fontSize: 18, marginBottom: 4 }}>👤</div>
-            + Atleta
-            <div style={{ fontSize: 9, color: C.muted, fontWeight: 500, marginTop: 2 }}>Onboarding</div>
-          </button>
         </div>
       </div>
+
+      <WiseAssistant context="Coach Dashboard · Box Command" />
     </div>
   );
 };

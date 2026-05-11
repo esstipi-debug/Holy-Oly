@@ -27,6 +27,7 @@ import VoltaDashboard from './pages/VoltaDashboard';
 import VoltaPreWod from './pages/VoltaPreWod';
 import VoltaCoachDash from './pages/VoltaCoachDash';
 import VoltaCoachWod from './pages/VoltaCoachWod';
+import VoltaCoachTools from './pages/VoltaCoachTools';
 import type { View } from './context/NavigationContext';
 
 const NAV_MAP_HO: Record<string, NavTab> = {
@@ -40,7 +41,7 @@ const NAV_MAP_HO: Record<string, NavTab> = {
 const NAV_MAP_VOLTA: Record<string, NavTab> = {
   VOLTA_HOME: 'home', VOLTA_COACH: 'home',
   VOLTA_PREWOD: 'wod', VOLTA_COACH_WOD: 'wod', WARMUP: 'wod', SESSION: 'wod', SUMMARY: 'wod', VICTORY: 'wod',
-  VOLTA_COACH_MACRO: 'stats', VOLTA_COACH_INVENTORY: 'stats',
+  VOLTA_COACH_MACRO: 'stats', VOLTA_COACH_INVENTORY: 'stats', VOLTA_COACH_TOOLS: 'stats',
   PERFORMANCE: 'stats', INDEX: 'stats', SCHEDULE: 'stats', PULSE: 'stats', PILLS: 'stats',
   SOCIAL: 'logros',
   PROFILE: 'profile',
@@ -55,7 +56,7 @@ const navGroups = [
   { title: 'HO Stats',     views: ['PERFORMANCE', 'INDEX', 'SCHEDULE', 'PULSE', 'PILLS', 'SOCIAL', 'PROFILE'] },
   { title: 'HO Coach',     views: ['COACH_DASH', 'ATHLETE_DETAIL', 'ASSIGN_MACRO'] },
   { title: 'Volta Atleta', views: ['VOLTA_HOME', 'VOLTA_PREWOD'] },
-  { title: 'Volta Coach',  views: ['VOLTA_COACH', 'VOLTA_COACH_WOD', 'VOLTA_COACH_MACRO', 'VOLTA_COACH_INVENTORY'] },
+  { title: 'Volta Coach',  views: ['VOLTA_COACH', 'VOLTA_COACH_WOD', 'VOLTA_COACH_TOOLS', 'VOLTA_COACH_MACRO', 'VOLTA_COACH_INVENTORY'] },
 ];
 
 function ProductRoleSwitcher() {
@@ -143,8 +144,9 @@ function AppInner() {
       switch (currentView) {
         case 'VOLTA_COACH':           return <VoltaCoachDash />;
         case 'VOLTA_COACH_WOD':       return <VoltaCoachWod />;
-        case 'VOLTA_COACH_MACRO':     return <AssignMacrocycle />;
-        case 'VOLTA_COACH_INVENTORY': return <VoltaCoachWod />; // TODO: dedicated inventory page
+        case 'VOLTA_COACH_TOOLS':     return <VoltaCoachTools />;
+        case 'VOLTA_COACH_MACRO':     return <VoltaCoachTools />;
+        case 'VOLTA_COACH_INVENTORY': return <VoltaCoachTools />;
         case 'VOLTA_PREWOD':          return <VoltaPreWod />;
         case 'ATHLETE_DETAIL':        return <AthleteDeepDive />;
         case 'ASSIGN_MACRO':          return <AssignMacrocycle />;
@@ -186,7 +188,7 @@ function AppInner() {
     if (product === 'volta') {
       if (tab === 'home') navigate(role === 'coach' ? 'VOLTA_COACH' : 'VOLTA_HOME');
       else if (tab === 'wod') navigate(role === 'coach' ? 'VOLTA_COACH_WOD' : 'VOLTA_PREWOD');
-      else if (tab === 'stats') navigate(role === 'coach' ? 'VOLTA_COACH_MACRO' : 'PERFORMANCE');
+      else if (tab === 'stats') navigate(role === 'coach' ? 'VOLTA_COACH_TOOLS' : 'PERFORMANCE');
       else if (tab === 'logros') navigate('SOCIAL');
       else if (tab === 'profile') navigate('PROFILE');
       return;
