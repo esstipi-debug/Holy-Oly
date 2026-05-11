@@ -6,6 +6,43 @@ const ringColor = (r: number) => r >= 70 ? '#22C55E' : r >= 50 ? '#F59E0B' : '#E
 const ringLabel = (r: number) => r >= 70 ? 'Listo para carga alta' : r >= 50 ? 'Carga moderada' : 'Tu cuerpo pide descanso';
 const ringTag = (r: number) => r >= 70 ? 'ÓPTIMO' : r >= 50 ? 'MODERADO' : 'BAJO';
 
+const PILLARS: { key: string; label: string; pct: number; color: string }[] = [
+  { key: 'mind',     label: 'Mental',     pct: 78, color: '#22C55E' },
+  { key: 'sleep',    label: 'Sueño',      pct: 64, color: '#06B6D4' },
+  { key: 'nutrition',label: 'Nutrición',  pct: 82, color: '#F59E0B' },
+  { key: 'tech',     label: 'Técnica',    pct: 45, color: '#A78BFA' },
+];
+
+const PillarRing: React.FC<{ pct: number; color: string; label: string }> = ({ pct, color, label }) => {
+  const r = 20, c = 2 * Math.PI * r, off = c * (1 - pct / 100);
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, flex: '0 0 auto' }}>
+      <div style={{ position: 'relative', width: 52, height: 52 }}>
+        <svg width={52} height={52} style={{ transform: 'rotate(-90deg)' }}>
+          <circle cx={26} cy={26} r={r} fill="none" stroke="var(--card-border)" strokeWidth={4} />
+          <circle
+            cx={26} cy={26} r={r} fill="none"
+            stroke={color} strokeWidth={4} strokeLinecap="round"
+            strokeDasharray={c} strokeDashoffset={off}
+            style={{ transition: 'stroke-dashoffset .8s ease' }}
+          />
+        </svg>
+        <span style={{
+          position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 11, fontWeight: 800, color: 'var(--text)', fontVariantNumeric: 'tabular-nums',
+        }}>{pct}</span>
+      </div>
+      <span style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 600 }}>{label}</span>
+    </div>
+  );
+};
+
+const formatDate = (d: Date) => {
+  const days = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
+  const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+  return `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]}`;
+};
+
 const RADIUS = 86;
 const STROKE = 10;
 const CIRCUM = 2 * Math.PI * RADIUS;
@@ -114,19 +151,22 @@ const AtletaHome: React.FC = () => {
       {/* HEADER — minimal */}
       <div style={{ padding: '14px 20px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
-          <p style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 500 }}>{greeting},</p>
-          <p style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)', letterSpacing: '-.02em', lineHeight: 1.15 }}>
+          <p style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600, letterSpacing: '.04em' }}>
+            {greeting} · {formatDate(new Date())}
+          </p>
+          <p style={{ fontSize: 22, fontWeight: 800, color: 'var(--text)', letterSpacing: '-.02em', lineHeight: 1.15, marginTop: 2 }}>
             {firstName}
           </p>
         </div>
         <button
           onClick={() => navigate('PROFILE')}
           style={{
-            width: 40, height: 40, borderRadius: '50%',
+            width: 42, height: 42, borderRadius: '50%',
             background: 'linear-gradient(135deg,var(--primary),#3B82F6)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 13, fontWeight: 900, color: 'var(--bg)',
             border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+            boxShadow: '0 4px 16px rgba(0,0,0,.25)',
           }}
         >
           {firstName[0]}{lastInitial}
@@ -134,7 +174,14 @@ const AtletaHome: React.FC = () => {
       </div>
 
       {/* HERO — readiness */}
-      <div style={{ padding: '16px 20px 28px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <div style={{
+        padding: '20px 20px 32px',
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+        position: 'relative',
+        background: readiness !== null
+          ? `radial-gradient(circle at 50% 40%, ${rc}18 0%, transparent 60%)`
+          : 'transparent',
+      }}>
         <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.18em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: 14 }}>
           Readiness · Hoy
         </p>
@@ -198,6 +245,26 @@ const AtletaHome: React.FC = () => {
             background: 'linear-gradient(90deg, var(--primary), #3B82F6)',
             width: `${macroPct}%`, transition: 'width .8s ease',
           }} />
+        </div>
+      </div>
+
+      {/* PILLARS — recovery / lifestyle rings */}
+      <div style={{ padding: '0 20px 22px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12 }}>
+          <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
+            Pilares de hoy
+          </p>
+          <button
+            onClick={() => navigate('PILLS')}
+            style={{ fontSize: 10, color: 'var(--primary)', fontWeight: 700, background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+          >
+            Ver todos →
+          </button>
+        </div>
+        <div style={{ display: 'flex', gap: 16, justifyContent: 'space-between' }}>
+          {PILLARS.map((p) => (
+            <PillarRing key={p.key} pct={p.pct} color={p.color} label={p.label} />
+          ))}
         </div>
       </div>
 

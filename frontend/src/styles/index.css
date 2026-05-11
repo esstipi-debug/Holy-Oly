@@ -113,3 +113,18 @@
     background: var(--surface);
   }
 }
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes ring-pulse {
+  0%, 100% { opacity: .6; }
+  50%      { opacity: 1; }
+}
+
+.scroll-x-no-bar::-webkit-scrollbar { display: none; }
+.scroll-x-no-bar { scrollbar-width: none; -ms-overflow-style: none; }
