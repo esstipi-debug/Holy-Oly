@@ -47,7 +47,7 @@ const AssignMacrocycle: React.FC = () => {
   const initials = target ? target.name.split(' ').slice(0, 2).map(n => n[0]).join('') : '';
 
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100%', paddingBottom: 110 }}>
+    <div style={{ background: 'var(--bg)', minHeight: '100%', paddingBottom: 170 }}>
 
       {/* HEADER */}
       <div style={{ padding: '52px 20px 24px' }}>

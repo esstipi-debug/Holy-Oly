@@ -164,29 +164,46 @@ const AthleteDeepDive: React.FC = () => {
           background: 'var(--surface)', border: '1px solid var(--card-border)', borderRadius: 16,
           padding: '14px 16px 8px', marginBottom: 20,
         }}>
-          <div style={{ height: 100, display: 'flex', alignItems: 'flex-end', gap: 6 }}>
-            {a.sessions_last_7.map((s, i) => {
-              const pct = (s.load / maxLoad) * 100;
-              return (
-                <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                  <div style={{
-                    width: '100%',
-                    height: `${Math.max(2, pct)}%`,
-                    background: s.completed
-                      ? 'linear-gradient(180deg, var(--primary), rgba(34,197,94,0.4))'
-                      : 'rgba(255,255,255,0.08)',
-                    borderRadius: 4,
-                    transition: 'height .6s ease',
-                  }} />
-                </div>
-              );
-            })}
-          </div>
-          <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
-            {days.map((d, i) => (
-              <p key={i} style={{ flex: 1, textAlign: 'center', fontSize: 9, color: 'var(--text-secondary)', fontWeight: 700 }}>{d}</p>
-            ))}
-          </div>
+          {maxLoad > 0 ? (
+            <>
+              <div style={{ height: 100, display: 'flex', alignItems: 'flex-end', gap: 6 }}>
+                {a.sessions_last_7.map((s, i) => {
+                  const pct = (s.load / maxLoad) * 100;
+                  return (
+                    <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                      <div style={{
+                        width: '100%',
+                        height: `${Math.max(2, pct)}%`,
+                        background: s.completed
+                          ? 'linear-gradient(180deg, var(--primary), rgba(34,197,94,0.4))'
+                          : 'rgba(255,255,255,0.08)',
+                        borderRadius: 4,
+                        transition: 'height .6s ease',
+                      }} />
+                    </div>
+                  );
+                })}
+              </div>
+              <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
+                {days.map((d, i) => (
+                  <p key={i} style={{ flex: 1, textAlign: 'center', fontSize: 9, color: 'var(--text-secondary)', fontWeight: 700 }}>{d}</p>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div style={{
+              height: 116, display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center', gap: 6,
+            }}>
+              <span style={{ fontSize: 22, opacity: 0.5 }}>⌛</span>
+              <p style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 700, textAlign: 'center' }}>
+                Sin sesiones registradas en los últimos 7 días
+              </p>
+              <p style={{ fontSize: 9, color: 'var(--text-secondary)', opacity: 0.6, textAlign: 'center' }}>
+                Los datos aparecerán cuando el atleta complete entrenamientos
+              </p>
+            </div>
+          )}
         </div>
 
         {/* RMs */}

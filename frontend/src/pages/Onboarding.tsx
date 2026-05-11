@@ -82,7 +82,7 @@ const Onboarding: React.FC = () => {
 
       <footer className="mt-auto">
         {step < 3 ? (
-          <Button fullWidth variant="primary" size="lg" onClick={() => setStep(step + 1)}>
+          <Button fullWidth variant="gold" size="lg" onClick={() => setStep(step + 1)}>
             CONTINUAR →
           </Button>
         ) : (

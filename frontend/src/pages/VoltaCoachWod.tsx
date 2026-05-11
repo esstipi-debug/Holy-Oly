@@ -56,7 +56,7 @@ const VoltaCoachWod: React.FC = () => {
   const intensityScore = type === 'AMRAP' || type === 'For Time' ? 5 : type === 'EMOM' ? 4 : type === 'Strength' ? 3 : 2;
 
   return (
-    <div style={{ background: C.bg, minHeight: '100%', paddingBottom: 110, color: C.text }}>
+    <div style={{ background: C.bg, minHeight: '100%', paddingBottom: 240, color: C.text }}>
 
       {/* HEADER */}
       <div style={{ padding: '48px 20px 12px' }}>
@@ -252,7 +252,7 @@ const VoltaCoachWod: React.FC = () => {
 
       {/* FOOTER */}
       <div style={{
-        position: 'absolute', bottom: 84, left: 16, right: 16, zIndex: 40,
+        position: 'absolute', bottom: 168, left: 16, right: 16, zIndex: 40,
         display: 'flex', gap: 8,
       }}>
         <button

@@ -97,6 +97,11 @@ const WiseAssistant: React.FC<Props> = ({ context = 'Volta Coach' }) => {
     ? '0 0 0 3px rgba(0,230,118,0.15), 0 0 28px rgba(0,229,255,0.4), 0 8px 24px rgba(0,0,0,0.5)'
     : '0 0 0 3px rgba(255,215,0,0.18), 0 0 28px rgba(255,215,0,0.4), 0 8px 24px rgba(0,0,0,0.5)';
   const brandAccent = product === 'volta' ? C.cyan : '#FFD700';
+  const brandAccentRgb = product === 'volta' ? '0,229,255' : '255,215,0';
+  const brandStatusColor = product === 'volta' ? C.green : '#FFD700';
+  const brandPanelShadow = product === 'volta'
+    ? '0 -12px 40px rgba(0,229,255,0.15)'
+    : '0 -12px 40px rgba(255,215,0,0.15)';
 
   useEffect(() => {
     if (open && msgs.length === 0) {
@@ -167,7 +172,7 @@ const WiseAssistant: React.FC<Props> = ({ context = 'Volta Coach' }) => {
               background: C.bg, borderTopLeftRadius: 28, borderTopRightRadius: 28,
               border: `1px solid ${C.line}`, borderBottom: 'none',
               height: '78%', display: 'flex', flexDirection: 'column',
-              boxShadow: '0 -12px 40px rgba(0,229,255,0.15)',
+              boxShadow: brandPanelShadow,
             }}
           >
             {/* HEADER */}
@@ -187,7 +192,7 @@ const WiseAssistant: React.FC<Props> = ({ context = 'Volta Coach' }) => {
                 </div>
                 <div>
                   <p style={{ fontSize: 14, fontWeight: 900, color: C.text, letterSpacing: '.02em' }}>WISE</p>
-                  <p style={{ fontSize: 9, color: C.green, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase' }}>
+                  <p style={{ fontSize: 9, color: brandStatusColor, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase' }}>
                     ● {context}
                   </p>
                 </div>
@@ -220,7 +225,7 @@ const WiseAssistant: React.FC<Props> = ({ context = 'Volta Coach' }) => {
                   <div style={{
                     maxWidth: '78%',
                     padding: '10px 13px',
-                    background: m.role === 'user' ? C.cyan : C.surface,
+                    background: m.role === 'user' ? brandAccent : C.surface,
                     color: m.role === 'user' ? '#07070F' : C.text,
                     border: m.role === 'user' ? 'none' : `1px solid ${C.line}`,
                     borderRadius: m.role === 'user' ? '16px 16px 4px 16px' : '4px 16px 16px 16px',
@@ -246,7 +251,7 @@ const WiseAssistant: React.FC<Props> = ({ context = 'Volta Coach' }) => {
                     {[0, 1, 2].map(i => (
                       <span key={i} style={{
                         width: 6, height: 6, borderRadius: '50%',
-                        background: C.cyan, opacity: 0.4,
+                        background: brandAccent, opacity: 0.4,
                         animation: `ring-pulse 1.2s ease-in-out ${i * 0.2}s infinite`,
                       }} />
                     ))}
@@ -267,8 +272,8 @@ const WiseAssistant: React.FC<Props> = ({ context = 'Volta Coach' }) => {
                     onClick={() => send(s)}
                     style={{
                       flexShrink: 0, padding: '7px 12px', borderRadius: 16,
-                      background: 'rgba(0,229,255,0.08)', color: C.cyan,
-                      border: '1px solid rgba(0,229,255,0.25)',
+                      background: `rgba(${brandAccentRgb},0.08)`, color: brandAccent,
+                      border: `1px solid rgba(${brandAccentRgb},0.25)`,
                       fontSize: 11, fontWeight: 700,
                       cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
                     }}
@@ -300,7 +305,7 @@ const WiseAssistant: React.FC<Props> = ({ context = 'Volta Coach' }) => {
                 disabled={!input.trim() || typing}
                 style={{
                   width: 44, height: 44, borderRadius: 14,
-                  background: input.trim() && !typing ? 'linear-gradient(135deg, #00E676, #00E5FF)' : C.surface,
+                  background: input.trim() && !typing ? brandGradient : C.surface,
                   color: input.trim() && !typing ? '#07070F' : C.muted,
                   border: input.trim() && !typing ? 'none' : `1px solid ${C.line}`,
                   fontSize: 16, fontWeight: 900,

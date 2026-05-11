@@ -64,6 +64,8 @@ const WellnessRow: React.FC<{ icon: string; title: string; sub: string; pct: num
 
 const VoltaDashboard: React.FC = () => {
   const { navigate } = useNav();
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Buenos días' : hour < 19 ? 'Buenas tardes' : 'Buenas noches';
 
   return (
     <div style={{ background: C.bg, minHeight: '100%', paddingBottom: 90, color: C.text }}>
@@ -71,7 +73,7 @@ const VoltaDashboard: React.FC = () => {
       {/* HEADER */}
       <div style={{ padding: '12px 20px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
-          <div style={{ fontSize: 12, color: C.muted }}>Buen día,</div>
+          <div style={{ fontSize: 12, color: C.muted }}>{greeting},</div>
           <div style={{ fontSize: 19, fontWeight: 900, color: C.text, letterSpacing: '-.02em' }}>Marco Torres</div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
