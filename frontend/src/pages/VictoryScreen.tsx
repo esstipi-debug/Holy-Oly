@@ -68,7 +68,7 @@ const VictoryScreen: React.FC = () => {
 
       {/* Footer Buttons */}
       <footer className="p-6 pt-0 space-y-3 relative z-10">
-         <Button fullWidth variant="gold" size="lg" onClick={() => navigate('SUMMARY')}>COMPARTIR VICTORIA 📱</Button>
+         <Button fullWidth variant="gold" size="lg" onClick={() => navigate('SOCIAL')}>COMPARTIR VICTORIA 📱</Button>
          <Button fullWidth variant="ghost" className="text-slate-500" onClick={() => navigate('HOME')}>Volver al Dashboard</Button>
       </footer>
     </div>

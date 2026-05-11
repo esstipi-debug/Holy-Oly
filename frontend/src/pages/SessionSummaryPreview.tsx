@@ -81,7 +81,7 @@ const SessionSummaryPreview: React.FC = () => {
 
       {/* Footer CTA */}
       <footer className="p-6 pt-2">
-         <Button fullWidth variant="primary" size="lg" onClick={() => navigate('HOME')}>EMPEZAR CALENTAMIENTO</Button>
+         <Button fullWidth variant="primary" size="lg" onClick={() => navigate('WARMUP')}>EMPEZAR CALENTAMIENTO</Button>
       </footer>
     </div>
   );

@@ -41,7 +41,7 @@ const PulseHub: React.FC = () => {
                     {[1,2,3,4].map(x => <div key={x} className="w-8 h-8 rounded-full bg-slate-800 border-2 border-holy-bg flex items-center justify-center text-[8px] font-black text-white">U{x}</div>)}
                     <div className="w-8 h-8 rounded-full bg-holy-primary border-2 border-holy-bg flex items-center justify-center text-[8px] font-black text-white">+4</div>
                  </div>
-                 <Button variant="primary" size="sm">UNIRSE AL PULSE</Button>
+                 <Button variant="primary" size="sm" onClick={() => navigate('SESSION')}>UNIRSE AL PULSE</Button>
               </div>
            </Card>
         </section>
@@ -74,20 +74,6 @@ const PulseHub: React.FC = () => {
         </section>
       </div>
 
-      <nav className="h-[76px] bg-holy-surface border-t border-slate-800/50 flex items-center justify-around pb-4">
-         <div className="flex flex-col items-center gap-1 opacity-40">
-            <div className="w-6 h-6 rounded-lg bg-slate-800" />
-            <span className="text-[10px] text-slate-500 font-bold">Home</span>
-         </div>
-         <div className="flex flex-col items-center gap-1">
-            <div className="w-6 h-6 rounded-lg bg-holy-primary/10 border border-holy-primary/20" />
-            <span className="text-[10px] text-holy-primary font-bold">Pulse</span>
-         </div>
-         <div className="flex flex-col items-center gap-1 opacity-40">
-            <div className="w-6 h-6 rounded-lg bg-slate-800" />
-            <span className="text-[10px] text-slate-500 font-bold">Stats</span>
-         </div>
-      </nav>
     </div>
   );
 };

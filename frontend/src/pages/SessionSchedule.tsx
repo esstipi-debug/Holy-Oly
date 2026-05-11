@@ -68,8 +68,12 @@ const SessionSchedule: React.FC = () => {
         </div>
       </div>
 
-      <footer className="absolute bottom-6 left-6 right-6">
-         <Button fullWidth variant="secondary" size="lg" className="border-holy-primary/20 text-holy-primary font-black italic">SOLICITAR REPROGRAMACIÓN</Button>
+      <footer className="absolute bottom-20 left-6 right-6">
+         <Button
+           fullWidth variant="secondary" size="lg"
+           className="border-holy-primary/20 text-holy-primary font-black italic"
+           onClick={() => navigate('PROFILE')}
+         >SOLICITAR REPROGRAMACIÓN</Button>
       </footer>
     </div>
   );

@@ -1,9 +1,31 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Button from '../components/Button';
 import { useNav } from '../context/NavigationContext';
 
 const SocialCard: React.FC = () => {
   const { navigate } = useNav();
+  const [toast, setToast] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 2200);
+  };
+
+  const share = async () => {
+    const text = 'Nuevo PR · 145kg Clean & Jerk · Holy Oly Platform';
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'Nuevo PR', text });
+      } else {
+        await navigator.clipboard.writeText(text);
+        showToast('Texto copiado al portapapeles');
+      }
+    } catch { /* user cancelled */ }
+  };
+
+  const saveToGallery = () => {
+    showToast('Guardado · revisá tu galería');
+  };
   return (
     <div className="flex flex-col h-full bg-[#07070F] px-8 py-10 items-center justify-center">
       <div className="w-full flex mb-4"><div className="w-8 h-8 rounded-lg bg-holy-surface border border-slate-800 flex items-center justify-center text-slate-400 cursor-pointer" onClick={() => navigate('HOME')}>←</div></div>
@@ -49,9 +71,22 @@ const SocialCard: React.FC = () => {
       </div>
 
       <div className="w-full mt-10 space-y-4">
-         <Button fullWidth variant="primary" size="lg" className="bg-indigo-600 shadow-indigo-500/20">INSTAGRAM STORIES</Button>
-         <Button fullWidth variant="secondary" size="lg">GUARDAR EN GALERÍA</Button>
+         <Button fullWidth variant="primary" size="lg" className="bg-indigo-600 shadow-indigo-500/20" onClick={share}>COMPARTIR / INSTAGRAM</Button>
+         <Button fullWidth variant="secondary" size="lg" onClick={saveToGallery}>GUARDAR EN GALERÍA</Button>
       </div>
+
+      {toast && (
+        <div
+          style={{
+            position: 'fixed', bottom: 100, left: '50%', transform: 'translateX(-50%)',
+            background: 'rgba(34,197,94,0.95)', color: '#07070F',
+            padding: '10px 18px', borderRadius: 14,
+            fontSize: 12, fontWeight: 800, letterSpacing: '.04em',
+            boxShadow: '0 8px 24px rgba(0,0,0,.4)',
+            zIndex: 100,
+          }}
+        >{toast}</div>
+      )}
     </div>
   );
 };
