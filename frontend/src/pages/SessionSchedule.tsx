@@ -4,17 +4,29 @@ import Button from '../components/Button';
 import Badge from '../components/Badge';
 import { useNav } from '../context/NavigationContext';
 
+const DAY_LABELS = ['DOM', 'LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB'];
+const MONTH_LABELS = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+const SESSIONS = ['Snatch + OHS', 'C&J + Front Squat', 'Snatch Speed', 'Rest Day', 'Max Effort C&J', 'Technique Drills', 'Rest Day'];
+
 const SessionSchedule: React.FC = () => {
   const { navigate } = useNav();
-  const days = [
-    { day: 'LUN', date: 15, status: 'DONE', label: 'Snatch + OHS' },
-    { day: 'MAR', date: 16, status: 'DONE', label: 'C&J + Front Squat' },
-    { day: 'MIE', date: 17, status: 'ACTIVE', label: 'Snatch Speed' },
-    { day: 'JUE', date: 18, status: 'PENDING', label: 'Rest Day' },
-    { day: 'VIE', date: 19, status: 'PENDING', label: 'Max Effort C&J' },
-    { day: 'SAB', date: 20, status: 'PENDING', label: 'Technique Drills' },
-    { day: 'DOM', date: 21, status: 'PENDING', label: 'Rest Day' },
-  ];
+  const today = new Date();
+  const dow = today.getDay();
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - ((dow + 6) % 7));
+  const days = SESSIONS.map((label, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    const isPast = d.toDateString() !== today.toDateString() && d < today;
+    const isToday = d.toDateString() === today.toDateString();
+    return {
+      day: DAY_LABELS[d.getDay()],
+      date: d.getDate(),
+      month: MONTH_LABELS[d.getMonth()],
+      status: isToday ? 'ACTIVE' : isPast ? 'DONE' : 'PENDING',
+      label,
+    };
+  });
 
   return (
     <div className="flex flex-col h-full bg-holy-bg">
@@ -54,7 +66,7 @@ const SessionSchedule: React.FC = () => {
                       <div className={`w-2 h-10 rounded-full ${d.label === 'Rest Day' ? 'bg-slate-800' : 'bg-holy-primary'}`} />
                       <div>
                          <p className="text-white text-sm font-bold">{d.label}</p>
-                         <p className="text-slate-600 text-[10px] uppercase font-bold">{d.day} {d.date} Abr · 10:00 AM</p>
+                         <p className="text-slate-600 text-[10px] uppercase font-bold">{d.day} {d.date} {d.month} · 10:00 AM</p>
                       </div>
                    </div>
                    {d.label !== 'Rest Day' ? (

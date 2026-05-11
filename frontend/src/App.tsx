@@ -241,8 +241,8 @@ function AppInner() {
         {renderView()}
       </PhoneLayout>
 
-      {/* Dev sidebar — solo cuando autenticado */}
-      {!isPublic && (
+      {/* Dev sidebar — solo cuando autenticado y en DEV */}
+      {import.meta.env.DEV && !isPublic && (
       <div
         className="hidden 2xl:flex fixed right-10 top-10 bottom-10 w-56 flex-col gap-4 overflow-y-auto z-50 p-5 rounded-2xl"
         style={{ background: 'var(--surface)', border: '1px solid var(--card-border)' }}
@@ -275,8 +275,8 @@ function AppInner() {
 
       )}
 
-      {/* Mobile switcher — solo cuando autenticado */}
-      {!isPublic && (
+      {/* Mobile switcher — solo cuando autenticado y en DEV */}
+      {import.meta.env.DEV && !isPublic && (
       <div className="2xl:hidden fixed bottom-2 left-2 right-2 flex gap-1 z-50 overflow-x-auto p-2 rounded-xl backdrop-blur-md"
         style={{ background: 'rgba(0,0,0,0.85)', border: '1px solid var(--card-border)' }}>
         {navGroups.flatMap(g => g.views).map(v => (

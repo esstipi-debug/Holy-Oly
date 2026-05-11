@@ -90,6 +90,14 @@ const WiseAssistant: React.FC<Props> = ({ context = 'Volta Coach' }) => {
     ? SUGGESTIONS_COACH
     : (product === 'volta' ? SUGGESTIONS_ATHLETE_VOLTA : SUGGESTIONS_ATHLETE_HO);
 
+  const brandGradient = product === 'volta'
+    ? 'linear-gradient(135deg, #00E676 0%, #00E5FF 100%)'
+    : 'linear-gradient(135deg, #FFD700 0%, #B8860B 100%)';
+  const brandShadow = product === 'volta'
+    ? '0 0 0 3px rgba(0,230,118,0.15), 0 0 28px rgba(0,229,255,0.4), 0 8px 24px rgba(0,0,0,0.5)'
+    : '0 0 0 3px rgba(255,215,0,0.18), 0 0 28px rgba(255,215,0,0.4), 0 8px 24px rgba(0,0,0,0.5)';
+  const brandAccent = product === 'volta' ? C.cyan : '#FFD700';
+
   useEffect(() => {
     if (open && msgs.length === 0) {
       setTimeout(() => {
@@ -129,8 +137,8 @@ const WiseAssistant: React.FC<Props> = ({ context = 'Volta Coach' }) => {
         style={{
           position: 'absolute', bottom: 96, right: 16, zIndex: 55,
           width: 56, height: 56, borderRadius: '50%',
-          background: 'linear-gradient(135deg, #00E676 0%, #00E5FF 100%)',
-          boxShadow: '0 0 0 3px rgba(0,230,118,0.15), 0 0 28px rgba(0,229,255,0.4), 0 8px 24px rgba(0,0,0,0.5)',
+          background: brandGradient,
+          boxShadow: brandShadow,
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
           border: 'none', cursor: 'pointer', fontFamily: 'inherit',
           transition: 'transform .15s ease',
@@ -171,7 +179,7 @@ const WiseAssistant: React.FC<Props> = ({ context = 'Volta Coach' }) => {
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <div style={{
                   width: 36, height: 36, borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #00E676, #00E5FF)',
+                  background: brandGradient,
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                   boxShadow: '0 0 16px rgba(0,229,255,0.4)',
                 }}>
@@ -204,7 +212,7 @@ const WiseAssistant: React.FC<Props> = ({ context = 'Volta Coach' }) => {
                   {m.role === 'wise' && (
                     <div style={{
                       width: 28, height: 28, borderRadius: '50%',
-                      background: 'linear-gradient(135deg, #00E676, #00E5FF)',
+                      background: brandGradient,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       flexShrink: 0, fontSize: 12,
                     }}>✦</div>
@@ -225,7 +233,7 @@ const WiseAssistant: React.FC<Props> = ({ context = 'Volta Coach' }) => {
                 <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
                   <div style={{
                     width: 28, height: 28, borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #00E676, #00E5FF)',
+                    background: brandGradient,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: 12,
                   }}>✦</div>

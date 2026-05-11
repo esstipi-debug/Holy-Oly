@@ -42,12 +42,12 @@ const PulseHub: React.FC = () => {
         <section className="space-y-4 mb-10">
            <h3 className="text-slate-500 text-[10px] font-black uppercase tracking-widest pl-1">Retos Globales (EMOM/AMRAP)</h3>
            <Card variant="glass" padding="none" className="border-holy-primary/30 overflow-hidden">
-              <div className="bg-holy-primary/10 p-5 border-b border-holy-primary/20 flex justify-between items-center">
-                 <div>
-                    <h4 className="text-white text-base font-black">THE DROP-OFF CHALLENGE</h4>
-                    <p className="text-holy-primary text-[10px] font-bold uppercase">Sincronizado: 12:00 PM</p>
+              <div className="bg-holy-primary/10 p-5 border-b border-holy-primary/20 flex justify-between items-center gap-3">
+                 <div className="min-w-0 flex-1 overflow-hidden">
+                    <h4 className="text-white text-base font-black truncate">THE DROP-OFF CHALLENGE</h4>
+                    <p className="text-holy-primary text-[10px] font-bold uppercase truncate">Sincronizado: 12:00 PM</p>
                  </div>
-                 <div className="text-right">
+                 <div className="text-right flex-shrink-0">
                     <p className="text-white text-lg font-black tabular-nums">14:25</p>
                     <p className="text-slate-500 text-[8px] font-bold">PARA CIERRE</p>
                  </div>
