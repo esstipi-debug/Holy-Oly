@@ -17,7 +17,7 @@ const C = {
   purple: '#A855F7',
 };
 
-type Tab = 'templates' | 'comparativa' | 'tendencias' | 'macro' | 'calendario' | 'notas' | 'bulk' | 'progresion';
+export type Tab = 'templates' | 'comparativa' | 'tendencias' | 'macro' | 'calendario' | 'notas' | 'bulk' | 'progresion' | 'inventario';
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'progresion', label: 'Progresión',    icon: '🎚️' },
@@ -26,8 +26,25 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'comparativa',label: 'Comparar',      icon: '⚖️' },
   { id: 'tendencias', label: 'Tendencias',    icon: '📈' },
   { id: 'macro',      label: 'Eval Macro',    icon: '🎯' },
+  { id: 'inventario', label: 'Inventario',    icon: '📦' },
   { id: 'calendario', label: 'Calendario',    icon: '📅' },
   { id: 'notas',      label: 'Notas',         icon: '💬' },
+];
+
+const INVENTORY: { icon: string; label: string; count: number; total: number; category: 'Barras' | 'Plates' | 'Gymnastics' | 'Cardio' | 'Accesorios' }[] = [
+  { icon: '🏋️', label: 'Barras Olímpicas 20kg',  count: 10, total: 12, category: 'Barras' },
+  { icon: '🏋️', label: 'Barras Olímpicas 15kg',  count: 4,  total: 4,  category: 'Barras' },
+  { icon: '⚪', label: 'Bumpers 25kg (par)',     count: 6,  total: 8,  category: 'Plates' },
+  { icon: '⚪', label: 'Bumpers 20kg (par)',     count: 8,  total: 8,  category: 'Plates' },
+  { icon: '⚪', label: 'Bumpers 15kg (par)',     count: 10, total: 10, category: 'Plates' },
+  { icon: '⚪', label: 'Bumpers 10kg (par)',     count: 12, total: 12, category: 'Plates' },
+  { icon: '🥊', label: 'Kettlebells 16-24kg',    count: 16, total: 20, category: 'Accesorios' },
+  { icon: '🪢', label: 'Cuerdas para saltar',    count: 18, total: 20, category: 'Gymnastics' },
+  { icon: '📦', label: 'Cajones plyo 24"',       count: 8,  total: 8,  category: 'Gymnastics' },
+  { icon: '💍', label: 'Anillas',                count: 6,  total: 8,  category: 'Gymnastics' },
+  { icon: '🚣', label: 'Rowers Concept2',        count: 4,  total: 6,  category: 'Cardio' },
+  { icon: '🚴', label: 'Assault Bikes',          count: 3,  total: 4,  category: 'Cardio' },
+  { icon: '⚪', label: 'Wall balls 9/14kg',      count: 10, total: 12, category: 'Accesorios' },
 ];
 
 // Matriz de progresión: nivel por atleta y movimiento (sample)
@@ -74,9 +91,15 @@ const COMPETITIONS = [
   { date: futureDate(146), name: 'Sudamericano Lima',       tier: 'Regional',      athletes: 1, status: 'tentative' },
 ];
 
-const VoltaCoachTools: React.FC = () => {
+interface VoltaCoachToolsProps {
+  initialTab?: Tab;
+}
+
+const VoltaCoachTools: React.FC<VoltaCoachToolsProps> = ({ initialTab = 'progresion' }) => {
   const { navigate } = useNav();
-  const [tab, setTab] = useState<Tab>('progresion');
+  const [tab, setTab] = useState<Tab>(initialTab);
+  // Sync tab when navigating between VOLTA_COACH_MACRO / _INVENTORY / _TOOLS routes
+  React.useEffect(() => { setTab(initialTab); }, [initialTab]);
   const [selA, setSelA] = useState<string | null>('m1');
   const [selB, setSelB] = useState<string | null>('m4');
   const [selectedAthletes, setSelectedAthletes] = useState<Set<string>>(new Set(['m1', 'm2', 'm4']));
@@ -537,16 +560,27 @@ const VoltaCoachTools: React.FC = () => {
                 );
               })}
             </div>
-            <button
-              onClick={() => navigate('VOLTA_COACH_MACRO')}
-              style={{
-                width: '100%', marginTop: 14, padding: '14px 0',
-                background: C.cyan, color: '#07070F', border: 'none',
-                borderRadius: 14, fontSize: 13, fontWeight: 800,
-                letterSpacing: '.04em', textTransform: 'uppercase',
-                cursor: 'pointer', fontFamily: 'inherit',
-              }}
-            >Ajustar macrociclo</button>
+            <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
+              <button
+                onClick={() => navigate('ASSIGN_MACRO')}
+                style={{
+                  flex: 1, padding: '13px 0',
+                  background: 'transparent', color: C.cyan, border: `1px solid ${C.cyan}55`,
+                  borderRadius: 14, fontSize: 12, fontWeight: 800,
+                  letterSpacing: '.04em', textTransform: 'uppercase',
+                  cursor: 'pointer', fontFamily: 'inherit',
+                }}
+              >Cambiar macro</button>
+              <button
+                style={{
+                  flex: 1, padding: '13px 0',
+                  background: C.cyan, color: '#07070F', border: 'none',
+                  borderRadius: 14, fontSize: 12, fontWeight: 800,
+                  letterSpacing: '.04em', textTransform: 'uppercase',
+                  cursor: 'pointer', fontFamily: 'inherit',
+                }}
+              >Marcar deload</button>
+            </div>
           </>
         )}
 
@@ -604,6 +638,101 @@ const VoltaCoachTools: React.FC = () => {
                 fontSize: 12, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit',
               }}
             >+ Agregar competencia</button>
+          </>
+        )}
+
+        {/* INVENTARIO */}
+        {tab === 'inventario' && (
+          <>
+            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: C.muted, marginBottom: 10 }}>
+              Equipamiento del box · {INVENTORY.length} items
+            </p>
+
+            {/* TOTALS BAR */}
+            {(() => {
+              const totalItems = INVENTORY.reduce((acc, it) => acc + it.total, 0);
+              const availableItems = INVENTORY.reduce((acc, it) => acc + it.count, 0);
+              const ratio = Math.round((availableItems / totalItems) * 100);
+              const ratioColor = ratio >= 90 ? C.green : ratio >= 70 ? C.amber : C.red;
+              return (
+                <div style={{
+                  background: C.surface, border: `1px solid ${C.line}`,
+                  borderRadius: 14, padding: 14, marginBottom: 14,
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
+                    <span style={{ fontSize: 11, color: C.muted, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase' }}>Disponibilidad</span>
+                    <span style={{ fontSize: 18, fontWeight: 900, color: ratioColor }}>{ratio}%</span>
+                  </div>
+                  <div style={{ height: 6, borderRadius: 3, background: C.line, overflow: 'hidden', marginBottom: 6 }}>
+                    <div style={{ height: '100%', width: `${ratio}%`, background: ratioColor, transition: 'width .3s ease' }} />
+                  </div>
+                  <p style={{ fontSize: 10, color: C.muted }}>
+                    <strong style={{ color: C.text }}>{availableItems}</strong> de {totalItems} unidades disponibles
+                  </p>
+                </div>
+              );
+            })()}
+
+            {/* AGRUPADO POR CATEGORÍA */}
+            {(['Barras', 'Plates', 'Gymnastics', 'Cardio', 'Accesorios'] as const).map(cat => {
+              const items = INVENTORY.filter(it => it.category === cat);
+              if (items.length === 0) return null;
+              return (
+                <div key={cat} style={{ marginBottom: 14 }}>
+                  <p style={{ fontSize: 9, fontWeight: 800, letterSpacing: '.1em', textTransform: 'uppercase', color: C.cyan, marginBottom: 6, paddingLeft: 4 }}>
+                    {cat}
+                  </p>
+                  <div style={{
+                    background: C.surface, border: `1px solid ${C.line}`,
+                    borderRadius: 14, overflow: 'hidden',
+                  }}>
+                    {items.map((it, i) => {
+                      const ratio = it.count / it.total;
+                      const status = ratio >= 0.9 ? C.green : ratio >= 0.6 ? C.amber : C.red;
+                      const missing = it.total - it.count;
+                      return (
+                        <div key={i} style={{
+                          display: 'flex', alignItems: 'center', gap: 12,
+                          padding: '11px 14px',
+                          borderBottom: i < items.length - 1 ? `1px solid ${C.line}` : 'none',
+                        }}>
+                          <span style={{ fontSize: 22 }}>{it.icon}</span>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <p style={{ fontSize: 12, fontWeight: 700, color: C.text }}>{it.label}</p>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
+                              <div style={{ flex: 1, height: 3, borderRadius: 2, background: C.line, overflow: 'hidden' }}>
+                                <div style={{ height: '100%', width: `${ratio * 100}%`, background: status }} />
+                              </div>
+                              <span style={{ fontSize: 10, color: C.muted, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
+                                {it.count}/{it.total}
+                              </span>
+                            </div>
+                          </div>
+                          {missing > 0 && (
+                            <span style={{
+                              fontSize: 9, fontWeight: 800, padding: '3px 7px', borderRadius: 8,
+                              background: `${status}1a`, color: status,
+                              border: `1px solid ${status}55`,
+                              textTransform: 'uppercase', letterSpacing: '.04em',
+                            }}>-{missing}</span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+
+            <button
+              style={{
+                width: '100%', marginTop: 6, padding: '14px 0',
+                background: C.cyan, color: '#07070F', border: 'none',
+                borderRadius: 14, fontSize: 13, fontWeight: 800,
+                letterSpacing: '.04em', textTransform: 'uppercase',
+                cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >+ Agregar / reportar faltante</button>
           </>
         )}
 

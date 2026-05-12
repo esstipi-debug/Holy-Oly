@@ -186,8 +186,8 @@ function AppInner() {
         case 'VOLTA_COACH':           return <VoltaCoachDash />;
         case 'VOLTA_COACH_WOD':       return <VoltaCoachWod />;
         case 'VOLTA_COACH_TOOLS':     return <VoltaCoachTools />;
-        case 'VOLTA_COACH_MACRO':     return <VoltaCoachTools />;
-        case 'VOLTA_COACH_INVENTORY': return <VoltaCoachTools />;
+        case 'VOLTA_COACH_MACRO':     return <VoltaCoachTools initialTab="macro" />;
+        case 'VOLTA_COACH_INVENTORY': return <VoltaCoachTools initialTab="inventario" />;
         case 'PROGRESSION':           return <MovementProgression />;
         case 'VOLTA_PREWOD':          return <VoltaPreWod />;
         case 'ATHLETE_DETAIL':        return <AthleteDeepDive />;
