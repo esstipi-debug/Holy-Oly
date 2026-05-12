@@ -64,8 +64,14 @@ const WellnessRow: React.FC<{ icon: string; title: string; sub: string; pct: num
 
 const VoltaDashboard: React.FC = () => {
   const { navigate } = useNav();
-  const hour = new Date().getHours();
+  const now = new Date();
+  const hour = now.getHours();
   const greeting = hour < 12 ? 'Buenos días' : hour < 19 ? 'Buenas tardes' : 'Buenas noches';
+  // Día: 1=Lun..7=Dom; Semana: índice dentro de macrociclo de 4 semanas (week-of-year mod 4 + 1)
+  const dia = ((now.getDay() + 6) % 7) + 1;
+  const startOfYear = new Date(now.getFullYear(), 0, 1);
+  const weekOfYear = Math.floor((now.getTime() - startOfYear.getTime()) / 86400000 / 7);
+  const semana = (weekOfYear % 4) + 1;
 
   return (
     <div style={{ background: C.bg, minHeight: '100%', paddingBottom: 90, color: C.text }}>
@@ -204,7 +210,7 @@ const VoltaDashboard: React.FC = () => {
         </div>
 
         {/* WOD DE HOY */}
-        <Sec style={{ marginBottom: 8 }}>WOD de hoy · Semana 4 · Día 3</Sec>
+        <Sec style={{ marginBottom: 8 }}>WOD de hoy · Semana {semana} · Día {dia}</Sec>
         <div style={{
           background: C.surface,
           border: '1px solid rgba(0,229,255,0.2)',

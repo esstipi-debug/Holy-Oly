@@ -62,11 +62,16 @@ const ATHLETES = [
   { id: 'm6', name: 'Sofía Méndez',   cf: 76, vform: 'V', hrv: 70,  adher: 71, lastPr: 'BS +5kg · 5d' },
 ];
 
+const MONTHS_ES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+const futureDate = (offsetDays: number) => {
+  const d = new Date(Date.now() + offsetDays * 86400000);
+  return `${d.getDate().toString().padStart(2, '0')} ${MONTHS_ES[d.getMonth()]}`;
+};
 const COMPETITIONS = [
-  { date: '15 Jun', name: 'Open Local Buenos Aires', tier: 'Local',     athletes: 4, status: 'confirmed' },
-  { date: '22 Jul', name: 'Throwdown Córdoba',       tier: 'Regional',  athletes: 2, status: 'tentative' },
-  { date: '12 Ago', name: 'CrossFit Games Open',     tier: 'Internacional', athletes: 6, status: 'planning' },
-  { date: '05 Oct', name: 'Sudamericano Lima',       tier: 'Regional',  athletes: 1, status: 'tentative' },
+  { date: futureDate(34),  name: 'Open Local Buenos Aires', tier: 'Local',         athletes: 4, status: 'confirmed' },
+  { date: futureDate(71),  name: 'Throwdown Córdoba',       tier: 'Regional',      athletes: 2, status: 'tentative' },
+  { date: futureDate(92),  name: 'CrossFit Games Open',     tier: 'Internacional', athletes: 6, status: 'planning'  },
+  { date: futureDate(146), name: 'Sudamericano Lima',       tier: 'Regional',      athletes: 1, status: 'tentative' },
 ];
 
 const VoltaCoachTools: React.FC = () => {

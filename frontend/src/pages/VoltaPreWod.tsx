@@ -43,6 +43,16 @@ const Emoji: React.FC<{ children: React.ReactNode; active?: boolean; tint?: 'red
 const VoltaPreWod: React.FC = () => {
   const { navigate } = useNav();
 
+  // Cafeína: simulamos toma hace ~2.5h. Decaimiento exp con t1/2 = 5h.
+  const intakeMg = 200;
+  const intake = new Date(Date.now() - 2.5 * 3600 * 1000);
+  const hrs = intake.getHours();
+  const mins = intake.getMinutes();
+  const h12 = ((hrs + 11) % 12) + 1;
+  const ampm = hrs < 12 ? 'am' : 'pm';
+  const intakeLabel = `${h12}:${mins.toString().padStart(2, '0')}${ampm}`;
+  const residualMg = Math.round(intakeMg * Math.pow(0.5, 2.5 / 5));
+
   return (
     <div style={{ background: C.bg, minHeight: '100%', paddingBottom: 90, color: C.text }}>
 
@@ -135,8 +145,8 @@ const VoltaPreWod: React.FC = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span style={{ fontSize: 20 }}>☕</span>
             <div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: C.text }}>200mg — 8:15am</div>
-              <div style={{ fontSize: 10, color: C.muted }}>C_residual actual: 88mg</div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: C.text }}>{intakeMg}mg — {intakeLabel}</div>
+              <div style={{ fontSize: 10, color: C.muted }}>C_residual actual: {residualMg}mg</div>
             </div>
           </div>
           <button style={{
