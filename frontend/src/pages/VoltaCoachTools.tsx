@@ -104,6 +104,38 @@ const VoltaCoachTools: React.FC<VoltaCoachToolsProps> = ({ initialTab = 'progres
   const [selB, setSelB] = useState<string | null>('m4');
   const [selectedAthletes, setSelectedAthletes] = useState<Set<string>>(new Set(['m1', 'm2', 'm4']));
 
+  // Inventario editable (state local, en producción persiste en backend)
+  const [inventory, setInventory] = useState(INVENTORY);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newItem, setNewItem] = useState({ label: '', count: '', total: '', category: 'Accesorios' as typeof INVENTORY[number]['category'], icon: '📦' });
+
+  const adjustCount = (idx: number, delta: number) => {
+    setInventory(prev => prev.map((it, i) => i === idx
+      ? { ...it, count: Math.max(0, Math.min(it.total, it.count + delta)) }
+      : it
+    ));
+  };
+  const adjustTotal = (idx: number, delta: number) => {
+    setInventory(prev => prev.map((it, i) => i === idx
+      ? { ...it, total: Math.max(0, it.total + delta), count: Math.min(it.count, Math.max(0, it.total + delta)) }
+      : it
+    ));
+  };
+  const removeItem = (idx: number) => {
+    setInventory(prev => prev.filter((_, i) => i !== idx));
+  };
+  const addItem = () => {
+    const count = Number(newItem.count);
+    const total = Number(newItem.total);
+    if (!newItem.label.trim() || total <= 0 || count < 0 || count > total) return;
+    setInventory(prev => [...prev, {
+      icon: newItem.icon, label: newItem.label.trim(),
+      count, total, category: newItem.category,
+    }]);
+    setNewItem({ label: '', count: '', total: '', category: 'Accesorios', icon: '📦' });
+    setShowAddForm(false);
+  };
+
   const toggleAthlete = (id: string) => {
     setSelectedAthletes(prev => {
       const next = new Set(prev);
@@ -510,79 +542,162 @@ const VoltaCoachTools: React.FC<VoltaCoachToolsProps> = ({ initialTab = 'progres
           </>
         )}
 
-        {/* EVAL MACRO */}
-        {tab === 'macro' && (
-          <>
-            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: C.muted, marginBottom: 10 }}>
-              Review semanal · CF Open Prep Q2
-            </p>
-            <div style={{
-              background: 'rgba(0,229,255,0.04)',
-              border: '1px solid rgba(0,229,255,0.25)',
-              borderRadius: 14, padding: 14, marginBottom: 14,
-            }}>
-              <p style={{ fontSize: 11, color: C.cyan, fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 4 }}>
-                Sem 4/8 · Conditioning Block
-              </p>
-              <p style={{ fontSize: 12, color: C.text, lineHeight: 1.5 }}>
-                Estás a mitad del bloque. Pico planificado en 4 semanas. Adherencia 71% — por debajo del target 80%.
-              </p>
-            </div>
-            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: C.muted, marginBottom: 10 }}>
-              Criterios de evaluación
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {[
-                { label: 'Adherencia',   value: 71, target: 80, status: 'warning' },
-                { label: 'PRs (acum.)',  value: 8,  target: 6,  status: 'good',    unit: '' },
-                { label: 'Lesiones',     value: 0,  target: 0,  status: 'good',    unit: '' },
-                { label: 'Carga rel.',   value: 88, target: 90, status: 'good' },
-                { label: 'V-Form rojo',  value: 1,  target: 0,  status: 'warning', unit: '' },
-                { label: 'HRV crítico',  value: 1,  target: 0,  status: 'warning', unit: '' },
-              ].map((c) => {
-                const color = c.status === 'good' ? C.green : c.status === 'warning' ? C.amber : C.red;
-                return (
-                  <div key={c.label} style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    background: C.surface, border: `1px solid ${C.line}`,
-                    borderRadius: 12, padding: '10px 14px',
-                  }}>
-                    <p style={{ fontSize: 12, color: C.text, fontWeight: 600 }}>{c.label}</p>
-                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-                      <span style={{ fontSize: 16, fontWeight: 900, color }}>
-                        {c.value}{c.unit ?? '%'}
-                      </span>
-                      <span style={{ fontSize: 10, color: C.muted }}>
-                        / target {c.target}{c.unit ?? '%'}
-                      </span>
-                    </div>
+        {/* EVAL MACRO — REDISEÑADO */}
+        {tab === 'macro' && (() => {
+          const criteria = [
+            { label: 'Adherencia',   icon: '✓',  value: 71, target: 80, unit: '%', status: 'warning' as const, hint: '9% bajo target' },
+            { label: 'PRs acum.',    icon: '🏆', value: 8,  target: 6,  unit: '',  status: 'good'    as const, hint: '+2 sobre target' },
+            { label: 'Lesiones',     icon: '🩹', value: 0,  target: 0,  unit: '',  status: 'good'    as const, hint: 'En meta' },
+            { label: 'Carga rel.',   icon: '⚡', value: 88, target: 90, unit: '%', status: 'good'    as const, hint: '2% bajo target' },
+            { label: 'V-Form rojo',  icon: '🚨', value: 1,  target: 0,  unit: '',  status: 'warning' as const, hint: 'Pablo I.' },
+            { label: 'HRV crítico',  icon: '💔', value: 1,  target: 0,  unit: '',  status: 'warning' as const, hint: 'Pablo I.' },
+          ];
+          const warnings = criteria.filter(c => c.status === 'warning').length;
+          const verdict = warnings === 0
+            ? { color: C.green, label: 'EN TRACK', desc: 'Bloque sin alertas — seguí plan original.' }
+            : warnings <= 2
+              ? { color: C.amber, label: 'AJUSTAR', desc: `${warnings} criterios sub-target — revisá adherencia y atletas en rojo.` }
+              : { color: C.red, label: 'CRÍTICO', desc: 'Múltiples desvíos — considerá deload o cambio de macro.' };
+
+          const weekPct = (4 / 8) * 100;
+
+          return (
+            <>
+              {/* HERO: progress + verdict */}
+              <div style={{
+                background: C.surface, border: `1px solid ${C.line}`,
+                borderRadius: 16, padding: 16, marginBottom: 14,
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontSize: 10, color: C.muted, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase' }}>
+                      Macrociclo activo
+                    </p>
+                    <p style={{ fontSize: 15, fontWeight: 900, color: C.text, marginTop: 2 }}>
+                      CF Open Prep · Q2
+                    </p>
+                    <p style={{ fontSize: 10, color: C.cyan, fontWeight: 700, marginTop: 2 }}>
+                      Conditioning Block
+                    </p>
                   </div>
-                );
-              })}
-            </div>
-            <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
-              <button
-                onClick={() => navigate('ASSIGN_MACRO')}
-                style={{
-                  flex: 1, padding: '13px 0',
-                  background: 'transparent', color: C.cyan, border: `1px solid ${C.cyan}55`,
-                  borderRadius: 14, fontSize: 12, fontWeight: 800,
-                  letterSpacing: '.04em', textTransform: 'uppercase',
-                  cursor: 'pointer', fontFamily: 'inherit',
-                }}
-              >Cambiar macro</button>
-              <button
-                style={{
-                  flex: 1, padding: '13px 0',
-                  background: C.cyan, color: '#07070F', border: 'none',
-                  borderRadius: 14, fontSize: 12, fontWeight: 800,
-                  letterSpacing: '.04em', textTransform: 'uppercase',
-                  cursor: 'pointer', fontFamily: 'inherit',
-                }}
-              >Marcar deload</button>
-            </div>
-          </>
-        )}
+                  <span style={{
+                    padding: '5px 11px', borderRadius: 999,
+                    background: `${verdict.color}1a`, color: verdict.color,
+                    border: `1px solid ${verdict.color}55`,
+                    fontSize: 11, fontWeight: 900, letterSpacing: '.08em',
+                  }}>{verdict.label}</span>
+                </div>
+
+                {/* Week timeline */}
+                <div style={{ marginBottom: 12 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                    <span style={{ fontSize: 10, color: C.muted, fontWeight: 700 }}>SEMANA 4 / 8</span>
+                    <span style={{ fontSize: 10, color: verdict.color, fontWeight: 800 }}>{Math.round(weekPct)}%</span>
+                  </div>
+                  <div style={{ display: 'flex', gap: 3 }}>
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map(w => {
+                      const done = w <= 4;
+                      const current = w === 4;
+                      return (
+                        <div key={w} style={{
+                          flex: 1, height: 8, borderRadius: 2,
+                          background: current
+                            ? verdict.color
+                            : done
+                              ? `${C.cyan}cc`
+                              : C.line,
+                          boxShadow: current ? `0 0 6px ${verdict.color}` : 'none',
+                        }} />
+                      );
+                    })}
+                  </div>
+                  <p style={{ fontSize: 10, color: C.muted, marginTop: 8, lineHeight: 1.5 }}>
+                    <strong style={{ color: verdict.color }}>{verdict.desc}</strong>
+                  </p>
+                </div>
+              </div>
+
+              {/* CRITERIOS — 2 columnas, icon + valor grande */}
+              <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: C.muted, marginBottom: 8 }}>
+                Criterios · {criteria.length}
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 14 }}>
+                {criteria.map(c => {
+                  const color = c.status === 'good' ? C.green : c.status === 'warning' ? C.amber : C.red;
+                  const tgt = c.target === 0 && c.value > 0 ? 'over' : c.value >= c.target ? 'met' : 'under';
+                  const arrow = tgt === 'met' ? '▲' : tgt === 'over' ? '▲' : '▼';
+                  return (
+                    <div key={c.label} style={{
+                      background: C.surface, border: `1px solid ${color}55`,
+                      borderRadius: 12, padding: 12,
+                      position: 'relative', overflow: 'hidden',
+                    }}>
+                      {/* Tinted accent strip */}
+                      <div style={{
+                        position: 'absolute', left: 0, top: 0, bottom: 0, width: 3,
+                        background: color,
+                      }} />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                        <span style={{ fontSize: 14 }}>{c.icon}</span>
+                        <span style={{ fontSize: 10, color: C.muted, fontWeight: 700, letterSpacing: '.04em', textTransform: 'uppercase' }}>
+                          {c.label}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 4 }}>
+                        <span style={{ fontSize: 22, fontWeight: 900, color, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
+                          {c.value}{c.unit}
+                        </span>
+                        <span style={{ fontSize: 9, color: C.muted, fontWeight: 700 }}>
+                          /{c.target}{c.unit}
+                        </span>
+                      </div>
+                      <p style={{ fontSize: 9, color, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 3 }}>
+                        <span style={{ fontSize: 8 }}>{arrow}</span> {c.hint}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* ACTIONS */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <button
+                  onClick={() => navigate('ASSIGN_MACRO')}
+                  style={{
+                    width: '100%', padding: '14px 0',
+                    background: C.cyan, color: '#07070F', border: 'none',
+                    borderRadius: 14, fontSize: 13, fontWeight: 800,
+                    letterSpacing: '.04em', textTransform: 'uppercase',
+                    cursor: 'pointer', fontFamily: 'inherit',
+                    boxShadow: '0 4px 14px rgba(0,229,255,.2)',
+                  }}
+                >Cambiar de macrociclo (21 sistemas)</button>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button
+                    style={{
+                      flex: 1, padding: '12px 0',
+                      background: 'transparent', color: C.amber,
+                      border: `1px solid ${C.amber}55`,
+                      borderRadius: 12, fontSize: 11, fontWeight: 800,
+                      letterSpacing: '.04em', textTransform: 'uppercase',
+                      cursor: 'pointer', fontFamily: 'inherit',
+                    }}
+                  >Marcar deload</button>
+                  <button
+                    style={{
+                      flex: 1, padding: '12px 0',
+                      background: 'transparent', color: C.muted,
+                      border: `1px solid ${C.line}`,
+                      borderRadius: 12, fontSize: 11, fontWeight: 800,
+                      letterSpacing: '.04em', textTransform: 'uppercase',
+                      cursor: 'pointer', fontFamily: 'inherit',
+                    }}
+                  >Exportar review</button>
+                </div>
+              </div>
+            </>
+          );
+        })()}
 
         {/* CALENDARIO */}
         {tab === 'calendario' && (
@@ -645,13 +760,13 @@ const VoltaCoachTools: React.FC<VoltaCoachToolsProps> = ({ initialTab = 'progres
         {tab === 'inventario' && (
           <>
             <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: C.muted, marginBottom: 10 }}>
-              Equipamiento del box · {INVENTORY.length} items
+              Equipamiento del box · {inventory.length} items
             </p>
 
             {/* TOTALS BAR */}
             {(() => {
-              const totalItems = INVENTORY.reduce((acc, it) => acc + it.total, 0);
-              const availableItems = INVENTORY.reduce((acc, it) => acc + it.count, 0);
+              const totalItems = inventory.reduce((acc, it) => acc + it.total, 0) || 1;
+              const availableItems = inventory.reduce((acc, it) => acc + it.count, 0);
               const ratio = Math.round((availableItems / totalItems) * 100);
               const ratioColor = ratio >= 90 ? C.green : ratio >= 70 ? C.amber : C.red;
               return (
@@ -673,9 +788,9 @@ const VoltaCoachTools: React.FC<VoltaCoachToolsProps> = ({ initialTab = 'progres
               );
             })()}
 
-            {/* AGRUPADO POR CATEGORÍA */}
+            {/* AGRUPADO POR CATEGORÍA — EDITABLE INLINE */}
             {(['Barras', 'Plates', 'Gymnastics', 'Cardio', 'Accesorios'] as const).map(cat => {
-              const items = INVENTORY.filter(it => it.category === cat);
+              const items = inventory.map((it, idx) => ({ ...it, _idx: idx })).filter(it => it.category === cat);
               if (items.length === 0) return null;
               return (
                 <div key={cat} style={{ marginBottom: 14 }}>
@@ -686,36 +801,86 @@ const VoltaCoachTools: React.FC<VoltaCoachToolsProps> = ({ initialTab = 'progres
                     background: C.surface, border: `1px solid ${C.line}`,
                     borderRadius: 14, overflow: 'hidden',
                   }}>
-                    {items.map((it, i) => {
-                      const ratio = it.count / it.total;
+                    {items.map((it, j) => {
+                      const ratio = it.total > 0 ? it.count / it.total : 0;
                       const status = ratio >= 0.9 ? C.green : ratio >= 0.6 ? C.amber : C.red;
-                      const missing = it.total - it.count;
                       return (
-                        <div key={i} style={{
-                          display: 'flex', alignItems: 'center', gap: 12,
-                          padding: '11px 14px',
-                          borderBottom: i < items.length - 1 ? `1px solid ${C.line}` : 'none',
+                        <div key={it._idx} style={{
+                          padding: '12px 14px',
+                          borderBottom: j < items.length - 1 ? `1px solid ${C.line}` : 'none',
                         }}>
-                          <span style={{ fontSize: 22 }}>{it.icon}</span>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <p style={{ fontSize: 12, fontWeight: 700, color: C.text }}>{it.label}</p>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
-                              <div style={{ flex: 1, height: 3, borderRadius: 2, background: C.line, overflow: 'hidden' }}>
-                                <div style={{ height: '100%', width: `${ratio * 100}%`, background: status }} />
-                              </div>
-                              <span style={{ fontSize: 10, color: C.muted, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
-                                {it.count}/{it.total}
-                              </span>
-                            </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                            <span style={{ fontSize: 22 }}>{it.icon}</span>
+                            <p style={{ flex: 1, fontSize: 12, fontWeight: 700, color: C.text }}>{it.label}</p>
+                            <button
+                              onClick={() => removeItem(it._idx)}
+                              style={{
+                                width: 24, height: 24, borderRadius: 6,
+                                background: 'rgba(255,61,0,0.08)', color: C.red,
+                                border: '1px solid rgba(255,61,0,0.2)',
+                                cursor: 'pointer', fontSize: 11, fontFamily: 'inherit', padding: 0,
+                              }}
+                              aria-label="Eliminar item"
+                            >×</button>
                           </div>
-                          {missing > 0 && (
-                            <span style={{
-                              fontSize: 9, fontWeight: 800, padding: '3px 7px', borderRadius: 8,
-                              background: `${status}1a`, color: status,
-                              border: `1px solid ${status}55`,
-                              textTransform: 'uppercase', letterSpacing: '.04em',
-                            }}>-{missing}</span>
-                          )}
+                          <div style={{ height: 3, borderRadius: 2, background: C.line, overflow: 'hidden', marginBottom: 8 }}>
+                            <div style={{ height: '100%', width: `${ratio * 100}%`, background: status, transition: 'width .2s ease' }} />
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            {/* Disponibles -/+ */}
+                            <span style={{ fontSize: 9, color: C.muted, fontWeight: 700, textTransform: 'uppercase' }}>Disp.</span>
+                            <button
+                              onClick={() => adjustCount(it._idx, -1)}
+                              disabled={it.count <= 0}
+                              style={{
+                                width: 24, height: 24, borderRadius: 6,
+                                background: C.surface2, color: C.text,
+                                border: `1px solid ${C.line}`,
+                                cursor: it.count > 0 ? 'pointer' : 'not-allowed',
+                                fontSize: 13, fontFamily: 'inherit', padding: 0,
+                                opacity: it.count > 0 ? 1 : 0.4,
+                              }}
+                            >−</button>
+                            <span style={{ fontSize: 13, fontWeight: 900, color: status, minWidth: 24, textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}>{it.count}</span>
+                            <button
+                              onClick={() => adjustCount(it._idx, 1)}
+                              disabled={it.count >= it.total}
+                              style={{
+                                width: 24, height: 24, borderRadius: 6,
+                                background: C.surface2, color: C.text,
+                                border: `1px solid ${C.line}`,
+                                cursor: it.count < it.total ? 'pointer' : 'not-allowed',
+                                fontSize: 13, fontFamily: 'inherit', padding: 0,
+                                opacity: it.count < it.total ? 1 : 0.4,
+                              }}
+                            >+</button>
+                            <span style={{ marginLeft: 8, fontSize: 10, color: C.muted, fontWeight: 700 }}>/</span>
+                            {/* Total -/+ */}
+                            <span style={{ fontSize: 9, color: C.muted, fontWeight: 700, textTransform: 'uppercase' }}>Total</span>
+                            <button
+                              onClick={() => adjustTotal(it._idx, -1)}
+                              disabled={it.total <= 0}
+                              style={{
+                                width: 24, height: 24, borderRadius: 6,
+                                background: 'transparent', color: C.muted,
+                                border: `1px solid ${C.line}`,
+                                cursor: it.total > 0 ? 'pointer' : 'not-allowed',
+                                fontSize: 13, fontFamily: 'inherit', padding: 0,
+                                opacity: it.total > 0 ? 1 : 0.4,
+                              }}
+                            >−</button>
+                            <span style={{ fontSize: 12, fontWeight: 700, color: C.muted, minWidth: 22, textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}>{it.total}</span>
+                            <button
+                              onClick={() => adjustTotal(it._idx, 1)}
+                              style={{
+                                width: 24, height: 24, borderRadius: 6,
+                                background: 'transparent', color: C.muted,
+                                border: `1px solid ${C.line}`,
+                                cursor: 'pointer',
+                                fontSize: 13, fontFamily: 'inherit', padding: 0,
+                              }}
+                            >+</button>
+                          </div>
                         </div>
                       );
                     })}
@@ -724,15 +889,103 @@ const VoltaCoachTools: React.FC<VoltaCoachToolsProps> = ({ initialTab = 'progres
               );
             })}
 
-            <button
-              style={{
-                width: '100%', marginTop: 6, padding: '14px 0',
-                background: C.cyan, color: '#07070F', border: 'none',
-                borderRadius: 14, fontSize: 13, fontWeight: 800,
-                letterSpacing: '.04em', textTransform: 'uppercase',
-                cursor: 'pointer', fontFamily: 'inherit',
-              }}
-            >+ Agregar / reportar faltante</button>
+            {/* ADD FORM */}
+            {showAddForm ? (
+              <div style={{
+                background: C.surface, border: `1px solid ${C.cyan}55`,
+                borderRadius: 14, padding: 14, marginTop: 6,
+                display: 'flex', flexDirection: 'column', gap: 10,
+              }}>
+                <p style={{ fontSize: 11, fontWeight: 800, color: C.cyan, letterSpacing: '.08em', textTransform: 'uppercase' }}>
+                  Nuevo item
+                </p>
+                <input
+                  value={newItem.label}
+                  onChange={(e) => setNewItem({ ...newItem, label: e.target.value })}
+                  placeholder="Ej. Mancuernas 10kg"
+                  style={{
+                    padding: '10px 12px', borderRadius: 10,
+                    background: C.surface2, border: `1px solid ${C.line}`,
+                    color: C.text, fontSize: 13, fontFamily: 'inherit', outline: 'none',
+                  }}
+                />
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                  <input
+                    type="number"
+                    value={newItem.count}
+                    onChange={(e) => setNewItem({ ...newItem, count: e.target.value })}
+                    placeholder="Disponibles"
+                    style={{
+                      padding: '10px 12px', borderRadius: 10,
+                      background: C.surface2, border: `1px solid ${C.line}`,
+                      color: C.text, fontSize: 13, fontFamily: 'inherit', outline: 'none',
+                    }}
+                  />
+                  <input
+                    type="number"
+                    value={newItem.total}
+                    onChange={(e) => setNewItem({ ...newItem, total: e.target.value })}
+                    placeholder="Total"
+                    style={{
+                      padding: '10px 12px', borderRadius: 10,
+                      background: C.surface2, border: `1px solid ${C.line}`,
+                      color: C.text, fontSize: 13, fontFamily: 'inherit', outline: 'none',
+                    }}
+                  />
+                </div>
+                <div className="scroll-x-no-bar" style={{ display: 'flex', gap: 5, overflowX: 'auto' }}>
+                  {(['Barras', 'Plates', 'Gymnastics', 'Cardio', 'Accesorios'] as const).map(cat => (
+                    <button
+                      key={cat}
+                      onClick={() => setNewItem({ ...newItem, category: cat })}
+                      style={{
+                        flexShrink: 0, padding: '6px 12px', borderRadius: 999,
+                        background: newItem.category === cat ? C.cyan : 'transparent',
+                        color: newItem.category === cat ? '#07070F' : C.muted,
+                        border: `1px solid ${newItem.category === cat ? C.cyan : C.line}`,
+                        fontSize: 10, fontWeight: 800,
+                        cursor: 'pointer', fontFamily: 'inherit',
+                      }}
+                    >{cat}</button>
+                  ))}
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button
+                    onClick={() => { setShowAddForm(false); setNewItem({ label: '', count: '', total: '', category: 'Accesorios', icon: '📦' }); }}
+                    style={{
+                      flex: 1, padding: '11px 0', borderRadius: 12,
+                      background: 'transparent', color: C.muted,
+                      border: `1px solid ${C.line}`,
+                      fontSize: 12, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase',
+                      cursor: 'pointer', fontFamily: 'inherit',
+                    }}
+                  >Cancelar</button>
+                  <button
+                    onClick={addItem}
+                    disabled={!newItem.label.trim() || !newItem.total || !newItem.count}
+                    style={{
+                      flex: 2, padding: '11px 0', borderRadius: 12,
+                      background: C.cyan, color: '#07070F',
+                      border: 'none',
+                      fontSize: 12, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase',
+                      cursor: 'pointer', fontFamily: 'inherit',
+                      opacity: (!newItem.label.trim() || !newItem.total || !newItem.count) ? 0.4 : 1,
+                    }}
+                  >Agregar item</button>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowAddForm(true)}
+                style={{
+                  width: '100%', marginTop: 6, padding: '14px 0',
+                  background: C.cyan, color: '#07070F', border: 'none',
+                  borderRadius: 14, fontSize: 13, fontWeight: 800,
+                  letterSpacing: '.04em', textTransform: 'uppercase',
+                  cursor: 'pointer', fontFamily: 'inherit',
+                }}
+              >+ Agregar item</button>
+            )}
           </>
         )}
 
