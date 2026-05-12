@@ -1,18 +1,46 @@
 import React from 'react';
 import { useNav } from '../context/NavigationContext';
 
-export type NavTab = 'home' | 'train' | 'stats' | 'profile' | 'wod' | 'logros';
+export type NavTab = 'home' | 'train' | 'stats' | 'profile' | 'wod' | 'logros' | 'roster';
 
 interface PhoneLayoutProps {
   children: React.ReactNode;
   activeNav?: NavTab;
   onNavChange?: (tab: NavTab) => void;
   product?: 'holy-oly' | 'volta';
+  role?: 'atleta' | 'coach';
   showBack?: boolean;
   hideNav?: boolean;
 }
 
-const NAV_ITEMS = [
+const TRAIN_ITEM = {
+  id: 'train' as const,
+  label: 'Entrenar',
+  icon: (active: boolean) => (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <rect x="2" y="10" width="4" height="4" rx="1" fill={active ? 'var(--primary)' : '#475569'} />
+      <rect x="18" y="10" width="4" height="4" rx="1" fill={active ? 'var(--primary)' : '#475569'} />
+      <rect x="6" y="7" width="12" height="10" rx="2" fill={active ? 'var(--primary)' : 'none'}
+        stroke={active ? 'var(--primary)' : '#475569'} strokeWidth="1.8" />
+      <line x1="12" y1="7" x2="12" y2="17" stroke={active ? 'var(--primary-text)' : '#475569'} strokeWidth="1.8" />
+    </svg>
+  ),
+};
+
+const ROSTER_ITEM = {
+  id: 'roster' as const,
+  label: 'Atletas',
+  icon: (active: boolean) => (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <circle cx="8" cy="9" r="3" fill={active ? 'var(--primary)' : 'none'} stroke={active ? 'var(--primary)' : '#475569'} strokeWidth="1.6" />
+      <circle cx="16" cy="9" r="3" fill={active ? 'var(--primary)' : 'none'} stroke={active ? 'var(--primary)' : '#475569'} strokeWidth="1.6" />
+      <path d="M2 19c0-2.5 2.7-4.5 6-4.5s6 2 6 4.5" stroke={active ? 'var(--primary)' : '#475569'} strokeWidth="1.6" strokeLinecap="round" fill="none" />
+      <path d="M14 14.5c3.3 0 6 2 6 4.5" stroke={active ? 'var(--primary)' : '#475569'} strokeWidth="1.6" strokeLinecap="round" fill="none" />
+    </svg>
+  ),
+};
+
+const NAV_ITEMS_BASE = [
   {
     id: 'home' as const,
     label: 'Inicio',
@@ -22,19 +50,6 @@ const NAV_ITEMS = [
           fill={active ? 'var(--primary)' : 'none'}
           stroke={active ? 'var(--primary)' : '#475569'}
           strokeWidth="1.8" strokeLinejoin="round" />
-      </svg>
-    ),
-  },
-  {
-    id: 'train' as const,
-    label: 'Entrenar',
-    icon: (active: boolean) => (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <rect x="2" y="10" width="4" height="4" rx="1" fill={active ? 'var(--primary)' : '#475569'} />
-        <rect x="18" y="10" width="4" height="4" rx="1" fill={active ? 'var(--primary)' : '#475569'} />
-        <rect x="6" y="7" width="12" height="10" rx="2" fill={active ? 'var(--primary)' : 'none'}
-          stroke={active ? 'var(--primary)' : '#475569'} strokeWidth="1.8" />
-        <line x1="12" y1="7" x2="12" y2="17" stroke={active ? 'var(--primary-text)' : '#475569'} strokeWidth="1.8" />
       </svg>
     ),
   },
@@ -80,9 +95,17 @@ const PhoneLayout: React.FC<PhoneLayoutProps> = ({
   activeNav = 'home',
   onNavChange,
   product = 'holy-oly',
+  role = 'atleta',
   showBack = false,
   hideNav = false,
 }) => {
+  // HO: insertar "Entrenar" (atleta) o "Atletas" (coach) entre Inicio y Stats
+  const NAV_ITEMS = [
+    NAV_ITEMS_BASE[0],
+    role === 'coach' ? ROSTER_ITEM : TRAIN_ITEM,
+    NAV_ITEMS_BASE[1],
+    NAV_ITEMS_BASE[2],
+  ];
   const { back, canGoBack } = useNav();
   const now = new Date();
   const time = now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });

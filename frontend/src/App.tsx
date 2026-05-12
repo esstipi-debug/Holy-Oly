@@ -39,8 +39,12 @@ const NAV_MAP_HO: Record<string, NavTab> = {
   PERFORMANCE: 'stats', INDEX: 'stats', SCHEDULE: 'stats', PULSE: 'stats', PILLS: 'stats', SOCIAL: 'stats',
   PROGRESSION: 'stats',
   PROFILE: 'profile', ONBOARDING: 'profile', PREMIUM: 'profile',
-  COACH_DASH: 'home', ATHLETE_DETAIL: 'home', ASSIGN_MACRO: 'home',
+  COACH_DASH: 'home', ATHLETE_DETAIL: 'roster', ASSIGN_MACRO: 'roster',
 };
+
+// Vistas exclusivas por rol — al cambiar de rol, redirige al home apropiado
+const ATHLETE_ONLY: View[] = ['WARMUP', 'SESSION', 'SUMMARY', 'VICTORY', 'PULSE', 'PILLS', 'INDEX', 'SCHEDULE', 'ONBOARDING', 'PREMIUM', 'VOLTA_PREWOD'];
+const COACH_ONLY: View[]   = ['COACH_DASH', 'ATHLETE_DETAIL', 'ASSIGN_MACRO', 'VOLTA_COACH', 'VOLTA_COACH_WOD', 'VOLTA_COACH_TOOLS', 'VOLTA_COACH_MACRO', 'VOLTA_COACH_INVENTORY'];
 
 const NAV_MAP_VOLTA: Record<string, NavTab> = {
   VOLTA_HOME: 'home', VOLTA_COACH: 'home',
@@ -154,6 +158,16 @@ function AppInner() {
     }
   }, [isAuthenticated, currentView, navigate]);
 
+  // Role-guard: si la vista actual no aplica al rol activo, redirigir al home apropiado
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    if (role === 'coach' && ATHLETE_ONLY.includes(currentView)) {
+      navigate(product === 'volta' ? 'VOLTA_COACH' : 'COACH_DASH');
+    } else if (role === 'atleta' && COACH_ONLY.includes(currentView)) {
+      navigate(product === 'volta' ? 'VOLTA_HOME' : 'HOME');
+    }
+  }, [role, currentView, product, isAuthenticated, navigate]);
+
   const isPublic = PUBLIC_VIEWS.has(currentView);
 
   const renderView = () => {
@@ -222,6 +236,7 @@ function AppInner() {
     }
     if (tab === 'home') navigate(role === 'coach' ? 'COACH_DASH' : 'HOME');
     else if (tab === 'train') navigate('WARMUP');
+    else if (tab === 'roster') navigate('COACH_DASH');
     else if (tab === 'stats') navigate('PERFORMANCE');
     else if (tab === 'profile') navigate('PROFILE');
   };
@@ -234,6 +249,7 @@ function AppInner() {
         activeNav={(product === 'volta' ? NAV_MAP_VOLTA : NAV_MAP_HO)[currentView] ?? 'home'}
         onNavChange={handleNavChange}
         product={product}
+        role={role}
         showBack={showBack && !isPublic}
         hideNav={isPublic}
       >
