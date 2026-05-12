@@ -17,6 +17,7 @@ import OlyIndex from './pages/OlyIndex';
 import CommandCenter from './pages/CommandCenter';
 import AthleteDeepDive from './pages/AthleteDeepDive';
 import AssignMacrocycle from './pages/AssignMacrocycle';
+import NewAthlete from './pages/NewAthlete';
 import Onboarding from './pages/Onboarding';
 import Premium from './pages/PreMium';
 import PulseHub from './pages/PulseHub';
@@ -39,12 +40,12 @@ const NAV_MAP_HO: Record<string, NavTab> = {
   PERFORMANCE: 'stats', INDEX: 'stats', SCHEDULE: 'stats', PULSE: 'stats', PILLS: 'stats', SOCIAL: 'stats',
   PROGRESSION: 'stats',
   PROFILE: 'profile', ONBOARDING: 'profile', PREMIUM: 'profile',
-  COACH_DASH: 'home', ATHLETE_DETAIL: 'home', ASSIGN_MACRO: 'home',
+  COACH_DASH: 'home', ATHLETE_DETAIL: 'home', ASSIGN_MACRO: 'home', NEW_ATHLETE: 'home',
 };
 
 // Vistas exclusivas por rol — al cambiar de rol, redirige al home apropiado
 const ATHLETE_ONLY: View[] = ['WARMUP', 'SESSION', 'SUMMARY', 'VICTORY', 'PULSE', 'PILLS', 'INDEX', 'SCHEDULE', 'ONBOARDING', 'PREMIUM', 'VOLTA_PREWOD'];
-const COACH_ONLY: View[]   = ['COACH_DASH', 'ATHLETE_DETAIL', 'ASSIGN_MACRO', 'VOLTA_COACH', 'VOLTA_COACH_WOD', 'VOLTA_COACH_TOOLS', 'VOLTA_COACH_MACRO', 'VOLTA_COACH_INVENTORY'];
+const COACH_ONLY: View[]   = ['COACH_DASH', 'ATHLETE_DETAIL', 'ASSIGN_MACRO', 'NEW_ATHLETE', 'VOLTA_COACH', 'VOLTA_COACH_WOD', 'VOLTA_COACH_TOOLS', 'VOLTA_COACH_MACRO', 'VOLTA_COACH_INVENTORY'];
 
 const NAV_MAP_VOLTA: Record<string, NavTab> = {
   VOLTA_HOME: 'home', VOLTA_COACH: 'home',
@@ -66,7 +67,7 @@ const navGroups = [
   { title: 'Core',         views: ['LOGIN', 'REGISTER', 'ONBOARDING', 'PREMIUM'] },
   { title: 'HO Atleta',    views: ['HOME', 'SUMMARY', 'WARMUP', 'SESSION', 'VICTORY'] },
   { title: 'HO Stats',     views: ['PERFORMANCE', 'INDEX', 'SCHEDULE', 'PULSE', 'PILLS', 'SOCIAL', 'PROFILE'] },
-  { title: 'HO Coach',     views: ['COACH_DASH', 'ATHLETE_DETAIL', 'ASSIGN_MACRO'] },
+  { title: 'HO Coach',     views: ['COACH_DASH', 'ATHLETE_DETAIL', 'ASSIGN_MACRO', 'NEW_ATHLETE'] },
   { title: 'Volta Atleta', views: ['VOLTA_HOME', 'VOLTA_PREWOD'] },
   { title: 'Volta Coach',  views: ['VOLTA_COACH', 'VOLTA_COACH_WOD', 'VOLTA_COACH_TOOLS', 'VOLTA_COACH_MACRO', 'VOLTA_COACH_INVENTORY'] },
 ];
@@ -191,6 +192,7 @@ function AppInner() {
         case 'VOLTA_PREWOD':          return <VoltaPreWod />;
         case 'ATHLETE_DETAIL':        return <AthleteDeepDive />;
         case 'ASSIGN_MACRO':          return <AssignMacrocycle />;
+        case 'NEW_ATHLETE':           return <NewAthlete />;
         case 'PROFILE':               return <Profile />;
         case 'PERFORMANCE':           return <PerformanceDeepDive />;
         case 'SOCIAL':                return <SocialCard />;
@@ -218,6 +220,7 @@ function AppInner() {
       case 'COACH_DASH':     return <CommandCenter />;
       case 'ATHLETE_DETAIL': return <AthleteDeepDive />;
       case 'ASSIGN_MACRO':   return <AssignMacrocycle />;
+      case 'NEW_ATHLETE':    return <NewAthlete />;
       case 'PROGRESSION':    return <MovementProgression />;
       case 'HOME':
       default:

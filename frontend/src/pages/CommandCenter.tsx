@@ -223,7 +223,7 @@ const CommandCenter: React.FC = () => {
           }}
         >Asignar macro</button>
         <button
-          onClick={() => navigate('ATHLETE_DETAIL')}
+          onClick={() => navigate('NEW_ATHLETE')}
           style={{
             flex: 1, padding: '12px 0', borderRadius: 14,
             background: 'var(--cta-bg)', color: 'var(--cta-text)',
