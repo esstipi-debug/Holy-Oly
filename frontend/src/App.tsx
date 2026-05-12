@@ -44,13 +44,16 @@ const NAV_MAP_HO: Record<string, NavTab> = {
 };
 
 // Vistas exclusivas por rol — al cambiar de rol, redirige al home apropiado
-const ATHLETE_ONLY: View[] = ['WARMUP', 'SESSION', 'SUMMARY', 'VICTORY', 'PULSE', 'PILLS', 'INDEX', 'SCHEDULE', 'ONBOARDING', 'PREMIUM', 'VOLTA_PREWOD'];
+const ATHLETE_ONLY: View[] = ['WARMUP', 'SESSION', 'SUMMARY', 'VICTORY', 'PULSE', 'PILLS', 'INDEX', 'SCHEDULE', 'ONBOARDING', 'PREMIUM', 'VOLTA_PREWOD', 'SOCIAL'];
 const COACH_ONLY: View[]   = ['COACH_DASH', 'ATHLETE_DETAIL', 'ASSIGN_MACRO', 'NEW_ATHLETE', 'VOLTA_COACH', 'VOLTA_COACH_WOD', 'VOLTA_COACH_TOOLS', 'VOLTA_COACH_MACRO', 'VOLTA_COACH_INVENTORY'];
 
 const NAV_MAP_VOLTA: Record<string, NavTab> = {
   VOLTA_HOME: 'home', VOLTA_COACH: 'home',
   VOLTA_PREWOD: 'wod', VOLTA_COACH_WOD: 'wod', WARMUP: 'wod', SESSION: 'wod', SUMMARY: 'wod', VICTORY: 'wod',
-  VOLTA_COACH_MACRO: 'stats', VOLTA_COACH_INVENTORY: 'stats', VOLTA_COACH_TOOLS: 'stats',
+  // Stats slot en coach es Macro (eval macrociclo); Tools genérico también cae acá
+  VOLTA_COACH_MACRO: 'stats', VOLTA_COACH_TOOLS: 'stats',
+  // Logros slot en coach es Box (inventario)
+  VOLTA_COACH_INVENTORY: 'logros',
   PROGRESSION: 'stats',
   PERFORMANCE: 'stats', INDEX: 'stats', SCHEDULE: 'stats', PULSE: 'stats', PILLS: 'stats',
   SOCIAL: 'logros',
@@ -232,8 +235,10 @@ function AppInner() {
     if (product === 'volta') {
       if (tab === 'home') navigate(role === 'coach' ? 'VOLTA_COACH' : 'VOLTA_HOME');
       else if (tab === 'wod') navigate(role === 'coach' ? 'VOLTA_COACH_WOD' : 'VOLTA_PREWOD');
-      else if (tab === 'stats') navigate(role === 'coach' ? 'VOLTA_COACH_TOOLS' : 'PROGRESSION');
-      else if (tab === 'logros') navigate('SOCIAL');
+      // Stats slot: atleta → progresión movs · coach → eval macrociclo
+      else if (tab === 'stats') navigate(role === 'coach' ? 'VOLTA_COACH_MACRO' : 'PROGRESSION');
+      // Logros slot: atleta → social card · coach → inventario del box
+      else if (tab === 'logros') navigate(role === 'coach' ? 'VOLTA_COACH_INVENTORY' : 'SOCIAL');
       else if (tab === 'profile') navigate('PROFILE');
       return;
     }

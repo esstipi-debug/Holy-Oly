@@ -82,12 +82,21 @@ const NAV_ITEMS_BASE = [
   },
 ];
 
-// Volta nav: Inicio / WOD / Stats / Logros / Perfil — cyan accent
-const VOLTA_NAV: { id: NavTab; label: string; icon: string }[] = [
+// Volta nav atleta: Inicio / WOD / Stats / Logros / Perfil
+const VOLTA_NAV_ATLETA: { id: NavTab; label: string; icon: string }[] = [
   { id: 'home',    label: 'Inicio', icon: '🏠' },
   { id: 'wod',     label: 'WOD',    icon: '⚡' },
   { id: 'stats',   label: 'Stats',  icon: '📊' },
   { id: 'logros',  label: 'Logros', icon: '🏅' },
+  { id: 'profile', label: 'Perfil', icon: '👤' },
+];
+
+// Volta nav coach: Inicio / WOD / Macro / Box / Perfil
+const VOLTA_NAV_COACH: { id: NavTab; label: string; icon: string }[] = [
+  { id: 'home',    label: 'Inicio', icon: '🏠' },
+  { id: 'wod',     label: 'WOD',    icon: '⚡' },
+  { id: 'stats',   label: 'Macro',  icon: '🎯' },
+  { id: 'logros',  label: 'Box',    icon: '📦' },
   { id: 'profile', label: 'Perfil', icon: '👤' },
 ];
 
@@ -196,7 +205,7 @@ const PhoneLayout: React.FC<PhoneLayoutProps> = ({
           }}
         >
           {product === 'volta' ? (
-            VOLTA_NAV.map(({ id, label, icon }) => {
+            (role === 'coach' ? VOLTA_NAV_COACH : VOLTA_NAV_ATLETA).map(({ id, label, icon }) => {
               const active = activeNav === id;
               return (
                 <button
