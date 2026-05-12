@@ -3,13 +3,20 @@ import Card from '../components/Card';
 import Button from '../components/Button';
 import Badge from '../components/Badge';
 import { useNav } from '../context/NavigationContext';
+import { useAthlete } from '../context/AthleteContext';
 
 const DAY_LABELS = ['DOM', 'LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB'];
 const MONTH_LABELS = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
 const SESSIONS = ['Snatch + OHS', 'C&J + Front Squat', 'Snatch Speed', 'Rest Day', 'Max Effort C&J', 'Technique Drills', 'Rest Day'];
 
+// Horarios estimados de sesión por día (variación realista vs todo a 10:00 AM)
+const SESSION_TIMES = ['09:00 AM', '10:00 AM', '09:30 AM', '—', '18:00 PM', '10:00 AM', '—'];
+
 const SessionSchedule: React.FC = () => {
   const { navigate } = useNav();
+  const { athlete } = useAthlete();
+  const macroLabel = athlete?.macrocycle.program_name ?? 'Sin macrociclo asignado';
+  const macroWeek = athlete?.macrocycle.week ?? 1;
   const today = new Date();
   const dow = today.getDay();
   const monday = new Date(today);
@@ -35,7 +42,7 @@ const SessionSchedule: React.FC = () => {
            
            <div>
               <h1 className="text-holy-text text-2xl font-black">Planificación</h1>
-              <p className="text-holy-primary text-[10px] font-black uppercase mt-1">Semana 4 · Macrociclo Búlgaro</p>
+              <p className="text-holy-primary text-[10px] font-black uppercase mt-1">Semana {macroWeek} · {macroLabel}</p>
            </div>
         </header>
 
@@ -66,7 +73,7 @@ const SessionSchedule: React.FC = () => {
                       <div className={`w-2 h-10 rounded-full ${d.label === 'Rest Day' ? 'bg-holy-surface' : 'bg-holy-primary'}`} />
                       <div>
                          <p className="text-holy-text text-sm font-bold">{d.label}</p>
-                         <p className="text-holy-text-secondary text-[10px] uppercase font-bold">{d.day} {d.date} {d.month} · 10:00 AM</p>
+                         <p className="text-holy-text-secondary text-[10px] uppercase font-bold">{d.day} {d.date} {d.month} · {SESSION_TIMES[i]}</p>
                       </div>
                    </div>
                    {d.label !== 'Rest Day' ? (

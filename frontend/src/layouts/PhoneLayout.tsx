@@ -169,22 +169,32 @@ const PhoneLayout: React.FC<PhoneLayoutProps> = ({
           </div>
         </div>
 
-        {/* Universal back button */}
+        {/* Header bar reservada cuando hay back — evita que el botón pise el contenido */}
         {showBack && canGoBack && (
-          <button
-            onClick={back}
+          <div
+            className="flex items-center flex-shrink-0"
             style={{
-              position: 'absolute', top: 50, left: 14, zIndex: 60,
-              width: 34, height: 34, borderRadius: '50%',
-              background: 'rgba(0,0,0,0.55)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              color: '#fff', fontSize: 16, cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontFamily: 'inherit',
+              height: 44,
+              padding: '0 14px',
+              background: 'var(--bg)',
+              borderBottom: '1px solid transparent',
+              zIndex: 50,
             }}
-            aria-label="Atrás"
-          >←</button>
+          >
+            <button
+              onClick={back}
+              style={{
+                width: 34, height: 34, borderRadius: '50%',
+                background: 'rgba(0,0,0,0.55)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                color: '#fff', fontSize: 16, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontFamily: 'inherit', flexShrink: 0,
+              }}
+              aria-label="Atrás"
+            >←</button>
+          </div>
         )}
 
         {/* Scrollable Content */}
