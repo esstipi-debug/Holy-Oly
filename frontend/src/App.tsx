@@ -39,7 +39,7 @@ const NAV_MAP_HO: Record<string, NavTab> = {
   PERFORMANCE: 'stats', INDEX: 'stats', SCHEDULE: 'stats', PULSE: 'stats', PILLS: 'stats', SOCIAL: 'stats',
   PROGRESSION: 'stats',
   PROFILE: 'profile', ONBOARDING: 'profile', PREMIUM: 'profile',
-  COACH_DASH: 'home', ATHLETE_DETAIL: 'roster', ASSIGN_MACRO: 'roster',
+  COACH_DASH: 'home', ATHLETE_DETAIL: 'home', ASSIGN_MACRO: 'home',
 };
 
 // Vistas exclusivas por rol — al cambiar de rol, redirige al home apropiado
@@ -236,7 +236,6 @@ function AppInner() {
     }
     if (tab === 'home') navigate(role === 'coach' ? 'COACH_DASH' : 'HOME');
     else if (tab === 'train') navigate('WARMUP');
-    else if (tab === 'roster') navigate('COACH_DASH');
     else if (tab === 'stats') navigate('PERFORMANCE');
     else if (tab === 'profile') navigate('PROFILE');
   };

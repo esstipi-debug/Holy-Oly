@@ -27,8 +27,9 @@ const TRAIN_ITEM = {
   ),
 };
 
-const ROSTER_ITEM = {
-  id: 'roster' as const,
+// Coach home: en HO el dashboard del coach ES el roster — usamos icono de gente y label "Atletas"
+const COACH_HOME_ITEM = {
+  id: 'home' as const,
   label: 'Atletas',
   icon: (active: boolean) => (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
@@ -99,13 +100,10 @@ const PhoneLayout: React.FC<PhoneLayoutProps> = ({
   showBack = false,
   hideNav = false,
 }) => {
-  // HO: insertar "Entrenar" (atleta) o "Atletas" (coach) entre Inicio y Stats
-  const NAV_ITEMS = [
-    NAV_ITEMS_BASE[0],
-    role === 'coach' ? ROSTER_ITEM : TRAIN_ITEM,
-    NAV_ITEMS_BASE[1],
-    NAV_ITEMS_BASE[2],
-  ];
+  // HO: atleta tiene 4 tabs (Inicio/Entrenar/Stats/Perfil); coach tiene 3 (Atletas/Stats/Perfil)
+  const NAV_ITEMS = role === 'coach'
+    ? [COACH_HOME_ITEM, NAV_ITEMS_BASE[1], NAV_ITEMS_BASE[2]]
+    : [NAV_ITEMS_BASE[0], TRAIN_ITEM, NAV_ITEMS_BASE[1], NAV_ITEMS_BASE[2]];
   const { back, canGoBack } = useNav();
   const now = new Date();
   const time = now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
