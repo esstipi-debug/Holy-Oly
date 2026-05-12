@@ -57,11 +57,11 @@ const WarmupGenerator: React.FC = () => {
         <header className="flex justify-between items-center mb-8">
           <div className="flex items-center gap-3">
              <div>
-               <h2 className="text-white text-lg font-black">Calentamiento</h2>
+               <h2 className="text-holy-text text-lg font-black">Calentamiento</h2>
                <p className="text-holy-primary text-[10px] font-bold">READYNESS_AWARE</p>
              </div>
           </div>
-          <button onClick={() => navigate('SESSION')} className="text-slate-500 text-xs font-bold hover:text-white transition-colors">OMITIR</button>
+          <button onClick={() => navigate('SESSION')} className="text-holy-text-secondary text-xs font-bold hover:text-holy-text transition-colors">OMITIR</button>
         </header>
 
         {/* Phase Tabs */}
@@ -71,7 +71,7 @@ const WarmupGenerator: React.FC = () => {
               key={p}
               onClick={() => setPhase(p)}
               className={`flex-1 py-2 text-[10px] font-black rounded-lg transition-all ${
-                phase === p ? 'bg-slate-800 text-white' : 'text-slate-500'
+                phase === p ? 'bg-holy-surface text-holy-text' : 'text-holy-text-secondary'
               }`}
             >
               {p} {done[p].length === PHASE_ITEMS[p].length ? '✓' : `${done[p].length}/${PHASE_ITEMS[p].length}`}
@@ -81,8 +81,8 @@ const WarmupGenerator: React.FC = () => {
 
         {/* Phase Info */}
         <div className="mb-6">
-          <p className="text-slate-400 text-sm leading-relaxed">
-            Preparamos <span className="text-white font-bold">{phaseLabel}</span> · {phaseDoneCount}/{phaseTotal} hechos
+          <p className="text-holy-text-secondary text-sm leading-relaxed">
+            Preparamos <span className="text-holy-text font-bold">{phaseLabel}</span> · {phaseDoneCount}/{phaseTotal} hechos
           </p>
         </div>
 
@@ -97,13 +97,13 @@ const WarmupGenerator: React.FC = () => {
                onClick={() => toggleItem(item.idx)}
              >
                <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 ${
-                 item.status === 'done' ? 'bg-holy-primary border-holy-primary' : 'border-slate-800'
+                 item.status === 'done' ? 'bg-holy-primary border-holy-primary' : 'border-holy-surface'
                }`}>
-                 {item.status === 'done' && <span className="text-white text-[10px]">✓</span>}
+                 {item.status === 'done' && <span className="text-holy-text text-[10px]">✓</span>}
                </div>
                <div className="flex-1">
-                 <p className="text-white text-sm font-bold">{item.name}</p>
-                 <p className="text-slate-500 text-[11px]">{item.info}</p>
+                 <p className="text-holy-text text-sm font-bold">{item.name}</p>
+                 <p className="text-holy-text-secondary text-[11px]">{item.info}</p>
                </div>
                {item.status === 'active' && <span className="text-holy-primary text-xs">●</span>}
              </Card>
@@ -111,16 +111,16 @@ const WarmupGenerator: React.FC = () => {
 
            {/* Ramp-up Indicator */}
            <div className="flex items-center gap-4 py-4">
-              <div className="h-px flex-1 bg-slate-800" />
-              <span className="text-slate-600 text-[9px] font-black uppercase tracking-widest">Aproximación</span>
-              <div className="h-px flex-1 bg-slate-800" />
+              <div className="h-px flex-1 bg-holy-surface" />
+              <span className="text-holy-text-secondary text-[9px] font-black uppercase tracking-widest">Aproximación</span>
+              <div className="h-px flex-1 bg-holy-surface" />
            </div>
 
            <Card variant="solid" padding="sm" className="flex items-center gap-4">
-              <div className="w-6 h-6 rounded-full border-2 border-slate-800" />
+              <div className="w-6 h-6 rounded-full border-2 border-holy-surface" />
               <div className="flex-1">
-                <p className="text-slate-200 text-sm font-bold">Serie 1</p>
-                <p className="text-slate-500 text-[11px]">3 reps · 45% 1RM</p>
+                <p className="text-holy-text-secondary text-sm font-bold">Serie 1</p>
+                <p className="text-holy-text-secondary text-[11px]">3 reps · 45% 1RM</p>
               </div>
               <p className="text-holy-primary font-black text-lg">40 kg</p>
            </Card>
@@ -130,7 +130,7 @@ const WarmupGenerator: React.FC = () => {
         <div className="mt-8 mb-24 bg-holy-primary/10 border border-holy-primary/20 rounded-2xl p-4 flex items-center gap-4">
            <span className="text-2xl">⏱️</span>
            <div>
-             <p className="text-white text-xs font-bold">Siguiente: Descanso 45s</p>
+             <p className="text-holy-text text-xs font-bold">Siguiente: Descanso 45s</p>
              <p className="text-holy-primary/60 text-[10px]">Mantén pulsaciones en Zona 2</p>
            </div>
         </div>

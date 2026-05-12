@@ -26,7 +26,7 @@ const PerformanceDeepDive: React.FC = () => {
            <div className="flex items-center gap-3">
               
               <div>
-                 <h1 className="text-white text-2xl font-black italic tracking-tighter">PERFORMANCE</h1>
+                 <h1 className="text-holy-text text-2xl font-black italic tracking-tighter">PERFORMANCE</h1>
                  <p className="text-holy-primary text-[10px] font-black uppercase mt-1">ANÁLISIS DE DATOS HISTÓRICOS</p>
               </div>
            </div>
@@ -36,7 +36,7 @@ const PerformanceDeepDive: React.FC = () => {
                   key={r}
                   onClick={() => setRange(r)}
                   className={`px-3 py-1 text-[9px] font-bold rounded-md transition-all ${
-                    range === r ? 'bg-slate-800 text-white' : 'text-slate-500 hover:text-white'
+                    range === r ? 'bg-holy-surface text-holy-text' : 'text-holy-text-secondary hover:text-holy-text'
                   }`}
                 >{r}</button>
               ))}
@@ -46,9 +46,9 @@ const PerformanceDeepDive: React.FC = () => {
         {/* Big Metric Card */}
         <Card variant="solid" className="bg-gradient-to-br from-holy-primary/10 to-transparent border-holy-primary/30 mb-8 overflow-hidden relative">
            <div className="absolute top-[-20%] right-[-10%] w-40 h-40 bg-holy-primary/10 rounded-full blur-3xl" />
-           <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-2">Volume Load ({range === 'W' ? 'Semanal' : range === 'M' ? 'Mensual' : 'Anual'})</p>
+           <p className="text-holy-text-secondary text-[10px] font-black uppercase tracking-widest mb-2">Volume Load ({range === 'W' ? 'Semanal' : range === 'M' ? 'Mensual' : 'Anual'})</p>
            <div className="flex items-baseline gap-2">
-              <span className="text-white text-5xl font-black italic">{data.volume}</span>
+              <span className="text-holy-text text-5xl font-black italic">{data.volume}</span>
               <span className="text-holy-primary text-sm font-bold">KG</span>
            </div>
            <p className="text-green-500 text-[10px] font-bold mt-2 uppercase tracking-wide">{data.trend}</p>
@@ -56,16 +56,16 @@ const PerformanceDeepDive: React.FC = () => {
 
         {/* Intensity Chart Mockup */}
         <div className="space-y-4 mb-10">
-           <h3 className="text-slate-500 text-[10px] font-black uppercase tracking-widest pl-1">Intensidad Media Relativa</h3>
+           <h3 className="text-holy-text-secondary text-[10px] font-black uppercase tracking-widest pl-1">Intensidad Media Relativa</h3>
            <Card variant="glass" className="h-48 flex items-end justify-between px-4 pb-2 gap-1">
               {data.bars.map((h, i) => (
                 <div key={i} className="flex-1 space-y-2">
-                   <p className="text-center text-[8px] text-slate-500 font-bold">{h}%</p>
+                   <p className="text-center text-[8px] text-holy-text-secondary font-bold">{h}%</p>
                    <div
                     className={`w-full rounded-t-lg transition-all duration-700 ${h > 80 ? 'bg-red-500' : 'bg-holy-primary'}`}
                     style={{ height: `${(h/100) * 120}px` }}
                    />
-                   <p className="text-center text-[8px] text-slate-700 font-bold">{data.labels[i]}</p>
+                   <p className="text-center text-[8px] text-holy-text-secondary font-bold">{data.labels[i]}</p>
                 </div>
               ))}
            </Card>
@@ -73,23 +73,23 @@ const PerformanceDeepDive: React.FC = () => {
 
         {/* PR Distribution */}
         <div className="space-y-4 mb-20">
-           <h3 className="text-slate-500 text-[10px] font-black uppercase tracking-widest pl-1">Distribución de Levantamientos</h3>
+           <h3 className="text-holy-text-secondary text-[10px] font-black uppercase tracking-widest pl-1">Distribución de Levantamientos</h3>
            <div className="grid grid-cols-2 gap-4">
-              <Card variant="solid" className="p-4 bg-holy-surface border-slate-800">
+              <Card variant="solid" className="p-4 bg-holy-surface border-holy-surface">
                  <div className="flex justify-between items-center mb-4">
                     <span className="text-lg">🏋️</span>
                     <Badge variant="info">SNATCH</Badge>
                  </div>
-                 <p className="text-white text-xs font-bold">Best: {snatchBest} kg</p>
-                 <p className="text-slate-600 text-[10px]">Ratio S/C: {sRatio}%</p>
+                 <p className="text-holy-text text-xs font-bold">Best: {snatchBest} kg</p>
+                 <p className="text-holy-text-secondary text-[10px]">Ratio S/C: {sRatio}%</p>
               </Card>
-              <Card variant="solid" className="p-4 bg-holy-surface border-slate-800">
+              <Card variant="solid" className="p-4 bg-holy-surface border-holy-surface">
                  <div className="flex justify-between items-center mb-4">
                     <span className="text-lg">💥</span>
                     <Badge variant="info">C&J</Badge>
                  </div>
-                 <p className="text-white text-xs font-bold">Best: {cjBest} kg</p>
-                 <p className="text-slate-600 text-[10px]">Rep. Max: {Math.round(cjBest * 0.9)}x3</p>
+                 <p className="text-holy-text text-xs font-bold">Best: {cjBest} kg</p>
+                 <p className="text-holy-text-secondary text-[10px]">Rep. Max: {Math.round(cjBest * 0.9)}x3</p>
               </Card>
            </div>
         </div>

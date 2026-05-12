@@ -45,35 +45,35 @@ const SocialCard: React.FC = () => {
          <div className="text-center w-full">
             <h2 className="text-holy-gold text-[10px] font-black uppercase tracking-[0.4em] mb-4">NUEVO RÉCORD PERSONAL</h2>
             <div className="h-0.5 w-12 bg-holy-gold/30 mx-auto mb-8" />
-            <h1 className="text-white text-6xl font-black italic tracking-tighter leading-none">{cjPr}<span className="text-holy-gold text-2xl not-italic ml-1">KG</span></h1>
-            <p className="text-slate-500 text-lg font-bold uppercase mt-2">CLEAN & JERK</p>
+            <h1 className="text-holy-text text-6xl font-black italic tracking-tighter leading-none">{cjPr}<span className="text-holy-gold text-2xl not-italic ml-1">KG</span></h1>
+            <p className="text-holy-text-secondary text-lg font-bold uppercase mt-2">CLEAN & JERK</p>
          </div>
 
          <div className="w-full space-y-4">
             <div className="flex justify-between items-end border-b border-white/5 pb-4">
                <div>
-                  <p className="text-slate-600 text-[9px] font-black uppercase">Atleta</p>
-                  <p className="text-white text-sm font-bold">{name}</p>
+                  <p className="text-holy-text-secondary text-[9px] font-black uppercase">Atleta</p>
+                  <p className="text-holy-text text-sm font-bold">{name}</p>
                </div>
                <div className="text-right">
-                  <p className="text-slate-600 text-[9px] font-black uppercase">Lugar</p>
-                  <p className="text-white text-sm font-bold">{club}</p>
+                  <p className="text-holy-text-secondary text-[9px] font-black uppercase">Lugar</p>
+                  <p className="text-holy-text text-sm font-bold">{club}</p>
                </div>
             </div>
 
             <div className="flex justify-between items-center bg-white/[0.03] p-4 rounded-2xl">
                <div>
-                  <p className="text-slate-500 text-[8px] font-black uppercase tracking-widest leading-none">Holy Score</p>
+                  <p className="text-holy-text-secondary text-[8px] font-black uppercase tracking-widest leading-none">Holy Score</p>
                   <p className="text-holy-primary text-xl font-black italic">+{xpGained} XP</p>
                </div>
-               <div className="w-8 h-8 bg-holy-primary rounded-lg flex items-center justify-center text-white text-xs">
+               <div className="w-8 h-8 bg-holy-primary rounded-lg flex items-center justify-center text-holy-text text-xs">
                   ✓
                </div>
             </div>
          </div>
 
          <div className="w-full flex justify-center mt-2">
-            <p className="text-slate-700 text-[9px] font-black italic tracking-tighter">HOLY OLY PLATFORM · SMART TRAINING</p>
+            <p className="text-holy-text-secondary text-[9px] font-black italic tracking-tighter">HOLY OLY PLATFORM · SMART TRAINING</p>
          </div>
       </div>
 

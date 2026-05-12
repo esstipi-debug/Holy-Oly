@@ -73,10 +73,10 @@ const KnowledgePills: React.FC = () => {
 
       <div className="px-8 py-20 flex-1 flex flex-col justify-end relative z-20 pb-40">
         <Badge variant="gold" className="mb-4 self-start">PÍLDORA {idx + 1}/{PILLS.length}</Badge>
-        <h1 className="text-white text-3xl font-black italic tracking-tighter leading-none mb-6">
+        <h1 className="text-holy-text text-3xl font-black italic tracking-tighter leading-none mb-6">
           {pill.title}
         </h1>
-        <p className="text-slate-300 text-base leading-relaxed mb-8">
+        <p className="text-holy-text-secondary text-base leading-relaxed mb-8">
           {pill.body}
         </p>
 
@@ -85,8 +85,8 @@ const KnowledgePills: React.FC = () => {
             +{pill.xp}
           </div>
           <div>
-            <p className="text-white text-xs font-black uppercase">RECOMPENSA DE LECTURA</p>
-            <p className="text-slate-500 text-[10px] font-bold">XP acreditada al finalizar</p>
+            <p className="text-holy-text text-xs font-black uppercase">RECOMPENSA DE LECTURA</p>
+            <p className="text-holy-text-secondary text-[10px] font-bold">XP acreditada al finalizar</p>
           </div>
         </Card>
       </div>
