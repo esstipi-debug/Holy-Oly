@@ -1,22 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNav } from '../context/NavigationContext';
 import { useAthlete } from '../context/AthleteContext';
-
-interface School {
-  id: string;
-  name: string;
-  desc: string;
-  color: string;
-  intensity: number;
-  volume: number;
-}
-
-const SCHOOLS: School[] = [
-  { id: 'bulgarian', name: 'Bulgarian Method', desc: 'Max intensity, high frequency. Diario al 90%+.',           color: '#EF4444', intensity: 5, volume: 2 },
-  { id: 'soviet',    name: 'Soviet System',    desc: 'Volumen periodizado, precisión técnica.',                   color: '#06B6D4', intensity: 3, volume: 5 },
-  { id: 'chinese',   name: 'Chinese School',   desc: 'Énfasis en pull, estabilidad y sentadilla profunda.',       color: '#F59E0B', intensity: 4, volume: 4 },
-  { id: 'catalyst',  name: 'Catalyst Athletics',desc: 'Periodización lineal americana, balance vol/int.',         color: '#22C55E', intensity: 4, volume: 3 },
-];
+import { MACROCYCLES, MACROCYCLE_FAMILIES, type Macrocycle } from '../data/macrocycles';
 
 const Bars: React.FC<{ value: number; color: string }> = ({ value, color }) => (
   <div style={{ display: 'flex', gap: 2, marginTop: 4 }}>
@@ -32,36 +17,44 @@ const Bars: React.FC<{ value: number; color: string }> = ({ value, color }) => (
   </div>
 );
 
+type FamilyFilter = 'TODOS' | Macrocycle['family'];
+
 const AssignMacrocycle: React.FC = () => {
   const { navigate } = useNav();
   const { selectedAthlete, athlete: currentAthlete } = useAthlete();
   const target = selectedAthlete ?? currentAthlete;
   const [selected, setSelected] = useState<string | null>(null);
+  const [filter, setFilter] = useState<FamilyFilter>('TODOS');
+
+  const filtered = useMemo(
+    () => filter === 'TODOS' ? MACROCYCLES : MACROCYCLES.filter(m => m.family === filter),
+    [filter],
+  );
 
   const handleConfirm = () => {
     if (!selected) return;
-    // En un mundo real esto haría POST. Acá navegamos al detalle del atleta.
     navigate('ATHLETE_DETAIL');
   };
 
   const initials = target ? target.name.split(' ').slice(0, 2).map(n => n[0]).join('') : '';
+  const selectedMacro = selected ? MACROCYCLES.find(m => m.id === selected) : null;
 
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100%', paddingBottom: 170 }}>
 
       {/* HEADER */}
-      <div style={{ padding: '52px 20px 24px' }}>
+      <div style={{ padding: '52px 20px 20px' }}>
         <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text)', letterSpacing: '-.02em' }}>
           Asignar Macrociclo
         </h1>
         <p style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', marginTop: 4 }}>
-          Selecciona la escuela filosófica
+          {MACROCYCLES.length} sistemas · Filtrá por escuela
         </p>
       </div>
 
       {/* SELECTED ATHLETE */}
       {target && (
-        <div style={{ padding: '0 20px 20px' }}>
+        <div style={{ padding: '0 20px 16px' }}>
           <div style={{
             background: 'rgba(6,182,212,0.06)',
             border: '1px solid rgba(6,182,212,0.25)',
@@ -84,23 +77,51 @@ const AssignMacrocycle: React.FC = () => {
         </div>
       )}
 
-      {/* SCHOOLS */}
-      <div style={{ padding: '0 20px 20px' }}>
-        <p style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 12 }}>
-          Escuelas disponibles
-        </p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {SCHOOLS.map((school) => {
-            const active = selected === school.id;
+      {/* FAMILY FILTER (chips horizontales) */}
+      <div style={{ padding: '0 20px 16px' }}>
+        <div
+          className="scroll-x-no-bar"
+          style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 4 }}
+        >
+          {(['TODOS', ...MACROCYCLE_FAMILIES] as FamilyFilter[]).map(f => {
+            const active = filter === f;
             return (
               <button
-                key={school.id}
-                onClick={() => setSelected(school.id)}
+                key={f}
+                onClick={() => setFilter(f)}
+                style={{
+                  flexShrink: 0,
+                  padding: '7px 13px', borderRadius: 999,
+                  background: active ? 'var(--text)' : 'var(--surface)',
+                  color: active ? 'var(--bg)' : 'var(--text-secondary)',
+                  border: `1px solid ${active ? 'var(--text)' : 'var(--card-border)'}`,
+                  fontSize: 11, fontWeight: 700, letterSpacing: '.04em',
+                  textTransform: 'uppercase',
+                  cursor: 'pointer', fontFamily: 'inherit',
+                }}
+              >{f}</button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* SCHOOLS */}
+      <div style={{ padding: '0 20px 20px' }}>
+        <p style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 10 }}>
+          {filtered.length} disponibles
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {filtered.map((macro) => {
+            const active = selected === macro.id;
+            return (
+              <button
+                key={macro.id}
+                onClick={() => setSelected(macro.id)}
                 style={{
                   textAlign: 'left',
-                  background: active ? `${school.color}10` : 'var(--surface)',
-                  border: `1px solid ${active ? school.color : 'var(--card-border)'}`,
-                  borderLeft: `4px solid ${school.color}`,
+                  background: active ? `${macro.color}10` : 'var(--surface)',
+                  border: `1px solid ${active ? macro.color : 'var(--card-border)'}`,
+                  borderLeft: `4px solid ${macro.color}`,
                   borderRadius: 16, padding: 14,
                   cursor: 'pointer', fontFamily: 'inherit',
                   transition: 'all .15s ease',
@@ -108,21 +129,33 @@ const AssignMacrocycle: React.FC = () => {
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div style={{ flex: 1, paddingRight: 12 }}>
-                    <p style={{ fontSize: 15, fontWeight: 700, color: active ? school.color : 'var(--text)' }}>
-                      {school.name}
+                    <p style={{ fontSize: 15, fontWeight: 700, color: active ? macro.color : 'var(--text)' }}>
+                      {macro.name}
                     </p>
                     <p style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 4, lineHeight: 1.4 }}>
-                      {school.desc}
+                      {macro.desc}
                     </p>
+                    <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
+                      <span style={{
+                        fontSize: 9, fontWeight: 700, padding: '3px 7px', borderRadius: 6,
+                        background: 'var(--surface2)', color: 'var(--text-secondary)',
+                        letterSpacing: '.04em', textTransform: 'uppercase',
+                      }}>{macro.frequency}</span>
+                      <span style={{
+                        fontSize: 9, fontWeight: 700, padding: '3px 7px', borderRadius: 6,
+                        background: 'var(--surface2)', color: 'var(--text-secondary)',
+                        letterSpacing: '.04em', textTransform: 'uppercase',
+                      }}>{macro.duration}</span>
+                    </div>
                   </div>
                   <div style={{
                     width: 22, height: 22, borderRadius: '50%',
-                    border: `1.5px solid ${active ? school.color : 'var(--card-border)'}`,
+                    border: `1.5px solid ${active ? macro.color : 'var(--card-border)'}`,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    flexShrink: 0,
+                    flexShrink: 0, marginTop: 2,
                   }}>
                     {active && (
-                      <div style={{ width: 10, height: 10, borderRadius: '50%', background: school.color }} />
+                      <div style={{ width: 10, height: 10, borderRadius: '50%', background: macro.color }} />
                     )}
                   </div>
                 </div>
@@ -132,15 +165,25 @@ const AssignMacrocycle: React.FC = () => {
                     <p style={{ fontSize: 8, fontWeight: 800, color: 'var(--text-secondary)', letterSpacing: '.08em', textTransform: 'uppercase' }}>
                       Intensidad
                     </p>
-                    <Bars value={school.intensity} color="#EF4444" />
+                    <Bars value={macro.intensity} color="#EF4444" />
                   </div>
                   <div>
                     <p style={{ fontSize: 8, fontWeight: 800, color: 'var(--text-secondary)', letterSpacing: '.08em', textTransform: 'uppercase' }}>
                       Volumen
                     </p>
-                    <Bars value={school.volume} color="#06B6D4" />
+                    <Bars value={macro.volume} color="#06B6D4" />
                   </div>
                 </div>
+
+                {active && macro.bestFor && (
+                  <p style={{
+                    fontSize: 10, color: macro.color, marginTop: 10,
+                    paddingTop: 10, borderTop: `1px dashed ${macro.color}55`,
+                    fontStyle: 'italic',
+                  }}>
+                    💡 {macro.bestFor}
+                  </p>
+                )}
               </button>
             );
           })}
@@ -167,9 +210,9 @@ const AssignMacrocycle: React.FC = () => {
             transition: 'all .2s ease',
           }}
         >
-          {selected
-            ? `Confirmar · ${SCHOOLS.find(s => s.id === selected)?.name}`
-            : 'Elegí una escuela'}
+          {selectedMacro
+            ? `Confirmar · ${selectedMacro.name}`
+            : 'Elegí un macrociclo'}
         </button>
       </div>
     </div>
