@@ -2,6 +2,7 @@ import React from 'react';
 import { useNav } from '../context/NavigationContext';
 import { useAthlete } from '../context/AthleteContext';
 import WiseAssistant from '../components/WiseAssistant';
+import QuestsSection, { type QuestProgress } from '../components/QuestsSection';
 
 const C = {
   bg: '#07070F',
@@ -166,6 +167,31 @@ const VoltaDashboard: React.FC = () => {
           <WellnessRow icon="💓" title="HRV" sub="-1.8σ del baseline" pct={28} color={C.red} alert="critical" label="🔴 CRÍTICO" />
           <WellnessRow icon="😴" title="Sueño" sub="Score 64 · 3° día bajo" pct={42} color={C.amber} alert="warning" label="⚠ CRÓNICO" />
           <WellnessRow icon="☕" title="Cafeína" sub="C_residual 88mg · curfew OK" pct={62} color={C.cyan} alert="info" label="ⓘ INFO" />
+        </div>
+
+        {/* QUESTS DE LA SEMANA */}
+        <Sec style={{ marginTop: 12, marginBottom: 8 }}>Quests semanales</Sec>
+        <div style={{ marginBottom: 16 }}>
+          <QuestsSection
+            product="volta"
+            weekOfYear={Math.ceil(((new Date().getTime() - new Date(new Date().getFullYear(), 0, 1).getTime()) / 86400000 + new Date(new Date().getFullYear(), 0, 1).getDay() + 1) / 7)}
+            progress={{
+              sessionsThisWeek: 3,
+              rxThisWeek: 1,
+              prsThisWeek: 0,
+              tonelajeKg: 0,
+              skippedThisWeek: 0,
+              mobilityDays: 1,
+              sleepDays: 4,
+              hrvDays: 5,
+              waterDays: 3,
+              foamDays: 1,
+              preCheckCount: 3,
+              benchmarkDone: false,
+              teamWodDone: false,
+              skillPrDone: false,
+            } satisfies QuestProgress}
+          />
         </div>
 
         {/* WISE SCORE */}
