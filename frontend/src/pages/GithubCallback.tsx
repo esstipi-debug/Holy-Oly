@@ -19,7 +19,7 @@ const GithubCallback: React.FC = () => {
       }
 
       try {
-        await loginWithGithubCode(code);
+        await loginWithGithubCode(code, state ?? undefined);
         navigate('VOLTA_HOME');
       } catch (e: unknown) {
         setError(e instanceof Error ? e.message : 'Error al autenticar con GitHub');

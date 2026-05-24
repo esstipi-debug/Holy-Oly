@@ -7,7 +7,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string, role: 'atleta' | 'coach', product: 'holy-oly' | 'volta') => Promise<void>;
   loginWithGithub: () => Promise<void>;
-  loginWithGithubCode: (code: string) => Promise<void>;
+  loginWithGithubCode: (code: string, state?: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
   backendAlive: boolean | null;
@@ -90,8 +90,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.location.href = authorizeUrl;
   }, []);
 
-  const loginWithGithubCodeFn = useCallback(async (code: string) => {
-    const data = await loginWithGithubCode(code);
+  const loginWithGithubCodeFn = useCallback(async (code: string, state?: string) => {
+    const data = await loginWithGithubCode(code, state);
     localStorage.setItem('token', data.access_token);
     localStorage.setItem('user', JSON.stringify(data.user));
     localStorage.removeItem('demoMode');

@@ -101,11 +101,11 @@ export async function getGithubAuthUrl(): Promise<string> {
   return data.authorize_url;
 }
 
-export async function loginWithGithubCode(code: string): Promise<{ access_token: string; token_type: string; user: AuthUser }> {
+export async function loginWithGithubCode(code: string, state?: string): Promise<{ access_token: string; token_type: string; user: AuthUser }> {
   const res = await fetch(`${API_URL}/v1/auth/github/callback`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ code }),
+    body: JSON.stringify({ code, state }),
   });
 
   if (!res.ok) {
