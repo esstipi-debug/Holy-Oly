@@ -6,7 +6,7 @@ import { useNav } from '../context/NavigationContext';
 import { useAthlete } from '../context/AthleteContext';
 
 const ACTIONS = [
-  'completó AMRAP 20 (Rx)',
+  'completó complejo Arrancada (3+1)',
   'alcanzó PR en Snatch (+2kg)',
   'inició sesión: Prep. Campeonato',
   'logró 12 días de racha',
@@ -40,12 +40,12 @@ const PulseHub: React.FC = () => {
 
         {/* Live Challenges */}
         <section className="space-y-4 mb-10">
-           <h3 className="text-holy-text-secondary text-[10px] font-black uppercase tracking-widest pl-1">Retos Globales (EMOM/AMRAP)</h3>
+           <h3 className="text-holy-text-secondary text-[10px] font-black uppercase tracking-widest pl-1">Retos del Club · Halterofilia</h3>
            <Card variant="glass" padding="none" className="border-holy-primary/30 overflow-hidden">
               <div className="bg-holy-primary/10 p-5 border-b border-holy-primary/20 flex justify-between items-center gap-3">
                  <div className="min-w-0 flex-1 overflow-hidden">
-                    <h4 className="text-holy-text text-base font-black truncate">THE DROP-OFF CHALLENGE</h4>
-                    <p className="text-holy-primary text-[10px] font-bold uppercase truncate">Sincronizado: 12:00 PM</p>
+                    <h4 className="text-holy-text text-base font-black truncate">MAX SNATCH DEL DÍA</h4>
+                    <p className="text-holy-primary text-[10px] font-bold uppercase truncate">Ventana: 12:00 PM – 18:00</p>
                  </div>
                  <div className="text-right flex-shrink-0">
                     <p className="text-holy-text text-lg font-black tabular-nums">14:25</p>
