@@ -1,77 +1,113 @@
 """
-Script para ejecutar migraciones SQL en PostgreSQL.
-Uso: python execute_migration.py
+Script para ejecutar migraciones SQL en PostgreSQL / AlloyDB.
+
+Uso:
+    python execute_migration.py                  # Ejecuta todas las migraciones pendientes
+    python execute_migration.py 005              # Ejecuta solo 005_*.sql
+    python execute_migration.py 005_github_oauth # Match parcial
+    python execute_migration.py --list           # Lista migraciones disponibles
 """
 import os
 import sys
+import glob
 from sqlalchemy import create_engine, text
 
-# Agregar el path del backend
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-def execute_migration():
-    """Ejecuta la migración de RLS."""
+MIGRATIONS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "migrations")
+
+
+def list_migrations() -> list[str]:
+    """Lista migraciones ordenadas por número."""
+    files = sorted(glob.glob(os.path.join(MIGRATIONS_DIR, "*.sql")))
+    return [os.path.basename(f) for f in files]
+
+
+def find_migration(query: str) -> list[str]:
+    """Encuentra migraciones que matchean el query (prefijo o nombre parcial)."""
+    all_migs = list_migrations()
+    return [m for m in all_migs if query in m or m.startswith(query)]
+
+
+def execute_file(engine, path: str) -> bool:
+    """Ejecuta un archivo SQL completo. Retorna True si OK."""
+    name = os.path.basename(path)
+    print(f"\n📄 {name}")
+    print("-" * 50)
+
+    with open(path, "r", encoding="utf-8") as f:
+        sql = f.read()
+
+    statements = [s.strip() for s in sql.split(";") if s.strip()]
+    ok_count, skip_count, err_count = 0, 0, 0
+
+    with engine.connect() as conn:
+        for i, stmt in enumerate(statements, 1):
+            try:
+                conn.execute(text(stmt))
+                ok_count += 1
+            except Exception as e:
+                msg = str(e).lower()
+                if any(k in msg for k in ("already exists", "duplicate", "does not exist")):
+                    skip_count += 1
+                else:
+                    print(f"  ✗ Sentencia {i}: {e}")
+                    err_count += 1
+        conn.commit()
+
+    print(f"  ✓ {ok_count} ejecutadas · {skip_count} idempotentes · {err_count} errores")
+    return err_count == 0
+
+
+def main():
+    args = sys.argv[1:]
+
+    if "--list" in args or "-l" in args:
+        print("📋 Migraciones disponibles:")
+        for m in list_migrations():
+            print(f"  · {m}")
+        return 0
+
     db_url = os.getenv("DATABASE_URL")
     if not db_url:
         print("❌ ERROR: DATABASE_URL no está configurada")
-        print("Por favor, configura la variable de entorno DATABASE_URL")
-        return False
-    
-    # Ajustar URL para SQLAlchemy
+        return 1
+
     if db_url.startswith("postgres://"):
         db_url = db_url.replace("postgres://", "postgresql://", 1)
-    
-    print(f"🔄 Conectando a la base de datos...")
-    
+
+    print(f"🔄 Conectando a {db_url.split('@')[-1].split('/')[0]}...")
     try:
         engine = create_engine(db_url)
-        
-        # Leer el archivo de migración
-        migration_path = os.path.join(os.path.dirname(__file__), "migrations", "001_enable_rls.sql")
-        
-        if not os.path.exists(migration_path):
-            print(f"❌ ERROR: No se encontró el archivo de migración: {migration_path}")
-            return False
-        
-        with open(migration_path, 'r') as f:
-            migration_sql = f.read()
-        
-        print(f"📄 Ejecutando migración: 001_enable_rls.sql")
-        print("-" * 50)
-        
-        with engine.connect() as conn:
-            # Ejecutar cada sentencia por separado
-            statements = [s.strip() for s in migration_sql.split(';') if s.strip()]
-            
-            for i, statement in enumerate(statements, 1):
-                try:
-                    conn.execute(text(statement))
-                    print(f"  ✓ Sentencia {i} ejecutada")
-                except Exception as e:
-                    # Si es un error de "policy already exists" o similar, lo ignoramos
-                    error_str = str(e).lower()
-                    if "already exists" in error_str or "duplicate" in error_str:
-                        print(f"  ⚠ Sentencia {i} ya existe (ignorado)")
-                    else:
-                        print(f"  ✗ Error en sentencia {i}: {e}")
-            
-            conn.commit()
-        
-        print("-" * 50)
-        print("✅ Migración completada exitosamente!")
-        print("\n📝 Resumen de cambios:")
-        print("  • RLS habilitado en: athlete_sessions")
-        print("  • RLS habilitado en: daily_metrics")
-        print("  • RLS habilitado en: sleep_logs")
-        print("\n⚠️  IMPORTANTE: La aplicación debe ejecutar 'SET LOCAL app.current_user_id = <ID>'")
-        print("    al inicio de cada transacción para que las políticas RLS funcionen.")
-        
-        return True
-        
     except Exception as e:
-        print(f"❌ ERROR: {e}")
-        return False
+        print(f"❌ ERROR conectando: {e}")
+        return 1
+
+    if args:
+        query = args[0]
+        matches = find_migration(query)
+        if not matches:
+            print(f"❌ No se encontró migración para: {query}")
+            return 1
+        targets = matches
+    else:
+        targets = list_migrations()
+
+    print(f"🚀 Aplicando {len(targets)} migración(es): {', '.join(targets)}")
+
+    all_ok = True
+    for name in targets:
+        path = os.path.join(MIGRATIONS_DIR, name)
+        if not execute_file(engine, path):
+            all_ok = False
+
+    print("\n" + "=" * 50)
+    if all_ok:
+        print("✅ Todas las migraciones aplicadas")
+        return 0
+    print("⚠️  Algunas migraciones tuvieron errores (revisar arriba)")
+    return 1
+
 
 if __name__ == "__main__":
-    success = execute_migration()
-    sys.exit(0 if success else 1)
+    sys.exit(main())

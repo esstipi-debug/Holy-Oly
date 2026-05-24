@@ -2,6 +2,7 @@ import React from 'react';
 import { useAthlete } from '../context/AthleteContext';
 import { useNav } from '../context/NavigationContext';
 import WiseAssistant from '../components/WiseAssistant';
+import QuestsSection, { type QuestProgress } from '../components/QuestsSection';
 
 const ringColor = (r: number) => r >= 70 ? '#22C55E' : r >= 50 ? '#F59E0B' : '#EF4444';
 const ringLabel = (r: number) => r >= 70 ? 'Listo para carga alta' : r >= 50 ? 'Carga moderada' : 'Tu cuerpo pide descanso';
@@ -96,7 +97,7 @@ const AtletaHome: React.FC = () => {
   const xpPct = Math.max(4, Math.min(100, Math.round(((xpNow - xpCurrentBase) / (xpNextBase - xpCurrentBase)) * 100)));
 
   return (
-    <div style={{ background: 'var(--bg)', paddingBottom: 90, minHeight: '100%' }}>
+    <div className="anim-fade-in" style={{ background: 'var(--bg)', paddingBottom: 90, minHeight: '100%' }}>
 
       {/* HEADER */}
       <div style={{ padding: '14px 20px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -292,6 +293,30 @@ const AtletaHome: React.FC = () => {
             {(xpNextBase - xpNow).toLocaleString('es')} XP para {beltNext.name}
           </p>
         </div>
+      </div>
+
+      {/* QUESTS DE LA SEMANA */}
+      <div style={{ padding: '0 20px 18px' }}>
+        <QuestsSection
+          product="holy-oly"
+          weekOfYear={Math.ceil(((new Date().getTime() - new Date(new Date().getFullYear(), 0, 1).getTime()) / 86400000 + new Date(new Date().getFullYear(), 0, 1).getDay() + 1) / 7)}
+          progress={{
+            sessionsThisWeek: 2,
+            rxThisWeek: 0,
+            prsThisWeek: 0,
+            tonelajeKg: 8500,
+            skippedThisWeek: 0,
+            mobilityDays: 2,
+            sleepDays: 5,
+            hrvDays: 4,
+            waterDays: 3,
+            foamDays: 2,
+            preCheckCount: 2,
+            benchmarkDone: false,
+            teamWodDone: false,
+            skillPrDone: false,
+          } satisfies QuestProgress}
+        />
       </div>
 
       {/* MACRO progress slim */}

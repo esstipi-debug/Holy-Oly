@@ -71,7 +71,7 @@ const KnowledgePills: React.FC = () => {
         aria-label="Siguiente"
       />
 
-      <div className="px-8 py-20 flex-1 flex flex-col justify-end relative z-20 pb-40">
+      <div className="px-8 py-20 flex-1 flex flex-col justify-end relative z-20" style={{ paddingBottom: 220 }}>
         <Badge variant="gold" className="mb-4 self-start">PÍLDORA {idx + 1}/{PILLS.length}</Badge>
         <h1 className="text-holy-text text-3xl font-black italic tracking-tighter leading-none mb-6">
           {pill.title}

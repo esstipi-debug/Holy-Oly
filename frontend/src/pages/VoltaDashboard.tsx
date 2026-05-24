@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNav } from '../context/NavigationContext';
 import { useAthlete } from '../context/AthleteContext';
 import WiseAssistant from '../components/WiseAssistant';
+import QuestsSection, { type QuestProgress } from '../components/QuestsSection';
+import BottomSheet from '../components/BottomSheet';
 
 const C = {
   bg: '#07070F',
@@ -63,9 +65,80 @@ const WellnessRow: React.FC<{ icon: string; title: string; sub: string; pct: num
   </div>
 );
 
+interface CFComponentInfo {
+  title: string;
+  what: string;
+  how: string;
+  zone: string;
+  tip?: string;
+}
+
+const CF_INFOS: Record<string, CFComponentInfo> = {
+  index: {
+    title: 'CF Index',
+    what: 'Score global 0-100 que sintetiza tu nivel CrossFit. Combina fuerza, capacidad metabólica, gimnasia, performance en benchmarks y adherencia.',
+    how: 'CF Index = promedio ponderado de los 5 componentes: Strength 25% · Engine 25% · Gymnastics 20% · Benchmark 20% · Consistency 10%.',
+    zone: '<40 Beginner · 40-60 Intermediate · 60-80 Rx · ≥80 Élite · ≥90 Competidor regional.',
+    tip: 'Subir tu peor componente da más score que mejorar el mejor. Foco en el más bajo.',
+  },
+  Strength: {
+    title: 'Strength',
+    what: 'Capacidad de fuerza absoluta y relativa. Mide tus PRs en Back Squat, Deadlift, Press y Olympic lifts vs BW.',
+    how: 'Strength = ((Squat + Deadlift + Press + Snatch + C&J) / BW) × 10. Normalizado 0-100.',
+    zone: '<50 Foundation · 50-70 Intermediate · 70-85 Advanced · ≥85 Elite. Squat 2× BW = referencia élite.',
+    tip: 'Si <60, considerá un CF Strength Cycle de 8-10 semanas (off-season).',
+  },
+  Engine: {
+    title: 'Engine',
+    what: 'Capacidad aeróbica y láctica. Tu motor para WODs largos: cuánto podés mantener intensidad sin fundirte.',
+    how: 'Engine = combinación de Row 2k, Run 5k, AirBike 10min calories. Convertido a percentile vs población CF.',
+    zone: '<40 Punto débil · 40-60 OK · 60-80 Buen motor · ≥80 Engine élite. Row 2k <7min = élite.',
+    tip: 'Es lo que más impacto tiene en WODs >12min. Agregá 1-2 sesiones de capacidad por semana.',
+  },
+  Gymnastics: {
+    title: 'Gymnastics',
+    what: 'Dominio de movimientos de peso corporal: pull-ups, HSPU, muscle-ups, ring work, handstands.',
+    how: 'Score basado en skills accomplished del SkillTree. Cada skill suma según tier (T1=2pts, T5=20pts).',
+    zone: '<50 Foundation · 50-75 Atleta · 75-90 Avanzado · ≥90 Élite gimnástico (todos los muscle-ups).',
+    tip: 'Las skills T4-T5 (BMU, RMU, Strict HSPU) son las que más score dan. Constancia 3-4 sesiones/sem.',
+  },
+  Benchmark: {
+    title: 'Benchmark',
+    what: 'Performance en los "Girls" y heroes WODs. Cuánto te separás del tiempo promedio en Fran, Helen, Murph, etc.',
+    how: 'Tu tiempo vs percentile de la base de datos CrossFit Open. Promediado entre 6+ benchmarks completados.',
+    zone: 'Fran <4min = élite. Murph <40min = élite. Score 50 = mediana. Score 80+ = top 20% mundial.',
+    tip: 'Repetí los mismos benchmarks cada 8-12 semanas para medir progreso real.',
+  },
+  Consistency: {
+    title: 'Consistency',
+    what: 'Adherencia al programa. Cuántas sesiones programadas completaste en las últimas 4 semanas.',
+    how: 'Consistency = (sesiones completadas / programadas) × 100. Castiga skip > 3 días consecutivos.',
+    zone: '<60 Riesgo de salir del macro · 60-75 OK · 75-90 Bueno · ≥90 Consistencia élite.',
+    tip: 'Es el factor que más correlaciona con resultados a largo plazo. Más importante que la intensidad puntual.',
+  },
+};
+
+const InfoButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
+  <button
+    onClick={onClick}
+    className="btn-press"
+    style={{
+      width: 18, height: 18, borderRadius: '50%',
+      background: 'rgba(255,255,255,0.08)',
+      color: '#52527A',
+      border: 'none', cursor: 'pointer',
+      fontSize: 10, fontWeight: 900, fontFamily: 'inherit',
+      display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+      marginLeft: 6,
+    }}
+    aria-label="Más info"
+  >ⓘ</button>
+);
+
 const VoltaDashboard: React.FC = () => {
   const { navigate } = useNav();
   const { athlete } = useAthlete();
+  const [activeInfo, setActiveInfo] = useState<CFComponentInfo | null>(null);
   const userName = athlete?.name ?? 'Atleta';
   const now = new Date();
   const hour = now.getHours();
@@ -77,10 +150,10 @@ const VoltaDashboard: React.FC = () => {
   const semana = (weekOfYear % 4) + 1;
 
   return (
-    <div style={{ background: C.bg, minHeight: '100%', paddingBottom: 90, color: C.text }}>
+    <div className="anim-fade-in" style={{ background: C.bg, minHeight: '100%', paddingBottom: 90, color: C.text }}>
 
       {/* HEADER */}
-      <div style={{ padding: '12px 20px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div className="anim-fade-up" style={{ padding: '12px 20px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
           <div style={{ fontSize: 12, color: C.muted }}>{greeting},</div>
           <div style={{ fontSize: 19, fontWeight: 900, color: C.text, letterSpacing: '-.02em' }}>{userName}</div>
@@ -117,15 +190,29 @@ const VoltaDashboard: React.FC = () => {
         {/* ESTADO ACTUAL */}
         <Sec style={{ marginBottom: 8 }}>Estado actual</Sec>
         <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
-          <div style={{
-            flex: 1, padding: 14,
-            background: C.surface,
-            border: '1px solid rgba(0,229,255,0.2)',
-            borderRadius: 18,
-            boxShadow: '0 0 20px rgba(0,229,255,0.06)',
-            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
-          }}>
-            <Sec>CF Index</Sec>
+          <button
+            onClick={() => setActiveInfo(CF_INFOS.index)}
+            className="btn-press"
+            style={{
+              flex: 1, padding: 14,
+              background: C.surface,
+              border: '1px solid rgba(0,229,255,0.2)',
+              borderRadius: 18,
+              boxShadow: '0 0 20px rgba(0,229,255,0.06)',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
+              cursor: 'pointer', fontFamily: 'inherit',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <Sec>CF Index</Sec>
+              <span style={{
+                width: 14, height: 14, borderRadius: '50%',
+                background: 'rgba(0,229,255,0.12)', color: C.cyan,
+                fontSize: 8, fontWeight: 900,
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                marginLeft: 4,
+              }}>ⓘ</span>
+            </div>
             <div style={{
               width: 96, height: 96, borderRadius: '50%',
               border: `5px solid ${C.cyan}`,
@@ -137,7 +224,7 @@ const VoltaDashboard: React.FC = () => {
               <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '.06em', color: C.cyanDim }}>RX · H</span>
             </div>
             <div style={{ fontSize: 10, color: C.muted }}>↑ +1 esta semana</div>
-          </div>
+          </button>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
             <div style={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 18, padding: 13 }}>
               <Sec style={{ marginBottom: 6 }}>V-Form</Sec>
@@ -166,6 +253,31 @@ const VoltaDashboard: React.FC = () => {
           <WellnessRow icon="💓" title="HRV" sub="-1.8σ del baseline" pct={28} color={C.red} alert="critical" label="🔴 CRÍTICO" />
           <WellnessRow icon="😴" title="Sueño" sub="Score 64 · 3° día bajo" pct={42} color={C.amber} alert="warning" label="⚠ CRÓNICO" />
           <WellnessRow icon="☕" title="Cafeína" sub="C_residual 88mg · curfew OK" pct={62} color={C.cyan} alert="info" label="ⓘ INFO" />
+        </div>
+
+        {/* QUESTS DE LA SEMANA */}
+        <Sec style={{ marginTop: 12, marginBottom: 8 }}>Quests semanales</Sec>
+        <div style={{ marginBottom: 16 }}>
+          <QuestsSection
+            product="volta"
+            weekOfYear={Math.ceil(((new Date().getTime() - new Date(new Date().getFullYear(), 0, 1).getTime()) / 86400000 + new Date(new Date().getFullYear(), 0, 1).getDay() + 1) / 7)}
+            progress={{
+              sessionsThisWeek: 3,
+              rxThisWeek: 1,
+              prsThisWeek: 0,
+              tonelajeKg: 0,
+              skippedThisWeek: 0,
+              mobilityDays: 1,
+              sleepDays: 4,
+              hrvDays: 5,
+              waterDays: 3,
+              foamDays: 1,
+              preCheckCount: 3,
+              benchmarkDone: false,
+              teamWodDone: false,
+              skillPrDone: false,
+            } satisfies QuestProgress}
+          />
         </div>
 
         {/* WISE SCORE */}
@@ -267,8 +379,11 @@ const VoltaDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* CF INDEX DESGLOSE */}
-        <Sec style={{ marginBottom: 8 }}>CF Index — desglose</Sec>
+        {/* CF INDEX DESGLOSE · clickable */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+          <Sec>CF Index — desglose</Sec>
+          <span style={{ fontSize: 9, color: C.muted, fontWeight: 700 }}>👆 Tocá para info</span>
+        </div>
         <div style={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 18, padding: 14 }}>
           {[
             { name: 'Strength',   pct: 78, color: C.cyan },
@@ -277,27 +392,83 @@ const VoltaDashboard: React.FC = () => {
             { name: 'Benchmark',  pct: 70, color: C.cyan },
             { name: 'Consistency',pct: 76, color: C.cyan, last: true },
           ].map((s) => (
-            <div key={s.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: s.last ? 0 : 8 }}>
+            <button
+              key={s.name}
+              onClick={() => setActiveInfo(CF_INFOS[s.name])}
+              className="btn-press"
+              style={{
+                width: '100%',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                marginBottom: s.last ? 0 : 8,
+                background: 'transparent', border: 'none', padding: 0, fontFamily: 'inherit',
+                cursor: 'pointer', textAlign: 'left',
+              }}
+            >
               <span style={{ fontSize: 12, fontWeight: 700, color: C.text, width: 110 }}>{s.name}</span>
               <div style={{ flex: 1, margin: '0 10px' }}>
                 <div style={{ height: 4, borderRadius: 2, background: C.line, overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: `${s.pct}%`, background: s.color }} />
+                  <div style={{ height: '100%', width: `${s.pct}%`, background: s.color, transition: 'width .8s ease' }} />
                 </div>
               </div>
-              <span style={{ fontSize: 12, fontWeight: 700, color: s.color }}>{s.pct}{s.warn ? ' ⚠' : ''}</span>
-            </div>
+              <span style={{ fontSize: 12, fontWeight: 700, color: s.color, display: 'flex', alignItems: 'center', gap: 4 }}>
+                {s.pct}{s.warn ? ' ⚠' : ''}
+                <span style={{ fontSize: 9, color: C.muted }}>ⓘ</span>
+              </span>
+            </button>
           ))}
-          <div style={{
-            marginTop: 10, padding: '9px 11px',
-            background: 'rgba(255,179,0,0.06)',
-            border: '1px solid rgba(255,179,0,0.15)',
-            borderRadius: 10,
-          }}>
+          <button
+            onClick={() => setActiveInfo(CF_INFOS.Engine)}
+            className="btn-press"
+            style={{
+              width: '100%', marginTop: 10, padding: '9px 11px',
+              background: 'rgba(255,179,0,0.06)',
+              border: '1px solid rgba(255,179,0,0.15)',
+              borderRadius: 10, cursor: 'pointer',
+              fontFamily: 'inherit', textAlign: 'left',
+            }}
+          >
             <div style={{ fontSize: 11, color: C.amber, fontWeight: 700 }}>💡 Engine es tu punto débil</div>
             <div style={{ fontSize: 11, color: C.muted, marginTop: 2 }}>Agrega 1 WOD de capacidad larga por semana.</div>
-          </div>
+          </button>
         </div>
       </div>
+
+      {/* ─── BottomSheet: info de componente CF ─── */}
+      <BottomSheet
+        open={activeInfo !== null}
+        onClose={() => setActiveInfo(null)}
+        title={activeInfo?.title}
+      >
+        {activeInfo && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14, color: C.text }}>
+            <div>
+              <p className="type-caption" style={{ color: C.cyan }}>¿Qué mide?</p>
+              <p className="type-body" style={{ marginTop: 4 }}>{activeInfo.what}</p>
+            </div>
+            <div>
+              <p className="type-caption" style={{ color: C.cyan }}>¿Cómo se calcula?</p>
+              <p className="type-body" style={{ marginTop: 4 }}>{activeInfo.how}</p>
+            </div>
+            <div style={{
+              background: C.surface, border: `1px solid ${C.line}`,
+              borderRadius: 12, padding: '10px 14px',
+            }}>
+              <p className="type-caption" style={{ color: C.muted }}>Zonas de referencia</p>
+              <p className="type-body" style={{ marginTop: 4 }}>{activeInfo.zone}</p>
+            </div>
+            {activeInfo.tip && (
+              <div style={{
+                background: 'rgba(0,229,255,0.06)',
+                border: '1px solid rgba(0,229,255,0.18)',
+                borderRadius: 12, padding: '10px 14px',
+              }}>
+                <p className="type-caption" style={{ color: C.cyan }}>💡 Tip</p>
+                <p className="type-body" style={{ marginTop: 4 }}>{activeInfo.tip}</p>
+              </div>
+            )}
+          </div>
+        )}
+      </BottomSheet>
 
       <WiseAssistant context="Volta Atleta · Dashboard" />
     </div>

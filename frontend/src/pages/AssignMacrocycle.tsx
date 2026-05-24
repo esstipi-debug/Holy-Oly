@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { useNav } from '../context/NavigationContext';
 import { useAthlete } from '../context/AthleteContext';
-import { MACROCYCLES, MACROCYCLE_FAMILIES, type Macrocycle } from '../data/macrocycles';
+import { useProduct } from '../context/ProductContext';
+import { MACROCYCLES, type Macrocycle } from '../data/macrocycles';
 
 const Bars: React.FC<{ value: number; color: string }> = ({ value, color }) => (
   <div style={{ display: 'flex', gap: 2, marginTop: 4 }}>
@@ -22,13 +23,25 @@ type FamilyFilter = 'TODOS' | Macrocycle['family'];
 const AssignMacrocycle: React.FC = () => {
   const { navigate } = useNav();
   const { selectedAthlete, athlete: currentAthlete } = useAthlete();
+  const { product } = useProduct();
   const target = selectedAthlete ?? currentAthlete;
   const [selected, setSelected] = useState<string | null>(null);
   const [filter, setFilter] = useState<FamilyFilter>('TODOS');
 
+  // Solo macros del producto activo
+  const macrosForProduct = useMemo(
+    () => MACROCYCLES.filter(m => m.product === product),
+    [product],
+  );
+
+  const familiesForProduct = useMemo(
+    () => Array.from(new Set(macrosForProduct.map(m => m.family))),
+    [macrosForProduct],
+  );
+
   const filtered = useMemo(
-    () => filter === 'TODOS' ? MACROCYCLES : MACROCYCLES.filter(m => m.family === filter),
-    [filter],
+    () => filter === 'TODOS' ? macrosForProduct : macrosForProduct.filter(m => m.family === filter),
+    [filter, macrosForProduct],
   );
 
   const handleConfirm = () => {
@@ -83,7 +96,7 @@ const AssignMacrocycle: React.FC = () => {
           className="scroll-x-no-bar"
           style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 4 }}
         >
-          {(['TODOS', ...MACROCYCLE_FAMILIES] as FamilyFilter[]).map(f => {
+          {(['TODOS', ...familiesForProduct] as FamilyFilter[]).map(f => {
             const active = filter === f;
             return (
               <button
@@ -190,10 +203,13 @@ const AssignMacrocycle: React.FC = () => {
         </div>
       </div>
 
-      {/* CONFIRM */}
+      {/* CONFIRM (sticky con backdrop para no superponerse con cards) */}
       <div style={{
-        position: 'absolute', bottom: 84, left: 16, right: 16,
+        position: 'absolute', bottom: 76, left: 0, right: 0,
         zIndex: 40,
+        padding: '14px 16px 12px',
+        background: 'linear-gradient(to top, var(--bg) 0%, var(--bg) 60%, transparent 100%)',
+        backdropFilter: 'blur(8px)',
       }}>
         <button
           onClick={handleConfirm}
@@ -208,6 +224,7 @@ const AssignMacrocycle: React.FC = () => {
             fontFamily: 'inherit',
             opacity: selected ? 1 : 0.6,
             transition: 'all .2s ease',
+            boxShadow: selected ? '0 6px 20px rgba(0,0,0,0.4)' : 'none',
           }}
         >
           {selectedMacro

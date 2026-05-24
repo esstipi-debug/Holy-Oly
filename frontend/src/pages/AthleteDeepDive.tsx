@@ -46,7 +46,9 @@ const AthleteDeepDive: React.FC = () => {
 
   // Carga semanal: ATL (acute) approximation per día
   const loads = a.sessions_last_7.map(s => s.load);
+  const totalLoad = loads.reduce((s, v) => s + v, 0);
   const maxLoad = Math.max(...loads, 1);
+  const hasLoadData = a.sessions_last_7.length > 0 && totalLoad > 0;
   const days = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
 
   const rmList = [
@@ -177,16 +179,17 @@ const AthleteDeepDive: React.FC = () => {
           background: 'var(--surface)', border: '1px solid var(--card-border)', borderRadius: 16,
           padding: '14px 16px 8px', marginBottom: 20,
         }}>
-          {maxLoad > 0 ? (
+          {hasLoadData ? (
             <>
-              <div style={{ height: 100, display: 'flex', alignItems: 'flex-end', gap: 6 }}>
+              <div style={{ height: 100, display: 'flex', alignItems: 'stretch', gap: 6 }}>
                 {a.sessions_last_7.map((s, i) => {
                   const pct = (s.load / maxLoad) * 100;
                   return (
-                    <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                    <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center', gap: 4 }}>
                       <div style={{
                         width: '100%',
                         height: `${Math.max(2, pct)}%`,
+                        minHeight: 4,
                         background: s.completed
                           ? 'linear-gradient(180deg, var(--primary), rgba(34,197,94,0.4))'
                           : 'rgba(255,255,255,0.08)',

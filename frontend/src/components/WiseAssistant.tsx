@@ -75,9 +75,11 @@ function wiseGreeting(role: 'atleta' | 'coach', product: 'holy-oly' | 'volta'): 
 
 interface Props {
   context?: string; // ej. "Volta Coach · WOD Builder"
+  /** Distancia desde el fondo en px. Subí este valor en pantallas con CTA sticky. */
+  bottomOffset?: number;
 }
 
-const WiseAssistant: React.FC<Props> = ({ context = 'Volta Coach' }) => {
+const WiseAssistant: React.FC<Props> = ({ context = 'Volta Coach', bottomOffset = 96 }) => {
   const { role } = useRole();
   const { product } = useProduct();
   const [open, setOpen] = useState(false);
@@ -140,7 +142,7 @@ const WiseAssistant: React.FC<Props> = ({ context = 'Volta Coach' }) => {
       <button
         onClick={() => setOpen(true)}
         style={{
-          position: 'absolute', bottom: 96, right: 16, zIndex: 55,
+          position: 'absolute', bottom: bottomOffset, right: 16, zIndex: 55,
           width: 56, height: 56, borderRadius: '50%',
           background: brandGradient,
           boxShadow: brandShadow,

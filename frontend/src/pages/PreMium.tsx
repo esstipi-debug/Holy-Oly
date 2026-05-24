@@ -14,7 +14,6 @@ const features: Feature[] = [
   { label: 'IA Coach', free: false, pro: true, elite: true },
   { label: 'Injury Shield', free: false, pro: true, elite: true },
   { label: 'Analytics avanzados', free: false, pro: true, elite: true },
-  { label: 'Volta CrossFit', free: false, pro: false, elite: true },
   { label: 'Soporte prioritario', free: false, pro: false, elite: true },
   { label: 'Coach asignado', free: false, pro: false, elite: true },
 ];

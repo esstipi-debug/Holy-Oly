@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import ThemeGallery from '../components/ThemeGallery';
+import AchievementsGrid from '../components/AchievementsGrid';
 import { useAthlete } from '../context/AthleteContext';
 import { useAuth } from '../context/AuthContext';
 import { useNav } from '../context/NavigationContext';
+import { useProduct } from '../context/ProductContext';
+import { unlockedCount, totalCount, type AthleteState } from '../data/achievements';
 
 const SETTINGS = [
   { id: 'biometrics', label: 'Datos Biométricos', icon: '⚖️' },
@@ -21,6 +24,22 @@ const Profile: React.FC = () => {
   const { athlete } = useAthlete();
   const { logout } = useAuth();
   const { navigate } = useNav();
+  const { product } = useProduct();
+
+  // Mock state del atleta — en prod esto vendría del backend
+  const athleteState: AthleteState = {
+    sessionCount: 42,
+    rxSessionCount: 12,
+    prCount: 7,
+    prByLift: { snatch: 3, clean_jerk: 2, squat: 2 },
+    streakDays: 12,
+    currentTier: 3,
+    wellnessDays: { sleep: 18, hrv: 25, mood: 10, caffeine: 30 },
+    leaderboardPercentile: 23,
+    wodsCompleted: product === 'volta' ? ['fran', 'helen'] : [],
+  };
+  const unlocked = unlockedCount(athleteState, product);
+  const total = totalCount(product);
 
   const toggleUnits = () => {
     const next = units === 'kg' ? 'lbs' : 'kg';
@@ -78,7 +97,7 @@ const Profile: React.FC = () => {
         {/* Stats grid */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
           {[
-            { icon: '🏆', label: 'Logros', sub: '12 Desbloqueados', onClick: () => navigate('SOCIAL') },
+            { icon: '🏆', label: 'Logros', sub: `${unlocked}/${total} Desbloqueados`, onClick: () => navigate('SOCIAL') },
             { icon: '💳', label: 'Pagos',  sub: 'PRO Expira en 12d', onClick: () => navigate('PREMIUM') },
           ].map((item) => (
             <div
@@ -98,6 +117,11 @@ const Profile: React.FC = () => {
               <p style={{ color: 'var(--text-secondary)', fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.04em', marginTop: 2 }}>{item.sub}</p>
             </div>
           ))}
+        </div>
+
+        {/* Achievements */}
+        <div style={{ marginBottom: 24 }}>
+          <AchievementsGrid product={product} state={athleteState} />
         </div>
 
         {/* Settings */}

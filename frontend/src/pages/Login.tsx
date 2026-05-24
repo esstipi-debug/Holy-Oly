@@ -8,7 +8,7 @@ interface LoginProps {
 }
 
 const Login: React.FC<LoginProps> = ({ onSuccess }) => {
-  const { login, enterDemoMode, backendAlive } = useAuth();
+  const { login, loginWithGithub, enterDemoMode, backendAlive } = useAuth();
   const { navigate } = useNav();
   const { product } = useProduct();
 
@@ -34,7 +34,7 @@ const Login: React.FC<LoginProps> = ({ onSuccess }) => {
   };
 
   return (
-    <div style={{
+    <div className="anim-fade-in" style={{
       display: 'flex', flexDirection: 'column', minHeight: '100%',
       background: 'var(--bg)', padding: '60px 24px 28px', justifyContent: 'center',
     }}>
@@ -141,9 +141,21 @@ const Login: React.FC<LoginProps> = ({ onSuccess }) => {
           border: '1px solid var(--card-border)',
           fontSize: 12, fontWeight: 700, letterSpacing: '.04em', textTransform: 'uppercase',
           cursor: 'pointer', fontFamily: 'inherit',
-          marginBottom: 18,
+          marginBottom: 12,
         }}
       >Crear cuenta nueva</button>
+
+      <button
+        onClick={loginWithGithub}
+        style={{
+          width: '100%', padding: '12px 0', borderRadius: 14,
+          background: 'rgba(255,255,255,0.08)', color: 'var(--text)',
+          border: '1px solid var(--card-border)',
+          fontSize: 12, fontWeight: 700, letterSpacing: '.04em', textTransform: 'uppercase',
+          cursor: 'pointer', fontFamily: 'inherit',
+          marginBottom: 18,
+        }}
+      >🔗 Entrar con GitHub</button>
 
       <div style={{ textAlign: 'center' }}>
         <button
