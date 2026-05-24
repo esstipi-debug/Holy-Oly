@@ -190,10 +190,13 @@ const AssignMacrocycle: React.FC = () => {
         </div>
       </div>
 
-      {/* CONFIRM */}
+      {/* CONFIRM (sticky con backdrop para no superponerse con cards) */}
       <div style={{
-        position: 'absolute', bottom: 84, left: 16, right: 16,
+        position: 'absolute', bottom: 76, left: 0, right: 0,
         zIndex: 40,
+        padding: '14px 16px 12px',
+        background: 'linear-gradient(to top, var(--bg) 0%, var(--bg) 60%, transparent 100%)',
+        backdropFilter: 'blur(8px)',
       }}>
         <button
           onClick={handleConfirm}
@@ -208,6 +211,7 @@ const AssignMacrocycle: React.FC = () => {
             fontFamily: 'inherit',
             opacity: selected ? 1 : 0.6,
             transition: 'all .2s ease',
+            boxShadow: selected ? '0 6px 20px rgba(0,0,0,0.4)' : 'none',
           }}
         >
           {selectedMacro
