@@ -58,7 +58,7 @@ const WarmupGenerator: React.FC = () => {
           <div className="flex items-center gap-3">
              <div>
                <h2 className="text-holy-text text-lg font-black">Calentamiento</h2>
-               <p className="text-holy-primary text-[10px] font-bold">READYNESS_AWARE</p>
+               <p className="text-holy-primary text-[10px] font-bold uppercase tracking-wider">Adaptado a tu readiness</p>
              </div>
           </div>
           <button onClick={() => navigate('SESSION')} className="text-holy-text-secondary text-xs font-bold hover:text-holy-text transition-colors">OMITIR</button>
@@ -136,8 +136,16 @@ const WarmupGenerator: React.FC = () => {
         </div>
       </div>
 
-      {/* Footer CTA */}
-      <footer className="absolute bottom-[88px] left-6 right-6 z-30">
+      {/* Footer CTA con backdrop */}
+      <footer
+        className="absolute left-0 right-0 z-30"
+        style={{
+          bottom: 76,
+          padding: '14px 24px 12px',
+          background: 'linear-gradient(to top, var(--bg) 0%, var(--bg) 65%, transparent 100%)',
+          backdropFilter: 'blur(8px)',
+        }}
+      >
         <Button fullWidth variant="primary" size="lg" onClick={() => navigate('SESSION')}>FINALIZAR CALENTAMIENTO →</Button>
       </footer>
     </div>

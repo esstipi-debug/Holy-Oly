@@ -17,8 +17,8 @@ const SessionSummaryPreview: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-holy-bg pb-10">
-      <div className="px-6 py-6 flex-1 overflow-y-auto">
+    <div className="relative flex flex-col h-full bg-holy-bg">
+      <div className="px-6 py-6 flex-1 overflow-y-auto" style={{ paddingBottom: 110 }}>
         {/* Header */}
         <header className="mb-8">
           
@@ -79,8 +79,16 @@ const SessionSummaryPreview: React.FC = () => {
         </div>
       </div>
 
-      {/* Footer CTA */}
-      <footer className="p-6 pt-2">
+      {/* Footer CTA sticky con backdrop */}
+      <footer
+        className="absolute left-0 right-0 z-30"
+        style={{
+          bottom: 0,
+          padding: '14px 24px 16px',
+          background: 'linear-gradient(to top, var(--bg) 0%, var(--bg) 65%, transparent 100%)',
+          backdropFilter: 'blur(8px)',
+        }}
+      >
          <Button fullWidth variant="primary" size="lg" onClick={() => navigate('WARMUP')}>EMPEZAR CALENTAMIENTO</Button>
       </footer>
     </div>
