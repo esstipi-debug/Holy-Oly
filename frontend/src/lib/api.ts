@@ -87,3 +87,31 @@ export async function checkBackendAlive(): Promise<boolean> {
     return false;
   }
 }
+
+export async function getGithubAuthUrl(): Promise<string> {
+  const res = await fetch(`${API_URL}/v1/auth/github/authorize`, {
+    method: 'GET',
+  });
+
+  if (!res.ok) {
+    throw new Error('Error al obtener URL de GitHub');
+  }
+
+  const data = await res.json() as { authorize_url: string };
+  return data.authorize_url;
+}
+
+export async function loginWithGithubCode(code: string): Promise<{ access_token: string; token_type: string; user: AuthUser }> {
+  const res = await fetch(`${API_URL}/v1/auth/github/callback`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code }),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: 'Error al autenticar con GitHub' }));
+    throw new Error(typeof err.detail === 'string' ? err.detail : 'Error al autenticar con GitHub');
+  }
+
+  return res.json() as Promise<{ access_token: string; token_type: string; user: AuthUser }>;
+}

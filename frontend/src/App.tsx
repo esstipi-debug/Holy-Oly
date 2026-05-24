@@ -9,6 +9,7 @@ import PhoneLayout, { type NavTab } from './layouts/PhoneLayout';
 import AtletaHome from './pages/AtletaHome';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import GithubCallback from './pages/GithubCallback';
 import ActiveSession from './pages/ActiveSession';
 import WarmupGenerator from './pages/WarmupGenerator';
 import SessionSummaryPreview from './pages/SessionSummaryPreview';
@@ -61,10 +62,10 @@ const NAV_MAP_VOLTA: Record<string, NavTab> = {
 };
 
 // Home-set: vistas que NO deben mostrar back
-const HOME_VIEWS = new Set<View>(['HOME', 'COACH_DASH', 'VOLTA_HOME', 'VOLTA_COACH', 'LOGIN', 'REGISTER']);
+const HOME_VIEWS = new Set<View>(['HOME', 'COACH_DASH', 'VOLTA_HOME', 'VOLTA_COACH', 'LOGIN', 'REGISTER', 'GITHUB_CALLBACK']);
 
 // Vistas accesibles sin autenticar
-const PUBLIC_VIEWS = new Set<View>(['LOGIN', 'REGISTER']);
+const PUBLIC_VIEWS = new Set<View>(['LOGIN', 'REGISTER', 'GITHUB_CALLBACK']);
 
 const navGroups = [
   { title: 'Core',         views: ['LOGIN', 'REGISTER', 'ONBOARDING', 'PREMIUM'] },
@@ -182,6 +183,7 @@ function AppInner() {
         : (product === 'volta' ? 'VOLTA_HOME' : 'HOME'))} />;
     }
     if (currentView === 'REGISTER') return <Register />;
+    if (currentView === 'GITHUB_CALLBACK') return <GithubCallback />;
 
     // VOLTA
     if (product === 'volta') {
