@@ -1,21 +1,32 @@
 import React from 'react';
+import { motion, type HTMLMotionProps } from 'framer-motion';
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends Omit<HTMLMotionProps<'button'>, 'whileTap' | 'whileHover'> {
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'gold';
   size?: 'sm' | 'md' | 'lg' | 'xl';
   fullWidth?: boolean;
+  loading?: boolean;
 }
+
+const Spinner: React.FC<{ size: number }> = ({ size }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" style={{ animation: 'spin 0.7s linear infinite' }}>
+    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="3" fill="none" strokeDasharray="40 60" strokeLinecap="round" opacity="0.85" />
+  </svg>
+);
 
 const Button: React.FC<ButtonProps> = ({
   children,
   variant = 'primary',
   size = 'md',
   fullWidth = false,
+  loading = false,
+  disabled,
   className = '',
   style,
   ...props
 }) => {
-  const base = 'inline-flex items-center justify-center font-bold transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none';
+  const isDisabled = disabled || loading;
+  const base = 'inline-flex items-center justify-center gap-2 font-bold disabled:opacity-50 disabled:pointer-events-none';
 
   const sizes = {
     sm: 'px-3 py-1.5 text-xs',
@@ -23,6 +34,8 @@ const Button: React.FC<ButtonProps> = ({
     lg: 'px-6 py-4 text-base',
     xl: 'px-8 py-5 text-lg',
   };
+
+  const spinnerSizes = { sm: 12, md: 14, lg: 16, xl: 18 };
 
   const variantStyle: React.CSSProperties =
     variant === 'primary'
@@ -63,13 +76,18 @@ const Button: React.FC<ButtonProps> = ({
         };
 
   return (
-    <button
+    <motion.button
       className={`${base} ${sizes[size]} ${fullWidth ? 'w-full' : ''} ${className}`}
       style={{ ...variantStyle, ...style }}
+      disabled={isDisabled}
+      whileTap={isDisabled ? undefined : { scale: 0.96 }}
+      whileHover={isDisabled ? undefined : { filter: 'brightness(1.08)' }}
+      transition={{ duration: 0.12, ease: [0.16, 1, 0.3, 1] }}
       {...props}
     >
-      {children}
-    </button>
+      {loading && <Spinner size={spinnerSizes[size]} />}
+      <span>{children}</span>
+    </motion.button>
   );
 };
 

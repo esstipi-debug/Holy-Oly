@@ -97,7 +97,7 @@ const AtletaHome: React.FC = () => {
   const xpPct = Math.max(4, Math.min(100, Math.round(((xpNow - xpCurrentBase) / (xpNextBase - xpCurrentBase)) * 100)));
 
   return (
-    <div style={{ background: 'var(--bg)', paddingBottom: 90, minHeight: '100%' }}>
+    <div className="anim-fade-in" style={{ background: 'var(--bg)', paddingBottom: 90, minHeight: '100%' }}>
 
       {/* HEADER */}
       <div style={{ padding: '14px 20px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

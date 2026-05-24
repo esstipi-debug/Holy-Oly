@@ -34,7 +34,7 @@ const Login: React.FC<LoginProps> = ({ onSuccess }) => {
   };
 
   return (
-    <div style={{
+    <div className="anim-fade-in" style={{
       display: 'flex', flexDirection: 'column', minHeight: '100%',
       background: 'var(--bg)', padding: '60px 24px 28px', justifyContent: 'center',
     }}>

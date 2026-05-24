@@ -5,6 +5,7 @@ import { AthleteProvider } from './context/AthleteContext';
 import { NavigationProvider, useNav } from './context/NavigationContext';
 import { ProductProvider, useProduct } from './context/ProductContext';
 import { RoleProvider, useRole } from './context/RoleContext';
+import { ToastProvider } from './components/Toast';
 import PhoneLayout, { type NavTab } from './layouts/PhoneLayout';
 import AtletaHome from './pages/AtletaHome';
 import Login from './pages/Login';
@@ -371,7 +372,9 @@ function App() {
           <ProductProvider>
             <RoleProvider>
               <NavigationProvider>
-                <AppInner />
+                <ToastProvider>
+                  <AppInner />
+                </ToastProvider>
               </NavigationProvider>
             </RoleProvider>
           </ProductProvider>
