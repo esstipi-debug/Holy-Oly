@@ -29,6 +29,9 @@ import KnowledgePills from './pages/KnowledgePills';
 import SocialCard from './pages/SocialCard';
 import VoltaDashboard from './pages/VoltaDashboard';
 import VoltaPreWod from './pages/VoltaPreWod';
+import VoltaWarmup from './pages/VoltaWarmup';
+import VoltaActiveWod from './pages/VoltaActiveWod';
+import VoltaWodSummary from './pages/VoltaWodSummary';
 import VoltaCoachDash from './pages/VoltaCoachDash';
 import VoltaCoachWod from './pages/VoltaCoachWod';
 import VoltaCoachTools from './pages/VoltaCoachTools';
@@ -201,6 +204,11 @@ function AppInner() {
         case 'VOLTA_COACH_INVENTORY': return <VoltaCoachTools initialTab="inventario" />;
         case 'PROGRESSION':           return <MovementProgression />;
         case 'VOLTA_PREWOD':          return <VoltaPreWod />;
+        // Pantallas Volta-específicas para el flow del WOD (NO usar las HO)
+        case 'WARMUP':                return <VoltaWarmup />;
+        case 'SESSION':               return <VoltaActiveWod />;
+        case 'SUMMARY':               return <VoltaWodSummary />;
+        case 'VICTORY':               return <VictoryScreen />;
         case 'ATHLETE_DETAIL':        return <AthleteDeepDive />;
         case 'ASSIGN_MACRO':          return <AssignMacrocycle />;
         case 'NEW_ATHLETE':           return <NewAthlete />;
