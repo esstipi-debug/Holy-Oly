@@ -323,26 +323,20 @@ async def github_callback(payload: GithubCallbackPayload):
         if not email:
             raise HTTPException(status_code=400, detail="No se pudo obtener email de GitHub")
 
-    # 4. Find or create user
+    # 4. Find or create user (DB-backed con fallback a MOCK_USERS)
+    from ...db import users_repo
     email_key = email.lower().strip()
-    if email_key in MOCK_USERS:
-        user_data = MOCK_USERS[email_key]
-    else:
-        user_id = f"athlete_{uuid.uuid4().hex[:12]}"
-        user_data = {
-            "id": user_id,
-            "email": email_key,
-            "name": gh_user.get("name") or gh_user.get("login") or email_key.split("@")[0],
-            "hashed_password": None,  # GitHub users no tienen password
-            "role": "athlete",
-            "product": "volta",
-            "coach_id": None,
-            "is_active": True,
-            "github_id": gh_user.get("id"),
-            "github_login": gh_user.get("login"),
-            "avatar_url": gh_user.get("avatar_url"),
-        }
-        MOCK_USERS[email_key] = user_data
+    user_data = await users_repo.find_by_github_id(gh_user["id"]) or await users_repo.find_by_email(email_key)
+    if not user_data:
+        user_data = await users_repo.create_github_user(
+            email=email_key,
+            name=gh_user.get("name") or gh_user.get("login") or email_key.split("@")[0],
+            github_id=gh_user["id"],
+            github_login=gh_user.get("login", ""),
+            avatar_url=gh_user.get("avatar_url"),
+            role="athlete",
+            product="volta",
+        )
 
     # 5. Generate JWT
     access_token = create_access_token(
