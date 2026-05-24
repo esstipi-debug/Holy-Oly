@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNav } from '../context/NavigationContext';
 import { useAthlete } from '../context/AthleteContext';
 
@@ -6,6 +6,19 @@ const AthleteDeepDive: React.FC = () => {
   const { navigate } = useNav();
   const { selectedAthlete, athlete: currentAthlete } = useAthlete();
   const a = selectedAthlete ?? currentAthlete;
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedbackMsg, setFeedbackMsg] = useState('');
+  const [feedbackSent, setFeedbackSent] = useState(false);
+
+  const sendFeedback = () => {
+    if (!feedbackMsg.trim()) return;
+    setFeedbackSent(true);
+    setTimeout(() => {
+      setShowFeedback(false);
+      setFeedbackSent(false);
+      setFeedbackMsg('');
+    }, 1500);
+  };
 
   if (!a) {
     return (
@@ -277,7 +290,7 @@ const AthleteDeepDive: React.FC = () => {
           }}
         >Cambiar macro</button>
         <button
-          onClick={() => navigate('PULSE')}
+          onClick={() => setShowFeedback(true)}
           style={{
             flex: 1, padding: '14px 0', borderRadius: 14,
             background: 'var(--cta-bg)', color: 'var(--cta-text)',
@@ -287,6 +300,75 @@ const AthleteDeepDive: React.FC = () => {
           }}
         >Enviar feedback</button>
       </div>
+
+      {/* FEEDBACK MODAL */}
+      {showFeedback && (
+        <div
+          onClick={() => !feedbackSent && setShowFeedback(false)}
+          style={{
+            position: 'absolute', inset: 0, zIndex: 100,
+            background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
+            display: 'flex', alignItems: 'flex-end',
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: '100%', background: 'var(--surface)',
+              borderTop: '1px solid var(--card-border)',
+              borderRadius: '20px 20px 0 0', padding: 20,
+              display: 'flex', flexDirection: 'column', gap: 12,
+            }}
+          >
+            {feedbackSent ? (
+              <div style={{ textAlign: 'center', padding: '24px 0' }}>
+                <p style={{ fontSize: 32, marginBottom: 8 }}>✅</p>
+                <p style={{ fontSize: 14, fontWeight: 800, color: 'var(--text)' }}>
+                  Feedback enviado a {a.name.split(' ')[0]}
+                </p>
+              </div>
+            ) : (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <p style={{ fontSize: 13, fontWeight: 800, color: 'var(--text)' }}>
+                    💬 Feedback a {a.name.split(' ')[0]}
+                  </p>
+                  <button
+                    onClick={() => setShowFeedback(false)}
+                    style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', fontSize: 18, cursor: 'pointer' }}
+                  >✕</button>
+                </div>
+                <textarea
+                  value={feedbackMsg}
+                  onChange={(e) => setFeedbackMsg(e.target.value)}
+                  placeholder="Ej. Excelente progreso en C&J esta semana, seguí con los pulls hasta el viernes."
+                  autoFocus
+                  style={{
+                    width: '100%', minHeight: 100, padding: 12,
+                    background: 'var(--bg)', border: '1px solid var(--card-border)',
+                    borderRadius: 12, color: 'var(--text)', fontSize: 13,
+                    fontFamily: 'inherit', resize: 'vertical', outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                />
+                <button
+                  onClick={sendFeedback}
+                  disabled={!feedbackMsg.trim()}
+                  style={{
+                    width: '100%', padding: '13px 0', borderRadius: 12,
+                    background: feedbackMsg.trim() ? 'var(--cta-bg)' : 'var(--surface2, transparent)',
+                    color: feedbackMsg.trim() ? 'var(--cta-text)' : 'var(--text-secondary)',
+                    border: feedbackMsg.trim() ? 'none' : '1px solid var(--card-border)',
+                    fontSize: 12, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase',
+                    cursor: feedbackMsg.trim() ? 'pointer' : 'not-allowed',
+                    fontFamily: 'inherit', opacity: feedbackMsg.trim() ? 1 : 0.6,
+                  }}
+                >Enviar mensaje</button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -185,7 +185,7 @@ const VoltaPreWod: React.FC = () => {
         {/* CTAS */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <button
-            onClick={() => navigate('VOLTA_HOME')}
+            onClick={() => navigate('WARMUP')}
             style={{
               padding: 14, background: C.cyan, color: '#07070F',
               border: 'none', borderRadius: 14,
@@ -193,7 +193,7 @@ const VoltaPreWod: React.FC = () => {
             }}
           >⚡ Iniciar WOD (modificado) +30 Wise</button>
           <button
-            onClick={() => navigate('VOLTA_HOME')}
+            onClick={() => navigate('PROGRESSION')}
             style={{
               padding: 12, background: C.surface2, color: C.text,
               border: `1px solid ${C.line}`, borderRadius: 14,
