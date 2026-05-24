@@ -250,16 +250,19 @@ const VoltaCoachWod: React.FC = () => {
 
       </div>
 
-      {/* FOOTER */}
+      {/* FOOTER (sticky con backdrop para evitar overlay con preview) */}
       <div style={{
-        position: 'absolute', bottom: 168, left: 16, right: 16, zIndex: 40,
+        position: 'absolute', bottom: 76, left: 0, right: 0, zIndex: 40,
+        padding: '14px 16px 12px',
+        background: `linear-gradient(to top, ${C.bg} 0%, ${C.bg} 65%, transparent 100%)`,
+        backdropFilter: 'blur(8px)',
         display: 'flex', gap: 8,
       }}>
         <button
           onClick={() => navigate('VOLTA_COACH')}
           style={{
             flex: 1, padding: '13px 0', borderRadius: 14,
-            background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(10px)',
+            background: C.surface2,
             color: C.muted, border: `1px solid ${C.line}`,
             fontSize: 11, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase',
             cursor: 'pointer', fontFamily: 'inherit',
@@ -278,7 +281,7 @@ const VoltaCoachWod: React.FC = () => {
         >Publicar al box</button>
       </div>
 
-      <WiseAssistant context="Coach · WOD Builder" />
+      <WiseAssistant context="Coach · WOD Builder" bottomOffset={170} />
     </div>
   );
 };
