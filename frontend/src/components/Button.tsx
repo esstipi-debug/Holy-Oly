@@ -1,11 +1,12 @@
 import React from 'react';
 import { motion, type HTMLMotionProps } from 'framer-motion';
 
-interface ButtonProps extends Omit<HTMLMotionProps<'button'>, 'whileTap' | 'whileHover'> {
+interface ButtonProps extends Omit<HTMLMotionProps<'button'>, 'whileTap' | 'whileHover' | 'children'> {
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'gold';
   size?: 'sm' | 'md' | 'lg' | 'xl';
   fullWidth?: boolean;
   loading?: boolean;
+  children?: React.ReactNode;
 }
 
 const Spinner: React.FC<{ size: number }> = ({ size }) => (
@@ -82,7 +83,7 @@ const Button: React.FC<ButtonProps> = ({
       disabled={isDisabled}
       whileTap={isDisabled ? undefined : { scale: 0.96 }}
       whileHover={isDisabled ? undefined : { filter: 'brightness(1.08)' }}
-      transition={{ duration: 0.12, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.12, ease: [0.16, 1, 0.3, 1] as const }}
       {...props}
     >
       {loading && <Spinner size={spinnerSizes[size]} />}

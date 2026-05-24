@@ -37,4 +37,4 @@ backend/test_rag_full.py
 backend/verify_security.py
 backend/verify_self_healing.py
 backend/etl_out.txt
-backend/ingest_self_healing.py
+backend/ingest_self_healing.py.claude/

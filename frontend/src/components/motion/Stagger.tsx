@@ -1,5 +1,7 @@
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import type { ReactNode } from 'react';
+
+const EASE_OUT_EXPO: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 /**
  * Wrapper que aplica stagger animation a sus hijos directos.
@@ -14,7 +16,7 @@ interface StaggerProps {
   stagger?: number;   // tiempo entre hijos
 }
 
-const containerVariants = (stagger: number, delay: number) => ({
+const containerVariants = (stagger: number, delay: number): Variants => ({
   hidden: { opacity: 1 },
   show: {
     opacity: 1,
@@ -25,12 +27,12 @@ const containerVariants = (stagger: number, delay: number) => ({
   },
 });
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 12 },
   show: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] },
+    transition: { duration: 0.35, ease: EASE_OUT_EXPO },
   },
 };
 

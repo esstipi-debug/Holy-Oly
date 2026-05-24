@@ -118,22 +118,6 @@ const CF_INFOS: Record<string, CFComponentInfo> = {
   },
 };
 
-const InfoButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
-  <button
-    onClick={onClick}
-    className="btn-press"
-    style={{
-      width: 18, height: 18, borderRadius: '50%',
-      background: 'rgba(255,255,255,0.08)',
-      color: '#52527A',
-      border: 'none', cursor: 'pointer',
-      fontSize: 10, fontWeight: 900, fontFamily: 'inherit',
-      display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-      marginLeft: 6,
-    }}
-    aria-label="Más info"
-  >ⓘ</button>
-);
 
 const VoltaDashboard: React.FC = () => {
   const { navigate } = useNav();
