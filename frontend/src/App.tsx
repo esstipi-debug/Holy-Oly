@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AthleteProvider } from './context/AthleteContext';
@@ -155,6 +155,12 @@ function AppInner() {
   const { product } = useProduct();
   const { role } = useRole();
   const { isAuthenticated } = useAuth();
+  const [devNavOpen, setDevNavOpen] = useState<boolean>(() => localStorage.getItem('devNav:open') === '1');
+  const toggleDevNav = () => {
+    const next = !devNavOpen;
+    setDevNavOpen(next);
+    localStorage.setItem('devNav:open', next ? '1' : '0');
+  };
 
   // Gate: forzar LOGIN si no autenticado y la vista actual no es pública
   useEffect(() => {
@@ -300,24 +306,50 @@ function AppInner() {
 
       )}
 
-      {/* Mobile switcher — solo cuando autenticado y en DEV */}
+      {/* Mobile switcher — solo cuando autenticado y en DEV. Colapsable. */}
       {import.meta.env.DEV && !isPublic && (
-      <div className="2xl:hidden fixed bottom-2 left-2 right-2 flex gap-1 z-50 overflow-x-auto p-2 rounded-xl backdrop-blur-md"
-        style={{ background: 'rgba(0,0,0,0.85)', border: '1px solid var(--card-border)' }}>
-        {navGroups.flatMap(g => g.views).map(v => (
+        <>
+          {/* Toggle FAB (siempre visible) */}
           <button
-            key={v}
-            onClick={() => navigate(v as View)}
-            className="flex-shrink-0 px-2 py-1 rounded-lg text-[8px] font-black transition-all"
+            onClick={toggleDevNav}
+            className="2xl:hidden fixed z-[60] rounded-full text-[10px] font-black"
             style={{
-              background: currentView === v ? 'var(--primary)' : 'rgba(255,255,255,0.05)',
-              color: currentView === v ? 'var(--bg)' : 'var(--text-secondary)',
+              top: 8, right: 8,
+              width: 28, height: 28,
+              background: devNavOpen ? 'var(--primary)' : 'rgba(0,0,0,0.7)',
+              color: devNavOpen ? 'var(--bg)' : 'var(--text-secondary)',
+              border: '1px solid var(--card-border)',
+              backdropFilter: 'blur(8px)',
             }}
+            title="Dev navigator"
           >
-            {v}
+            {devNavOpen ? '×' : '⋯'}
           </button>
-        ))}
-      </div>
+
+          {/* Dev nav panel (solo cuando abierto) */}
+          {devNavOpen && (
+            <div className="2xl:hidden fixed z-50 flex flex-wrap gap-1 p-2 rounded-xl backdrop-blur-md"
+              style={{
+                top: 44, right: 8, left: 8,
+                maxHeight: '60vh', overflowY: 'auto',
+                background: 'rgba(0,0,0,0.92)', border: '1px solid var(--card-border)',
+              }}>
+              {navGroups.flatMap(g => g.views).map(v => (
+                <button
+                  key={v}
+                  onClick={() => { navigate(v as View); toggleDevNav(); }}
+                  className="flex-shrink-0 px-2 py-1 rounded-lg text-[9px] font-black transition-all"
+                  style={{
+                    background: currentView === v ? 'var(--primary)' : 'rgba(255,255,255,0.05)',
+                    color: currentView === v ? 'var(--bg)' : 'var(--text-secondary)',
+                  }}
+                >
+                  {v}
+                </button>
+              ))}
+            </div>
+          )}
+        </>
       )}
     </div>
   );
