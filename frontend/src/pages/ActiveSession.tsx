@@ -8,6 +8,12 @@ interface SetLog {
   result: 'completed' | 'failed';
 }
 
+interface WarmupSet {
+  pct: number;        // % de 1RM
+  reps: number;
+  note?: string;      // ej. "Barra vacía", "Técnica"
+}
+
 interface ExerciseDef {
   name: string;
   targetSets: number;
@@ -15,17 +21,35 @@ interface ExerciseDef {
   pct: number;
   max: number;
   coachNote: string;
+  /** Sets de calentamiento técnico antes de los sets de trabajo. */
+  warmupSets: WarmupSet[];
 }
+
+/** Redondea al múltiplo de 2.5 kg más cercano (resolución típica de discos). */
+const roundToPlate = (kg: number) => Math.round(kg / 2.5) * 2.5;
 
 const ActiveSession: React.FC = () => {
   const { navigate } = useNav();
   const { athlete } = useAthlete();
 
   // Build exercises from athlete maxes
+  // Olympic lifts: ramp-up técnico extendido (4 sets pre-trabajo).
+  // Accessory: ramp-up corto (2 sets).
+  const OLYMPIC_RAMPUP: WarmupSet[] = [
+    { pct: 0,    reps: 5, note: 'Barra vacía · técnica' },
+    { pct: 0.40, reps: 3 },
+    { pct: 0.55, reps: 2 },
+    { pct: 0.70, reps: 1 },
+  ];
+  const ACCESSORY_RAMPUP: WarmupSet[] = [
+    { pct: 0.40, reps: 5 },
+    { pct: 0.60, reps: 3 },
+  ];
+
   const exercises: ExerciseDef[] = athlete ? [
-    { name: 'Arrancada',          targetSets: 4, targetReps: 2, pct: 0.85, max: athlete.maxes.snatch,       coachNote: 'Mantené el pecho alto en el catch. No te precipites en la subida.' },
-    { name: 'Dos Tiempos',        targetSets: 4, targetReps: 2, pct: 0.80, max: athlete.maxes.jerk,         coachNote: 'Dip vertical, dirige los codos rápido. Sin perder el eje.' },
-    { name: 'Sentadilla Frontal', targetSets: 4, targetReps: 4, pct: 0.75, max: athlete.maxes.front_squat,  coachNote: 'Codos arriba, mantén la barra alta en hombros.' },
+    { name: 'Arrancada',          targetSets: 4, targetReps: 2, pct: 0.85, max: athlete.maxes.snatch,       coachNote: 'Mantené el pecho alto en el catch. No te precipites en la subida.', warmupSets: OLYMPIC_RAMPUP },
+    { name: 'Dos Tiempos',        targetSets: 4, targetReps: 2, pct: 0.80, max: athlete.maxes.jerk,         coachNote: 'Dip vertical, dirige los codos rápido. Sin perder el eje.',           warmupSets: OLYMPIC_RAMPUP },
+    { name: 'Sentadilla Frontal', targetSets: 4, targetReps: 4, pct: 0.75, max: athlete.maxes.front_squat,  coachNote: 'Codos arriba, mantén la barra alta en hombros.',                       warmupSets: ACCESSORY_RAMPUP },
   ] : [];
 
   const [exIdx, setExIdx] = useState(0);
@@ -33,6 +57,8 @@ const ActiveSession: React.FC = () => {
   const [weight, setWeight] = useState('');
   const [reps, setReps] = useState('');
   const [seconds, setSeconds] = useState(0);
+  /** Tracking de warmup sets completados por ejercicio. */
+  const [warmupDone, setWarmupDone] = useState<Record<number, Set<number>>>({});
 
   // Crono
   useEffect(() => {
@@ -86,6 +112,18 @@ const ActiveSession: React.FC = () => {
 
   const setsDone = currentLogs.filter(l => l.result === 'completed').length;
   const allDone = setsDone >= current.targetSets;
+
+  // Warmup helpers
+  const currentWarmupDone = warmupDone[exIdx] ?? new Set<number>();
+  const warmupComplete = currentWarmupDone.size >= current.warmupSets.length;
+  const toggleWarmup = (i: number) => {
+    setWarmupDone(prev => {
+      const set = new Set(prev[exIdx] ?? []);
+      if (set.has(i)) set.delete(i);
+      else set.add(i);
+      return { ...prev, [exIdx]: set };
+    });
+  };
 
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100%', paddingBottom: 200 }}>
@@ -144,11 +182,91 @@ const ActiveSession: React.FC = () => {
           </p>
         </div>
 
+        {/* RAMP-UP TÉCNICO (calentamiento de pesos) */}
+        {current.warmupSets.length > 0 && (
+          <div style={{ marginBottom: 20 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
+                Ramp-up técnico
+              </p>
+              <span style={{
+                fontSize: 10, fontWeight: 700,
+                padding: '3px 8px', borderRadius: 10,
+                background: warmupComplete ? 'rgba(34,197,94,0.12)' : 'var(--surface)',
+                color: warmupComplete ? '#22C55E' : 'var(--text-secondary)',
+                border: `1px solid ${warmupComplete ? 'rgba(34,197,94,0.3)' : 'var(--card-border)'}`,
+              }}>
+                {currentWarmupDone.size}/{current.warmupSets.length} {warmupComplete ? '✓' : ''}
+              </span>
+            </div>
+
+            <div style={{
+              background: 'var(--surface)',
+              border: '1px solid var(--card-border)',
+              borderRadius: 14, overflow: 'hidden',
+            }}>
+              {current.warmupSets.map((ws, i) => {
+                const w = ws.pct === 0 ? 20 : roundToPlate(current.max * ws.pct); // 20kg = barra olímpica vacía
+                const done = currentWarmupDone.has(i);
+                return (
+                  <button
+                    key={i}
+                    onClick={() => toggleWarmup(i)}
+                    style={{
+                      width: '100%', display: 'flex',
+                      alignItems: 'center', justifyContent: 'space-between',
+                      padding: '12px 14px',
+                      borderBottom: i < current.warmupSets.length - 1 ? '1px solid var(--card-border)' : 'none',
+                      background: done ? 'rgba(34,197,94,0.06)' : 'transparent',
+                      border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+                      textAlign: 'left',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <div style={{
+                        width: 22, height: 22, borderRadius: '50%',
+                        background: done ? '#22C55E' : 'transparent',
+                        border: `2px solid ${done ? '#22C55E' : 'var(--card-border)'}`,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        color: '#07070F', fontSize: 12, fontWeight: 900,
+                      }}>{done ? '✓' : ''}</div>
+                      <div>
+                        <p style={{
+                          fontSize: 11, fontWeight: 700,
+                          color: done ? 'var(--text-secondary)' : 'var(--text)',
+                          textDecoration: done ? 'line-through' : 'none',
+                        }}>
+                          {ws.pct === 0 ? 'Barra vacía' : `${Math.round(ws.pct * 100)}% 1RM`}
+                          {ws.note && ws.pct > 0 && <span style={{ color: 'var(--text-secondary)', fontWeight: 600, marginLeft: 6 }}>· {ws.note}</span>}
+                        </p>
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <p style={{ fontSize: 13, fontWeight: 800, color: 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>
+                        {w} kg
+                      </p>
+                      <p style={{ fontSize: 9, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.04em' }}>
+                        × {ws.reps} reps
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {!warmupComplete && (
+              <p style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 6, lineHeight: 1.4 }}>
+                Completá el ramp-up antes de empezar las series de trabajo.
+              </p>
+            )}
+          </div>
+        )}
+
         {/* Logging */}
-        <div style={{ marginBottom: 20 }}>
+        <div style={{ marginBottom: 20, opacity: warmupComplete ? 1 : 0.55, transition: 'opacity .25s ease' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
             <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
-              Logging
+              Series de trabajo
             </p>
             <span style={{
               fontSize: 10, fontWeight: 700,
@@ -199,22 +317,24 @@ const ActiveSession: React.FC = () => {
           <div style={{ display: 'flex', gap: 8 }}>
             <button
               onClick={() => logSet('failed')}
+              disabled={!warmupComplete}
               style={{
                 flex: 1, padding: '12px 0', borderRadius: 12,
                 background: 'rgba(239,68,68,0.08)', color: '#f87171',
                 border: '1px solid rgba(239,68,68,0.25)',
                 fontSize: 12, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase',
-                cursor: 'pointer', fontFamily: 'inherit',
+                cursor: warmupComplete ? 'pointer' : 'not-allowed', fontFamily: 'inherit',
               }}
             >Fallo</button>
             <button
               onClick={() => logSet('completed')}
+              disabled={!warmupComplete}
               style={{
                 flex: 2, padding: '12px 0', borderRadius: 12,
                 background: 'var(--cta-bg)', color: 'var(--cta-text)',
                 border: 'none',
                 fontSize: 12, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase',
-                cursor: 'pointer', fontFamily: 'inherit',
+                cursor: warmupComplete ? 'pointer' : 'not-allowed', fontFamily: 'inherit',
               }}
             >Completar serie</button>
           </div>
