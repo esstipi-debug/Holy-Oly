@@ -1,89 +1,242 @@
-import React from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useAthlete } from '../context/AthleteContext';
+import { buildCelebrationCatalog } from '../data/celebrations';
+import MinimalistCard from '../components/social/MinimalistCard';
+import StadiumCard from '../components/social/StadiumCard';
+import StatSheetCard from '../components/social/StatSheetCard';
+import { useShareCard } from '../components/social/useShareCard';
 
 /**
  * Social Card — pantalla full-screen optimizada para screenshot.
  *
  * Diseño viral: el atleta toma screenshot y lo comparte en sus redes.
- * NO tiene botones de share/save porque el screenshot ES el share.
+ * El screenshot ES el share — por eso no hay botones share/save sobre la card.
  *
- * TODO siguiente iteración:
- * - Múltiples estilos de visualización (rotativos / seleccionables)
- * - Tracking de screenshot events (visibilitychange + screen capture API)
- * - Diferentes "logros celebrables": PR, racha, tier-up, primer muscle-up, etc
- * - A/B testing para medir cuál genera más screenshots
+ * Esta iteración (Fase 3.5):
+ * - Catálogo de "logros celebrables" (PR, racha, tier-up, benchmark, etc).
+ * - 3 estilos visuales rotativos: Minimalist · Stadium · Stat Sheet.
+ * - Selector arriba (◀ Estilo ▶ + ◀ Logro ▶) con persistencia en localStorage.
+ *
+ * Pendiente próxima iteración:
+ * - 2 estilos más (Trophy, Progress before/after)
+ * - Tracking de screenshots (visibilitychange + dwell time)
+ * - A/B testing (random consistente por usuario)
+ * - Auto-trigger desde Victory screen / PR log
  */
+
+type VariantId = 'minimalist' | 'stadium' | 'statsheet';
+
+const VARIANTS: Array<{ id: VariantId; label: string }> = [
+  { id: 'minimalist', label: 'Minimalist' },
+  { id: 'stadium', label: 'Stadium' },
+  { id: 'statsheet', label: 'Stat Sheet' },
+];
+
+const STORAGE_VARIANT = 'social:preferred_variant';
+const STORAGE_CELEBRATION = 'social:preferred_celebration';
+const STORAGE_HIDDEN = 'social:hidden_celebrations';
+
+function loadHidden(): Set<string> {
+  try {
+    const raw = localStorage.getItem(STORAGE_HIDDEN);
+    return new Set(raw ? JSON.parse(raw) : []);
+  } catch { return new Set(); }
+}
+
+function saveHidden(set: Set<string>) {
+  localStorage.setItem(STORAGE_HIDDEN, JSON.stringify([...set]));
+}
 
 const SocialCard: React.FC = () => {
   const { athlete } = useAthlete();
+  const fullCatalog = useMemo(() => buildCelebrationCatalog(athlete), [athlete]);
+
+  const [hidden, setHidden] = useState<Set<string>>(() => loadHidden());
+
+  // Catálogo visible = todo lo NO oculto. Si todo está oculto, mostramos el primero igual.
+  const catalog = useMemo(() => {
+    const visible = fullCatalog.filter(c => !hidden.has(c.id));
+    return visible.length > 0 ? visible : fullCatalog;
+  }, [fullCatalog, hidden]);
+
+  const [variantIdx, setVariantIdx] = useState(0);
+  const [celebrationIdx, setCelebrationIdx] = useState(0);
+
+  // Cargar preferencias del usuario
+  useEffect(() => {
+    const v = localStorage.getItem(STORAGE_VARIANT);
+    if (v) {
+      const idx = VARIANTS.findIndex(x => x.id === v);
+      if (idx >= 0) setVariantIdx(idx);
+    }
+    const c = localStorage.getItem(STORAGE_CELEBRATION);
+    if (c) {
+      const idx = catalog.findIndex(x => x.id === c);
+      if (idx >= 0) setCelebrationIdx(idx);
+    }
+  }, [catalog]);
+
+  // Persistir
+  useEffect(() => {
+    localStorage.setItem(STORAGE_VARIANT, VARIANTS[variantIdx].id);
+  }, [variantIdx]);
+  useEffect(() => {
+    if (catalog[celebrationIdx]) {
+      localStorage.setItem(STORAGE_CELEBRATION, catalog[celebrationIdx].id);
+    }
+  }, [celebrationIdx, catalog]);
+
+  const cycle = (delta: number, len: number, idx: number) => (idx + delta + len) % len;
 
   const name = athlete?.name.toUpperCase() ?? 'ATLETA';
   const club = athlete?.club.toUpperCase() ?? 'HOLY OLY CLUB';
-  const cjPr = athlete ? (athlete.maxes.clean + athlete.maxes.jerk - athlete.maxes.clean) : 145;
-  const xpGained = athlete ? athlete.sessions_last_7.filter(s => s.completed).length * 14 : 42;
+  const celebration = catalog[celebrationIdx] ?? catalog[0];
+  const variant = VARIANTS[variantIdx];
+
+  // Share 9:16 PNG
+  const cardRef = useRef<HTMLDivElement | null>(null);
+  const { state: shareState, share } = useShareCard();
+
+  const handleShare = () => {
+    const msg = `${celebration.title} · ${celebration.value}${celebration.unit ?? ''} · holyoly.app · #${celebration.hashtag}`;
+    share({
+      node: cardRef.current,
+      message: msg,
+      filename: `holyoly-${celebration.id}`,
+      variant: variant.id,
+      achievementType: celebration.type,
+      achievementId: celebration.id,
+    });
+  };
+
+  const shareLabel = {
+    idle: 'COMPARTIR · GENERAR PNG',
+    rendering: 'GENERANDO...',
+    sharing: 'COMPARTIENDO...',
+    shared: '✓ LISTO',
+    downloaded: '✓ LISTO',
+    error: 'REINTENTAR',
+  }[shareState.status];
+
+  const hideCurrent = () => {
+    const next = new Set(hidden); next.add(celebration.id); saveHidden(next); setHidden(next);
+    // Saltamos al siguiente disponible: si era el último, ajustamos el índice
+    setCelebrationIdx(i => Math.min(i, Math.max(0, catalog.length - 2)));
+  };
+
+  const restoreAll = () => {
+    saveHidden(new Set()); setHidden(new Set());
+  };
 
   return (
-    <div className="flex flex-col h-full bg-holy-bg items-stretch justify-stretch p-0">
-      {/* Card edge-to-edge · sin padding · sin botones · para screenshot */}
-      <div className="flex-1 bg-gradient-to-br from-holy-bg via-holy-bg to-holy-surface flex flex-col items-center justify-between p-8 relative overflow-hidden">
-        {/* Decorative top accent */}
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-holy-gold to-transparent opacity-60" />
-        {/* Decorative oversized emoji blur */}
-        <div className="absolute top-10 right-6 text-9xl opacity-[0.06] blur-md">🏋️</div>
-        <div className="absolute bottom-20 left-6 text-9xl opacity-[0.06] blur-md">💪</div>
+    <div className="flex flex-col h-full bg-holy-bg">
+      {/* Selector chips — fuera del área de screenshot */}
+      <div className="px-4 pt-3 pb-1 flex gap-2 bg-holy-bg/95 backdrop-blur z-20 shrink-0">
+        <Pager
+          label="Estilo"
+          value={variant.label}
+          onPrev={() => setVariantIdx(i => cycle(-1, VARIANTS.length, i))}
+          onNext={() => setVariantIdx(i => cycle(+1, VARIANTS.length, i))}
+        />
+        <Pager
+          label="Logro"
+          value={celebration.title}
+          onPrev={() => setCelebrationIdx(i => cycle(-1, catalog.length, i))}
+          onNext={() => setCelebrationIdx(i => cycle(+1, catalog.length, i))}
+        />
+      </div>
 
-        {/* TOP · Brand */}
-        <div className="w-full flex justify-between items-start z-10 pt-2">
-          <div>
-            <p className="text-holy-gold text-[10px] font-black uppercase tracking-[0.3em]">HOLY OLY</p>
-            <p className="text-holy-text-secondary text-[8px] font-bold uppercase tracking-widest mt-1">SMART TRAINING</p>
-          </div>
-          <div className="text-right">
-            <p className="text-holy-text-secondary text-[9px] font-bold uppercase tracking-wider">{new Date().toLocaleDateString('es', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
-          </div>
+      {/* Hide / Restore row · acción discreta */}
+      <div className="px-4 pb-2 flex items-center justify-between text-[10px] z-20 shrink-0">
+        <button
+          onClick={hideCurrent}
+          className="text-holy-text-secondary hover:text-red-300 font-bold tracking-wider uppercase active:scale-95 transition"
+          aria-label="Ocultar este logro"
+        >
+          ✕ Ocultar este logro
+        </button>
+        {hidden.size > 0 && (
+          <button
+            onClick={restoreAll}
+            className="text-holy-text-secondary hover:text-holy-primary font-bold tracking-wider uppercase active:scale-95 transition"
+          >
+            ↺ Restaurar ({hidden.size})
+          </button>
+        )}
+      </div>
+
+      {/* Área shareable · sin overlays · screenshot-friendly */}
+      {/*
+        Wrapper interno con aspect 9:16 fijo para que el PNG exportado tenga
+        proporción Instagram Stories. El layout visible se adapta al viewport.
+      */}
+      <div className="flex-1 flex flex-col relative">
+        <div ref={cardRef} className="flex-1 flex flex-col" style={{ minHeight: 0 }}>
+          {variant.id === 'minimalist' && (
+            <MinimalistCard celebration={celebration} athleteName={name} club={club} />
+          )}
+          {variant.id === 'stadium' && (
+            <StadiumCard celebration={celebration} athleteName={name} club={club} />
+          )}
+          {variant.id === 'statsheet' && (
+            <StatSheetCard celebration={celebration} athleteName={name} club={club} />
+          )}
         </div>
 
-        {/* CENTER · Hero PR */}
-        <div className="text-center w-full z-10">
-          <p className="text-holy-gold text-[10px] font-black uppercase tracking-[0.4em] mb-4">⭐ NUEVO RÉCORD PERSONAL ⭐</p>
-          <div className="h-0.5 w-16 bg-holy-gold/40 mx-auto mb-8" />
-          <h1 className="text-holy-text text-8xl font-black italic tracking-tighter leading-none">
-            {cjPr}<span className="text-holy-gold text-3xl not-italic ml-1">KG</span>
-          </h1>
-          <p className="text-holy-text text-xl font-bold uppercase mt-4 tracking-wider">CLEAN &amp; JERK</p>
-          <p className="text-holy-text-secondary text-xs font-bold uppercase tracking-widest mt-2">2× peso corporal · zona élite</p>
-        </div>
-
-        {/* BOTTOM · Atleta + Holy Score */}
-        <div className="w-full space-y-4 z-10">
-          <div className="flex justify-between items-end border-b border-white/10 pb-4">
-            <div>
-              <p className="text-holy-text-secondary text-[9px] font-black uppercase tracking-wider">ATLETA</p>
-              <p className="text-holy-text text-base font-black tracking-tight mt-1">{name}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-holy-text-secondary text-[9px] font-black uppercase tracking-wider">CLUB</p>
-              <p className="text-holy-text text-base font-black tracking-tight mt-1">{club}</p>
-            </div>
-          </div>
-
-          <div className="flex justify-between items-center bg-white/[0.04] backdrop-blur p-4 rounded-2xl border border-white/5">
-            <div>
-              <p className="text-holy-text-secondary text-[8px] font-black uppercase tracking-widest leading-none">HOLY SCORE</p>
-              <p className="text-holy-primary text-2xl font-black italic mt-1">+{xpGained} XP</p>
-            </div>
-            <div className="w-10 h-10 bg-gradient-to-br from-holy-gold to-orange-600 rounded-xl flex items-center justify-center text-white text-lg shadow-lg shadow-holy-gold/30">
-              🏆
-            </div>
-          </div>
-
-          <p className="text-center text-holy-text-secondary text-[9px] font-black italic tracking-tighter pt-2">
-            holyoly.app · #HolyOly #PR{cjPr}kg
+        {/* Botón share flotante · NO entra al PNG porque está fuera del cardRef */}
+        <button
+          onClick={handleShare}
+          disabled={shareState.status === 'rendering' || shareState.status === 'sharing'}
+          className="absolute bottom-4 left-4 right-4 z-20 py-3 rounded-full font-black text-xs tracking-widest uppercase text-white shadow-2xl active:scale-95 transition disabled:opacity-60"
+          style={{
+            background: shareState.status === 'shared' || shareState.status === 'downloaded'
+              ? 'linear-gradient(135deg, #22C55E, #16A34A)'
+              : shareState.status === 'error'
+              ? 'linear-gradient(135deg, #EF4444, #DC2626)'
+              : 'linear-gradient(135deg, #7C5CFF, #5B3FE8)',
+            boxShadow: '0 10px 30px rgba(124,92,255,0.45)',
+          }}
+        >
+          {shareLabel}
+        </button>
+        {shareState.error && (
+          <p className="absolute bottom-16 left-4 right-4 z-20 text-center text-[10px] text-red-300">
+            {shareState.error}
           </p>
-        </div>
+        )}
       </div>
     </div>
   );
 };
+
+interface PagerProps {
+  label: string;
+  value: string;
+  onPrev: () => void;
+  onNext: () => void;
+}
+
+const Pager: React.FC<PagerProps> = ({ label, value, onPrev, onNext }) => (
+  <div className="flex-1 flex items-center justify-between bg-white/[0.04] border border-white/10 rounded-full px-2 py-1.5">
+    <button
+      onClick={onPrev}
+      className="w-7 h-7 flex items-center justify-center text-holy-text-secondary hover:text-holy-text text-sm rounded-full active:scale-90 transition"
+      aria-label={`${label} anterior`}
+    >
+      ◀
+    </button>
+    <div className="text-center leading-none">
+      <p className="text-holy-text-secondary text-[8px] font-black uppercase tracking-widest">{label}</p>
+      <p className="text-holy-text text-[11px] font-black uppercase tracking-tight mt-0.5">{value}</p>
+    </div>
+    <button
+      onClick={onNext}
+      className="w-7 h-7 flex items-center justify-center text-holy-text-secondary hover:text-holy-text text-sm rounded-full active:scale-90 transition"
+      aria-label={`${label} siguiente`}
+    >
+      ▶
+    </button>
+  </div>
+);
 
 export default SocialCard;

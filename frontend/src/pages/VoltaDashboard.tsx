@@ -4,6 +4,7 @@ import { useAthlete } from '../context/AthleteContext';
 import WiseAssistant from '../components/WiseAssistant';
 import QuestsSection, { type QuestProgress } from '../components/QuestsSection';
 import BottomSheet from '../components/BottomSheet';
+import { loadResults, overallProgress, personalizationTier } from '../data/baseline';
 
 const C = {
   bg: '#07070F',
@@ -119,6 +120,98 @@ const CF_INFOS: Record<string, CFComponentInfo> = {
 };
 
 
+const VolumePromptCard: React.FC<{ onNavigate: () => void; athlete: any }> = ({ onNavigate, athlete }) => {
+  const recent: number[] = athlete?.sessions_last_7?.map((s: any) => Math.round(s.load)) ?? [];
+  const weekVolume = recent.reduce((a, b) => a + b, 0);
+  // Aproximación semana anterior: si no hay data, asumir base
+  const prevWeekVolume = Math.max(Math.round(weekVolume * 0.85), 8000);
+  const deltaPct = prevWeekVolume > 0 ? Math.round(((weekVolume - prevWeekVolume) / prevWeekVolume) * 100) : 0;
+  const wodsDone = recent.filter(v => v > 100).length;
+  const alert = deltaPct < -15;
+  return (
+    <button
+      onClick={onNavigate}
+      className="btn-press"
+      style={{
+        width: '100%', display: 'flex', alignItems: 'center', gap: 12,
+        padding: 14, marginBottom: 14,
+        background: alert
+          ? 'linear-gradient(135deg, rgba(255,179,0,0.14) 0%, rgba(255,179,0,0.04) 100%)'
+          : 'linear-gradient(135deg, rgba(0,229,255,0.12) 0%, rgba(0,229,255,0.03) 100%)',
+        border: `1px solid ${alert ? 'rgba(255,179,0,0.40)' : 'rgba(0,229,255,0.30)'}`,
+        borderRadius: 16, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
+        color: C.text,
+      }}
+    >
+      <div style={{
+        width: 46, height: 46, borderRadius: 12,
+        background: alert ? 'rgba(255,179,0,0.18)' : 'rgba(0,229,255,0.18)',
+        border: `2px solid ${alert ? C.amber : C.cyan}`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: 11, fontWeight: 900, color: alert ? C.amber : C.cyan, flexShrink: 0,
+        flexDirection: 'column', lineHeight: 1,
+      }}>
+        <span style={{ fontSize: 14, fontStyle: 'italic' }}>{(weekVolume / 1000).toFixed(1)}</span>
+        <span style={{ fontSize: 7, marginTop: 1, opacity: 0.7 }}>TON</span>
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.1em', color: alert ? C.amber : C.cyan, textTransform: 'uppercase', margin: 0 }}>
+          {alert ? '⚠ VOLUMEN BAJO' : 'TUS NÚMEROS'}
+        </p>
+        <p style={{ fontSize: 13, fontWeight: 900, color: C.text, margin: '2px 0', letterSpacing: '-.01em' }}>
+          {wodsDone} WODs · {(weekVolume / 1000).toFixed(1)}t esta semana
+        </p>
+        <p style={{ fontSize: 10, color: C.muted, margin: 0 }}>
+          {alert
+            ? `${Math.abs(deltaPct)}% por debajo de la semana pasada · tap para ver`
+            : `${deltaPct >= 0 ? '▲' : '▼'} ${Math.abs(deltaPct)}% vs semana anterior · ver gráficos`}
+        </p>
+      </div>
+      <span style={{ fontSize: 18, color: alert ? C.amber : C.cyan, flexShrink: 0 }}>›</span>
+    </button>
+  );
+};
+
+const BaselinePromptCard: React.FC<{ onNavigate: () => void }> = ({ onNavigate }) => {
+  const results = loadResults();
+  const { done, total, pct } = overallProgress(results);
+  const tier = personalizationTier(pct);
+  const isComplete = pct >= 100;
+  return (
+    <button
+      onClick={onNavigate}
+      className="btn-press"
+      style={{
+        width: '100%', display: 'flex', alignItems: 'center', gap: 12,
+        padding: 14, marginBottom: 14,
+        background: 'linear-gradient(135deg, rgba(124,92,255,0.12) 0%, rgba(124,92,255,0.04) 100%)',
+        border: '1px solid rgba(124,92,255,0.35)',
+        borderRadius: 16, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
+        color: C.text,
+      }}
+    >
+      <div style={{
+        width: 46, height: 46, borderRadius: '50%',
+        background: 'rgba(124,92,255,0.18)', border: '2px solid #7C5CFF',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: 14, fontWeight: 900, color: '#A88BFF', flexShrink: 0,
+      }}>{pct}%</div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.1em', color: '#A88BFF', textTransform: 'uppercase', margin: 0 }}>
+          {isComplete ? '✓ Plan Inteligente activo' : 'Tu Base · Comptrain'}
+        </p>
+        <p style={{ fontSize: 13, fontWeight: 900, color: C.text, margin: '2px 0', letterSpacing: '-.01em' }}>
+          {isComplete ? 'Cargas 100% personalizadas' : `Completá tu base · ${done}/${total} tests`}
+        </p>
+        <p style={{ fontSize: 10, color: C.muted, margin: 0 }}>
+          {isComplete ? 'Tap para retest o actualizar' : tier.perk}
+        </p>
+      </div>
+      <span style={{ fontSize: 18, color: '#7C5CFF', flexShrink: 0 }}>›</span>
+    </button>
+  );
+};
+
 const VoltaDashboard: React.FC = () => {
   const { navigate } = useNav();
   const { athlete } = useAthlete();
@@ -170,6 +263,12 @@ const VoltaDashboard: React.FC = () => {
       </div>
 
       <div style={{ padding: '14px 16px 80px' }}>
+
+        {/* BASELINE PROMPT · invita a completar tests */}
+        <BaselinePromptCard onNavigate={() => navigate('BASELINE')} />
+
+        {/* VOLUMEN PROMPT · función principal */}
+        <VolumePromptCard onNavigate={() => navigate('VOLTA_STATS')} athlete={athlete} />
 
         {/* ESTADO ACTUAL */}
         <Sec style={{ marginBottom: 8 }}>Estado actual</Sec>
