@@ -1,15 +1,19 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
   SUBJECTS, SKILLS,
-  isSkillAccomplished, isSkillUnlocked, getSkillPercent, countAccomplished,
+  isSkillUnlocked, isSkillMastered, isSkillInProgress, countMastered, getPath,
   type SubjectId, type Skill, type SkillProgress,
 } from '../data/skillTree';
+import BottomSheet from '../components/BottomSheet';
 
 /**
- * Movement Progression como Skill Tree (modelo NSA SkillTree).
+ * Movement Progression — Skill Tree CrossFit con 95 movimientos.
  *
- * Subjects (Gymnastics / Halterofilia / Conditioning) → Skills con prerequisites.
- * Cada skill tiene 3 estados: locked (prereqs no cumplidos) / in-progress / accomplished.
+ * Dos vistas:
+ * - Lista: cards por tier con prereqs visibles (mobile-friendly)
+ * - Árbol: SVG hexagonal con conexiones curvas entre prereqs (visual)
+ *
+ * Sidebar lateral con tier-jump para navegar largo.
  */
 
 const C = {
@@ -19,147 +23,322 @@ const C = {
   line: '#1E1E32',
   text: '#EAEAF5',
   muted: '#52527A',
+  gold: '#F59E0B',
+  green: '#22C55E',
 };
 
-// Mock progress del atleta — en prod vendría del backend
-const MOCK_PROGRESS: SkillProgress = {
-  'jumping-pullup': 20,
-  'strict-pullup': 5,
-  'kipping-pullup': 15,
-  'c2b-pullup': 6,
-  'ring-dip': 8,
-  'pike-pushup': 15,
-  'wall-walk': 5,
-  'kipping-hspu': 2,
-  'single-under-100': 100,
-  'double-under-10': 10,
-  'double-under-50': 28,
-  'front-squat': 1,
-  'power-clean': 5,
-  'squat-clean': 1,
-};
+const TIER_LABELS = ['Fundamentos', 'Principiante', 'Intermedio', 'Avanzado', 'Élite'];
+const TIER_COLORS = ['#94A3B8', '#3B82F6', '#A855F7', '#F59E0B', '#EF4444'];
 
-const TIER_LABELS = ['Foundation', 'Beginner', 'Intermediate', 'Advanced', 'Elite'];
+const STORAGE_KEY = 'skillTree:progress';
 
+function loadProgress(): SkillProgress {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveProgress(p: SkillProgress) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); } catch { /* ignore */ }
+}
+
+type ViewMode = 'list' | 'tree';
+
+// ─── SKILL CARD (LIST VIEW) ─────────────────────────────
 interface SkillCardProps {
   skill: Skill;
   progress: SkillProgress;
   accent: string;
+  highlighted?: boolean;
+  faded?: boolean;
+  onClick: () => void;
 }
 
-const SkillCard: React.FC<SkillCardProps> = ({ skill, progress, accent }) => {
+const SkillCard: React.FC<SkillCardProps> = ({ skill, progress, accent, highlighted, faded, onClick }) => {
   const unlocked = isSkillUnlocked(skill, progress);
-  const accomplished = isSkillAccomplished(skill, progress);
-  const pct = getSkillPercent(skill, progress);
-  const current = progress[skill.id] ?? 0;
+  const mastered = isSkillMastered(skill, progress);
+  const inProgress = isSkillInProgress(skill, progress);
 
   const prereqs = skill.prerequisites.map(pid => SKILLS.find(s => s.id === pid)).filter(Boolean) as Skill[];
 
   return (
-    <div style={{
-      background: accomplished ? `${accent}10` : unlocked ? C.surface : 'rgba(255,255,255,0.02)',
-      border: `1px solid ${accomplished ? `${accent}50` : unlocked ? C.line : C.line}`,
-      borderRadius: 14, padding: 12,
-      opacity: unlocked ? 1 : 0.55,
-      position: 'relative',
-    }}>
-      {/* Lock overlay */}
-      {!unlocked && (
-        <div style={{
-          position: 'absolute', top: 8, right: 8,
-          fontSize: 12, color: C.muted,
-        }}>🔒</div>
-      )}
-      {accomplished && (
-        <div style={{
-          position: 'absolute', top: 8, right: 8,
-          fontSize: 14, color: accent, fontWeight: 900,
-        }}>✓</div>
-      )}
-
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-        <p style={{ fontSize: 13, fontWeight: 800, color: unlocked ? C.text : C.muted }}>{skill.name}</p>
+    <button
+      onClick={onClick}
+      className="btn-press"
+      style={{
+        width: '100%',
+        background: mastered
+          ? `linear-gradient(135deg, ${accent}25, ${accent}08)`
+          : inProgress
+            ? `${accent}10`
+            : unlocked
+              ? C.surface
+              : 'rgba(255,255,255,0.02)',
+        border: `1px solid ${
+          highlighted ? C.gold :
+          mastered ? `${accent}80` :
+          inProgress ? `${accent}50` :
+          C.line
+        }`,
+        borderRadius: 14,
+        padding: '12px 14px',
+        opacity: faded ? 0.3 : (unlocked ? 1 : 0.6),
+        position: 'relative',
+        cursor: 'pointer',
+        fontFamily: 'inherit',
+        textAlign: 'left',
+        boxShadow: highlighted ? `0 0 16px ${C.gold}50` : 'none',
+        transition: 'all .25s ease',
+      }}
+    >
+      <div style={{ position: 'absolute', top: 10, right: 12, fontSize: 14 }}>
+        {mastered ? <span style={{ color: accent, fontWeight: 900 }}>✓</span>
+         : inProgress ? <span style={{ color: accent, fontSize: 11, fontWeight: 800 }}>●</span>
+         : !unlocked ? <span style={{ opacity: 0.5 }}>🔒</span> : null}
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, paddingRight: 22 }}>
+        <p style={{ fontSize: 13, fontWeight: 800, color: unlocked ? C.text : C.muted, flex: 1 }}>{skill.name}</p>
         <span style={{
-          fontSize: 9, fontWeight: 700, color: accent,
-          padding: '2px 6px', borderRadius: 6,
-          background: `${accent}15`, letterSpacing: '.04em',
+          fontSize: 9, fontWeight: 800, padding: '2px 6px', borderRadius: 6,
+          background: `${TIER_COLORS[skill.tier - 1]}20`, color: TIER_COLORS[skill.tier - 1],
+          letterSpacing: '.04em', flexShrink: 0,
         }}>T{skill.tier}</span>
       </div>
-
-      <p style={{ fontSize: 10, color: C.muted, lineHeight: 1.4, marginBottom: 8 }}>
-        {skill.description}
-      </p>
-
-      {/* Progress bar (solo si está desbloqueado) */}
-      {unlocked && (
-        <>
-          <div style={{
-            height: 4, background: C.bg, borderRadius: 2,
-            overflow: 'hidden', marginBottom: 4,
-          }}>
-            <div style={{
-              height: '100%', width: `${pct * 100}%`,
-              background: accomplished ? accent : `${accent}80`,
-              transition: 'width .4s ease',
-            }} />
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, color: C.muted }}>
-            <span>{current} / {skill.occurrences} {skill.unit}</span>
-            <span style={{ color: accomplished ? accent : C.muted, fontWeight: accomplished ? 800 : 600 }}>
-              {accomplished ? '✓ Logrado' : `+${skill.xpReward} XP`}
-            </span>
-          </div>
-        </>
-      )}
-
-      {/* Prereqs chips */}
-      {!unlocked && prereqs.length > 0 && (
-        <div style={{ marginTop: 8, paddingTop: 8, borderTop: `1px dashed ${C.line}` }}>
-          <p style={{ fontSize: 8, color: C.muted, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 4 }}>
-            Requiere
-          </p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-            {prereqs.map(p => {
-              const ok = isSkillAccomplished(p, progress);
-              return (
-                <span key={p.id} style={{
-                  fontSize: 9, padding: '2px 6px', borderRadius: 6,
-                  background: ok ? `${accent}20` : C.surface2,
-                  color: ok ? accent : C.muted,
-                  border: `1px solid ${ok ? `${accent}40` : C.line}`,
-                  fontWeight: 700,
-                }}>
-                  {ok ? '✓' : '○'} {p.name}
-                </span>
-              );
-            })}
-          </div>
+      <p style={{ fontSize: 10, color: C.muted, lineHeight: 1.4, marginBottom: 6 }}>{skill.description}</p>
+      <p style={{ fontSize: 9, color: accent, fontWeight: 700, letterSpacing: '.04em', marginBottom: prereqs.length ? 8 : 0 }}>📊 {skill.volume}</p>
+      {prereqs.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, paddingTop: 8, borderTop: `1px dashed ${C.line}` }}>
+          <span style={{ fontSize: 8, color: C.muted, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', alignSelf: 'center', marginRight: 2 }}>Requiere:</span>
+          {prereqs.map(p => {
+            const ok = isSkillMastered(p, progress);
+            return (
+              <span key={p.id} style={{
+                fontSize: 9, padding: '2px 6px', borderRadius: 6,
+                background: ok ? `${accent}20` : C.surface2, color: ok ? accent : C.muted,
+                border: `1px solid ${ok ? `${accent}40` : C.line}`, fontWeight: 700,
+              }}>{ok ? '✅' : '○'} {p.name}</span>
+            );
+          })}
         </div>
       )}
-
-      {/* Drills (cuando in-progress, no accomplished) */}
-      {unlocked && !accomplished && skill.drills && skill.drills.length > 0 && (
-        <div style={{ marginTop: 8, paddingTop: 8, borderTop: `1px dashed ${C.line}` }}>
-          <p style={{ fontSize: 8, color: C.muted, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 4 }}>
-            Drills sugeridos
-          </p>
-          <p style={{ fontSize: 10, color: C.text, lineHeight: 1.4 }}>
-            {skill.drills.join(' · ')}
-          </p>
-        </div>
+      {skill.unlocks.length > 0 && (
+        <p style={{ fontSize: 9, color: C.muted, marginTop: 6, fontStyle: 'italic' }}>
+          → Desbloquea {skill.unlocks.length} skill{skill.unlocks.length === 1 ? '' : 's'}
+        </p>
       )}
+    </button>
+  );
+};
+
+// ─── TREE VIEW (SVG) ────────────────────────────────────
+interface TreeViewProps {
+  skills: Skill[];
+  progress: SkillProgress;
+  accent: string;
+  highlightedPath: { upstream: Set<string>; downstream: Set<string> } | null;
+  activeSkillId: string | null;
+  onSkillClick: (skill: Skill) => void;
+  subjectAccent: (s: Skill) => string;
+}
+
+const HEX_W = 62;
+const HEX_H = 54;
+const TIER_HEIGHT = 100;
+const COL_WIDTH = 78;
+
+const TreeView: React.FC<TreeViewProps> = ({ skills, progress, accent, highlightedPath, activeSkillId, onSkillClick, subjectAccent }) => {
+  // Layout: agrupar por tier vertical, distribuir horizontal
+  const layout = useMemo(() => {
+    const byTier: Record<number, Skill[]> = {};
+    skills.forEach(s => {
+      if (!byTier[s.tier]) byTier[s.tier] = [];
+      byTier[s.tier].push(s);
+    });
+
+    // Calcular posición x/y de cada skill
+    const positions: Record<string, { x: number; y: number; skill: Skill }> = {};
+    let maxCols = 0;
+
+    [1, 2, 3, 4, 5].forEach(tier => {
+      const list = byTier[tier] || [];
+      maxCols = Math.max(maxCols, list.length);
+    });
+
+    const totalWidth = Math.max(maxCols * COL_WIDTH + 40, 600);
+
+    [1, 2, 3, 4, 5].forEach(tier => {
+      const list = byTier[tier] || [];
+      const tierY = (tier - 1) * TIER_HEIGHT + 60;
+      // Center horizontally
+      const spacing = totalWidth / (list.length + 1);
+      list.forEach((skill, i) => {
+        positions[skill.id] = {
+          x: spacing * (i + 1),
+          y: tierY,
+          skill,
+        };
+      });
+    });
+
+    return { positions, totalWidth, totalHeight: 5 * TIER_HEIGHT + 80 };
+  }, [skills]);
+
+  // Generar edges entre prereqs
+  const edges = useMemo(() => {
+    const result: Array<{ from: { x: number; y: number }; to: { x: number; y: number }; mastered: boolean; highlighted: boolean }> = [];
+    skills.forEach(skill => {
+      const target = layout.positions[skill.id];
+      if (!target) return;
+      skill.prerequisites.forEach(pid => {
+        const source = layout.positions[pid];
+        if (!source) return;
+        const fromMastered = progress[pid] === 'mastered';
+        const inPath = highlightedPath && (
+          highlightedPath.upstream.has(skill.id) || highlightedPath.upstream.has(pid) ||
+          activeSkillId === skill.id || activeSkillId === pid
+        );
+        result.push({
+          from: { x: source.x, y: source.y + HEX_H / 2 },
+          to: { x: target.x, y: target.y - HEX_H / 2 },
+          mastered: fromMastered,
+          highlighted: !!inPath,
+        });
+      });
+    });
+    return result;
+  }, [skills, layout, progress, highlightedPath, activeSkillId]);
+
+  return (
+    <div style={{ width: '100%', overflow: 'auto', position: 'relative', paddingBottom: 20 }} className="scroll-x-no-bar">
+      <svg
+        width={layout.totalWidth}
+        height={layout.totalHeight}
+        style={{ display: 'block' }}
+      >
+        {/* Tier guide lines */}
+        {[1, 2, 3, 4, 5].map(tier => {
+          const y = (tier - 1) * TIER_HEIGHT + 60;
+          const tColor = TIER_COLORS[tier - 1];
+          return (
+            <g key={`tier-${tier}`}>
+              <line x1={0} y1={y} x2={layout.totalWidth} y2={y}
+                stroke={tColor} strokeOpacity={0.08} strokeDasharray="4 4" />
+              <text x={10} y={y - 6} fill={tColor} fontSize={9} fontWeight={800} letterSpacing="1">
+                T{tier} · {TIER_LABELS[tier - 1].toUpperCase()}
+              </text>
+            </g>
+          );
+        })}
+
+        {/* Edges (debajo de los nodos) */}
+        {edges.map((e, i) => {
+          const midY = (e.from.y + e.to.y) / 2;
+          const path = `M ${e.from.x} ${e.from.y} C ${e.from.x} ${midY}, ${e.to.x} ${midY}, ${e.to.x} ${e.to.y}`;
+          return (
+            <path key={`edge-${i}`}
+              d={path}
+              fill="none"
+              stroke={e.highlighted ? C.gold : e.mastered ? accent : C.line}
+              strokeWidth={e.highlighted ? 2.2 : 1.2}
+              opacity={e.highlighted ? 1 : e.mastered ? 0.55 : 0.35}
+              strokeLinecap="round"
+            />
+          );
+        })}
+
+        {/* Nodes hexagonales */}
+        {Object.values(layout.positions).map(({ x, y, skill }) => {
+          const unlocked = isSkillUnlocked(skill, progress);
+          const mastered = isSkillMastered(skill, progress);
+          const inProgress = isSkillInProgress(skill, progress);
+          const inPath = highlightedPath && (
+            highlightedPath.upstream.has(skill.id) ||
+            highlightedPath.downstream.has(skill.id) ||
+            activeSkillId === skill.id
+          );
+          const faded = highlightedPath !== null && !inPath;
+          const sAccent = subjectAccent(skill);
+
+          // Hexagon points (flat-top)
+          const hexPts = [
+            [x - HEX_W / 2, y],
+            [x - HEX_W / 4, y - HEX_H / 2],
+            [x + HEX_W / 4, y - HEX_H / 2],
+            [x + HEX_W / 2, y],
+            [x + HEX_W / 4, y + HEX_H / 2],
+            [x - HEX_W / 4, y + HEX_H / 2],
+          ].map(p => p.join(',')).join(' ');
+
+          return (
+            <g key={skill.id}
+              onClick={() => onSkillClick(skill)}
+              style={{ cursor: 'pointer', opacity: faded ? 0.3 : 1, transition: 'opacity .3s' }}
+            >
+              <polygon
+                points={hexPts}
+                fill={mastered ? sAccent : inProgress ? `${sAccent}25` : unlocked ? C.surface : C.surface2}
+                stroke={inPath ? C.gold : mastered ? sAccent : inProgress ? sAccent : unlocked ? C.line : C.line}
+                strokeWidth={inPath ? 2.5 : 1.5}
+                style={{
+                  filter: inPath ? `drop-shadow(0 0 8px ${C.gold}80)` :
+                          mastered ? `drop-shadow(0 0 6px ${sAccent}50)` : 'none',
+                }}
+              />
+              <text
+                x={x} y={y - 4}
+                textAnchor="middle"
+                fill={mastered ? '#07070F' : unlocked ? C.text : C.muted}
+                fontSize={8.5}
+                fontWeight={800}
+                style={{ pointerEvents: 'none' }}
+              >
+                {skill.name.length > 14 ? skill.name.slice(0, 12) + '…' : skill.name}
+              </text>
+              <text
+                x={x} y={y + 9}
+                textAnchor="middle"
+                fill={mastered ? '#07070F' : sAccent}
+                fontSize={8}
+                fontWeight={700}
+                style={{ pointerEvents: 'none' }}
+              >
+                {mastered ? '✓' : inProgress ? '●' : !unlocked ? '🔒' : `T${skill.tier}`}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
     </div>
   );
 };
 
+// ─── MAIN PAGE ──────────────────────────────────────────
 const MovementProgression: React.FC = () => {
+  const [view, setView] = useState<ViewMode>(() => (localStorage.getItem('skillTree:view') as ViewMode) || 'list');
   const [subjectFilter, setSubjectFilter] = useState<SubjectId | 'all'>('all');
-  const progress = MOCK_PROGRESS;
+  const [progress, setProgress] = useState<SkillProgress>(() => loadProgress());
+  const [activeSkill, setActiveSkill] = useState<Skill | null>(null);
+  const [highlightedPath, setHighlightedPath] = useState<{ upstream: Set<string>; downstream: Set<string> } | null>(null);
 
-  const totalStats = useMemo(() => countAccomplished(undefined, progress), [progress]);
+  const tierRefs = useRef<Record<number, HTMLDivElement | null>>({});
+
+  useEffect(() => { saveProgress(progress); }, [progress]);
+  useEffect(() => { localStorage.setItem('skillTree:view', view); }, [view]);
+
+  // Tree view requiere un subject único (95 nodos en 'all' es ilegible)
+  useEffect(() => {
+    if (view === 'tree' && subjectFilter === 'all') {
+      setSubjectFilter('gymnastics');
+    }
+  }, [view, subjectFilter]);
+
+  const totalStats = useMemo(() => countMastered(undefined, progress), [progress]);
   const subjectStats = useMemo(() => {
     return SUBJECTS.reduce((acc, s) => {
-      acc[s.id] = countAccomplished(s.id, progress);
+      acc[s.id] = countMastered(s.id, progress);
       return acc;
     }, {} as Record<SubjectId, { done: number; total: number }>);
   }, [progress]);
@@ -168,7 +347,6 @@ const MovementProgression: React.FC = () => {
     ? SKILLS
     : SKILLS.filter(s => s.subject === subjectFilter);
 
-  // Agrupar por tier
   const skillsByTier = useMemo(() => {
     const map: Record<number, Skill[]> = {};
     skillsToShow.forEach(s => {
@@ -180,45 +358,104 @@ const MovementProgression: React.FC = () => {
 
   const activeSubject = subjectFilter === 'all' ? null : SUBJECTS.find(s => s.id === subjectFilter);
   const accent = activeSubject?.color ?? '#00E5FF';
+  const subjectAccent = (s: Skill) => SUBJECTS.find(x => x.id === s.subject)?.color ?? accent;
+
+  const handleSkillClick = (skill: Skill) => {
+    setActiveSkill(skill);
+    const path = getPath(skill.id);
+    setHighlightedPath({
+      upstream: new Set(path.upstream),
+      downstream: new Set(path.downstream),
+    });
+  };
+
+  const closeModal = () => {
+    setActiveSkill(null);
+    setHighlightedPath(null);
+  };
+
+  const toggleSkillProgress = (id: string) => {
+    setProgress(prev => {
+      const next = { ...prev };
+      const current = next[id];
+      if (!current) next[id] = 'in_progress';
+      else if (current === 'in_progress') next[id] = 'mastered';
+      else delete next[id];
+      return next;
+    });
+  };
+
+  const jumpToTier = (tier: number) => {
+    tierRefs.current[tier]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   return (
-    <div style={{ background: C.bg, minHeight: '100%', paddingBottom: 90, color: C.text }}>
+    <div style={{ background: C.bg, minHeight: '100%', paddingBottom: 90, color: C.text, position: 'relative' }} className="anim-fade-in">
       {/* HEADER */}
-      <div style={{ padding: '52px 16px 16px' }}>
-        <p style={{ fontSize: 10, color: C.muted, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase' }}>
-          CrossFit · Skill Tree
-        </p>
-        <h1 style={{ fontSize: 22, fontWeight: 900, color: C.text, marginTop: 4 }}>Mi progresión</h1>
-        <p style={{ fontSize: 11, color: C.muted, marginTop: 6 }}>
-          {totalStats.done} / {totalStats.total} skills logrados · {SKILLS.length - totalStats.done} por desbloquear
-        </p>
+      <div style={{ padding: '20px 16px 12px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+          <div style={{ flex: 1 }}>
+            <p style={{ fontSize: 10, color: C.muted, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase' }}>
+              CrossFit · Skill Tree
+            </p>
+            <h1 style={{ fontSize: 22, fontWeight: 900, color: C.text, marginTop: 4 }}>Mi progresión</h1>
+            <p style={{ fontSize: 11, color: C.muted, marginTop: 6 }}>
+              {totalStats.done} / {totalStats.total} dominados · {SKILLS.length - totalStats.done} por desbloquear
+            </p>
+          </div>
+          {/* View toggle */}
+          <div style={{ display: 'flex', gap: 0, background: C.surface, border: `1px solid ${C.line}`, borderRadius: 10, padding: 2 }}>
+            <button
+              onClick={() => setView('list')}
+              className="btn-press"
+              style={{
+                padding: '6px 10px', borderRadius: 8,
+                background: view === 'list' ? accent : 'transparent',
+                color: view === 'list' ? '#07070F' : C.muted,
+                border: 'none', fontSize: 10, fontWeight: 800,
+                cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >☰ Lista</button>
+            <button
+              onClick={() => setView('tree')}
+              className="btn-press"
+              style={{
+                padding: '6px 10px', borderRadius: 8,
+                background: view === 'tree' ? accent : 'transparent',
+                color: view === 'tree' ? '#07070F' : C.muted,
+                border: 'none', fontSize: 10, fontWeight: 800,
+                cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >⋔ Árbol</button>
+          </div>
+        </div>
+
         {/* Global progress bar */}
-        <div style={{
-          height: 4, background: C.surface, borderRadius: 2,
-          overflow: 'hidden', marginTop: 8,
-        }}>
+        <div style={{ height: 5, background: C.surface, borderRadius: 3, overflow: 'hidden', marginTop: 10 }}>
           <div style={{
-            height: '100%',
-            width: `${(totalStats.done / totalStats.total) * 100}%`,
-            background: 'linear-gradient(90deg, #A855F7, #00E5FF, #F59E0B)',
+            height: '100%', width: `${(totalStats.done / totalStats.total) * 100}%`,
+            background: 'linear-gradient(90deg, #A855F7, #00E5FF, #F59E0B, #EF4444)',
             transition: 'width .5s ease',
           }} />
         </div>
       </div>
 
       {/* SUBJECT TABS */}
-      <div style={{ padding: '0 16px 16px', display: 'flex', gap: 6, overflowX: 'auto' }}>
-        <button
-          onClick={() => setSubjectFilter('all')}
-          style={{
-            padding: '8px 14px', borderRadius: 12, flexShrink: 0,
-            background: subjectFilter === 'all' ? C.text : C.surface,
-            color: subjectFilter === 'all' ? '#07070F' : C.muted,
-            border: `1px solid ${subjectFilter === 'all' ? C.text : C.line}`,
-            fontSize: 11, fontWeight: 800, letterSpacing: '.04em',
-            cursor: 'pointer', fontFamily: 'inherit',
-          }}
-        >Todos · {totalStats.done}/{totalStats.total}</button>
+      <div className="scroll-x-no-bar" style={{ padding: '0 16px 14px', display: 'flex', gap: 6, overflowX: 'auto' }}>
+        {view === 'list' && (
+          <button
+            onClick={() => setSubjectFilter('all')}
+            className="btn-press"
+            style={{
+              padding: '8px 14px', borderRadius: 12, flexShrink: 0,
+              background: subjectFilter === 'all' ? C.text : C.surface,
+              color: subjectFilter === 'all' ? '#07070F' : C.muted,
+              border: `1px solid ${subjectFilter === 'all' ? C.text : C.line}`,
+              fontSize: 11, fontWeight: 800, letterSpacing: '.04em',
+              cursor: 'pointer', fontFamily: 'inherit',
+            }}
+          >Todos · {totalStats.done}/{totalStats.total}</button>
+        )}
         {SUBJECTS.map(s => {
           const active = subjectFilter === s.id;
           const stats = subjectStats[s.id];
@@ -226,6 +463,7 @@ const MovementProgression: React.FC = () => {
             <button
               key={s.id}
               onClick={() => setSubjectFilter(s.id)}
+              className="btn-press"
               style={{
                 padding: '8px 14px', borderRadius: 12, flexShrink: 0,
                 background: active ? s.color : C.surface,
@@ -239,53 +477,242 @@ const MovementProgression: React.FC = () => {
         })}
       </div>
 
-      {/* SUBJECT DESCRIPTION */}
-      {activeSubject && (
-        <div style={{ padding: '0 16px 12px' }}>
-          <p style={{ fontSize: 11, color: C.muted, lineHeight: 1.4 }}>
-            {activeSubject.description}
+      {/* CONTENIDO según vista */}
+      {view === 'list' ? (
+        <>
+          {/* TIER JUMP SIDEBAR (vertical, derecha, fija) */}
+          <div style={{
+            position: 'fixed', right: 8, top: '40%', transform: 'translateY(-50%)',
+            display: 'flex', flexDirection: 'column', gap: 4, zIndex: 30,
+          }}>
+            {[1, 2, 3, 4, 5].map(tier => {
+              const tierColor = TIER_COLORS[tier - 1];
+              const tierSkills = skillsByTier[tier] || [];
+              const tierDone = tierSkills.filter(s => isSkillMastered(s, progress)).length;
+              return (
+                <button
+                  key={tier}
+                  onClick={() => jumpToTier(tier)}
+                  className="btn-press"
+                  title={`${TIER_LABELS[tier - 1]} · ${tierDone}/${tierSkills.length}`}
+                  style={{
+                    width: 24, height: 24, borderRadius: 8,
+                    background: tierSkills.length > 0 ? `${tierColor}25` : 'transparent',
+                    border: `1px solid ${tierSkills.length > 0 ? `${tierColor}60` : C.line}`,
+                    color: tierColor, fontSize: 9, fontWeight: 900,
+                    cursor: tierSkills.length > 0 ? 'pointer' : 'default',
+                    fontFamily: 'inherit',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    opacity: tierSkills.length > 0 ? 1 : 0.3,
+                  }}
+                >T{tier}</button>
+              );
+            })}
+          </div>
+
+          {activeSubject && (
+            <div style={{ padding: '0 16px 12px' }}>
+              <p style={{ fontSize: 11, color: C.muted, lineHeight: 1.4 }}>{activeSubject.description}</p>
+            </div>
+          )}
+
+          {/* LIST */}
+          <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {[1, 2, 3, 4, 5].map(tier => {
+              const skillsInTier = skillsByTier[tier];
+              if (!skillsInTier || skillsInTier.length === 0) return null;
+              const tierColor = TIER_COLORS[tier - 1];
+              return (
+                <div key={tier} ref={(el) => { tierRefs.current[tier] = el; }} style={{ scrollMarginTop: 10 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                    <span style={{
+                      fontSize: 10, fontWeight: 900, color: tierColor,
+                      padding: '3px 10px', borderRadius: 8,
+                      background: `${tierColor}15`, letterSpacing: '.06em',
+                      border: `1px solid ${tierColor}30`,
+                    }}>T{tier}</span>
+                    <p style={{ fontSize: 10, color: C.muted, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase' }}>
+                      {TIER_LABELS[tier - 1]} · {skillsInTier.length} skills
+                    </p>
+                    <div style={{ flex: 1, height: 1, background: C.line }} />
+                  </div>
+
+                  <div className="stagger" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {skillsInTier.map(skill => {
+                      const inUp = highlightedPath?.upstream.has(skill.id);
+                      const inDown = highlightedPath?.downstream.has(skill.id);
+                      const isActive = activeSkill?.id === skill.id;
+                      const highlighted = isActive || inUp || inDown;
+                      const faded = highlightedPath !== null && !highlighted;
+                      return (
+                        <SkillCard
+                          key={skill.id}
+                          skill={skill}
+                          progress={progress}
+                          accent={subjectAccent(skill)}
+                          highlighted={highlighted}
+                          faded={faded}
+                          onClick={() => handleSkillClick(skill)}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      ) : (
+        <div style={{ padding: '0 0 20px 0' }}>
+          <p style={{ fontSize: 10, color: C.muted, textAlign: 'center', marginBottom: 10, padding: '0 16px' }}>
+            👆 Tocá un nodo para ver su ruta · ⬇ Scroll horizontal para navegar
           </p>
+          <TreeView
+            skills={skillsToShow}
+            progress={progress}
+            accent={accent}
+            highlightedPath={highlightedPath}
+            activeSkillId={activeSkill?.id ?? null}
+            onSkillClick={handleSkillClick}
+            subjectAccent={subjectAccent}
+          />
         </div>
       )}
 
-      {/* SKILL TREE — agrupado por tier */}
-      <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 14 }}>
-        {[1, 2, 3, 4, 5].map(tier => {
-          const skillsInTier = skillsByTier[tier];
-          if (!skillsInTier || skillsInTier.length === 0) return null;
+      {/* DETAIL MODAL */}
+      <BottomSheet open={activeSkill !== null} onClose={closeModal} title={activeSkill?.name}>
+        {activeSkill && (() => {
+          const subj = SUBJECTS.find(s => s.id === activeSkill.subject)!;
+          const status = progress[activeSkill.id];
+          const unlocked = isSkillUnlocked(activeSkill, progress);
+          const prereqs = activeSkill.prerequisites.map(pid => SKILLS.find(s => s.id === pid)).filter(Boolean) as Skill[];
+          const unlocks = activeSkill.unlocks.map(uid => SKILLS.find(s => s.id === uid)).filter(Boolean) as Skill[];
+
           return (
-            <div key={tier}>
-              {/* Tier header */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+            <div style={{ color: C.text, display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 <span style={{
-                  fontSize: 10, fontWeight: 900, color: accent,
-                  padding: '3px 8px', borderRadius: 6,
-                  background: `${accent}15`, letterSpacing: '.06em',
-                }}>T{tier}</span>
-                <p style={{ fontSize: 10, color: C.muted, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase' }}>
-                  {TIER_LABELS[tier - 1]}
-                </p>
-                <div style={{ flex: 1, height: 1, background: C.line }} />
+                  fontSize: 10, fontWeight: 800, padding: '4px 10px', borderRadius: 8,
+                  background: `${subj.color}20`, color: subj.color, border: `1px solid ${subj.color}40`,
+                }}>{subj.icon} {subj.name}</span>
+                <span style={{
+                  fontSize: 10, fontWeight: 800, padding: '4px 10px', borderRadius: 8,
+                  background: `${TIER_COLORS[activeSkill.tier - 1]}20`,
+                  color: TIER_COLORS[activeSkill.tier - 1],
+                  border: `1px solid ${TIER_COLORS[activeSkill.tier - 1]}40`,
+                }}>T{activeSkill.tier} · {TIER_LABELS[activeSkill.tier - 1]}</span>
+                {!unlocked && (
+                  <span style={{
+                    fontSize: 10, fontWeight: 800, padding: '4px 10px', borderRadius: 8,
+                    background: 'rgba(255,255,255,0.06)', color: C.muted,
+                  }}>🔒 Bloqueado</span>
+                )}
               </div>
 
-              {/* Skills en este tier */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {skillsInTier.map(skill => {
-                  const subj = SUBJECTS.find(s => s.id === skill.subject)!;
-                  return (
-                    <SkillCard
-                      key={skill.id}
-                      skill={skill}
-                      progress={progress}
-                      accent={subjectFilter === 'all' ? subj.color : accent}
-                    />
-                  );
-                })}
+              <p style={{ fontSize: 13, color: C.text, lineHeight: 1.5 }}>{activeSkill.description}</p>
+
+              <div style={{
+                background: C.surface, border: `1px solid ${C.line}`,
+                borderRadius: 12, padding: '12px 14px',
+              }}>
+                <p className="type-caption" style={{ color: C.muted }}>📊 Volumen recomendado</p>
+                <p style={{ fontSize: 13, fontWeight: 800, color: subj.color, marginTop: 4 }}>{activeSkill.volume}</p>
               </div>
+
+              <div>
+                <p className="type-caption" style={{ color: C.muted, marginBottom: 8 }}>🎯 Cómo progresarlo</p>
+                <ol style={{ paddingLeft: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {activeSkill.progression.map((step, i) => (
+                    <li key={i} style={{
+                      display: 'flex', alignItems: 'flex-start', gap: 10,
+                      background: C.surface, border: `1px solid ${C.line}`,
+                      borderRadius: 10, padding: '10px 12px',
+                    }}>
+                      <span style={{
+                        width: 20, height: 20, borderRadius: '50%',
+                        background: `${subj.color}25`, color: subj.color,
+                        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 11, fontWeight: 900, flexShrink: 0,
+                      }}>{i + 1}</span>
+                      <span style={{ fontSize: 12, color: C.text, lineHeight: 1.5 }}>{step}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+
+              {prereqs.length > 0 && (
+                <div>
+                  <p className="type-caption" style={{ color: C.muted, marginBottom: 8 }}>⬇ Requiere</p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {prereqs.map(p => {
+                      const ok = isSkillMastered(p, progress);
+                      return (
+                        <button key={p.id}
+                          onClick={() => { closeModal(); setTimeout(() => handleSkillClick(p), 250); }}
+                          className="btn-press"
+                          style={{
+                            background: ok ? `${subj.color}10` : C.surface,
+                            border: `1px solid ${ok ? `${subj.color}30` : C.line}`,
+                            borderRadius: 10, padding: '8px 12px',
+                            display: 'flex', alignItems: 'center', gap: 10,
+                            cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
+                          }}
+                        >
+                          <span style={{ fontSize: 14 }}>{ok ? '✅' : '○'}</span>
+                          <span style={{ fontSize: 12, color: ok ? C.text : C.muted, fontWeight: ok ? 700 : 500, flex: 1 }}>
+                            {p.name}
+                          </span>
+                          <span style={{ fontSize: 9, color: C.muted }}>Ver →</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {unlocks.length > 0 && (
+                <div>
+                  <p className="type-caption" style={{ color: C.muted, marginBottom: 8 }}>⬆ Te desbloquea</p>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    {unlocks.map(u => (
+                      <button key={u.id}
+                        onClick={() => { closeModal(); setTimeout(() => handleSkillClick(u), 250); }}
+                        className="btn-press"
+                        style={{
+                          fontSize: 11, padding: '6px 10px', borderRadius: 8,
+                          background: C.surface, border: `1px solid ${C.line}`,
+                          color: C.text, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+                        }}
+                      >{u.name} →</button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <button
+                onClick={() => toggleSkillProgress(activeSkill.id)}
+                className="btn-press"
+                disabled={!unlocked}
+                style={{
+                  padding: '12px 0', borderRadius: 12, marginTop: 4,
+                  background: status === 'mastered' ? subj.color
+                            : status === 'in_progress' ? `${subj.color}30`
+                            : unlocked ? C.surface : 'rgba(255,255,255,0.04)',
+                  color: status === 'mastered' ? '#07070F' : C.text,
+                  border: `1px solid ${unlocked ? subj.color : C.line}`,
+                  fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.04em',
+                  cursor: unlocked ? 'pointer' : 'not-allowed', fontFamily: 'inherit',
+                  opacity: unlocked ? 1 : 0.5,
+                }}
+              >
+                {status === 'mastered' ? '✓ Dominado · Click para resetear' :
+                 status === 'in_progress' ? '● En progreso · Click para marcar dominado' :
+                 '○ Empezar a entrenar'}
+              </button>
             </div>
           );
-        })}
-      </div>
+        })()}
+      </BottomSheet>
     </div>
   );
 };
