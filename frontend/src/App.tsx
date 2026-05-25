@@ -66,8 +66,19 @@ const NAV_MAP_VOLTA: Record<string, NavTab> = {
   PROFILE: 'profile',
 };
 
-// Home-set: vistas que NO deben mostrar back (destinos primarios de tabs)
-const HOME_VIEWS = new Set<View>(['HOME', 'COACH_DASH', 'COACH_STATS', 'VOLTA_HOME', 'VOLTA_COACH', 'LOGIN', 'REGISTER']);
+// Home-set: vistas que NO deben mostrar back (destinos primarios de tabs del nav)
+const HOME_VIEWS = new Set<View>([
+  // Auth
+  'LOGIN', 'REGISTER',
+  // HO Atleta tabs
+  'HOME', 'WARMUP', 'PERFORMANCE', 'PROFILE',
+  // HO Coach tabs
+  'COACH_DASH', 'COACH_STATS',
+  // Volta Atleta tabs
+  'VOLTA_HOME', 'VOLTA_PREWOD', 'PROGRESSION', 'SOCIAL',
+  // Volta Coach tabs
+  'VOLTA_COACH', 'VOLTA_COACH_WOD', 'VOLTA_COACH_MACRO', 'VOLTA_COACH_INVENTORY',
+]);
 
 // Vistas accesibles sin autenticar
 const PUBLIC_VIEWS = new Set<View>(['LOGIN', 'REGISTER']);
