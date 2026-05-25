@@ -139,7 +139,7 @@ interface TreeViewProps {
   progress: SkillProgress;
   accent: string;
   highlightedPath: { upstream: Set<string>; downstream: Set<string> } | null;
-  activeSkillId: string | null;
+  modalSkillId: string | null;
   onSkillClick: (skill: Skill) => void;
   subjectAccent: (s: Skill) => string;
 }
@@ -149,7 +149,7 @@ const HEX_H = 54;
 const TIER_HEIGHT = 100;
 const COL_WIDTH = 78;
 
-const TreeView: React.FC<TreeViewProps> = ({ skills, progress, accent, highlightedPath, activeSkillId, onSkillClick, subjectAccent }) => {
+const TreeView: React.FC<TreeViewProps> = ({ skills, progress, accent, highlightedPath, modalSkillId, onSkillClick, subjectAccent }) => {
   // Layout: agrupar por tier vertical, distribuir horizontal
   const layout = useMemo(() => {
     const byTier: Record<number, Skill[]> = {};
@@ -198,7 +198,7 @@ const TreeView: React.FC<TreeViewProps> = ({ skills, progress, accent, highlight
         const fromMastered = progress[pid] === 'mastered';
         const inPath = highlightedPath && (
           highlightedPath.upstream.has(skill.id) || highlightedPath.upstream.has(pid) ||
-          activeSkillId === skill.id || activeSkillId === pid
+          modalSkillId === skill.id || modalSkillId === pid
         );
         result.push({
           from: { x: source.x, y: source.y + HEX_H / 2 },
@@ -209,7 +209,7 @@ const TreeView: React.FC<TreeViewProps> = ({ skills, progress, accent, highlight
       });
     });
     return result;
-  }, [skills, layout, progress, highlightedPath, activeSkillId]);
+  }, [skills, layout, progress, highlightedPath, modalSkillId]);
 
   return (
     <div style={{ width: '100%', overflow: 'auto', position: 'relative', paddingBottom: 20 }} className="scroll-x-no-bar">
@@ -257,7 +257,7 @@ const TreeView: React.FC<TreeViewProps> = ({ skills, progress, accent, highlight
           const inPath = highlightedPath && (
             highlightedPath.upstream.has(skill.id) ||
             highlightedPath.downstream.has(skill.id) ||
-            activeSkillId === skill.id
+            modalSkillId === skill.id
           );
           const faded = highlightedPath !== null && !inPath;
           const sAccent = subjectAccent(skill);
@@ -320,7 +320,8 @@ const MovementProgression: React.FC = () => {
   const [view, setView] = useState<ViewMode>(() => (localStorage.getItem('skillTree:view') as ViewMode) || 'list');
   const [subjectFilter, setSubjectFilter] = useState<SubjectId | 'all'>('all');
   const [progress, setProgress] = useState<SkillProgress>(() => loadProgress());
-  const [activeSkill, setActiveSkill] = useState<Skill | null>(null);
+  const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null); // skill resaltada (rama visible)
+  const [modalSkill, setModalSkill] = useState<Skill | null>(null);       // skill abierta en BottomSheet
   const [highlightedPath, setHighlightedPath] = useState<{ upstream: Set<string>; downstream: Set<string> } | null>(null);
 
   const tierRefs = useRef<Record<number, HTMLDivElement | null>>({});
@@ -361,7 +362,13 @@ const MovementProgression: React.FC = () => {
   const subjectAccent = (s: Skill) => SUBJECTS.find(x => x.id === s.subject)?.color ?? accent;
 
   const handleSkillClick = (skill: Skill) => {
-    setActiveSkill(skill);
+    // 2do click sobre el mismo skill → abre modal de detalle
+    if (selectedSkill?.id === skill.id) {
+      setModalSkill(skill);
+      return;
+    }
+    // 1er click → solo ilumina la rama (sin modal)
+    setSelectedSkill(skill);
     const path = getPath(skill.id);
     setHighlightedPath({
       upstream: new Set(path.upstream),
@@ -370,8 +377,18 @@ const MovementProgression: React.FC = () => {
   };
 
   const closeModal = () => {
-    setActiveSkill(null);
+    setModalSkill(null);
+    // selectedSkill + highlightedPath se mantienen para que el usuario siga viendo la rama
+  };
+
+  const clearSelection = () => {
+    setSelectedSkill(null);
     setHighlightedPath(null);
+    setModalSkill(null);
+  };
+
+  const openDetailFromSelection = () => {
+    if (selectedSkill) setModalSkill(selectedSkill);
   };
 
   const toggleSkillProgress = (id: string) => {
@@ -560,7 +577,7 @@ const MovementProgression: React.FC = () => {
                     {skillsInTier.map(skill => {
                       const inUp = highlightedPath?.upstream.has(skill.id);
                       const inDown = highlightedPath?.downstream.has(skill.id);
-                      const isActive = activeSkill?.id === skill.id;
+                      const isActive = selectedSkill?.id === skill.id;
                       const highlighted = isActive || inUp || inDown;
                       const faded = highlightedPath !== null && !highlighted;
                       return (
@@ -584,28 +601,65 @@ const MovementProgression: React.FC = () => {
       ) : (
         <div style={{ padding: '0 0 20px 0' }}>
           <p style={{ fontSize: 10, color: C.muted, textAlign: 'center', marginBottom: 10, padding: '0 16px' }}>
-            👆 Tocá un nodo para ver su ruta · ⬇ Scroll horizontal para navegar
+            👆 1er tap: ver rama · 2do tap o "Ver detalle": abrir info
           </p>
           <TreeView
             skills={skillsToShow}
             progress={progress}
             accent={accent}
             highlightedPath={highlightedPath}
-            activeSkillId={activeSkill?.id ?? null}
+            modalSkillId={selectedSkill?.id ?? null}
             onSkillClick={handleSkillClick}
             subjectAccent={subjectAccent}
           />
         </div>
       )}
 
+      {/* FLOATING ACTION cuando hay skill seleccionada (no modal abierto) */}
+      {selectedSkill && !modalSkill && (() => {
+        const subj = SUBJECTS.find(s => s.id === selectedSkill.subject)!;
+        return (
+          <div style={{
+            position: 'absolute', bottom: 90, left: 16, right: 16, zIndex: 40,
+            display: 'flex', gap: 8,
+            background: `linear-gradient(to top, ${C.bg} 60%, transparent)`,
+            padding: '14px 0 4px',
+          }} className="anim-fade-up">
+            <button
+              onClick={clearSelection}
+              className="btn-press"
+              style={{
+                padding: '12px 14px', borderRadius: 12,
+                background: C.surface2, color: C.muted,
+                border: `1px solid ${C.line}`,
+                fontSize: 11, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase',
+                cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >✕ Limpiar</button>
+            <button
+              onClick={openDetailFromSelection}
+              className="btn-press"
+              style={{
+                flex: 1, padding: '12px 0', borderRadius: 12,
+                background: subj.color, color: '#07070F',
+                border: 'none',
+                fontSize: 12, fontWeight: 900, letterSpacing: '.04em', textTransform: 'uppercase',
+                cursor: 'pointer', fontFamily: 'inherit',
+                boxShadow: `0 6px 20px ${subj.color}40`,
+              }}
+            >Ver detalle de "{selectedSkill.name.length > 20 ? selectedSkill.name.slice(0, 18) + '…' : selectedSkill.name}"</button>
+          </div>
+        );
+      })()}
+
       {/* DETAIL MODAL */}
-      <BottomSheet open={activeSkill !== null} onClose={closeModal} title={activeSkill?.name}>
-        {activeSkill && (() => {
-          const subj = SUBJECTS.find(s => s.id === activeSkill.subject)!;
-          const status = progress[activeSkill.id];
-          const unlocked = isSkillUnlocked(activeSkill, progress);
-          const prereqs = activeSkill.prerequisites.map(pid => SKILLS.find(s => s.id === pid)).filter(Boolean) as Skill[];
-          const unlocks = activeSkill.unlocks.map(uid => SKILLS.find(s => s.id === uid)).filter(Boolean) as Skill[];
+      <BottomSheet open={modalSkill !== null} onClose={closeModal} title={modalSkill?.name}>
+        {modalSkill && (() => {
+          const subj = SUBJECTS.find(s => s.id === modalSkill.subject)!;
+          const status = progress[modalSkill.id];
+          const unlocked = isSkillUnlocked(modalSkill, progress);
+          const prereqs = modalSkill.prerequisites.map(pid => SKILLS.find(s => s.id === pid)).filter(Boolean) as Skill[];
+          const unlocks = modalSkill.unlocks.map(uid => SKILLS.find(s => s.id === uid)).filter(Boolean) as Skill[];
 
           return (
             <div style={{ color: C.text, display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -616,10 +670,10 @@ const MovementProgression: React.FC = () => {
                 }}>{subj.icon} {subj.name}</span>
                 <span style={{
                   fontSize: 10, fontWeight: 800, padding: '4px 10px', borderRadius: 8,
-                  background: `${TIER_COLORS[activeSkill.tier - 1]}20`,
-                  color: TIER_COLORS[activeSkill.tier - 1],
-                  border: `1px solid ${TIER_COLORS[activeSkill.tier - 1]}40`,
-                }}>T{activeSkill.tier} · {TIER_LABELS[activeSkill.tier - 1]}</span>
+                  background: `${TIER_COLORS[modalSkill.tier - 1]}20`,
+                  color: TIER_COLORS[modalSkill.tier - 1],
+                  border: `1px solid ${TIER_COLORS[modalSkill.tier - 1]}40`,
+                }}>T{modalSkill.tier} · {TIER_LABELS[modalSkill.tier - 1]}</span>
                 {!unlocked && (
                   <span style={{
                     fontSize: 10, fontWeight: 800, padding: '4px 10px', borderRadius: 8,
@@ -628,20 +682,20 @@ const MovementProgression: React.FC = () => {
                 )}
               </div>
 
-              <p style={{ fontSize: 13, color: C.text, lineHeight: 1.5 }}>{activeSkill.description}</p>
+              <p style={{ fontSize: 13, color: C.text, lineHeight: 1.5 }}>{modalSkill.description}</p>
 
               <div style={{
                 background: C.surface, border: `1px solid ${C.line}`,
                 borderRadius: 12, padding: '12px 14px',
               }}>
                 <p className="type-caption" style={{ color: C.muted }}>📊 Volumen recomendado</p>
-                <p style={{ fontSize: 13, fontWeight: 800, color: subj.color, marginTop: 4 }}>{activeSkill.volume}</p>
+                <p style={{ fontSize: 13, fontWeight: 800, color: subj.color, marginTop: 4 }}>{modalSkill.volume}</p>
               </div>
 
               <div>
                 <p className="type-caption" style={{ color: C.muted, marginBottom: 8 }}>🎯 Cómo progresarlo</p>
                 <ol style={{ paddingLeft: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  {activeSkill.progression.map((step, i) => (
+                  {modalSkill.progression.map((step, i) => (
                     <li key={i} style={{
                       display: 'flex', alignItems: 'flex-start', gap: 10,
                       background: C.surface, border: `1px solid ${C.line}`,
@@ -709,7 +763,7 @@ const MovementProgression: React.FC = () => {
               )}
 
               <button
-                onClick={() => toggleSkillProgress(activeSkill.id)}
+                onClick={() => toggleSkillProgress(modalSkill.id)}
                 className="btn-press"
                 disabled={!unlocked}
                 style={{
