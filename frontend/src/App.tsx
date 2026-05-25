@@ -30,6 +30,7 @@ import KnowledgePills from './pages/KnowledgePills';
 import SocialCard from './pages/SocialCard';
 import BaselineAssessment from './pages/BaselineAssessment';
 import VoltaStats from './pages/VoltaStats';
+import HoStats from './pages/HoStats';
 import LogWodResult from './pages/LogWodResult';
 import VoltaDashboard from './pages/VoltaDashboard';
 import VoltaPreWod from './pages/VoltaPreWod';
@@ -46,7 +47,7 @@ const NAV_MAP_HO: Record<string, NavTab> = {
   HOME: 'home',
   WARMUP: 'train', SESSION: 'train', SUMMARY: 'train', VICTORY: 'train',
   PERFORMANCE: 'stats', INDEX: 'stats', SCHEDULE: 'stats', PULSE: 'stats', PILLS: 'stats', SOCIAL: 'stats',
-  PROGRESSION: 'stats',
+  PROGRESSION: 'stats', HO_STATS: 'stats',
   PROFILE: 'profile', ONBOARDING: 'profile', PREMIUM: 'profile',
   COACH_DASH: 'home', ATHLETE_DETAIL: 'home', ASSIGN_MACRO: 'home', NEW_ATHLETE: 'home',
   COACH_STATS: 'stats',
@@ -261,6 +262,7 @@ function AppInner() {
       case 'ASSIGN_MACRO':   return <AssignMacrocycle />;
       case 'NEW_ATHLETE':    return <NewAthlete />;
       case 'PROGRESSION':    return <MovementProgression />;
+      case 'HO_STATS':       return <HoStats />;
       case 'HOME':
       default:
         return role === 'coach' ? <CommandCenter /> : <AtletaHome />;
@@ -280,7 +282,7 @@ function AppInner() {
     }
     if (tab === 'home') navigate(role === 'coach' ? 'COACH_DASH' : 'HOME');
     else if (tab === 'train') navigate('WARMUP');
-    else if (tab === 'stats') navigate(role === 'coach' ? 'COACH_STATS' : 'PERFORMANCE');
+    else if (tab === 'stats') navigate(role === 'coach' ? 'COACH_STATS' : 'HO_STATS');
     else if (tab === 'profile') navigate('PROFILE');
   };
 
