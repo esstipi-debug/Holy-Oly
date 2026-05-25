@@ -386,7 +386,20 @@ const MovementProgression: React.FC = () => {
   };
 
   const jumpToTier = (tier: number) => {
-    tierRefs.current[tier]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const el = tierRefs.current[tier];
+    if (!el) return;
+    // Buscar el contenedor scrollable más cercano (el overflow-y-auto del PhoneLayout)
+    let scroller: HTMLElement | null = el.parentElement;
+    while (scroller && scroller !== document.body) {
+      const overflow = getComputedStyle(scroller).overflowY;
+      if (overflow === 'auto' || overflow === 'scroll') break;
+      scroller = scroller.parentElement;
+    }
+    if (!scroller) return;
+    const scrollerRect = scroller.getBoundingClientRect();
+    const elRect = el.getBoundingClientRect();
+    const targetTop = scroller.scrollTop + (elRect.top - scrollerRect.top) - 12;
+    scroller.scrollTo({ top: targetTop, behavior: 'smooth' });
   };
 
   return (
@@ -480,11 +493,16 @@ const MovementProgression: React.FC = () => {
       {/* CONTENIDO según vista */}
       {view === 'list' ? (
         <>
-          {/* TIER JUMP SIDEBAR (vertical, derecha, fija) */}
+          {/* TIER JUMP SIDEBAR (sticky dentro del scroll del phone frame) */}
           <div style={{
-            position: 'fixed', right: 8, top: '40%', transform: 'translateY(-50%)',
-            display: 'flex', flexDirection: 'column', gap: 4, zIndex: 30,
+            position: 'sticky', top: 220, marginLeft: 'auto', marginRight: 4,
+            width: 30, height: 0, // height 0 + overflow visible permite que los botones se vean
+            zIndex: 30,
           }}>
+            <div style={{
+              position: 'absolute', right: 0, top: 0,
+              display: 'flex', flexDirection: 'column', gap: 4,
+            }}>
             {[1, 2, 3, 4, 5].map(tier => {
               const tierColor = TIER_COLORS[tier - 1];
               const tierSkills = skillsByTier[tier] || [];
@@ -508,6 +526,7 @@ const MovementProgression: React.FC = () => {
                 >T{tier}</button>
               );
             })}
+            </div>
           </div>
 
           {activeSubject && (
