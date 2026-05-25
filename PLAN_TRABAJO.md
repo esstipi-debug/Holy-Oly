@@ -144,6 +144,81 @@ Achievements desbloqueados por eventos reales. Quests trackean progreso real.
 
 ---
 
+## Fase 3.5 · 🚀 Pantallas virales (3-4 días) · NUEVA · ALTA PRIORIDAD
+
+### Objetivo
+Convertir la pantalla `SOCIAL` (Volta atleta Logros) en motor de crecimiento orgánico. Los atletas toman screenshot y lo comparten en redes → adquisición sin costo de marketing.
+
+### Razonamiento del usuario
+> "El objetivo de esta pantalla es para que los atletas celebren y compartan sus logros y progresos. La idea central es que los atletas tomen screenshot. Es crucial medir si esto pasa, para registrar qué funciona mejor. Esta lógica alimenta una forma de autopromoción, para evitar pagar por marketing — la viralidad de las pantallas."
+
+### 3.5.A · Catálogo de logros celebrables
+
+| ID | Task | Esfuerzo | Criterio done |
+|----|------|----------|---------------|
+| 3.5.1 | Definir 10-15 tipos de logro celebrable (PR, milestone, racha, tier-up, benchmark WOD, leaderboard, aniversario, etc) | 2h | Lista en `data/celebrations.ts` con copy + iconografía |
+| 3.5.2 | Cada celebration tiene: type, title, value, context (athlete, club, fecha), color theme | 1h | Type definitions |
+| 3.5.3 | Hook `useLatestCelebration(userId)` que devuelve la más reciente | 2h | API ready |
+
+### 3.5.B · Múltiples estilos visuales (3-5 variantes)
+
+| ID | Task | Esfuerzo | Criterio done |
+|----|------|----------|---------------|
+| 3.5.4 | **Style 1 · Minimalist** — tipografía gigante, número hero, branding chico (ya implementado en PR #13) | ✅ | Existe |
+| 3.5.5 | **Style 2 · Stadium** — gradient deportivo, glow, medalla 3D | 4h | Componente `<StadiumCard>` |
+| 3.5.6 | **Style 3 · Stat Sheet** — ficha técnica de boxeo con maxes + categoría | 4h | Componente `<StatSheetCard>` |
+| 3.5.7 | **Style 4 · Trophy** — trophy 3D animado, podium con confetti SVG | 4h | Componente `<TrophyCard>` |
+| 3.5.8 | **Style 5 · Progress** — before/after de Snatch (6 meses atrás vs hoy) | 4h | Componente `<ProgressCard>` |
+| 3.5.9 | Selector horizontal "◀ Stadium ▶" en SOCIAL | 2h | Swipe entre estilos |
+| 3.5.10 | Persistir estilo preferido por usuario en localStorage `social:preferred_variant` | 30min | Carga el estilo del usuario |
+
+### 3.5.C · Tracking de screenshots (métrica crítica)
+
+| ID | Task | Esfuerzo | Criterio done |
+|----|------|----------|---------------|
+| 3.5.11 | Detectar `document.visibilitychange` cuando user sale de la pantalla con dwell time >5s en SOCIAL → trigger "probable screenshot" | 3h | Console log + state |
+| 3.5.12 | Backend: schema `social_screenshots` (user_id, variant, achievement_type, dwell_ms, timestamp) | 1h | Tabla |
+| 3.5.13 | Endpoint `POST /v1/social/screenshot` | 1h | API |
+| 3.5.14 | Frontend: enviar event al hacer probable-screenshot | 1h | Event registrado |
+| 3.5.15 | iOS native bridge para `UIScreenCapturedDidChangeNotification` (más preciso) | 1 día | Solo iOS, opcional |
+| 3.5.16 | Web: explorar Screen Capture API events (limitado por browsers) | 2h | Investigación |
+
+### 3.5.D · A/B testing entre estilos
+
+| ID | Task | Esfuerzo | Criterio done |
+|----|------|----------|---------------|
+| 3.5.17 | Asignar variante por user_id deterministicamente (hash mod 5) | 1h | Usuarios distribuidos |
+| 3.5.18 | Backend service: `getScreenshotsByVariant()` agregado por achievement_type | 2h | Stats por variant |
+| 3.5.19 | Dashboard admin (interno): conversion rate por variant | 4h | Vemos qué funciona |
+| 3.5.20 | Auto-promotion: cada 4 semanas, retirar la variante peor y reemplazar | 2h | Evolución natural |
+
+### 3.5.E · Auto-trigger de SOCIAL
+
+| ID | Task | Esfuerzo | Criterio done |
+|----|------|----------|---------------|
+| 3.5.21 | Toast post-WOD si hubo PR: "🎉 Nuevo PR · ¿Compartilo?" | 2h | Toast aparece |
+| 3.5.22 | Tap → navigate SOCIAL con celebration pre-configurada | 1h | Llega armada |
+| 3.5.23 | En `VICTORY` agregar CTA "Crear postal para redes" | 1h | Botón visible |
+| 3.5.24 | Triggers: PR, primer muscle-up/HSPU, racha 7/30/100 días, tier-up, benchmark WOD | 3h | Eventos disparan auto-trigger |
+
+### 3.5.F · UI extras para virality
+
+| ID | Task | Esfuerzo | Criterio done |
+|----|------|----------|---------------|
+| 3.5.25 | Hashtags dinámicos por tipo de logro (#PR135kg #MurphSub40) | 1h | Footer card |
+| 3.5.26 | QR code con link a `holyoly.app/u/<username>` (perfil público) | 3h | QR + perfil página |
+| 3.5.27 | Perfil público read-only: maxes, achievements, racha, club | 4h | URL pública shareable |
+| 3.5.28 | Tooltip "Tomá screenshot y compartilo 📸" (sutil, después del hero) | 1h | Mensaje educativo |
+
+**Milestone Fase 3.5:** Pantalla SOCIAL es motor de crecimiento orgánico. Métrica clara de cuántos screenshots por usuario por mes. Variantes mejoran iterativamente.
+
+**Valor de negocio esperado:**
+- Reducción de CAC (Customer Acquisition Cost) a casi $0 por canal orgánico
+- Loop: atleta hace PR → app celebra → screenshot → IG/Stories → amigo ve → install
+- Métrica norte: **% de usuarios activos que generan ≥1 screenshot/mes**
+
+---
+
 ## Fase 4 · Cerrar stubs frontend (2 días)
 
 ### Objetivo
@@ -245,11 +320,12 @@ Datos reales del cuerpo (wearables), notificaciones, payments, video.
 | 1 · Backend up | 1.5 días | Auth real funciona |
 | 2 · Persistencia core | 5-7 días | App útil, datos persisten |
 | 3 · Engagement engine | 3-5 días | Gamification real |
+| **3.5 · Pantallas virales** 🚀 | **3-4 días** | **Motor de crecimiento orgánico** |
 | 4 · Cerrar stubs | 2 días | Ningún botón muerto |
 | 5 · Integraciones | 8-12 días | Wearables + push + Stripe + video + AI |
 | 6 · Polish operativo | 5 días | Producción seria |
-| **Total para "operativa"** | **~3 semanas (fases 1-4)** | App usable por early users |
-| **Total para "lista para escalar"** | **~6 semanas (todas)** | Producto completo |
+| **Total para "operativa + viral"** | **~4 semanas (fases 1-4 + 3.5)** | App usable + autopromoción |
+| **Total para "lista para escalar"** | **~7 semanas (todas)** | Producto completo |
 
 ---
 
