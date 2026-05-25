@@ -85,7 +85,7 @@ export const MOVEMENTS: MovementFamily[] = [
   },
   {
     id: 'cleanjerk',
-    name: 'Dos Tiempos',
+    name: 'Clean & Jerk',
     category: 'Weightlifting',
     emoji: '💪',
     product: ['holy-oly', 'volta'],

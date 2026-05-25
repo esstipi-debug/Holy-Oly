@@ -5,12 +5,22 @@ import { useAthlete } from '../context/AthleteContext';
 import { useAuth } from '../context/AuthContext';
 import { useNav } from '../context/NavigationContext';
 import { useProduct } from '../context/ProductContext';
+import { useRole } from '../context/RoleContext';
 import { unlockedCount, totalCount, type AthleteState } from '../data/achievements';
 
-const SETTINGS = [
+const SETTINGS_ATLETA = [
   { id: 'biometrics', label: 'Datos Biométricos', icon: '⚖️' },
   { id: 'equipment',  label: 'Equipo Disponible',  icon: '🏋️' },
   { id: 'coach',      label: 'Mi Entrenador',       icon: '🕴️' },
+  { id: 'units',      label: 'Unidades (KG / LBS)', icon: '📐' },
+  { id: 'notifications', label: 'Notificaciones',   icon: '🔔' },
+  { id: 'themes',     label: 'Temas',               icon: '🎨' },
+];
+
+const SETTINGS_COACH = [
+  { id: 'box',        label: 'Mi Box / Club',      icon: '🏛️' },
+  { id: 'roster',     label: 'Atletas Asignados',  icon: '👥' },
+  { id: 'equipment',  label: 'Inventario',          icon: '🏋️' },
   { id: 'units',      label: 'Unidades (KG / LBS)', icon: '📐' },
   { id: 'notifications', label: 'Notificaciones',   icon: '🔔' },
   { id: 'themes',     label: 'Temas',               icon: '🎨' },
@@ -20,13 +30,16 @@ const Profile: React.FC = () => {
   const [showThemes, setShowThemes] = useState(false);
   const [units, setUnits] = useState<'kg' | 'lbs'>(() => (localStorage.getItem('units:current') as 'kg' | 'lbs') ?? 'kg');
   const [notifications, setNotifications] = useState<boolean>(() => localStorage.getItem('notifications:enabled') !== 'false');
-  const [openPanel, setOpenPanel] = useState<null | 'equipment' | 'coach' | 'notifications'>(null);
-  const { athlete } = useAthlete();
+  const [openPanel, setOpenPanel] = useState<null | 'equipment' | 'coach' | 'notifications' | 'box' | 'roster'>(null);
+  const { athlete, allAthletes } = useAthlete();
   const { logout } = useAuth();
   const { navigate } = useNav();
   const { product } = useProduct();
+  const { role } = useRole();
+  const isCoach = role === 'coach';
+  const SETTINGS = isCoach ? SETTINGS_COACH : SETTINGS_ATLETA;
 
-  // Mock state del atleta — en prod esto vendría del backend
+  // Stats del atleta para AchievementsGrid (solo si atleta)
   const athleteState: AthleteState = {
     sessionCount: 42,
     rxSessionCount: 12,
@@ -38,8 +51,12 @@ const Profile: React.FC = () => {
     leaderboardPercentile: 23,
     wodsCompleted: product === 'volta' ? ['fran', 'helen'] : [],
   };
-  const unlocked = unlockedCount(athleteState, product);
-  const total = totalCount(product);
+  const unlocked = isCoach ? 0 : unlockedCount(athleteState, product);
+  const total = isCoach ? 0 : totalCount(product);
+
+  // Stats del coach (roster)
+  const rosterCount = allAthletes.length;
+  const activeAthletes = allAthletes.filter(a => (a.sessions_last_7?.filter(s => s.completed).length ?? 0) > 0).length;
 
   const toggleUnits = () => {
     const next = units === 'kg' ? 'lbs' : 'kg';
@@ -88,18 +105,24 @@ const Profile: React.FC = () => {
           }}>
             {firstName[0]}{lastInitial}
           </div>
-          <h1 style={{ color: 'var(--text)', fontSize: 22, fontWeight: 900, letterSpacing: '-.02em' }}>{athlete?.name ?? 'Atleta'}</h1>
+          <h1 style={{ color: 'var(--text)', fontSize: 22, fontWeight: 900, letterSpacing: '-.02em' }}>{athlete?.name ?? (isCoach ? 'Coach' : 'Atleta')}</h1>
           <p style={{ color: 'var(--primary)', fontSize: 10, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', marginTop: 4 }}>
-            Suscripción: HOLY {subscription}
+            {isCoach ? `${product === 'volta' ? 'VOLTA' : 'HOLY OLY'} · Coach` : `Suscripción: HOLY ${subscription}`}
           </p>
         </div>
 
-        {/* Stats grid */}
+        {/* Stats grid · diferente por rol */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
-          {[
-            { icon: '🏆', label: 'Logros', sub: `${unlocked}/${total} Desbloqueados`, onClick: () => navigate('SOCIAL') },
-            { icon: '💳', label: 'Pagos',  sub: 'PRO Expira en 12d', onClick: () => navigate('PREMIUM') },
-          ].map((item) => (
+          {(isCoach
+            ? [
+                { icon: '👥', label: 'Atletas', sub: `${rosterCount} en el roster`, onClick: () => navigate(product === 'volta' ? 'VOLTA_COACH' : 'COACH_DASH') },
+                { icon: '🔥', label: 'Activos esta semana', sub: `${activeAthletes} de ${rosterCount}`, onClick: () => navigate(product === 'volta' ? 'VOLTA_COACH' : 'COACH_DASH') },
+              ]
+            : [
+                { icon: '🏆', label: 'Logros', sub: `${unlocked}/${total} Desbloqueados`, onClick: () => navigate('SOCIAL') },
+                { icon: '💳', label: 'Pagos',  sub: 'PRO Expira en 12d', onClick: () => navigate('PREMIUM') },
+              ]
+          ).map((item) => (
             <div
               key={item.label}
               onClick={item.onClick}
@@ -119,10 +142,12 @@ const Profile: React.FC = () => {
           ))}
         </div>
 
-        {/* Achievements */}
-        <div style={{ marginBottom: 24 }}>
-          <AchievementsGrid product={product} state={athleteState} />
-        </div>
+        {/* Achievements · solo atleta */}
+        {!isCoach && (
+          <div style={{ marginBottom: 24 }}>
+            <AchievementsGrid product={product} state={athleteState} />
+          </div>
+        )}
 
         {/* Settings */}
         <p style={{ color: 'var(--text-secondary)', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em', marginBottom: 10, paddingLeft: 4 }}>
@@ -136,7 +161,13 @@ const Profile: React.FC = () => {
               if (item.id === 'themes') setShowThemes(true);
               else if (item.id === 'biometrics') navigate('ONBOARDING');
               else if (item.id === 'coach') setOpenPanel('coach');
-              else if (item.id === 'equipment') setOpenPanel('equipment');
+              else if (item.id === 'equipment') {
+                // Coach va al inventario real, atleta abre panel info
+                if (isCoach && product === 'volta') navigate('VOLTA_COACH_INVENTORY');
+                else setOpenPanel('equipment');
+              }
+              else if (item.id === 'box') setOpenPanel('box');
+              else if (item.id === 'roster') navigate(product === 'volta' ? 'VOLTA_COACH' : 'COACH_DASH');
               else if (isUnits) toggleUnits();
               else if (isNotif) toggleNotifications();
             };
@@ -208,6 +239,20 @@ const Profile: React.FC = () => {
             </div>
             <p style={{ color: 'var(--text-secondary)', fontSize: 11, lineHeight: 1.6 }}>
               Inventario gestionado por tu coach. Si necesitás equipo específico, mandá mensaje desde el chat con WISE.
+            </p>
+          </div>
+        )}
+        {openPanel === 'box' && (
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--card-border)', borderRadius: 16, padding: 16, marginBottom: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <p style={{ color: 'var(--text)', fontSize: 13, fontWeight: 800 }}>🏛️ Mi Box / Club</p>
+              <button onClick={() => setOpenPanel(null)} style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', fontSize: 16, cursor: 'pointer' }}>✕</button>
+            </div>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 11, marginBottom: 4 }}>
+              {product === 'volta' ? 'CrossFit Box · 28 atletas' : 'Club Halterofilia · 18 atletas'}
+            </p>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 10 }}>
+              Configuración del box, capacidad por clase, horarios y branding desde el dashboard web.
             </p>
           </div>
         )}
