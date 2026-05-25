@@ -1036,7 +1036,7 @@ const VoltaCoachTools: React.FC<VoltaCoachToolsProps> = ({ initialTab = 'progres
         )}
       </div>
 
-      <WiseAssistant context={`Coach Tools · ${TABS.find(t => t.id === tab)?.label}`} />
+      <WiseAssistant context={`Coach Tools · ${TABS.find(t => t.id === tab)?.label}`} bottomOffset={200} />
     </div>
   );
 };

@@ -126,7 +126,7 @@ const ActiveSession: React.FC = () => {
   };
 
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100%', paddingBottom: 200 }}>
+    <div style={{ background: 'var(--bg)', minHeight: '100%', paddingBottom: allDone ? 180 : 100 }}>
 
       {/* HEADER */}
       <div style={{
@@ -145,11 +145,42 @@ const ActiveSession: React.FC = () => {
             </p>
           </div>
         </div>
-        <div style={{ textAlign: 'right' }}>
-          <p style={{ fontSize: 9, color: 'var(--text-secondary)', fontWeight: 800, letterSpacing: '.08em' }}>CRONO</p>
-          <p style={{ fontSize: 18, fontWeight: 900, color: 'var(--text)', letterSpacing: '-.02em', fontVariantNumeric: 'tabular-nums' }}>
-            {mm}:{ss}
-          </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ textAlign: 'right' }}>
+            <p style={{ fontSize: 9, color: 'var(--text-secondary)', fontWeight: 800, letterSpacing: '.08em' }}>CRONO</p>
+            <p style={{ fontSize: 18, fontWeight: 900, color: 'var(--text)', letterSpacing: '-.02em', fontVariantNumeric: 'tabular-nums' }}>
+              {mm}:{ss}
+            </p>
+          </div>
+          {/* Mini nav (← anterior / terminar) en header para no solapar logging buttons */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginLeft: 6 }}>
+            <button
+              onClick={goPrevExercise}
+              disabled={exIdx === 0}
+              title="Ejercicio anterior"
+              style={{
+                padding: '4px 8px', borderRadius: 8,
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid var(--card-border)',
+                color: 'var(--text-secondary)',
+                fontSize: 9, fontWeight: 800, letterSpacing: '.04em',
+                cursor: exIdx === 0 ? 'not-allowed' : 'pointer',
+                opacity: exIdx === 0 ? 0.4 : 1, fontFamily: 'inherit',
+              }}
+            >← Ant</button>
+            <button
+              onClick={() => navigate('VICTORY')}
+              title="Terminar sesión"
+              style={{
+                padding: '4px 8px', borderRadius: 8,
+                background: 'rgba(239,68,68,0.08)',
+                border: '1px solid rgba(239,68,68,0.25)',
+                color: '#f87171',
+                fontSize: 9, fontWeight: 800, letterSpacing: '.04em',
+                cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >Fin</button>
+          </div>
         </div>
       </div>
 
@@ -374,15 +405,18 @@ const ActiveSession: React.FC = () => {
         )}
       </div>
 
-      {/* FOOTER */}
-      <div style={{
-        position: 'absolute', bottom: 84, left: 16, right: 16, zIndex: 40,
-        display: 'flex', flexDirection: 'column', gap: 8,
-      }}>
-        {allDone ? (
+      {/* FOOTER · solo aparece cuando todas las series completadas (Siguiente ejercicio) */}
+      {allDone && (
+        <div style={{
+          position: 'absolute', bottom: 76, left: 0, right: 0, zIndex: 40,
+          padding: '14px 16px 12px',
+          background: 'linear-gradient(to top, var(--bg) 0%, var(--bg) 70%, transparent 100%)',
+          backdropFilter: 'blur(8px)',
+        }}>
           <button
             onClick={goNextExercise}
             style={{
+              width: '100%',
               padding: '14px 0', borderRadius: 14,
               background: 'linear-gradient(135deg, #F59E0B, #B8860B)',
               color: '#07070F', border: 'none',
@@ -393,35 +427,8 @@ const ActiveSession: React.FC = () => {
           >
             {exIdx < exercises.length - 1 ? 'Siguiente ejercicio →' : 'Finalizar sesión 🏆'}
           </button>
-        ) : (
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button
-              onClick={goPrevExercise}
-              disabled={exIdx === 0}
-              style={{
-                flex: 1, padding: '12px 0', borderRadius: 12,
-                background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(10px)',
-                color: 'var(--text-secondary)',
-                border: '1px solid var(--card-border)',
-                fontSize: 11, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase',
-                cursor: exIdx === 0 ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
-                opacity: exIdx === 0 ? 0.4 : 1,
-              }}
-            >← Anterior</button>
-            <button
-              onClick={() => navigate('VICTORY')}
-              style={{
-                flex: 1, padding: '12px 0', borderRadius: 12,
-                background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(10px)',
-                color: 'var(--text)',
-                border: '1px solid var(--card-border)',
-                fontSize: 11, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase',
-                cursor: 'pointer', fontFamily: 'inherit',
-              }}
-            >Terminar</button>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
