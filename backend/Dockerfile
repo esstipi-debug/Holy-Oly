@@ -13,6 +13,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy source
 COPY backend/src/ ./src/
 
+# Copy migrations (necesario para /v1/admin/migrate runtime)
+COPY backend/migrations/ ./migrations/
+
 # Render / Cloud Run usan PORT env var · default 8080 si no está seteado
 ENV PORT=8080
 

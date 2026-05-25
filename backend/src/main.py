@@ -16,6 +16,7 @@ from .api.auth import auth_router, verify_token
 from .api.baseline import router as baseline_router
 from .api.social import router as social_router
 from .api.payments import router as payments_router
+from .api.admin import router as admin_router
 from .rag.router import router as rag_router
 from .rag.feedback import router as rag_feedback_router
 from .coach.router import router as coach_router
@@ -134,6 +135,7 @@ app.include_router(auth_router)
 app.include_router(baseline_router)
 app.include_router(social_router)
 app.include_router(payments_router)
+app.include_router(admin_router)
 app.include_router(router)
 app.include_router(rag_router)
 app.include_router(rag_feedback_router)
