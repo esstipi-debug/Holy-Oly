@@ -16,6 +16,7 @@ import SessionSummaryPreview from './pages/SessionSummaryPreview';
 import VictoryScreen from './pages/VictoryScreen';
 import OlyIndex from './pages/OlyIndex';
 import CommandCenter from './pages/CommandCenter';
+import CoachStatsHO from './pages/CoachStatsHO';
 import AthleteDeepDive from './pages/AthleteDeepDive';
 import AssignMacrocycle from './pages/AssignMacrocycle';
 import NewAthlete from './pages/NewAthlete';
@@ -45,11 +46,12 @@ const NAV_MAP_HO: Record<string, NavTab> = {
   PROGRESSION: 'stats',
   PROFILE: 'profile', ONBOARDING: 'profile', PREMIUM: 'profile',
   COACH_DASH: 'home', ATHLETE_DETAIL: 'home', ASSIGN_MACRO: 'home', NEW_ATHLETE: 'home',
+  COACH_STATS: 'stats',
 };
 
 // Vistas exclusivas por rol — al cambiar de rol, redirige al home apropiado
-const ATHLETE_ONLY: View[] = ['WARMUP', 'SESSION', 'SUMMARY', 'VICTORY', 'PULSE', 'PILLS', 'INDEX', 'SCHEDULE', 'ONBOARDING', 'PREMIUM', 'VOLTA_PREWOD', 'SOCIAL'];
-const COACH_ONLY: View[]   = ['COACH_DASH', 'ATHLETE_DETAIL', 'ASSIGN_MACRO', 'NEW_ATHLETE', 'VOLTA_COACH', 'VOLTA_COACH_WOD', 'VOLTA_COACH_TOOLS', 'VOLTA_COACH_MACRO', 'VOLTA_COACH_INVENTORY'];
+const ATHLETE_ONLY: View[] = ['WARMUP', 'SESSION', 'SUMMARY', 'VICTORY', 'PULSE', 'PILLS', 'INDEX', 'SCHEDULE', 'ONBOARDING', 'PREMIUM', 'VOLTA_PREWOD', 'SOCIAL', 'PERFORMANCE'];
+const COACH_ONLY: View[]   = ['COACH_DASH', 'COACH_STATS', 'ATHLETE_DETAIL', 'ASSIGN_MACRO', 'NEW_ATHLETE', 'VOLTA_COACH', 'VOLTA_COACH_WOD', 'VOLTA_COACH_TOOLS', 'VOLTA_COACH_MACRO', 'VOLTA_COACH_INVENTORY'];
 
 const NAV_MAP_VOLTA: Record<string, NavTab> = {
   VOLTA_HOME: 'home', VOLTA_COACH: 'home',
@@ -64,8 +66,8 @@ const NAV_MAP_VOLTA: Record<string, NavTab> = {
   PROFILE: 'profile',
 };
 
-// Home-set: vistas que NO deben mostrar back
-const HOME_VIEWS = new Set<View>(['HOME', 'COACH_DASH', 'VOLTA_HOME', 'VOLTA_COACH', 'LOGIN', 'REGISTER']);
+// Home-set: vistas que NO deben mostrar back (destinos primarios de tabs)
+const HOME_VIEWS = new Set<View>(['HOME', 'COACH_DASH', 'COACH_STATS', 'VOLTA_HOME', 'VOLTA_COACH', 'LOGIN', 'REGISTER']);
 
 // Vistas accesibles sin autenticar
 const PUBLIC_VIEWS = new Set<View>(['LOGIN', 'REGISTER']);
@@ -236,6 +238,7 @@ function AppInner() {
       case 'SOCIAL':         return <SocialCard />;
       case 'PROFILE':        return <Profile />;
       case 'COACH_DASH':     return <CommandCenter />;
+      case 'COACH_STATS':    return <CoachStatsHO />;
       case 'ATHLETE_DETAIL': return <AthleteDeepDive />;
       case 'ASSIGN_MACRO':   return <AssignMacrocycle />;
       case 'NEW_ATHLETE':    return <NewAthlete />;
@@ -259,7 +262,7 @@ function AppInner() {
     }
     if (tab === 'home') navigate(role === 'coach' ? 'COACH_DASH' : 'HOME');
     else if (tab === 'train') navigate('WARMUP');
-    else if (tab === 'stats') navigate('PERFORMANCE');
+    else if (tab === 'stats') navigate(role === 'coach' ? 'COACH_STATS' : 'PERFORMANCE');
     else if (tab === 'profile') navigate('PROFILE');
   };
 
