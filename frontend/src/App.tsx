@@ -28,6 +28,9 @@ import PerformanceDeepDive from './pages/PerformanceDeepDive';
 import SessionSchedule from './pages/SessionSchedule';
 import KnowledgePills from './pages/KnowledgePills';
 import SocialCard from './pages/SocialCard';
+import BaselineAssessment from './pages/BaselineAssessment';
+import VoltaStats from './pages/VoltaStats';
+import LogWodResult from './pages/LogWodResult';
 import VoltaDashboard from './pages/VoltaDashboard';
 import VoltaPreWod from './pages/VoltaPreWod';
 import VoltaWarmup from './pages/VoltaWarmup';
@@ -60,7 +63,7 @@ const NAV_MAP_VOLTA: Record<string, NavTab> = {
   VOLTA_COACH_MACRO: 'stats', VOLTA_COACH_TOOLS: 'stats',
   // Logros slot en coach es Box (inventario)
   VOLTA_COACH_INVENTORY: 'logros',
-  PROGRESSION: 'stats',
+  VOLTA_STATS: 'stats', PROGRESSION: 'stats',
   PERFORMANCE: 'stats', INDEX: 'stats', SCHEDULE: 'stats', PULSE: 'stats', PILLS: 'stats',
   SOCIAL: 'logros',
   PROFILE: 'profile',
@@ -227,6 +230,9 @@ function AppInner() {
         case 'PROFILE':               return <Profile />;
         case 'PERFORMANCE':           return <PerformanceDeepDive />;
         case 'SOCIAL':                return <SocialCard />;
+        case 'BASELINE':              return <BaselineAssessment />;
+        case 'VOLTA_STATS':           return <VoltaStats />;
+        case 'VOLTA_WOD_LOG':         return <LogWodResult />;
         case 'VOLTA_HOME':
         case 'HOME':
         default:
@@ -247,6 +253,7 @@ function AppInner() {
       case 'PULSE':          return <PulseHub />;
       case 'PILLS':          return <KnowledgePills />;
       case 'SOCIAL':         return <SocialCard />;
+      case 'BASELINE':       return <BaselineAssessment />;
       case 'PROFILE':        return <Profile />;
       case 'COACH_DASH':     return <CommandCenter />;
       case 'COACH_STATS':    return <CoachStatsHO />;
@@ -264,8 +271,8 @@ function AppInner() {
     if (product === 'volta') {
       if (tab === 'home') navigate(role === 'coach' ? 'VOLTA_COACH' : 'VOLTA_HOME');
       else if (tab === 'wod') navigate(role === 'coach' ? 'VOLTA_COACH_WOD' : 'VOLTA_PREWOD');
-      // Stats slot: atleta → progresión movs · coach → eval macrociclo
-      else if (tab === 'stats') navigate(role === 'coach' ? 'VOLTA_COACH_MACRO' : 'PROGRESSION');
+      // Stats slot: atleta → volumen + benchmarks (Skills accesible adentro) · coach → eval macrociclo
+      else if (tab === 'stats') navigate(role === 'coach' ? 'VOLTA_COACH_MACRO' : 'VOLTA_STATS');
       // Logros slot: atleta → social card · coach → inventario del box
       else if (tab === 'logros') navigate(role === 'coach' ? 'VOLTA_COACH_INVENTORY' : 'SOCIAL');
       else if (tab === 'profile') navigate('PROFILE');

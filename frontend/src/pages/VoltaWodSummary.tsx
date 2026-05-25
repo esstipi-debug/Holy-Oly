@@ -149,13 +149,22 @@ const VoltaWodSummary: React.FC = () => {
       {/* CTAS */}
       <div style={{ padding: '8px 16px 0', display: 'flex', flexDirection: 'column', gap: 8 }}>
         <button
+          onClick={() => navigate('VOLTA_WOD_LOG')}
+          style={{
+            padding: '14px 0', borderRadius: 14,
+            background: `linear-gradient(135deg, ${C.cyan}, #0070FF)`, color: '#07070F', border: 'none',
+            fontSize: 13, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.04em',
+            cursor: 'pointer', fontFamily: 'inherit', width: '100%',
+            boxShadow: '0 8px 24px rgba(0,229,255,0.35)',
+          }}
+        >Loggear resultado oficial →</button>
+        <button
           onClick={() => navigate('VOLTA_HOME')}
           style={{
             padding: '14px 0', borderRadius: 14,
-            background: C.cyan, color: '#07070F', border: 'none',
-            fontSize: 13, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.04em',
+            background: C.cyan + '22', color: C.cyan, border: `1px solid ${C.cyan}55`,
+            fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.04em',
             cursor: 'pointer', fontFamily: 'inherit', width: '100%',
-            boxShadow: '0 6px 20px rgba(0,229,255,0.25)',
           }}
         >Compartir en el box</button>
         <button

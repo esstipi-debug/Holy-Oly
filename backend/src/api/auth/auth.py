@@ -207,26 +207,33 @@ class RegisterPayload(BaseModel):
 
 @auth_router.post("/register")
 async def register(payload: RegisterPayload):
-    """Crea una nueva cuenta de atleta o coach. Devuelve token + user igual que /login."""
+    """
+    Crea una nueva cuenta. Persiste en Postgres si DATABASE_URL está configurado,
+    falls back a MOCK_USERS in-memory en dev local.
+
+    Devuelve token + user con la misma forma que /login.
+    """
+    from ...db import users_repo
+
     email = payload.email.lower().strip()
-    if email in MOCK_USERS:
+
+    # Conflict check (Postgres + mock cubiertos por find_by_email)
+    existing = await users_repo.find_by_email(email)
+    if existing:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Ya existe una cuenta con ese email",
         )
 
-    user_id = f"{payload.role}_{uuid.uuid4().hex[:12]}"
-    MOCK_USERS[email] = {
-        "id": user_id,
-        "email": email,
-        "name": payload.name.strip(),
-        "hashed_password": get_password_hash(payload.password),
-        "role": payload.role,
-        "product": payload.product,
-        "coach_id": None,
-        "is_active": True,
-    }
+    user = await users_repo.create_user(
+        email=email,
+        name=payload.name.strip(),
+        password_hash=get_password_hash(payload.password),
+        role=payload.role,
+        product=payload.product,
+    )
 
+    user_id = str(user["id"])
     access_token = create_access_token(
         data={"sub": user_id, "email": email, "role": payload.role}
     )
@@ -237,8 +244,10 @@ async def register(payload: RegisterPayload):
         "user": {
             "id": user_id,
             "email": email,
-            "name": payload.name.strip(),
+            "name": user["name"],
             "role": payload.role,
             "product": payload.product,
+            "tier": user.get("tier", "trial"),
+            "trial_ends_at": str(user.get("trial_ends_at")) if user.get("trial_ends_at") else None,
         },
     }
