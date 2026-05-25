@@ -182,6 +182,17 @@ const VoltaStats: React.FC = () => {
 
       {tab === 'benchmarks' && (
         <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <button
+            onClick={() => navigate('VOLTA_WOD_LOG')}
+            className="btn-press"
+            style={{
+              padding: '12px', borderRadius: 12,
+              background: `linear-gradient(135deg, ${C.cyan}, ${C.cyanDim})`,
+              color: '#07070F', fontSize: 12, fontWeight: 900, letterSpacing: '.05em',
+              textTransform: 'uppercase', border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+              boxShadow: `0 8px 22px ${C.cyan}40`,
+            }}
+          >+ Loggear resultado de WOD</button>
           <Section title="Tus benchmarks RX" hint="WODs named · mejor tiempo personal">
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {BENCHMARKS.map(b => (

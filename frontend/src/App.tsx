@@ -30,6 +30,7 @@ import KnowledgePills from './pages/KnowledgePills';
 import SocialCard from './pages/SocialCard';
 import BaselineAssessment from './pages/BaselineAssessment';
 import VoltaStats from './pages/VoltaStats';
+import LogWodResult from './pages/LogWodResult';
 import VoltaDashboard from './pages/VoltaDashboard';
 import VoltaPreWod from './pages/VoltaPreWod';
 import VoltaWarmup from './pages/VoltaWarmup';
@@ -231,6 +232,7 @@ function AppInner() {
         case 'SOCIAL':                return <SocialCard />;
         case 'BASELINE':              return <BaselineAssessment />;
         case 'VOLTA_STATS':           return <VoltaStats />;
+        case 'VOLTA_WOD_LOG':         return <LogWodResult />;
         case 'VOLTA_HOME':
         case 'HOME':
         default:
