@@ -53,7 +53,7 @@ const AthleteDeepDive: React.FC = () => {
 
   const rmList = [
     { lift: 'Arrancada',         rm: `${a.maxes.snatch} kg`,      change: '+2kg', date: '5d' },
-    { lift: 'Dos Tiempos',       rm: `${a.maxes.clean + a.maxes.jerk - a.maxes.clean} kg`, change: '+5kg', date: '2d' },
+    { lift: 'Clean & Jerk',      rm: `${a.maxes.clean + a.maxes.jerk - a.maxes.clean} kg`, change: '+5kg', date: '2d' },
     { lift: 'Cargada',           rm: `${a.maxes.clean} kg`,       change: '+3kg', date: '1w' },
     { lift: 'Sentadilla Atrás',  rm: `${a.maxes.back_squat} kg`,  change: '0kg',  date: '1w' },
     { lift: 'Sentadilla Frontal',rm: `${a.maxes.front_squat} kg`, change: '+1kg', date: '4d' },

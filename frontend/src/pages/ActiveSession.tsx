@@ -48,7 +48,7 @@ const ActiveSession: React.FC = () => {
 
   const exercises: ExerciseDef[] = athlete ? [
     { name: 'Arrancada',          targetSets: 4, targetReps: 2, pct: 0.85, max: athlete.maxes.snatch,       coachNote: 'Mantené el pecho alto en el catch. No te precipites en la subida.', warmupSets: OLYMPIC_RAMPUP },
-    { name: 'Dos Tiempos',        targetSets: 4, targetReps: 2, pct: 0.80, max: athlete.maxes.jerk,         coachNote: 'Dip vertical, dirige los codos rápido. Sin perder el eje.',           warmupSets: OLYMPIC_RAMPUP },
+    { name: 'Clean & Jerk',       targetSets: 4, targetReps: 2, pct: 0.80, max: athlete.maxes.jerk,         coachNote: 'Dip vertical, dirige los codos rápido. Sin perder el eje.',           warmupSets: OLYMPIC_RAMPUP },
     { name: 'Sentadilla Frontal', targetSets: 4, targetReps: 4, pct: 0.75, max: athlete.maxes.front_squat,  coachNote: 'Codos arriba, mantén la barra alta en hombros.',                       warmupSets: ACCESSORY_RAMPUP },
   ] : [];
 
@@ -139,8 +139,22 @@ const ActiveSession: React.FC = () => {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div>
-            <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{current.name}</p>
-            <p style={{ fontSize: 10, color: 'var(--primary)', fontWeight: 800, letterSpacing: '.08em' }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
+              <p style={{ fontSize: 18, fontWeight: 900, color: 'var(--text)', letterSpacing: '-.01em' }}>{current.name}</p>
+              <p style={{
+                fontSize: 15, fontWeight: 900, color: 'var(--primary)',
+                fontVariantNumeric: 'tabular-nums', letterSpacing: '-.01em',
+              }}>
+                {current.targetSets}×{current.targetReps}
+              </p>
+              <span style={{
+                fontSize: 10, fontWeight: 800,
+                padding: '2px 6px', borderRadius: 6,
+                background: 'rgba(245,158,11,0.10)', color: '#F59E0B',
+                border: '1px solid rgba(245,158,11,0.20)',
+              }}>{Math.round(current.pct * 100)}%</span>
+            </div>
+            <p style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.06em', marginTop: 4 }}>
               Bloque {exIdx + 1}/{exercises.length} · Serie {Math.min(setNumber, current.targetSets)}/{current.targetSets}
             </p>
           </div>

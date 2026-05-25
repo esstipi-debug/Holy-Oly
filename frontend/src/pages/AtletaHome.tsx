@@ -78,7 +78,7 @@ const AtletaHome: React.FC = () => {
 
   const sessionExercises = [
     { name: 'Arrancada',         sets: 5, reps: 3, pct: 0.85, max: maxes.snatch },
-    { name: 'Dos Tiempos',       sets: 4, reps: 2, pct: 0.80, max: maxes.jerk },
+    { name: 'Clean & Jerk',      sets: 4, reps: 2, pct: 0.80, max: maxes.jerk },
     { name: 'Sentadilla Frontal',sets: 4, reps: 4, pct: 0.75, max: maxes.front_squat },
   ];
 
