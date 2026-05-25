@@ -1,13 +1,11 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
-import { loginRequest, registerRequest, fetchMe, checkBackendAlive, getGithubAuthUrl, loginWithGithubCode, type AuthUser } from '../lib/api';
+import { loginRequest, registerRequest, fetchMe, checkBackendAlive, type AuthUser } from '../lib/api';
 
 interface AuthContextType {
   user: AuthUser | null;
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string, role: 'atleta' | 'coach', product: 'holy-oly' | 'volta') => Promise<void>;
-  loginWithGithub: () => Promise<void>;
-  loginWithGithubCode: (code: string, state?: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
   backendAlive: boolean | null;
@@ -85,21 +83,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setDemoMode(false);
   }, []);
 
-  const loginWithGithub = useCallback(async () => {
-    const authorizeUrl = await getGithubAuthUrl();
-    window.location.href = authorizeUrl;
-  }, []);
-
-  const loginWithGithubCodeFn = useCallback(async (code: string, state?: string) => {
-    const data = await loginWithGithubCode(code, state);
-    localStorage.setItem('token', data.access_token);
-    localStorage.setItem('user', JSON.stringify(data.user));
-    localStorage.removeItem('demoMode');
-    setToken(data.access_token);
-    setUser(data.user);
-    setDemoMode(false);
-  }, []);
-
   const logout = useCallback(() => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -121,7 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider value={{
       user, token,
-      login, register, loginWithGithub, loginWithGithubCode: loginWithGithubCodeFn,
+      login, register,
       logout,
       isAuthenticated: !!user,
       backendAlive,

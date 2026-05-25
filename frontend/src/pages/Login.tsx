@@ -8,7 +8,7 @@ interface LoginProps {
 }
 
 const Login: React.FC<LoginProps> = ({ onSuccess }) => {
-  const { login, loginWithGithub, enterDemoMode, backendAlive } = useAuth();
+  const { login, enterDemoMode, backendAlive } = useAuth();
   const { navigate } = useNav();
   const { product } = useProduct();
 
@@ -141,21 +141,9 @@ const Login: React.FC<LoginProps> = ({ onSuccess }) => {
           border: '1px solid var(--card-border)',
           fontSize: 12, fontWeight: 700, letterSpacing: '.04em', textTransform: 'uppercase',
           cursor: 'pointer', fontFamily: 'inherit',
-          marginBottom: 12,
-        }}
-      >Crear cuenta nueva</button>
-
-      <button
-        onClick={loginWithGithub}
-        style={{
-          width: '100%', padding: '12px 0', borderRadius: 14,
-          background: 'rgba(255,255,255,0.08)', color: 'var(--text)',
-          border: '1px solid var(--card-border)',
-          fontSize: 12, fontWeight: 700, letterSpacing: '.04em', textTransform: 'uppercase',
-          cursor: 'pointer', fontFamily: 'inherit',
           marginBottom: 18,
         }}
-      >🔗 Entrar con GitHub</button>
+      >Crear cuenta nueva</button>
 
       <div style={{ textAlign: 'center' }}>
         <button

@@ -10,7 +10,6 @@ Used by:
 """
 from typing import Optional, Any
 import os
-import uuid
 import logging
 
 logger = logging.getLogger(__name__)
@@ -85,71 +84,3 @@ async def find_by_id(user_id: str) -> Optional[dict]:
         return dict(row) if row else None
 
 
-async def find_by_github_id(github_id: int) -> Optional[dict]:
-    """Find user by GitHub ID."""
-    pool = await get_pool()
-    if pool is None:
-        from ..api.auth.jwt_utils import MOCK_USERS
-        for u in MOCK_USERS.values():
-            if u.get("github_id") == github_id:
-                return u
-        return None
-
-    async with pool.acquire() as conn:
-        row = await conn.fetchrow(
-            """
-            SELECT id, email, name, password_hash, role, coach_id,
-                   github_id, github_login, product, tier, avatar_url
-            FROM users WHERE github_id = $1
-            """,
-            github_id,
-        )
-        return dict(row) if row else None
-
-
-async def create_github_user(
-    email: str,
-    name: str,
-    github_id: int,
-    github_login: str,
-    avatar_url: Optional[str] = None,
-    role: str = "athlete",
-    product: str = "volta",
-) -> dict:
-    """Create a new user authenticated via GitHub."""
-    pool = await get_pool()
-    if pool is None:
-        from ..api.auth.jwt_utils import MOCK_USERS
-        user_id = f"{role}_{uuid.uuid4().hex[:12]}"
-        user_data = {
-            "id": user_id,
-            "email": email.lower().strip(),
-            "name": name,
-            "hashed_password": None,
-            "role": role,
-            "product": product,
-            "coach_id": None,
-            "is_active": True,
-            "github_id": github_id,
-            "github_login": github_login,
-            "avatar_url": avatar_url,
-        }
-        MOCK_USERS[email.lower().strip()] = user_data
-        return user_data
-
-    async with pool.acquire() as conn:
-        row = await conn.fetchrow(
-            """
-            INSERT INTO users (email, name, role, product, github_id, github_login, avatar_url)
-            VALUES ($1, $2, $3::user_role, $4, $5, $6, $7)
-            RETURNING id, email, name, role, product, github_id, github_login, avatar_url
-            """,
-            email.lower().strip(),
-            name,
-            role,
-            product,
-            github_id,
-            github_login,
-            avatar_url,
-        )
-        return dict(row)
