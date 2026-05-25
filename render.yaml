@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: holy-oly-api
+    name: holy-oly-3
     env: docker
     dockerfilePath: ./backend/Dockerfile
     region: oregon

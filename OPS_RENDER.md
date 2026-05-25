@@ -1,6 +1,6 @@
 # OPS · Resucitar Render Backend
 
-Backend `holy-oly-api.onrender.com` devuelve 404. El código está sano (testeado local
+Backend `holy-oly-3.onrender.com` devuelve 404. El código está sano (testeado local
 con todos los endpoints nuevos). Sigue estos pasos en orden — debería tomar 15-20 min.
 
 ---
@@ -21,7 +21,7 @@ Si esto funciona local pero Render no, la causa es uno de los 4 problemas de aba
 
 ## Diagnóstico en Render Dashboard
 
-### 1. Abrí el servicio `holy-oly-api`
+### 1. Abrí el servicio `holy-oly-3`
 
 **URL:** https://dashboard.render.com/web/srv-XXXXXXXXXX/logs
 
@@ -91,23 +91,23 @@ Cuando esté `Live`, corré desde tu máquina:
 
 ```bash
 # 1. Health
-curl https://holy-oly-api.onrender.com/health
+curl https://holy-oly-3.onrender.com/health
 # Esperado: {"status":"ok","message":"Holy Oly engines + Motor 25 agents running"}
 
 # 2. Register real
-curl -X POST https://holy-oly-api.onrender.com/v1/auth/register \
+curl -X POST https://holy-oly-3.onrender.com/v1/auth/register \
   -H 'Content-Type: application/json' \
   -d '{"email":"vos@gmail.com","password":"holdy123","name":"Esteban","role":"athlete","product":"volta"}'
 # Esperado: {"access_token":"eyJ...","user":{"id":"<uuid>","tier":"trial","trial_ends_at":"..."}}
 
 # 3. Save baseline (con token del paso 2)
 TOKEN="eyJ..."
-curl -X POST https://holy-oly-api.onrender.com/v1/baseline/results \
+curl -X POST https://holy-oly-3.onrender.com/v1/baseline/results \
   -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
   -d '{"test_id":"snatch_1rm","value":80,"unit":"kg"}'
 
 # 4. Get baseline
-curl https://holy-oly-api.onrender.com/v1/baseline/results \
+curl https://holy-oly-3.onrender.com/v1/baseline/results \
   -H "Authorization: Bearer $TOKEN"
 # Esperado: {"snatch_1rm":{"value":80,"unit":"kg","date":"2026-..."}}
 ```
@@ -119,7 +119,7 @@ Si los 4 pasos pasan, el backend está OPERATIVO.
 ## Próximo paso (post-Render-up)
 
 1. Cablear frontend al backend real:
-   - `frontend/src/lib/api.ts` → cambiar baseURL a `https://holy-oly-api.onrender.com`
+   - `frontend/src/lib/api.ts` → cambiar baseURL a `https://holy-oly-3.onrender.com`
    - `Login.tsx` + `Register.tsx` → POST al backend (ya existen los endpoints)
    - `BaselineAssessment.tsx` → reemplazar `localStorage` por `useBaseline()` hook
      que sincronice con `/v1/baseline/results`

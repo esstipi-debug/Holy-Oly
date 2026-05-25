@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL ?? 'https://holy-oly-api.onrender.com';
+const API_URL = import.meta.env.VITE_API_URL ?? 'https://holy-oly-3.onrender.com';
 
 export type AuthUser = {
   id: string;

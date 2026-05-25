@@ -167,7 +167,7 @@ Total ~14h. Cuando consigamos Render up + credenciales, los items A.2 + A.4 son 
 ## 5. Qué necesito de vos (en orden de impacto)
 
 ### CRÍTICO
-1. **Render dashboard** — pegame los logs del último deploy o confirmá status del servicio `holy-oly-api`. Sin esto no hay register/login/persistencia real.
+1. **Render dashboard** — pegame los logs del último deploy o confirmá status del servicio `holy-oly-3`. Sin esto no hay register/login/persistencia real.
 2. **CBU/Alias** real de la cuenta receptora → puedo dejar las pantallas con datos reales, no placeholders.
 
 ### IMPORTANTE
