@@ -155,7 +155,66 @@ def list_plans():
 
 
 # ----------------------------------------------------------------
-# MERCADOPAGO Subscriptions API · helpers
+# MERCADOPAGO Checkout Pro · helper (default · funciona sin card_token)
+# ----------------------------------------------------------------
+# Flow:
+#   1. POST /checkout/preferences con items + back_urls + notification_url
+#   2. MP devuelve init_point (URL al checkout hosted)
+#   3. User paga con tarjeta en mercadopago.cl
+#   4. MP envía webhook con type=payment
+#   5. Backend activa tier=pro
+#
+# Limitación vs Subscriptions: cobro ÚNICO, no recurring. User vuelve cada
+# mes/año manualmente. Para auto-renovación se usa Subscriptions (más abajo)
+# pero requiere CardForm SDK en frontend.
+
+async def create_mp_preference(*, code: str, plan_key: str, plan: dict, user_email: str) -> dict:
+    """
+    Crea una preference de Checkout Pro · cobro único.
+    Devuelve init_point que el frontend abre para checkout.
+    """
+    if not MP_ACCESS_TOKEN:
+        raise HTTPException(503, "MP_ACCESS_TOKEN no configurado en server")
+
+    import httpx
+    body = {
+        "items": [{
+            "title":       f"Holy Oly {plan['label'].replace('·', '-')}",
+            "description": f"Acceso por {plan['days']} días",
+            "quantity":    1,
+            "currency_id": "CLP",
+            "unit_price":  plan["amount"],
+        }],
+        "payer": {"email": user_email},
+        "external_reference": code,
+        "back_urls": {
+            "success": FRONTEND_URL,
+            "failure": FRONTEND_URL,
+            "pending": FRONTEND_URL,
+        },
+        "auto_return": "approved",
+        "notification_url": f"{BACKEND_URL}/v1/payments/webhooks/mercadopago",
+        "statement_descriptor": "HOLY OLY",
+        "metadata": {"plan_key": plan_key, "code": code},
+    }
+    async with httpx.AsyncClient(timeout=15) as client:
+        resp = await client.post(
+            "https://api.mercadopago.com/checkout/preferences",
+            json=body,
+            headers={"Authorization": f"Bearer {MP_ACCESS_TOKEN}"},
+        )
+        if resp.status_code >= 400:
+            raise HTTPException(502, f"MP error {resp.status_code}: {resp.text[:300]}")
+        data = resp.json()
+        return {
+            "preference_id":      data.get("id"),
+            "init_point":         data.get("init_point"),
+            "sandbox_init_point": data.get("sandbox_init_point"),
+        }
+
+
+# ----------------------------------------------------------------
+# MERCADOPAGO Subscriptions API · opt-in (requiere CardForm en frontend)
 # ----------------------------------------------------------------
 # Flow:
 #   1. (Una vez por plan) POST /preapproval_plan → guardar plan_id
@@ -299,18 +358,27 @@ async def create_intent(payload: IntentCreate, user: User = Depends(verify_token
     }
 
     if PAYMENT_PROVIDER == "mercadopago":
-        # Fetch user email para asociar a la preapproval
+        # Fetch user email
         u = await users_repo.find_by_id(user.id) if pool else None
         user_email = (u or {}).get("email") or f"{user.id}@holyoly.app"
+
+        # Default: Checkout Pro (cobro único · funciona sin CardForm)
+        # Opt-in: Subscriptions (auto-recurring · requiere SDK MP.js + CardForm en frontend)
+        use_subscriptions = os.getenv("MP_USE_SUBSCRIPTIONS", "false").lower() == "true"
         try:
-            mp = await create_mp_preapproval(
-                code=code, plan_key=payload.plan, plan=plan_with_id, user_email=user_email,
-            )
+            if use_subscriptions:
+                mp = await create_mp_preapproval(
+                    code=code, plan_key=payload.plan, plan=plan_with_id, user_email=user_email,
+                )
+            else:
+                mp = await create_mp_preference(
+                    code=code, plan_key=payload.plan, plan=plan_with_id, user_email=user_email,
+                )
         except HTTPException:
             raise
         except Exception as e:
             raise HTTPException(502, f"MP integration error: {e}")
-        return {**base, **mp}
+        return {**base, **mp, "mode": "subscriptions" if use_subscriptions else "checkout"}
 
     # Legacy: transferencia bancaria
     return {
