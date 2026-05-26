@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNav } from '../context/NavigationContext';
 import { useAthlete } from '../context/AthleteContext';
 import WiseAssistant from '../components/WiseAssistant';
+import AthleteTrainingView from '../components/AthleteTrainingView';
 
 const C = {
   bg: '#07070F',
@@ -66,6 +67,15 @@ const INVENTORY = [
 const VoltaCoachDash: React.FC = () => {
   const { navigate } = useNav();
   const { allAthletes, selectAthlete } = useAthlete();
+
+  // Atleta seleccionado para la vista inline de entrenamiento.
+  // Default = primer atleta del roster real. El coach puede cambiarlo con el selector.
+  const [trainingViewId, setTrainingViewId] = useState<string | null>(
+    allAthletes.length > 0 ? allAthletes[0].id : null,
+  );
+  const trainingViewAthlete = trainingViewId
+    ? allAthletes.find(a => a.id === trainingViewId) ?? null
+    : null;
 
   const openAthlete = (mockIdx: number) => {
     const real = allAthletes[mockIdx];
@@ -267,6 +277,51 @@ const VoltaCoachDash: React.FC = () => {
             );
           })}
         </div>
+
+        {/* ENTRENAMIENTO DEL ATLETA · selector + vista inline */}
+        {trainingViewAthlete && (
+          <>
+            <Sec
+              right={
+                <select
+                  value={trainingViewId ?? ''}
+                  onChange={(e) => setTrainingViewId(e.target.value || null)}
+                  style={{
+                    background: C.surface2,
+                    color: C.text,
+                    border: `1px solid ${C.line}`,
+                    borderRadius: 10,
+                    padding: '4px 8px',
+                    fontSize: 11,
+                    fontWeight: 700,
+                    fontFamily: 'inherit',
+                    cursor: 'pointer',
+                    maxWidth: 160,
+                  }}
+                >
+                  {allAthletes.map((a) => (
+                    <option key={a.id} value={a.id} style={{ background: C.surface2 }}>
+                      {a.name}
+                    </option>
+                  ))}
+                </select>
+              }
+            >
+              Entrenamiento del atleta
+            </Sec>
+            <div
+              style={{
+                background: C.surface,
+                border: `1px solid ${C.line}`,
+                borderRadius: 16,
+                padding: 14,
+                marginBottom: 18,
+              }}
+            >
+              <AthleteTrainingView athlete={trainingViewAthlete} />
+            </div>
+          </>
+        )}
 
         {/* INVENTARIO RESUMEN */}
         <Sec right={<button onClick={() => navigate('VOLTA_COACH_INVENTORY')} style={{ fontSize: 10, color: C.cyan, fontWeight: 700, background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>Ver todo →</button>}>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNav } from '../context/NavigationContext';
 import { useAthlete } from '../context/AthleteContext';
 import WiseAssistant from '../components/WiseAssistant';
@@ -6,6 +6,8 @@ import QuestsSection, { type QuestProgress } from '../components/QuestsSection';
 import BottomSheet from '../components/BottomSheet';
 import MetricHistoryModal, { type MetricType } from '../components/MetricHistoryModal';
 import { loadResults, overallProgress, personalizationTier } from '../data/baseline';
+import { getPendingForToday, setActiveSlot } from '../lib/plannedSessions';
+import type { PlannedSession, TrainingSlot } from '../types/training';
 
 const C = {
   bg: '#07070F',
@@ -562,6 +564,14 @@ const VoltaDashboard: React.FC = () => {
           </div>
         </button>
 
+        {/* DOBLE SESIÓN · si el coach asignó AM + PM hoy (preWod 1 + preWod 2) */}
+        {athlete && (
+          <VoltaDoubleSessionCards
+            athleteId={athlete.id}
+            onStart={() => navigate('VOLTA_PREWOD')}
+          />
+        )}
+
         {/* WOD DE HOY */}
         <Sec style={{ marginBottom: 8 }}>WOD de hoy · Semana {semana} · Día {dia}</Sec>
         <div style={{
@@ -748,6 +758,138 @@ const VoltaDashboard: React.FC = () => {
       )}
 
       <WiseAssistant context="Volta Atleta · Dashboard" />
+    </div>
+  );
+};
+
+// ──────────────────────────────────────────────────────────────────
+// VoltaDoubleSessionCards
+// Equivalente Volta de DoubleSessionCards (AtletaHome). Reusa los mismos
+// helpers product-agnostic de lib/plannedSessions. Si el coach asignó
+// 2 sesiones (AM + PM) → 2 cards stacked con tema cyan Volta · tap setea
+// active slot y navega a VOLTA_PREWOD. Si asignó 1 (full) → 1 card.
+// Si no hay nada → no renderiza.
+// ──────────────────────────────────────────────────────────────────
+
+interface VoltaDoubleSessionCardsProps {
+  athleteId: string;
+  onStart: () => void;
+}
+
+const VOLTA_SLOT_LABEL: Record<TrainingSlot, string> = {
+  am: 'AM · PreWOD 1',
+  pm: 'PM · PreWOD 2',
+  full: 'WOD del día',
+};
+
+const VOLTA_FOCUS_EMOJI: Record<string, string> = {
+  metcon: '🔥',
+  strength: '💪',
+  technique: '🎯',
+  olympic: '🏋️',
+  accessory: '🧰',
+};
+
+const VoltaDoubleSessionCards: React.FC<VoltaDoubleSessionCardsProps> = ({ athleteId, onStart }) => {
+  const [pending, setPending] = useState<PlannedSession[]>([]);
+
+  const refresh = useMemo(() => () => setPending(getPendingForToday(athleteId)), [athleteId]);
+
+  useEffect(() => {
+    refresh();
+    const onStorage = () => refresh();
+    window.addEventListener('storage', onStorage);
+    // Poll suave porque storage no dispara en mismo tab
+    const id = window.setInterval(refresh, 1500);
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.clearInterval(id);
+    };
+  }, [refresh]);
+
+  if (pending.length === 0) return null;
+
+  const handlePick = (slot: TrainingSlot) => {
+    setActiveSlot(slot);
+    onStart();
+  };
+
+  const isDouble = pending.length === 2 && pending.some(s => s.slot === 'am') && pending.some(s => s.slot === 'pm');
+
+  return (
+    <div style={{ marginBottom: 14 }}>
+      <p style={{
+        fontSize: 10, fontWeight: 700, letterSpacing: '.08em',
+        textTransform: 'uppercase', color: C.muted, marginBottom: 8,
+      }}>
+        {isDouble ? 'Doble sesión · hoy' : 'Sesión asignada · hoy'}
+      </p>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {pending
+          .slice()
+          .sort((a, b) => (a.slot === 'am' ? -1 : b.slot === 'am' ? 1 : 0))
+          .map(s => {
+            const avgPct = s.exercises.reduce((acc, e) => acc + e.pct, 0) / Math.max(1, s.exercises.length);
+            const statusColor =
+              s.status === 'completed' ? C.green :
+              s.status === 'in_progress' ? C.cyan :
+              C.muted;
+            const statusLabel =
+              s.status === 'completed' ? '✓ Completada' :
+              s.status === 'in_progress' ? '🏃 En curso' :
+              '⏸ Pendiente';
+            const accent = s.slot === 'am' ? C.cyan : s.slot === 'pm' ? '#A88BFF' : C.cyan;
+            return (
+              <button
+                key={`${s.date}-${s.slot}`}
+                onClick={() => handlePick(s.slot)}
+                className="btn-press"
+                style={{
+                  width: '100%', textAlign: 'left', cursor: 'pointer', fontFamily: 'inherit',
+                  background: C.surface,
+                  border: `1px solid ${accent}55`,
+                  borderRadius: 16, padding: '12px 14px',
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  color: C.text,
+                }}
+              >
+                <div style={{
+                  width: 44, height: 44, borderRadius: 12,
+                  background: `${accent}1A`,
+                  border: `1px solid ${accent}44`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 20, flexShrink: 0,
+                }}>
+                  {VOLTA_FOCUS_EMOJI[s.focus] ?? '🔥'}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                    <p style={{ fontSize: 13, fontWeight: 900, color: C.text, letterSpacing: '-.01em', margin: 0 }}>
+                      {VOLTA_SLOT_LABEL[s.slot]}
+                    </p>
+                    <span style={{
+                      fontSize: 9, color: C.muted, fontWeight: 700,
+                      letterSpacing: '.06em', textTransform: 'uppercase',
+                    }}>
+                      {s.focus}
+                    </span>
+                  </div>
+                  <p style={{
+                    fontSize: 11, color: C.muted, margin: '3px 0 0',
+                    fontVariantNumeric: 'tabular-nums',
+                  }}>
+                    {s.exercises.length} ejerc · ~{Math.round(avgPct * 100)}% intensidad
+                  </p>
+                  <p style={{ fontSize: 10, fontWeight: 700, color: statusColor, margin: '4px 0 0' }}>
+                    {statusLabel}
+                  </p>
+                </div>
+                <span style={{ fontSize: 16, color: accent, fontWeight: 900 }}>→</span>
+              </button>
+            );
+          })}
+      </div>
     </div>
   );
 };
