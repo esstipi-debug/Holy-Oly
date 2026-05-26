@@ -200,6 +200,30 @@ const AtletaHome: React.FC = () => {
         )}
       </div>
 
+      {/* CTA Leaderboard · entry point del loop viral desde el home (no solo desde stats) */}
+      <div style={{ padding: '0 20px 16px' }}>
+        <button
+          onClick={() => navigate('LEADERBOARD')}
+          className="btn-press"
+          style={{
+            width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '12px 14px', borderRadius: 14,
+            background: 'linear-gradient(135deg, rgba(245,197,24,0.10) 0%, rgba(245,197,24,0.02) 100%)',
+            border: '1px solid rgba(245,197,24,0.30)',
+            color: 'var(--text)', cursor: 'pointer', fontFamily: 'inherit',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 18 }}>🏆</span>
+            <div style={{ textAlign: 'left' }}>
+              <p style={{ fontSize: 12, fontWeight: 900, color: 'var(--text)', margin: 0 }}>Top 10 del club</p>
+              <p style={{ fontSize: 10, color: 'var(--text-secondary)', margin: 0, marginTop: 2 }}>Ver tu ranking semanal</p>
+            </div>
+          </div>
+          <span style={{ fontSize: 14, color: '#F5C518', fontWeight: 900 }}>→</span>
+        </button>
+      </div>
+
       {/* WISE SCORE — surfacing del puntaje "smart trainer" del engine */}
       {stress && (
         <div style={{ padding: '0 20px 18px' }}>
