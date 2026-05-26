@@ -19,6 +19,13 @@ const Login: React.FC<LoginProps> = ({ onSuccess }) => {
 
   const accent = product === 'volta' ? '#00E5FF' : '#22C55E';
 
+  // Gate del modo demo · solo visible si la URL trajo `?demo=1`
+  // (persistido por main.tsx en localStorage al boot)
+  const isDemoModeAllowed = (() => {
+    try { return localStorage.getItem('app:demo_mode') === '1'; }
+    catch { return false; }
+  })();
+
   const handleSubmit = async () => {
     if (!email || !password) return;
     setError('');
@@ -145,18 +152,20 @@ const Login: React.FC<LoginProps> = ({ onSuccess }) => {
         }}
       >Crear cuenta nueva</button>
 
-      <div style={{ textAlign: 'center' }}>
-        <button
-          onClick={() => { enterDemoMode(); onSuccess(); }}
-          style={{
-            fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600,
-            background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: 'inherit',
-            textDecoration: 'underline',
-          }}
-        >
-          Entrar en modo Demo (sin backend)
-        </button>
-      </div>
+      {isDemoModeAllowed && (
+        <div style={{ textAlign: 'center' }}>
+          <button
+            onClick={() => { enterDemoMode(); onSuccess(); }}
+            style={{
+              fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600,
+              background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+              textDecoration: 'underline',
+            }}
+          >
+            Entrar en modo Demo (sin backend)
+          </button>
+        </div>
+      )}
 
       <p style={{ textAlign: 'center', fontSize: 9, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.18em', textTransform: 'uppercase', marginTop: 24 }}>
         v1.0.0-alpha

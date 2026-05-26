@@ -1,8 +1,10 @@
-from fastapi import HTTPException, Security, Depends, status
+from fastapi import HTTPException, Security, Depends, status, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer, OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional, List, Literal
 import uuid
+import time
+from collections import defaultdict
 from .jwt_utils import (
     decode_token, authenticate_user, create_access_token,
     get_user, User, TokenData, MOCK_USERS, get_password_hash
@@ -11,6 +13,22 @@ import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 from context import current_user_id_var
+
+# Rate limit per-IP for /v1/auth/register · in-memory dict (single-instance OK,
+# para multi-instance migrar a Redis). Configurable vía REGISTER_RATE_LIMIT_PER_HOUR.
+_REGISTER_IPS: dict[str, list[float]] = defaultdict(list)
+_REGISTER_RATE_LIMIT_PER_HOUR = int(os.getenv("REGISTER_RATE_LIMIT_PER_HOUR", "5"))
+
+
+def _check_register_rate_limit(ip: str) -> Optional[str]:
+    now = time.time()
+    hist = _REGISTER_IPS[ip]
+    cutoff = now - 3600
+    hist[:] = [t for t in hist if t > cutoff]
+    if len(hist) >= _REGISTER_RATE_LIMIT_PER_HOUR:
+        return f"Demasiados registros desde tu IP. Probá nuevamente en 1 hora."
+    hist.append(now)
+    return None
 
 # Esquemas de seguridad
 security = HTTPBearer()
@@ -267,7 +285,7 @@ class RegisterPayload(BaseModel):
 
 
 @auth_router.post("/register")
-async def register(payload: RegisterPayload):
+async def register(payload: RegisterPayload, request: Request):
     """
     Crea una nueva cuenta. Persiste en Postgres si DATABASE_URL está configurado,
     falls back a MOCK_USERS in-memory en dev local.
@@ -275,6 +293,14 @@ async def register(payload: RegisterPayload):
     Devuelve token + user con la misma forma que /login.
     """
     from ...db import users_repo
+
+    # Rate limit per-IP · evita bot registration flood
+    client_ip = request.headers.get("x-forwarded-for", "").split(",")[0].strip() or (
+        request.client.host if request.client else "unknown"
+    )
+    err = _check_register_rate_limit(client_ip)
+    if err:
+        raise HTTPException(status_code=429, detail=err)
 
     email = payload.email.lower().strip()
 

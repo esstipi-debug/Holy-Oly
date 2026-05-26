@@ -47,7 +47,23 @@ import VoltaCoachWod from './pages/VoltaCoachWod';
 import VoltaCoachTools from './pages/VoltaCoachTools';
 import CoachMacroView from './pages/CoachMacroView';
 import MovementProgression from './pages/MovementProgression';
+import Landing from './pages/Landing';
 import type { View } from './context/NavigationContext';
+
+/**
+ * Deep-link helpers · leen los flags `?p=` y `?demo=1` que main.tsx ya
+ * persistió en localStorage al boot. Recomputamos sobre `window.location`
+ * para reflejar cambios sin reload (aunque hoy navegamos con redirect).
+ */
+function getDeepLinkProduct(): 'ho' | 'volta' | null {
+  if (typeof window === 'undefined') return null;
+  const p = new URLSearchParams(window.location.search).get('p');
+  return p === 'ho' || p === 'volta' ? p : null;
+}
+function isDemoModeAllowed(): boolean {
+  try { return localStorage.getItem('app:demo_mode') === '1'; }
+  catch { return false; }
+}
 
 const NAV_MAP_HO: Record<string, NavTab> = {
   HOME: 'home',
@@ -235,8 +251,20 @@ function AppInner() {
   // Vistas fullscreen ceremoniales: ocultan nav inferior + switcher para experiencia inmersiva
   const isImmersive = currentView === 'BELT_CEREMONY';
 
+  // Switcher HO/VOLTA · oculto cuando el usuario entró por deep-link (?p=ho|volta)
+  // para que la experiencia sea estanca por producto.
+  // En modo demo (?demo=1) lo mostramos siempre · útil para QA.
+  const cameFromDeepLink = !!getDeepLinkProduct();
+  const demoMode = isDemoModeAllowed();
+  const showSwitcher = demoMode || !cameFromDeepLink;
+
   const renderView = () => {
     // PUBLIC views (sin auth)
+    // Landing · cuando no autenticado y no vino por deep-link `?p=`,
+    // mostramos el selector de producto en vez del Login directo.
+    if (currentView === 'LOGIN' && !isAuthenticated && !getDeepLinkProduct()) {
+      return <Landing />;
+    }
     if (currentView === 'LOGIN') {
       return <Login onSuccess={() => {
         const last = readLastView(product, role);
@@ -348,7 +376,7 @@ function AppInner() {
         showBack={showBack && !isPublic && !isImmersive}
         hideNav={isPublic || isImmersive}
       >
-        {!isPublic && !isImmersive && <ProductRoleSwitcher />}
+        {!isPublic && !isImmersive && showSwitcher && <ProductRoleSwitcher />}
         {renderView()}
       </PhoneLayout>
 

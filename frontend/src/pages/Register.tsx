@@ -2,13 +2,11 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNav } from '../context/NavigationContext';
 import { useProduct } from '../context/ProductContext';
-import { useRole } from '../context/RoleContext';
 
 const Register: React.FC = () => {
   const { register } = useAuth();
   const { navigate } = useNav();
   const { product, setProduct } = useProduct();
-  const { role, setRole } = useRole();
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -35,10 +33,9 @@ const Register: React.FC = () => {
     }
     setLoading(true);
     try {
-      await register(email, password, name, role, product);
-      navigate(role === 'coach'
-        ? (product === 'volta' ? 'VOLTA_COACH' : 'COACH_DASH')
-        : (product === 'volta' ? 'VOLTA_HOME' : 'ONBOARDING'));
+      // Role siempre atleta · backend ya no acepta role en payload
+      await register(email, password, name, 'atleta', product);
+      navigate(product === 'volta' ? 'VOLTA_HOME' : 'ONBOARDING');
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Error al registrarte');
     } finally {
@@ -65,16 +62,16 @@ const Register: React.FC = () => {
           {product === 'volta' ? 'VOLTA' : 'HOLY OLY'}
         </h1>
         <p style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', marginTop: 4 }}>
-          Crear cuenta
+          Crear cuenta de atleta
         </p>
       </div>
 
-      {/* PRODUCT + ROLE SELECTORS */}
+      {/* PRODUCT SELECTOR */}
       <div style={{ marginBottom: 18 }}>
         <p style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 8 }}>
           Plataforma
         </p>
-        <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+        <div style={{ display: 'flex', gap: 8 }}>
           {(['holy-oly', 'volta'] as const).map(p => (
             <button
               key={p}
@@ -90,26 +87,6 @@ const Register: React.FC = () => {
                 cursor: 'pointer', fontFamily: 'inherit',
               }}
             >{p === 'volta' ? 'VOLTA · CrossFit' : 'HOLY OLY · Halterofilia'}</button>
-          ))}
-        </div>
-
-        <p style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 8 }}>
-          Soy
-        </p>
-        <div style={{ display: 'flex', gap: 8 }}>
-          {(['atleta', 'coach'] as const).map(r => (
-            <button
-              key={r}
-              onClick={() => setRole(r)}
-              style={{
-                flex: 1, padding: '10px 0', borderRadius: 12,
-                background: role === r ? accent : 'var(--surface)',
-                color: role === r ? '#07070F' : 'var(--text-secondary)',
-                border: `1px solid ${role === r ? accent : 'var(--card-border)'}`,
-                fontSize: 11, fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase',
-                cursor: 'pointer', fontFamily: 'inherit',
-              }}
-            >{r === 'atleta' ? 'Atleta' : 'Coach'}</button>
           ))}
         </div>
       </div>
@@ -178,6 +155,21 @@ const Register: React.FC = () => {
         >
           ¿Ya tenés cuenta? <strong style={{ color: accent }}>Iniciar sesión</strong>
         </button>
+      </div>
+
+      {/* FOOTER · coach access */}
+      <div style={{
+        textAlign: 'center', marginTop: 24, padding: '14px 16px',
+        background: 'var(--surface)', border: '1px solid var(--card-border)',
+        borderRadius: 12,
+      }}>
+        <p style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600, lineHeight: 1.5 }}>
+          Si sos coach o entrenador, contactanos para acceso especial ·{' '}
+          <a
+            href="mailto:admin@holyoly.app"
+            style={{ color: accent, fontWeight: 700, textDecoration: 'none' }}
+          >admin@holyoly.app</a>
+        </p>
       </div>
     </div>
   );

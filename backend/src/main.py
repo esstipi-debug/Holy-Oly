@@ -24,6 +24,7 @@ from .rag.router import router as rag_router
 from .rag.feedback import router as rag_feedback_router
 from .coach.wise_router import router as wise_router
 from .api.middleware import SecurityLoggingMiddleware, RateLimitMiddleware
+from .api.security_headers import SecurityHeadersMiddleware
 from .agents.response_agent.router import router as response_router, set_handlers
 from .agents.router import router as agents_router
 from .agents.response_agent.email_handler import EmailInboundHandler
@@ -139,6 +140,10 @@ app.add_middleware(
 )
 
 app.add_middleware(SecurityLoggingMiddleware)
+
+# Security headers (HSTS, X-Frame, etc) · agregado ANTES de CORS por orden de wiring.
+# NO incluye CSP (rompería Swagger/Redoc). Usa setdefault → no pisa handlers explícitos.
+app.add_middleware(SecurityHeadersMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
