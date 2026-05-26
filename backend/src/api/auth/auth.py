@@ -17,34 +17,56 @@ security = HTTPBearer()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/v1/auth/login")
 
 async def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)) -> User:
-    """Verifica el token JWT y retorna el usuario autenticado."""
+    """Verifica el token JWT y retorna el usuario autenticado.
+
+    Busca primero en Postgres (vía users_repo) si hay DB pool configurado.
+    Fallback a MOCK_USERS (in-memory, dev).
+    """
     token = credentials.credentials
     token_data = decode_token(token)
-    
+
     if token_data is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token inválido o expirado",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
-    user = get_user(token_data.user_id)
+
+    # 1. Intentar Postgres (UUID válido)
+    user: Optional[User] = None
+    try:
+        from ...db import users_repo
+        row = await users_repo.find_by_id(token_data.user_id)
+        if row:
+            user = User(
+                id=str(row["id"]),
+                email=row["email"],
+                role=row.get("role", "athlete"),
+                coach_id=str(row["coach_id"]) if row.get("coach_id") else None,
+                is_active=row.get("is_active", True),
+            )
+    except Exception:
+        # Si find_by_id falla (ej. ID no es UUID válido en Postgres), fallback
+        user = None
+
+    # 2. Fallback a MOCK_USERS
+    if user is None:
+        user = get_user(token_data.user_id)
+
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Usuario no encontrado",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     if not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Usuario desactivado"
         )
-    
-    # Establecemos el ID del usuario en el contexto para RLS
+
     current_user_id_var.set(user.id)
-    
     return user
 
 async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
