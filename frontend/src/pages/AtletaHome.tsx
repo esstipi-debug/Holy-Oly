@@ -468,33 +468,65 @@ const AtletaHome: React.FC = () => {
         </div>
       </div>
 
-      {/* ESTA SEMANA */}
+      {/* ESTA SEMANA · tappable → HO_STATS para ver volumen + IMR + zona en detalle */}
       <div style={{ padding: '0 20px 24px' }}>
-        <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: 10 }}>
-          Esta semana
-        </p>
-        <div style={{
-          background: 'var(--surface)', border: '1px solid var(--card-border)',
-          borderRadius: 18, padding: '16px 18px',
-          display: 'flex', justifyContent: 'space-between',
-        }}>
-          <div>
-            <p style={{ fontSize: 24, fontWeight: 900, color: 'var(--text)', letterSpacing: '-.03em', lineHeight: 1 }}>{sesiones}</p>
-            <p style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 4, fontWeight: 600 }}>Sesiones</p>
-          </div>
-          <div style={{ width: 1, background: 'var(--card-border)' }} />
-          <div>
-            <p style={{ fontSize: 24, fontWeight: 900, color: '#F59E0B', letterSpacing: '-.03em', lineHeight: 1 }}>
-              {tonelaje.toFixed(1)}<span style={{ fontSize: 13, color: 'var(--text-secondary)', marginLeft: 2 }}>t</span>
-            </p>
-            <p style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 4, fontWeight: 600 }}>Volumen</p>
-          </div>
-          <div style={{ width: 1, background: 'var(--card-border)' }} />
-          <div>
-            <p style={{ fontSize: 24, fontWeight: 900, color: 'var(--primary)', letterSpacing: '-.03em', lineHeight: 1 }}>+{sesiones * 250}</p>
-            <p style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 4, fontWeight: 600 }}>XP</p>
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+          <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
+            Esta semana
+          </p>
+          <button
+            onClick={() => navigate('HO_STATS')}
+            className="btn-press"
+            style={{
+              fontSize: 10, fontWeight: 800, color: '#F59E0B', letterSpacing: '.06em',
+              background: 'rgba(245,158,11,0.10)', border: '1px solid rgba(245,158,11,0.35)',
+              borderRadius: 16, padding: '4px 10px',
+              cursor: 'pointer', fontFamily: 'inherit', textTransform: 'uppercase',
+            }}
+          >Ver detalle →</button>
         </div>
+        <button
+          onClick={() => navigate('HO_STATS')}
+          className="btn-press"
+          style={{
+            width: '100%',
+            background: 'var(--surface)', border: '1px solid var(--card-border)',
+            borderRadius: 18, padding: '16px 18px',
+            display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', alignItems: 'center', gap: 8,
+            cursor: 'pointer', fontFamily: 'inherit',
+          }}
+        >
+          <div style={{ textAlign: 'left' }}>
+            <p style={{ fontSize: 22, fontWeight: 900, color: 'var(--text)', letterSpacing: '-.03em', lineHeight: 1, fontStyle: 'italic' }}>{sesiones}</p>
+            <p style={{ fontSize: 9, color: 'var(--text-secondary)', marginTop: 4, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase' }}>Sesiones</p>
+          </div>
+          <div style={{ textAlign: 'left', borderLeft: '1px solid var(--card-border)', paddingLeft: 8 }}>
+            <p style={{ fontSize: 22, fontWeight: 900, color: '#F59E0B', letterSpacing: '-.03em', lineHeight: 1, fontStyle: 'italic' }}>
+              {tonelaje.toFixed(1)}<span style={{ fontSize: 11, color: 'var(--text-secondary)', marginLeft: 2, fontStyle: 'normal' }}>t</span>
+            </p>
+            <p style={{ fontSize: 9, color: 'var(--text-secondary)', marginTop: 4, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase' }}>Volumen</p>
+          </div>
+          <div style={{ textAlign: 'left', borderLeft: '1px solid var(--card-border)', paddingLeft: 8 }}>
+            {(() => {
+              const rpes = completedSessions.map(s => s.rpe_reported).filter(r => r > 0);
+              const avgRpe = rpes.length > 0 ? rpes.reduce((a,b)=>a+b,0)/rpes.length : 0;
+              const imr = avgRpe >= 9 ? 88 : avgRpe >= 8 ? 80 : avgRpe >= 7 ? 72 : avgRpe >= 6 ? 65 : 0;
+              const imrColor = imr >= 85 ? '#EF4444' : imr >= 75 ? '#F59E0B' : imr > 0 ? '#22C55E' : 'var(--text-secondary)';
+              return (
+                <>
+                  <p style={{ fontSize: 22, fontWeight: 900, color: imrColor, letterSpacing: '-.03em', lineHeight: 1, fontStyle: 'italic' }}>
+                    {imr || '—'}<span style={{ fontSize: 11, color: 'var(--text-secondary)', marginLeft: 1, fontStyle: 'normal' }}>%</span>
+                  </p>
+                  <p style={{ fontSize: 9, color: 'var(--text-secondary)', marginTop: 4, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase' }}>IMR · 1RM</p>
+                </>
+              );
+            })()}
+          </div>
+          <div style={{ textAlign: 'left', borderLeft: '1px solid var(--card-border)', paddingLeft: 8 }}>
+            <p style={{ fontSize: 22, fontWeight: 900, color: 'var(--primary)', letterSpacing: '-.03em', lineHeight: 1, fontStyle: 'italic' }}>+{sesiones * 250}</p>
+            <p style={{ fontSize: 9, color: 'var(--text-secondary)', marginTop: 4, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase' }}>XP</p>
+          </div>
+        </button>
       </div>
 
       <WiseAssistant context="Holy Oly · Dashboard Atleta" />
