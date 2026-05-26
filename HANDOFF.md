@@ -1,7 +1,7 @@
 # HANDOFF · Holy Oly + Volta
 
 > Documento maestro para arrancar un nuevo chat con contexto completo.
-> Última actualización: 2026-05-26 (sesión Opus 4.7 · 32 commits) · cerrada en commit `bf92652`+.
+> Última actualización: 2026-05-26 (sesión Opus 4.7 · 42 commits) · cerrada en commit `337fe5c`.
 
 ---
 
