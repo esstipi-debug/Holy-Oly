@@ -28,6 +28,7 @@ MIGRATION_FILES = [
     "003_wise_score.sql",
     "004_rag_self_healing.sql",
     "005_github_oauth.sql",
+    "006_wod_results.sql",
 ]
 
 

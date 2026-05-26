@@ -4,6 +4,23 @@ import {
   BENCHMARKS, saveResult, detectPR, packRoundsReps,
   type WodResult, type WodScale, type WodScoreType,
 } from '../data/wodResults';
+import {
+  wodResults as wodResultsApi,
+  type WodResultScoreType as BackendScoreType,
+  type WodResultRxOrScaled as BackendScale,
+} from '../lib/api';
+
+/** Map frontend granular score types → backend's 4 canonical types. */
+function mapScoreTypeToBackend(t: WodScoreType): BackendScoreType {
+  if (t === 'max_load') return 'weight';
+  if (t === 'calories') return 'reps';   // calorías se contabilizan como reps en backend
+  return t;                              // time | rounds_reps | reps
+}
+
+/** Map frontend escala (Rx+/Rx/Scaled/Beginner) → backend (rx|scaled). */
+function mapScaleToBackend(s: WodScale): BackendScale {
+  return s === 'Rx+' || s === 'Rx' ? 'rx' : 'scaled';
+}
 
 /**
  * LogWodResult · pantalla para loggear el resultado de un WOD post-sesión.
@@ -55,7 +72,7 @@ const LogWodResult: React.FC = () => {
     return parseFloat(singleNum || '0') > 0;
   })();
 
-  const handleSave = () => {
+  const handleSave = async () => {
     let scoreValue = 0;
     let scoreDisplay = '';
 
@@ -87,16 +104,36 @@ const LogWodResult: React.FC = () => {
       performedAt: new Date().toISOString(),
     };
 
+    // 1. Persistencia local (instantánea, offline-friendly)
     saveResult(result);
-    const pr = detectPR(result);
+    const localPR = detectPR(result);
 
-    if (pr.isPR && mode === 'benchmark') {
+    // 2. POST al backend (no bloqueante para UX — si falla, seguimos con detección local).
+    //    Si el backend responde con is_pr autoritativo, lo preferimos.
+    let backendIsPR: boolean | null = null;
+    try {
+      const saved = await wodResultsApi.create({
+        wod_name: wodName,
+        rx_or_scaled: mapScaleToBackend(scale),
+        score_type: mapScoreTypeToBackend(effectiveScoreType),
+        score_value: scoreValue,
+        notes: notes.trim() || undefined,
+      });
+      backendIsPR = saved.is_pr;
+    } catch (err) {
+      // Falla silenciosa: el resultado quedó en localStorage; el sync puede reintentarse.
+      console.warn('[LogWodResult] backend sync falló, fallback a detección local', err);
+    }
+
+    const isPR = backendIsPR ?? localPR.isPR;
+
+    if (isPR && mode === 'benchmark') {
       // Pre-cargar celebration de tipo wod_benchmark para auto-trigger
       localStorage.setItem('social:preferred_celebration', 'wod_fran'); // genérico — celebrations.ts ya tiene wod_fran
       localStorage.setItem('social:preferred_variant', 'stadium');
-      setFeedback(`🔥 PR · ${pr.deltaDisplay ?? ''} · llevándote a compartir...`);
+      setFeedback(`🔥 PR · ${localPR.deltaDisplay ?? ''} · llevándote a compartir...`);
       setTimeout(() => navigate('SOCIAL'), 1400);
-    } else if (pr.isPR) {
+    } else if (isPR) {
       setFeedback(`✓ Primer registro guardado`);
       setTimeout(() => back(), 1200);
     } else {
