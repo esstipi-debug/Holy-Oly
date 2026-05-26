@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNav } from '../context/NavigationContext';
 import { useAthlete } from '../context/AthleteContext';
 import Chart from '../components/social/Chart';
+import Heatmap365 from '../components/Heatmap365';
 
 /**
  * VoltaStats · pantalla de números del atleta CrossFit.
@@ -201,6 +202,9 @@ const VoltaStats: React.FC = () => {
               color={C.cyan} width={320} height={50} scheme="dark"
             />
           </Section>
+
+          {/* Heatmap 365 anual */}
+          <Heatmap365 sessions={athlete?.sessions_last_7 ?? []} />
 
         </div>
       )}
