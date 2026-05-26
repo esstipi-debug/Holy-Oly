@@ -1,7 +1,7 @@
 # HANDOFF · Holy Oly + Volta
 
 > Documento maestro para arrancar un nuevo chat con contexto completo.
-> Última actualización: 2026-05-26 (sesión Opus 4.7 · larga) · cerrada en commit `be1b7df`+.
+> Última actualización: 2026-05-26 (sesión Opus 4.7 · maratónica) · cerrada en commit `28a1995`+.
 
 ---
 
@@ -83,19 +83,31 @@
 - ~~Doble sesión AM/PM · coach asigna + atleta ve cards + SessionSlotBadge~~ ✅ commit `9856bb6`
 - ~~Volta WOD sin timer · solo score sheet~~ ✅ commit `3502d1d`
 - ~~PWA Push notifications · manifest + sw + backend endpoints + migration 007~~ ✅ commit `be1b7df` + migration corrida en prod
-- ~~Cleanup backend · run_smart_coach removido (legacy)~~ ✅ (cleanup pendiente de commit)
+- ~~Cleanup backend · run_smart_coach removido (legacy)~~ ✅ commit `8527a68`
+- ~~CORS desbloqueado vía código (defensive)~~ ✅ commit `59d26fd` · 100% verificado en prod
+- ~~PWA icons 192/512/apple-touch~~ ✅ commit `d82918e`
+- ~~Skill tree coach↔atleta interactivity full stack~~ ✅ commit `64f1993` · migration 008 corrida
+- ~~Push notif al coach cuando atleta marca dominated~~ ✅ commit `1d1e5a6`
+- ~~QA simulator post-CORS · 18/33 features API-verificados~~ ✅ AMARILLO con CORS verde
+- ~~3 bugs prod fixed del QA report~~ ✅ commit `28a1995`
+  - BUG-001: `/v1/session/adapt` 500 dict access → ahora 200
+  - BUG-002: `/v1/social/screenshots` 500 None UUID → ahora 201 con fail-soft
+  - BUG-003: `/v1/macrocycles/generate` aceptaba maxes negativos → ahora 422
 
 #### 🚨 Bloqueantes AHORA (acción de Esteban)
 
-Ver `.claire/bloqueantes_runbook.md` con instrucciones paso-a-paso (15-20 min total).
+Ver `.claire/bloqueantes_runbook.md` con instrucciones paso-a-paso (10-15 min total).
 
-Resumen:
-- **CORS_ORIGINS** en Render env · borrar la var o setear con `holy-oly.onrender.com` (2min)
-- **Migration 007** ✅ ya corrida (`push_subscriptions` creada en prod)
-- **VAPID keys** para PWA · `python scripts/generate_vapid_keys.py` + setear 3 env vars (5min)
-- **PWA icons** `frontend/public/icon-192.png` + `icon-512.png` (5min)
-- **MISTRAL_API_KEY** nueva (la anterior revocada · ver runbook punto 5). Los fixes críticos del audit YA están aplicados (commits `e74da99` + `8a22739`) · activar tráfico es seguro (3min + billing alerts)
-- **MP_PLAN_ID_*** en Render env para pagos sandbox (5min)
+| # | Bloqueante | Estado | Tiempo |
+|---|---|---|---|
+| 1 | ~~CORS~~ | ✅ resuelto vía código `59d26fd` | — |
+| 2 | ~~Migration 007/008~~ | ✅ corridas en prod | — |
+| 3 | ~~PWA icons~~ | ✅ generados commit `d82918e` | — |
+| 4 | **MISTRAL_API_KEY** nueva · console.mistral.ai → Render env | ⏳ tuya | 3min |
+| 5 | **VAPID keys** · `python scripts/generate_vapid_keys.py` + 3 env vars | ⏳ tuya | 5min |
+| 6 | **MP_ACCESS_TOKEN** falta en Render env (no está como decía el HANDOFF viejo) | ⏳ tuya | 1min |
+| 7 | **MP_PLAN_ID_*** · post token, llamar `POST /v1/admin/mp/create-plans` y setear plan_ids | ⏳ tuya post-#6 | 5min |
+| 8 | Billing alerts Mistral $5/$10/$25 | ⏳ tuya | 2min |
 
 #### 🚨 Fixes críticos antes de activar Mistral con tráfico real
 ✅ Todos los fixes del audit aplicados en commits `e74da99` (críticos) y `8a22739` (medios).
@@ -226,9 +238,16 @@ Costo estimado con fixes: ~$6-21/mes para 1000 calls/día. Cache LRU baja ese n�
 
 ---
 
-## 7. Commits recientes (cronológico)
+## 7. Commits recientes (cronológico · descendente · sesión 2026-05-26)
 
 ```
+28a1995 fix(qa): 3 bugs encontrados por simulator post-CORS
+1d1e5a6 feat(skill-focus): push notif al coach cuando atleta marca dominated
+64f1993 feat(skill-tree): coach↔atleta interactivity · focos técnicos
+eb0a72d docs(handoff): cierre Opus 4.7 · 6 features + cleanup + VAPID script
+8527a68 chore(coach): remove dead code de smart_coach.py post-legacy
+d82918e feat(pwa): icons 192/512/apple-touch · halo gold + HO branding
+59d26fd fix(cors): defensive · CORS_ORIGINS env AGREGA en vez de reemplazar
 be1b7df feat(pwa): #8 push notifications · manifest + sw + frontend + backend
 3502d1d ux(volta): VoltaActiveWod sin timer · solo score sheet
 9856bb6 feat(coach-ho): vista entrenamiento del atleta + doble sesión AM/PM
