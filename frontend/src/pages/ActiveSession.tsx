@@ -93,6 +93,11 @@ const ActiveSession: React.FC = () => {
     const w = parseFloat(weight) || 0;
     const r = parseInt(reps) || 0;
     if (w === 0 || r === 0) return;
+    // Hard guard: no permitir loggear más sets de los prescriptos
+    const completedSoFar = (logs[exIdx] ?? []).filter(l => l.result === 'completed').length;
+    if (result === 'completed' && completedSoFar >= current.targetSets) {
+      return;
+    }
     setLogs(prev => ({
       ...prev,
       [exIdx]: [...(prev[exIdx] ?? []), { weight: w, reps: r, result }],
@@ -359,6 +364,34 @@ const ActiveSession: React.FC = () => {
             </div>
           </div>
 
+          {allDone ? (
+            /* Ejercicio terminado · prescripción cumplida · invitar a avanzar */
+            <div style={{
+              padding: '16px',
+              background: 'rgba(34,197,94,0.10)',
+              border: '1px solid rgba(34,197,94,0.40)',
+              borderRadius: 14, textAlign: 'center',
+            }}>
+              <p style={{ fontSize: 12, fontWeight: 800, color: 'var(--primary)', letterSpacing: '.06em', textTransform: 'uppercase', margin: 0 }}>
+                ✓ {current.targetSets}×{current.targetReps} completado
+              </p>
+              <p style={{ fontSize: 10, color: 'var(--text-secondary)', margin: '4px 0 12px' }}>
+                Prescripción cumplida · pasá al siguiente ejercicio
+              </p>
+              <button
+                onClick={goNextExercise}
+                style={{
+                  width: '100%', padding: '14px 0', borderRadius: 12,
+                  background: 'var(--cta-bg)', color: 'var(--cta-text)',
+                  border: 'none',
+                  fontSize: 13, fontWeight: 900, letterSpacing: '.06em', textTransform: 'uppercase',
+                  cursor: 'pointer', fontFamily: 'inherit',
+                }}
+              >
+                {exIdx < exercises.length - 1 ? 'Siguiente ejercicio →' : 'Finalizar sesión 🏆'}
+              </button>
+            </div>
+          ) : (
           <div style={{ display: 'flex', gap: 8 }}>
             <button
               onClick={() => logSet('failed')}
@@ -383,6 +416,7 @@ const ActiveSession: React.FC = () => {
               }}
             >Completar serie</button>
           </div>
+          )}
         </div>
 
         {/* History */}
