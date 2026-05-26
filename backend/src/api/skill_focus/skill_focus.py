@@ -151,13 +151,24 @@ async def create_skill_focus(
                     detail="Ese movimiento ya tiene un foco activo para este atleta",
                 )
 
+            # CTE para resolver coach_name en una sola roundtrip y evitar el
+            # bug "coach_name=null" en la respuesta del POST. El RETURNING crudo
+            # no incluye coach_name (no es columna de la tabla); el JOIN externo
+            # contra users sí.
             row = await conn.fetchrow(
                 """
-                INSERT INTO coach_skill_focus
-                    (coach_id, athlete_id, movement_id, note, status)
-                VALUES ($1::uuid, $2::uuid, $3, $4, 'active')
-                RETURNING id, coach_id, athlete_id, movement_id, note, status,
-                          assigned_at, resolved_at
+                WITH inserted AS (
+                    INSERT INTO coach_skill_focus
+                        (coach_id, athlete_id, movement_id, note, status)
+                    VALUES ($1::uuid, $2::uuid, $3, $4, 'active')
+                    RETURNING id, coach_id, athlete_id, movement_id, note, status,
+                              assigned_at, resolved_at
+                )
+                SELECT i.id, i.coach_id, i.athlete_id, i.movement_id, i.note,
+                       i.status, i.assigned_at, i.resolved_at,
+                       u.name AS coach_name
+                FROM inserted i
+                LEFT JOIN users u ON u.id = i.coach_id
                 """,
                 user.id, payload.athlete_id, payload.movement_id, payload.note,
             )
@@ -174,27 +185,52 @@ async def create_skill_focus(
 @router.get("/me", response_model=List[SkillFocusResponse])
 async def list_my_focus(
     user: User = Depends(verify_token),
+    include_resolved: bool = False,
 ) -> List[SkillFocusResponse]:
     """
-    Atleta lista sus focos ACTIVOS (no dominated/retired).
+    Atleta lista sus focos.
+    - Default (include_resolved=False): solo status='active'.
+    - include_resolved=True: incluye también 'dominated' y 'retired' (historial).
+      Orden: active primero, después dominated por resolved_at DESC, después retired.
     Incluye coach_name vía JOIN con users.
     """
     pool = await _require_pool()
     try:
         async with pool.acquire() as conn:
-            rows = await conn.fetch(
-                """
-                SELECT f.id, f.coach_id, f.athlete_id, f.movement_id, f.note,
-                       f.status, f.assigned_at, f.resolved_at,
-                       u.name AS coach_name
-                FROM coach_skill_focus f
-                LEFT JOIN users u ON u.id = f.coach_id
-                WHERE f.athlete_id = $1::uuid
-                  AND f.status = 'active'
-                ORDER BY f.assigned_at DESC
-                """,
-                user.id,
-            )
+            if include_resolved:
+                rows = await conn.fetch(
+                    """
+                    SELECT f.id, f.coach_id, f.athlete_id, f.movement_id, f.note,
+                           f.status, f.assigned_at, f.resolved_at,
+                           u.name AS coach_name
+                    FROM coach_skill_focus f
+                    LEFT JOIN users u ON u.id = f.coach_id
+                    WHERE f.athlete_id = $1::uuid
+                    ORDER BY
+                      CASE f.status
+                        WHEN 'active' THEN 0
+                        WHEN 'dominated' THEN 1
+                        ELSE 2
+                      END,
+                      f.resolved_at DESC NULLS LAST,
+                      f.assigned_at DESC
+                    """,
+                    user.id,
+                )
+            else:
+                rows = await conn.fetch(
+                    """
+                    SELECT f.id, f.coach_id, f.athlete_id, f.movement_id, f.note,
+                           f.status, f.assigned_at, f.resolved_at,
+                           u.name AS coach_name
+                    FROM coach_skill_focus f
+                    LEFT JOIN users u ON u.id = f.coach_id
+                    WHERE f.athlete_id = $1::uuid
+                      AND f.status = 'active'
+                    ORDER BY f.assigned_at DESC
+                    """,
+                    user.id,
+                )
             return [_row_to_response(dict(r)) for r in rows]
     except Exception as e:
         raise HTTPException(

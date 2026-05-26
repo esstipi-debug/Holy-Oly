@@ -247,6 +247,36 @@ async def list_macrocycles():
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# IMPORTANT: route order matters in FastAPI · static paths MUST come before
+# /macrocycles/{program_id} (dynamic catch-all), o "me"/"assigned" se interpretan
+# como program_id y caen al handler dinámico → 404 wrapped en 500 por el
+# `except Exception` que sigue. BUG-004/005 del QA simulator.
+@router.get("/macrocycles/me")
+async def get_my_macrocycle(current_user=Depends(verify_token)):
+    """
+    Macrocycle activo asignado al current_user.
+    Por ahora no hay tabla de asignación atleta↔macrocycle: respondemos 200
+    con assigned=false para que el frontend pueda renderizar empty state sin
+    error. Cuando exista la tabla athlete_macrocycles (o equivalente), poblar
+    desde ahí.
+    """
+    return {
+        "assigned": False,
+        "message": "No tenés un macrociclo asignado todavía. Tu coach puede asignarte uno desde su panel.",
+        "macrocycle": None,
+    }
+
+
+@router.get("/macrocycles/assigned")
+async def get_assigned_macrocycle(current_user=Depends(verify_token)):
+    """Alias de /macrocycles/me · misma semántica."""
+    return {
+        "assigned": False,
+        "message": "No tenés un macrociclo asignado todavía. Tu coach puede asignarte uno desde su panel.",
+        "macrocycle": None,
+    }
+
+
 @router.get("/macrocycles/{program_id}")
 async def get_macrocyle(program_id: str):
     """Get specific macrocycle program"""
@@ -264,6 +294,9 @@ async def get_macrocyle(program_id: str):
             "sessions_per_week": program.sessions_per_week,
             "description": program.description
         }
+    except HTTPException:
+        # Re-raise 404 limpio · si no, el except Exception de abajo lo wrappea en 500.
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
