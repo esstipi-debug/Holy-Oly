@@ -1,7 +1,7 @@
 # HANDOFF · Holy Oly + Volta
 
 > Documento maestro para arrancar un nuevo chat con contexto completo.
-> Última actualización: 2026-05-26 (sesión Opus 4.7 · maratónica) · cerrada en commit `28a1995`+.
+> Última actualización: 2026-05-26 (sesión Opus 4.7 · 32 commits) · cerrada en commit `bf92652`+.
 
 ---
 
@@ -93,6 +93,21 @@
   - BUG-001: `/v1/session/adapt` 500 dict access → ahora 200
   - BUG-002: `/v1/social/screenshots` 500 None UUID → ahora 201 con fail-soft
   - BUG-003: `/v1/macrocycles/generate` aceptaba maxes negativos → ahora 422
+- ~~Bug fixes simulator extendido (skill /me + macrocycles /me + coach_name)~~ ✅ commit `6d0c08c`
+- ~~Engines visibility coach (HO + Volta) · stress real per athlete~~ ✅ commit `bf92652`
+- ~~Simulator extendido con 8 dimensiones (3 base + 5 nuevas: bidirectional/perms/state/lifecycle/empty/perf)~~ ✅ definición + 2 runs ejecutados
+
+## Estado de QA al cierre
+
+**3 simulator runs ejecutados (3 dimensiones cada uno):**
+1. Run 1 · post-CORS · API-only · 18/33 features verificados · 3 bugs encontrados + fixed
+2. Run 2 · extendido (bidirectional + permissions + state) · 6 bugs encontrados · 3 reales fixed · BUG-003 emoji era falso positivo (terminal encoding) · permission boundaries SOLID 5/5
+3. Run 3 · lifecycle + empty + perf · veredicto AMARILLO pero los 4 "bugs" son inconsistencias de contrato API que el frontend ya maneja correctamente · performance GREEN p95 <1s en todos los endpoints
+
+**Performance baseline establecido:**
+- p50: ~420ms warm
+- p95: ~624ms warm
+- Cold start Render free tier: ~2.2s first request
 
 #### 🚨 Bloqueantes AHORA (acción de Esteban)
 
