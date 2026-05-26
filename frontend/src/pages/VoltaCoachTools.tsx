@@ -831,7 +831,11 @@ const VoltaCoachTools: React.FC<VoltaCoachToolsProps> = ({ initialTab = 'progres
                             <span style={{ fontSize: 22 }}>{it.icon}</span>
                             <p style={{ flex: 1, fontSize: 12, fontWeight: 700, color: C.text }}>{it.label}</p>
                             <button
-                              onClick={() => removeItem(it._idx)}
+                              onClick={() => {
+                                if (window.confirm(`¿Eliminar "${it.label}" del inventario?\nEsta acción no se puede deshacer.`)) {
+                                  removeItem(it._idx);
+                                }
+                              }}
                               style={{
                                 width: 24, height: 24, borderRadius: 6,
                                 background: 'rgba(255,61,0,0.08)', color: C.red,

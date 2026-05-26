@@ -97,14 +97,21 @@ const VoltaCoachWod: React.FC = () => {
             </p>
             <input
               type="number"
+              inputMode="numeric"
+              min={type === 'Strength' || type === 'Skill' ? 1 : 1}
+              max={type === 'Strength' || type === 'Skill' ? 20 : 60}
               value={duration}
               onChange={(e) => setDuration(e.target.value)}
+              onFocus={(e) => { e.target.select(); }}
               style={{
                 width: '100%', padding: '12px',
-                background: C.surface, border: `1px solid ${C.line}`,
+                background: 'rgba(0,229,255,0.06)',
+                border: `2px solid ${C.cyan}55`,
                 borderRadius: 12, fontSize: 18, fontWeight: 800, color: C.text,
                 fontFamily: 'inherit', textAlign: 'center', outline: 'none',
+                cursor: 'text',
               }}
+              aria-label={type === 'Strength' || type === 'Skill' ? 'Cantidad de sets' : 'Duración en minutos'}
             />
           </div>
           <div>
@@ -194,7 +201,11 @@ const VoltaCoachWod: React.FC = () => {
                 />
               </div>
               <button
-                onClick={() => removeMovement(i)}
+                onClick={() => {
+                  if (window.confirm(`¿Eliminar movimiento "${m.name || 'sin nombre'}" del WOD?`)) {
+                    removeMovement(i);
+                  }
+                }}
                 style={{
                   width: 28, height: 28, borderRadius: 8,
                   background: 'rgba(255,61,0,0.08)', color: C.red,
