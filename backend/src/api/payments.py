@@ -38,36 +38,52 @@ router = APIRouter(prefix="/v1/payments", tags=["payments"])
 # Mercado: CHILE · moneda CLP (sin decimales prácticos)
 # Trial: 14 días free PRO al registrarse (definido en 000_init.sql users.trial_ends_at)
 #
-# AJUSTAR precios cuando estén definidos · setear via env vars en Render:
-#   PRICE_ATHLETE_PRO_MONTHLY, PRICE_COACH_PRO_MONTHLY
+# Precios anchored a USD target (USD/CLP ~900):
+#   Atleta 3-5 USD/mes  → ~3.990 CLP
+#   Coach  40-60 USD/mes → ~44.990 CLP
+# Anual = 10x mensual (2 meses gratis)
+#
+# Configurables via env vars (preferido para cambiar sin redeploy):
+#   PRICE_ATHLETE_PRO_MONTHLY, PRICE_ATHLETE_PRO_YEARLY
+#   PRICE_COACH_PRO_MONTHLY,   PRICE_COACH_PRO_YEARLY
+#
+# `frequency` y `frequency_type` se usan para crear preapproval_plan en MP.
 PLANS = {
     "athlete_pro_1m": {
-        "label":    "PRO Atleta · 1 mes",
-        "amount":   int(os.getenv("PRICE_ATHLETE_PRO_MONTHLY", "7990")),  # CLP — TBD
-        "days":     30,
-        "tier":     "pro",
-        "audience": "athlete",
+        "label":          "PRO Atleta · Mensual",
+        "amount":         int(os.getenv("PRICE_ATHLETE_PRO_MONTHLY", "3990")),
+        "frequency":      1,
+        "frequency_type": "months",
+        "days":           30,
+        "tier":           "pro",
+        "audience":       "athlete",
     },
     "athlete_pro_12m": {
-        "label":    "PRO Atleta · 12 meses",
-        "amount":   int(os.getenv("PRICE_ATHLETE_PRO_YEARLY", "79900")),  # CLP — TBD · 10x mensual = 2 meses gratis
-        "days":     365,
-        "tier":     "pro",
-        "audience": "athlete",
+        "label":          "PRO Atleta · Anual",
+        "amount":         int(os.getenv("PRICE_ATHLETE_PRO_YEARLY", "39900")),  # 10x mensual · 2 meses gratis
+        "frequency":      12,
+        "frequency_type": "months",
+        "days":           365,
+        "tier":           "pro",
+        "audience":       "athlete",
     },
     "coach_pro_1m": {
-        "label":    "PRO Coach · 1 mes",
-        "amount":   int(os.getenv("PRICE_COACH_PRO_MONTHLY", "24990")),  # CLP — TBD
-        "days":     30,
-        "tier":     "pro",
-        "audience": "coach",
+        "label":          "PRO Coach · Mensual",
+        "amount":         int(os.getenv("PRICE_COACH_PRO_MONTHLY", "44990")),
+        "frequency":      1,
+        "frequency_type": "months",
+        "days":           30,
+        "tier":           "pro",
+        "audience":       "coach",
     },
     "coach_pro_12m": {
-        "label":    "PRO Coach · 12 meses",
-        "amount":   int(os.getenv("PRICE_COACH_PRO_YEARLY", "249900")),  # CLP — TBD
-        "days":     365,
-        "tier":     "pro",
-        "audience": "coach",
+        "label":          "PRO Coach · Anual",
+        "amount":         int(os.getenv("PRICE_COACH_PRO_YEARLY", "449900")),
+        "frequency":      12,
+        "frequency_type": "months",
+        "days":           365,
+        "tier":           "pro",
+        "audience":       "coach",
     },
 }
 
@@ -137,48 +153,47 @@ def list_plans():
 
 
 # ----------------------------------------------------------------
-# MERCADOPAGO Checkout Pro · helpers
+# MERCADOPAGO Subscriptions API · helpers
 # ----------------------------------------------------------------
+# Flow:
+#   1. (Una vez por plan) POST /preapproval_plan → guardar plan_id
+#   2. (Por user) POST /preapproval con plan_id + payer_email → devuelve init_point
+#   3. User paga en MP-hosted checkout → MP cobra recurrente automático
+#   4. Webhook /v1/payments/webhooks/mercadopago notifica cada evento
+#      (authorized | payment | cancelled | paused | finished)
+#
+# Docs: https://www.mercadopago.cl/developers/es/reference/subscriptions/_preapproval/post
 
-async def create_mp_preference(*, intent_id: str, code: str, plan: dict) -> dict:
+BACKEND_URL = os.getenv("BACKEND_URL", "https://holy-oly-3.onrender.com")
+
+def _mp_plan_id_for(plan_key: str) -> Optional[str]:
+    """Devuelve el preapproval_plan_id guardado en env var para un plan dado."""
+    return os.getenv(f"MP_PLAN_ID_{plan_key.upper()}")
+
+
+async def create_mp_preapproval_plan(*, plan_key: str, plan: dict) -> dict:
     """
-    Crea una preferencia de pago en MercadoPago Chile.
-    Devuelve el init_point (URL a la que redirigís al user) + preference_id.
-
-    Docs: https://www.mercadopago.cl/developers/es/reference/preferences/_checkout_preferences/post
+    Crea un preapproval_plan en MP (una sola vez por plan).
+    Devuelve el plan_id que después hay que guardar como env var MP_PLAN_ID_{KEY}.
     """
     if not MP_ACCESS_TOKEN:
         raise HTTPException(503, "MP_ACCESS_TOKEN no configurado en server")
 
     import httpx
     body = {
-        "items": [{
-            "title":       plan["label"],
-            "description": f"Holy Oly · {plan['label']} · acceso por {plan['days']} días",
-            "quantity":    1,
-            "currency_id": "CLP",
-            "unit_price":  plan["amount"],
-        }],
-        "external_reference": code,  # nuestro código HOLY-XXXX-YYYY para matching webhook
-        "back_urls": {
-            "success": f"{FRONTEND_URL}/#PAYMENT_SUCCESS?code={code}",
-            "failure": f"{FRONTEND_URL}/#PAYMENT_FAILURE?code={code}",
-            "pending": f"{FRONTEND_URL}/#PAYMENT_PENDING?code={code}",
+        "reason": f"Holy Oly · {plan['label']}",
+        "auto_recurring": {
+            "frequency":          plan["frequency"],
+            "frequency_type":     plan["frequency_type"],
+            "transaction_amount": plan["amount"],
+            "currency_id":        "CLP",
         },
-        "auto_return": "approved",
-        "metadata": {"intent_id": intent_id, "code": code, "plan_id": plan.get("id", "")},
-        "notification_url": f"{os.getenv('BACKEND_URL', 'https://holy-oly-3.onrender.com')}/v1/payments/webhooks/mercadopago",
-        "statement_descriptor": "HOLY OLY",
-        # MercadoPago Chile: permitir débito + crédito + Webpay (transferencia)
-        "payment_methods": {
-            "excluded_payment_types": [],
-            "installments": 1,
-        },
+        "back_url": f"{FRONTEND_URL}/#PAYMENT_SUCCESS?plan={plan_key}",
+        "status":   "active",
     }
-
     async with httpx.AsyncClient(timeout=15) as client:
         resp = await client.post(
-            "https://api.mercadopago.com/checkout/preferences",
+            "https://api.mercadopago.com/preapproval_plan",
             json=body,
             headers={"Authorization": f"Bearer {MP_ACCESS_TOKEN}"},
         )
@@ -186,9 +201,46 @@ async def create_mp_preference(*, intent_id: str, code: str, plan: dict) -> dict
             raise HTTPException(502, f"MP error {resp.status_code}: {resp.text[:300]}")
         data = resp.json()
         return {
+            "plan_id":    data.get("id"),
             "init_point": data.get("init_point"),
-            "sandbox_init_point": data.get("sandbox_init_point"),
-            "preference_id": data.get("id"),
+            "status":     data.get("status"),
+        }
+
+
+async def create_mp_preapproval(*, code: str, plan_key: str, plan: dict, user_email: str) -> dict:
+    """
+    Crea una suscripción (preapproval) para un usuario sobre un preapproval_plan.
+    Devuelve init_point que el frontend debe abrir para que el user ingrese tarjeta.
+    """
+    if not MP_ACCESS_TOKEN:
+        raise HTTPException(503, "MP_ACCESS_TOKEN no configurado en server")
+
+    plan_id = _mp_plan_id_for(plan_key)
+    if not plan_id:
+        raise HTTPException(503, f"MP_PLAN_ID_{plan_key.upper()} no configurado. Crear el preapproval_plan en MP primero con POST /v1/admin/mp/create-plans")
+
+    import httpx
+    body = {
+        "preapproval_plan_id": plan_id,
+        "reason":              f"Holy Oly · {plan['label']}",
+        "external_reference":  code,
+        "payer_email":         user_email,
+        "back_url":            f"{FRONTEND_URL}/#PAYMENT_SUCCESS?code={code}",
+        "status":              "pending",
+    }
+    async with httpx.AsyncClient(timeout=15) as client:
+        resp = await client.post(
+            "https://api.mercadopago.com/preapproval",
+            json=body,
+            headers={"Authorization": f"Bearer {MP_ACCESS_TOKEN}"},
+        )
+        if resp.status_code >= 400:
+            raise HTTPException(502, f"MP error {resp.status_code}: {resp.text[:300]}")
+        data = resp.json()
+        return {
+            "preapproval_id": data.get("id"),
+            "init_point":     data.get("init_point"),
+            "status":         data.get("status"),
         }
 
 
@@ -242,8 +294,13 @@ async def create_intent(payload: IntentCreate, user: User = Depends(verify_token
     }
 
     if PAYMENT_PROVIDER == "mercadopago":
+        # Fetch user email para asociar a la preapproval
+        u = await users_repo.find_by_id(user.id) if pool else None
+        user_email = (u or {}).get("email") or f"{user.id}@holyoly.app"
         try:
-            mp = await create_mp_preference(intent_id=intent_id, code=code, plan=plan_with_id)
+            mp = await create_mp_preapproval(
+                code=code, plan_key=payload.plan, plan=plan_with_id, user_email=user_email,
+            )
         except HTTPException:
             raise
         except Exception as e:
@@ -265,85 +322,104 @@ async def create_intent(payload: IntentCreate, user: User = Depends(verify_token
 @router.post("/webhooks/mercadopago")
 async def mp_webhook(request: Request):
     """
-    Recibe notificaciones de MercadoPago cuando cambia el estado de un pago.
-    Si el pago está 'approved', verifica el intent y activa la suscripción.
+    Webhook MP · maneja 2 tipos de eventos:
+      - type='subscription_authorized_payment' / 'preapproval': activación de suscripción
+      - type='payment': cobros recurrentes individuales
 
     Docs: https://www.mercadopago.cl/developers/es/docs/your-integrations/notifications/webhooks
     """
     payload = await request.json()
-    # MP envía {action, type, data: {id: payment_id}}
-    payment_id = (payload.get("data") or {}).get("id")
-    if not payment_id:
-        return {"received": True, "skipped": "no payment_id"}
+    event_type = payload.get("type") or payload.get("topic")  # MP a veces usa 'topic'
+    obj_id = (payload.get("data") or {}).get("id") or payload.get("id")
+    if not obj_id:
+        return {"received": True, "skipped": "no obj_id"}
 
-    import httpx
     if not MP_ACCESS_TOKEN:
         raise HTTPException(503, "MP_ACCESS_TOKEN no configurado")
 
-    # Fetch del pago real desde MP
-    async with httpx.AsyncClient(timeout=10) as client:
-        r = await client.get(
-            f"https://api.mercadopago.com/v1/payments/{payment_id}",
-            headers={"Authorization": f"Bearer {MP_ACCESS_TOKEN}"},
-        )
-        if r.status_code >= 400:
-            return {"received": True, "error": f"MP fetch failed {r.status_code}"}
-        payment = r.json()
-
-    if payment.get("status") != "approved":
-        return {"received": True, "status": payment.get("status"), "skipped": "not approved"}
-
-    code = payment.get("external_reference")
-    if not code:
-        return {"received": True, "error": "no external_reference"}
-
+    import httpx
     pool = await users_repo.get_pool()
     if pool is None:
         return {"received": True, "error": "no DB"}
 
-    paid_amount = float(payment.get("transaction_amount") or 0)
+    # Resolver event a un preapproval que matchee con un intent
+    code = None
+    plan_key = None
+    status_mp = None
+
+    if event_type in ("preapproval", "subscription_preapproval"):
+        # Es un cambio de estado de la suscripción → fetch /preapproval/{id}
+        async with httpx.AsyncClient(timeout=10) as client:
+            r = await client.get(
+                f"https://api.mercadopago.com/preapproval/{obj_id}",
+                headers={"Authorization": f"Bearer {MP_ACCESS_TOKEN}"},
+            )
+            if r.status_code >= 400:
+                return {"received": True, "error": f"MP fetch preapproval failed {r.status_code}"}
+            pa = r.json()
+        code = pa.get("external_reference")
+        status_mp = pa.get("status")
+        # status posibles: pending / authorized / paused / cancelled / finished
+
+    elif event_type in ("payment", "subscription_authorized_payment"):
+        # Cobro individual recurrente → fetch /v1/payments/{id}
+        async with httpx.AsyncClient(timeout=10) as client:
+            r = await client.get(
+                f"https://api.mercadopago.com/v1/payments/{obj_id}",
+                headers={"Authorization": f"Bearer {MP_ACCESS_TOKEN}"},
+            )
+            if r.status_code >= 400:
+                return {"received": True, "error": f"MP fetch payment failed {r.status_code}"}
+            pay = r.json()
+        code = pay.get("external_reference")
+        status_mp = pay.get("status")  # approved | pending | rejected
+    else:
+        return {"received": True, "skipped": f"unhandled event type: {event_type}"}
+
+    if not code:
+        return {"received": True, "skipped": "no external_reference"}
 
     async with pool.acquire() as conn:
         intent = await conn.fetchrow(
-            "SELECT id, user_id, plan, amount, status::text AS status, expires_at FROM payment_intents WHERE code = $1",
+            "SELECT id, user_id, plan, amount, status::text AS status FROM payment_intents WHERE code = $1",
             code,
         )
         if not intent:
             return {"received": True, "error": "intent not found", "code": code}
-        if intent["status"] != "pending":
-            return {"received": True, "skipped": f"intent already {intent['status']}"}
 
-        expected = float(intent["amount"])
-        if abs(paid_amount - expected) / max(expected, 1) > 0.01:
-            return {"received": True, "error": f"amount mismatch: expected {expected}, paid {paid_amount}"}
+        # Solo activamos si MP nos dice approved/authorized
+        if status_mp not in ("authorized", "approved"):
+            return {"received": True, "code": code, "skipped": f"MP status: {status_mp}"}
 
+        # Si ya está verificado, igual extendemos el trial_ends_at (cobro recurrente)
         plan = PLANS[intent["plan"]]
         now = datetime.utcnow()
-        new_trial_ends_at = now + timedelta(days=plan["days"])
+        new_expires = now + timedelta(days=plan["days"])
 
         async with conn.transaction():
-            await conn.execute(
-                """
-                UPDATE payment_intents
-                SET status='verified'::payment_status, verified_at=NOW(),
-                    verified_email_id=$2, bank_sender=$3,
-                    notes='MP webhook ' || $4
-                WHERE id = $1
-                """,
-                intent["id"], str(payment_id), payment.get("payer", {}).get("email"), payment.get("id"),
-            )
+            if intent["status"] == "pending":
+                await conn.execute(
+                    """
+                    UPDATE payment_intents
+                    SET status='verified'::payment_status, verified_at=NOW(),
+                        verified_email_id=$2,
+                        notes=COALESCE(notes,'') || ' | MP ' || $3
+                    WHERE id = $1
+                    """,
+                    intent["id"], str(obj_id), str(event_type),
+                )
             await conn.execute(
                 """
                 UPDATE users
                 SET tier = $2::subscription_tier,
-                    subscribed_at = $3,
+                    subscribed_at = COALESCE(subscribed_at, $3),
                     trial_ends_at = $4
                 WHERE id = $1
                 """,
-                intent["user_id"], plan["tier"], now, new_trial_ends_at,
+                intent["user_id"], plan["tier"], now, new_expires,
             )
 
-    return {"received": True, "verified": True, "code": code, "expires_at": new_trial_ends_at.isoformat()}
+    return {"received": True, "verified": True, "code": code, "event": event_type, "expires_at": new_expires.isoformat()}
 
 
 @router.get("/intents")

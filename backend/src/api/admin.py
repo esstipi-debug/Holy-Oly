@@ -83,6 +83,29 @@ async def run_migrations(x_admin_token: Optional[str] = Header(default=None)):
     }
 
 
+@router.post("/mp/create-plans")
+async def create_mp_plans(x_admin_token: Optional[str] = Header(default=None)):
+    """
+    Crea los 4 preapproval_plan en MercadoPago Chile (una vez por entorno).
+    Devuelve los plan_ids que tenés que setear como env vars:
+      MP_PLAN_ID_ATHLETE_PRO_1M, MP_PLAN_ID_ATHLETE_PRO_12M,
+      MP_PLAN_ID_COACH_PRO_1M,   MP_PLAN_ID_COACH_PRO_12M
+    """
+    check_admin(x_admin_token)
+    from . import payments as P
+    results = {}
+    for plan_key, plan in P.PLANS.items():
+        try:
+            r = await P.create_mp_preapproval_plan(plan_key=plan_key, plan=plan)
+            results[plan_key] = {"plan_id": r["plan_id"], "init_point": r["init_point"], "status": r["status"]}
+        except Exception as e:
+            results[plan_key] = {"error": str(e)[:300]}
+    return {
+        "plans": results,
+        "next_step": "Setear las env vars MP_PLAN_ID_* en Render con los plan_ids de arriba y redeployar",
+    }
+
+
 @router.get("/db-status")
 async def db_status(x_admin_token: Optional[str] = Header(default=None)):
     """Inspecciona qué tablas existen + count rápido."""
