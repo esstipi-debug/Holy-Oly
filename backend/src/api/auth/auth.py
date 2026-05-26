@@ -130,26 +130,36 @@ def authorize_athlete_or_coach(current_user: User = Depends(verify_token)) -> Us
     return current_user
 
 def can_access_athlete_data(athlete_id: str, current_user: User = Depends(verify_token)) -> bool:
-    """
-    Verifica si el usuario actual puede acceder a los datos de un atleta específico.
-    
-    Reglas:
-    - Admin: puede ver todos los datos
-    - Coach: puede ver datos de sus atletas asignados
-    - Athlete: solo puede ver sus propios datos
-    """
+    """Dependency-injectable wrapper · sync interface."""
     if current_user.role == "admin":
         return True
-    
-    if current_user.role == "coach":
-        # Aquí deberíamos verificar en la BD si el atleta pertenece al coach
-        # Por ahora, mock simple
-        return True  # TODO: Implementar verificación real
-    
     if current_user.role == "athlete":
         return current_user.id == athlete_id
-    
+    if current_user.role == "coach":
+        # Coach binding requiere DB check · usar coach_owns_athlete()
+        return False  # default deny; los handlers deben usar coach_owns_athlete()
     return False
+
+
+async def coach_owns_athlete(coach_id: str, athlete_id: str) -> bool:
+    """
+    Verifica vía DB que `athlete_id` está asignado a `coach_id`.
+    Usado en endpoints coach-scoped que toman athlete_id como input.
+
+    Fix de Vuln 2+3 del security review · evita cross-athlete IDOR.
+    Admin debe bypassear este check en el caller.
+    """
+    from ...db import users_repo
+    pool = await users_repo.get_pool()
+    if pool is None:
+        # Sin DB · permitir (entornos dev sin Postgres)
+        return True
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow(
+            "SELECT 1 FROM users WHERE id = $1::uuid AND coach_id = $2::uuid",
+            athlete_id, coach_id,
+        )
+        return row is not None
 
 # Endpoints de autenticación
 from fastapi import APIRouter
@@ -244,7 +254,8 @@ class RegisterPayload(BaseModel):
     email: EmailStr
     password: str
     name: str
-    role: Literal["athlete", "coach"] = "athlete"
+    # SECURITY: `role` removido del payload público — el registro abierto siempre
+    # crea athletes. Promoción a coach va por endpoint admin-gated (futuro).
     product: Literal["holy-oly", "volta"] = "holy-oly"
 
     @field_validator("password")
@@ -275,17 +286,22 @@ async def register(payload: RegisterPayload):
             detail="Ya existe una cuenta con ese email",
         )
 
+    # SECURITY: role siempre "athlete" en self-registration · no aceptamos
+    # el campo desde el cliente (ver RegisterPayload). Promoción a coach
+    # debe pasar por endpoint admin-gated.
+    ROLE_FOR_NEW_USERS = "athlete"
+
     user = await users_repo.create_user(
         email=email,
         name=payload.name.strip(),
         password_hash=get_password_hash(payload.password),
-        role=payload.role,
+        role=ROLE_FOR_NEW_USERS,
         product=payload.product,
     )
 
     user_id = str(user["id"])
     access_token = create_access_token(
-        data={"sub": user_id, "email": email, "role": payload.role}
+        data={"sub": user_id, "email": email, "role": ROLE_FOR_NEW_USERS}
     )
 
     return {
@@ -295,7 +311,7 @@ async def register(payload: RegisterPayload):
             "id": user_id,
             "email": email,
             "name": user["name"],
-            "role": payload.role,
+            "role": ROLE_FOR_NEW_USERS,
             "product": payload.product,
             "tier": user.get("tier", "trial"),
             "trial_ends_at": str(user.get("trial_ends_at")) if user.get("trial_ends_at") else None,

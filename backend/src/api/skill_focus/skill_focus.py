@@ -128,8 +128,20 @@ async def create_skill_focus(
     """
     Coach asigna foco semanal sobre un movimiento del skill tree del atleta.
     Si ya existe un foco active para (athlete_id, movement_id) → 409 Conflict.
+
+    SECURITY (Vuln 3 del security review): verifica coach-athlete binding
+    antes del INSERT · evita que un coach asigne focos a atletas que no
+    están bajo su coaching (vector de phishing con callback push).
     """
     _require_coach(user)
+    # Coach binding · admin bypass
+    if user.role != "admin":
+        from ..auth.auth import coach_owns_athlete
+        if not await coach_owns_athlete(user.id, payload.athlete_id):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Este atleta no está asignado a tu coaching",
+            )
     pool = await _require_pool()
     try:
         async with pool.acquire() as conn:
@@ -246,8 +258,19 @@ async def list_focus_for_athlete(
 ) -> List[SkillFocusResponse]:
     """
     Coach lista focos de un atleta: actives + dominated recientes (últimos 60 días).
+
+    SECURITY (Vuln 2 del security review): verifica coach-athlete binding ·
+    evita cross-athlete IDOR donde cualquier coach podía leer notas
+    confidenciales de cualquier atleta del sistema.
     """
     _require_coach(user)
+    if user.role != "admin":
+        from ..auth.auth import coach_owns_athlete
+        if not await coach_owns_athlete(user.id, str(athlete_id)):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Este atleta no está asignado a tu coaching",
+            )
     pool = await _require_pool()
     try:
         async with pool.acquire() as conn:
