@@ -316,12 +316,67 @@ fadcfc7 feat(admin): /v1/admin/migrate endpoint
 
 ---
 
+## 9.5 · Cierre sesión 2026-05-26 (Opus 4.7 · 41 commits)
+
+### Lo que se cerró esta sesión
+
+**Backend** (102 routes total · era 64):
+- 13 endpoints nuevos · 8 migrations (006-013) · 3 engines smart nuevos
+- Routers nuevos: `wod_results` `notifications` `wellness` `deviations` `skill_focus` `skill_evaluation` `manual_sessions` `analytics` `competitor` `custom_wod` `macro_suggester` `volta_wod`
+- Engines smart: VoltaWodRecommender (16 templates · decision tree wellness-aware) · MacroSuggester (level_index + scoring multi-factor) · DeviationsAnalyzer (5 triggers)
+- Security: rate limit per-IP /register · SecurityHeadersMiddleware (HSTS/X-Frame/Referrer/Permissions-Policy) · CORS defensive · 3 HIGH vulns fixed (role mass-assignment + cross-athlete IDOR + skill-focus spam)
+- Mistral env-driven (mistral-small-latest + WISE_MODEL) · 3 fixes críticos audit · 2 medios (LRU cache + async _fetch_athlete)
+
+**Frontend** (20+ componentes nuevos):
+- Pages nuevas: Landing.tsx (selector producto)
+- Componentes nuevos: Heatmap365 · MetricHistoryModal · BeltCeremony · Leaderboard · PrewodShare · CoachViralTools · SocialShare variants · AthleteTrainingView · DoubleSessionCards · SessionSlotBadge · WellnessButton/Modal · DeviationsCard · WeeklyAnalysisCharts · SkillFocusAssign · SkillEvaluationPanel · ManualSessionAssigner · CustomWodAssigner · SessionHistoryList · NotificationsToggle
+- URLs separadas: `/` (Landing) · `?p=ho` · `?p=volta` · `?demo=1` (modo testing) · production hide demo button
+- WISE branding aplicado a sugerencias (✦ gold prefix) · disclaimer "es sugerencia · vos decidís"
+
+**QA**:
+- 3 simulator runs ejecutados (post-CORS + extendido bidireccional/permissions/state + lifecycle/empty/perf)
+- 10 bugs prod fixed (7 críticos + 3 medios) · 0 críticos abiertos
+- Permission boundaries 5/5 sólidos
+- Performance baseline establecido (p50 ~420ms · p95 ~624ms · todos GREEN)
+
+**8 usuarios sim registrados en prod** (`@holyolysim.com` · password `SimTest123!`) + atleta Volta nuevo Camila Bravo
+
+### Bugs cerrados al cierre
+
+| Bug | Fix commit |
+|---|---|
+| Volta atleta sin data en demo (todos atletas mock eran HO) | `c70b828` |
+| Coach sin historial cronológico de sesiones | `c70b828` |
+| 7 bugs anteriores (session/adapt 500, social/screenshots 500, etc) | varios |
+
+### Bloqueantes ACTIVOS solo para Esteban (no se pueden resolver desde código)
+
+1. **MP_ACCESS_TOKEN** en Render env vars · sandbox token TEST-... de MP Chile · 1min
+2. **MISTRAL_API_KEY** nueva (la anterior expuesta en chat) + billing alerts $5/$10/$25 en console.mistral.ai · 3min
+3. **VAPID keys** · correr `python scripts/generate_vapid_keys.py` local + setear 3 env vars (`VAPID_PUBLIC_KEY` + `VAPID_PRIVATE_KEY` backend · `VITE_VAPID_PUBLIC_KEY` frontend) · 5min
+4. **Migrations 009/010/011/012/013** pendientes correr en prod · UN curl las corre todas:
+   ```bash
+   curl -X POST https://holy-oly-3.onrender.com/v1/admin/migrate \
+     -H "X-Admin-Token: holyoly-admin-2026-XYZ"
+   ```
+
+### Próximos pendientes (no urgentes · backlog limpio)
+
+| Pendiente | Tiempo | Por qué |
+|---|---|---|
+| Email verification + reset password + welcome transaccional | ~6.5h | Soft requisito app stores Apple/Google · sin esto: spam bots + churn alto |
+| Endpoint admin-gated para promotion coach | 30min | Hoy registro abierto solo hace athletes · coach via DB manual |
+| Volta atleta normal vs competitor toggle visual (ya implementado · UX polish) | 1h | Opcional |
+| Custom WOD assigner UX expand · Volta coach embed | 1h | Solo HO coach lo usa hoy |
+| Push notif al atleta cuando coach asigna manual session | 30min | Reusa push_sender infra |
+| App store prep (privacy policy + T&C + delete account + data export) | 4-6h | Requisito Apple/Google review |
+
 ## 9. Cómo arrancar un chat nuevo · prompt sugerido
 
 ```
-Leé HANDOFF.md primero. Estamos en commit 9a9906d de
-github.com/esstipi-debug/Holy-Oly. La app live es 
-https://holy-oly.onrender.com (frontend) y 
+Leé HANDOFF.md primero (sección 9.5 · cierre 2026-05-26).
+Estamos en commit c70b828 de github.com/esstipi-debug/Holy-Oly.
+App live: https://holy-oly.onrender.com (frontend) ·
 https://holy-oly-3.onrender.com (backend).
 
 Lo más reciente (sesión 2026-05-26 Opus 4.7):
