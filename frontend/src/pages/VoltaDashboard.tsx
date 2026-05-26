@@ -10,6 +10,7 @@ import { loadResults, overallProgress, personalizationTier } from '../data/basel
 import { getPendingForToday, setActiveSlot } from '../lib/plannedSessions';
 import type { PlannedSession, TrainingSlot } from '../types/training';
 import { voltaWod, type RecommendedWodResponse, type WodScale } from '../lib/voltaWod';
+import { competitorApi, type CompetitorProfile } from '../lib/competitor';
 
 const C = {
   bg: '#07070F',
@@ -488,11 +489,145 @@ const VoltaWodTodayCard: React.FC<VoltaWodTodayCardProps> = ({ onStart }) => {
   );
 };
 
+// ──────────────────────────────────────────────────────────────────
+// CompetitorBanner
+// Banner extra para atletas competidores (Open / Quarterfinals / Games).
+// Solo se monta si /v1/volta/competitor/me retorna profile con is_competitor=true.
+// Muestra: target event · open rank · sessions/sem target · nota del coach.
+// ──────────────────────────────────────────────────────────────────
+
+interface CompetitorBannerProps {
+  profile: CompetitorProfile;
+  sessionsDoneWeek: number;
+}
+
+const CompetitorBanner: React.FC<CompetitorBannerProps> = ({ profile, sessionsDoneWeek }) => {
+  const target = profile.target_event ?? 'Modo Competidor';
+  const sessionsTarget = profile.weekly_sessions_target;
+  const sessionsPct = Math.min(100, Math.round((sessionsDoneWeek / Math.max(1, sessionsTarget)) * 100));
+  const hasRank = profile.open_rank_worldwide || profile.open_rank_regional;
+  return (
+    <div style={{
+      background: `linear-gradient(135deg, ${C.cyan}1A 0%, ${C.cyan}05 100%)`,
+      border: `1px solid ${C.cyan}55`,
+      borderRadius: 18, padding: 14, marginBottom: 14,
+      boxShadow: `0 0 24px ${C.cyan}22`,
+    }}>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+        <div style={{
+          fontSize: 10, fontWeight: 800, letterSpacing: '.1em',
+          color: C.cyan, textTransform: 'uppercase',
+          display: 'flex', alignItems: 'center', gap: 5,
+        }}>
+          <span style={{ fontSize: 12 }}>✦</span> Modo Competidor · {profile.category}
+        </div>
+        <span style={{
+          fontSize: 9, fontWeight: 800, color: C.amber,
+          background: `${C.amber}15`, border: `1px solid ${C.amber}55`,
+          borderRadius: 8, padding: '3px 8px', letterSpacing: '.04em',
+        }}>
+          {target}
+        </span>
+      </div>
+
+      {/* Open rank · si hay */}
+      {hasRank && (
+        <div style={{
+          background: 'rgba(0,0,0,0.25)', borderRadius: 10, padding: '8px 10px',
+          marginBottom: 10, display: 'flex', gap: 16,
+        }}>
+          {profile.open_rank_worldwide && (
+            <div>
+              <div style={{ fontSize: 8, color: C.muted, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase' }}>
+                Worldwide
+              </div>
+              <div style={{ fontSize: 16, fontWeight: 900, color: C.cyan, fontStyle: 'italic' }}>
+                #{profile.open_rank_worldwide.toLocaleString()}
+              </div>
+            </div>
+          )}
+          {profile.open_rank_regional && (
+            <div>
+              <div style={{ fontSize: 8, color: C.muted, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase' }}>
+                Regional
+              </div>
+              <div style={{ fontSize: 16, fontWeight: 900, color: C.cyan, fontStyle: 'italic' }}>
+                #{profile.open_rank_regional.toLocaleString()}
+              </div>
+            </div>
+          )}
+          {profile.open_year && (
+            <div style={{ marginLeft: 'auto', alignSelf: 'flex-end' }}>
+              <div style={{ fontSize: 9, color: C.muted, fontWeight: 700 }}>
+                Open {profile.open_year}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Sessions this week vs target */}
+      <div style={{ marginBottom: profile.coach_notes ? 10 : 0 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
+          <span style={{ fontSize: 10, color: C.text, fontWeight: 700, letterSpacing: '.04em' }}>
+            Sesiones semana
+          </span>
+          <span style={{
+            fontSize: 11, color: sessionsDoneWeek >= sessionsTarget ? C.green : C.cyan,
+            fontWeight: 900, fontVariantNumeric: 'tabular-nums',
+          }}>
+            {sessionsDoneWeek}/{sessionsTarget}
+          </span>
+        </div>
+        <div style={{ height: 4, borderRadius: 2, background: 'rgba(0,0,0,0.4)', overflow: 'hidden' }}>
+          <div style={{
+            height: '100%', width: `${sessionsPct}%`,
+            background: sessionsDoneWeek >= sessionsTarget ? C.green : C.cyan,
+            transition: 'width .8s ease',
+          }} />
+        </div>
+      </div>
+
+      {/* Nota del coach */}
+      {profile.coach_notes && (
+        <div style={{
+          padding: '8px 10px', background: 'rgba(0,0,0,0.3)',
+          border: `1px solid ${C.line}`, borderRadius: 8,
+        }}>
+          <div style={{ fontSize: 8, color: C.amber, fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 3 }}>
+            Nota del coach
+          </div>
+          <p style={{ fontSize: 11, color: C.text, lineHeight: 1.4, margin: 0, fontStyle: 'italic', opacity: 0.85 }}>
+            "{profile.coach_notes}"
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const VoltaDashboard: React.FC = () => {
   const { navigate } = useNav();
   const { athlete, stress, stressLoading, adaptation } = useAthlete();
   const [activeInfo, setActiveInfo] = useState<CFComponentInfo | null>(null);
   const [activeMetric, setActiveMetric] = useState<MetricType | null>(null);
+  const [competitorProfile, setCompetitorProfile] = useState<CompetitorProfile | null>(null);
+
+  // Fetch competitor profile · null si no es competidor (404 swallowed por el wrapper)
+  useEffect(() => {
+    let cancelled = false;
+    competitorApi.getMe()
+      .then((p) => { if (!cancelled) setCompetitorProfile(p); })
+      .catch(() => { /* silent · no es bloqueante */ });
+    return () => { cancelled = true; };
+  }, []);
+
+  // Sesiones completadas esta semana (best-effort sobre sessions_last_7 del context)
+  const sessionsDoneWeek = useMemo(() => {
+    const sessions = athlete?.sessions_last_7 ?? [];
+    return sessions.filter((s: any) => (s?.load ?? 0) > 0).length;
+  }, [athlete]);
 
   // ─── Wellness real (derivado de stress/adaptation/sessions) ───
   const today = athlete?.sessions_last_7?.at(-1);
@@ -592,7 +727,17 @@ const VoltaDashboard: React.FC = () => {
 
       <div style={{ padding: '14px 16px 80px' }}>
 
-        {/* WOD RECOMENDADO DEL DÍA · DIFERENCIADOR · primero que ve el atleta */}
+        {/* COMPETITOR BANNER · solo si el coach habilitó tier competidor */}
+        {competitorProfile?.is_competitor && (
+          <CompetitorBanner
+            profile={competitorProfile}
+            sessionsDoneWeek={sessionsDoneWeek}
+          />
+        )}
+
+        {/* WOD RECOMENDADO DEL DÍA · DIFERENCIADOR · primero que ve el atleta
+            Si el coach asignó un custom WOD, el endpoint /v1/volta/wod/today
+            ya lo retorna en lugar del template del engine (override transparente). */}
         <VoltaWodTodayCard onStart={() => navigate('VOLTA_PREWOD')} />
 
         {/* BASELINE PROMPT · invita a completar tests */}

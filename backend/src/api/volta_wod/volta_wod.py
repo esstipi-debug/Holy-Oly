@@ -286,6 +286,63 @@ async def _build_input(user_id: str) -> tuple[WodRecommendationInput, bool, Opti
 # Endpoints
 # ---------------------------------------------------------------------------
 
+async def _check_custom_wod_today(user_id: str) -> Optional[RecommendedWodResponse]:
+    """
+    Si el atleta competidor tiene un custom WOD asignado por el coach para hoy,
+    lo retornamos en formato RecommendedWodResponse (override del engine).
+    Best-effort · si DB falla o no hay nada, devuelve None y cae al recommender.
+    """
+    pool = await users_repo.get_pool()
+    if pool is None:
+        return None
+    try:
+        async with pool.acquire() as conn:
+            row = await conn.fetchrow(
+                """
+                SELECT cw.id, cw.title, cw.type, cw.duration_sec, cw.movements,
+                       cw.intensity_target, cw.notes, cw.created_at,
+                       u.name AS coach_name
+                FROM custom_wods cw
+                LEFT JOIN users u ON u.id = cw.coach_id
+                WHERE cw.athlete_id = $1::uuid AND cw.date = CURRENT_DATE
+                """,
+                user_id,
+            )
+            if row is None:
+                return None
+
+            import json as _json
+            raw_mov = row["movements"]
+            if isinstance(raw_mov, str):
+                raw_mov = _json.loads(raw_mov)
+            movements_out = [WodMovementOut(**m) for m in raw_mov]
+            coach_name = row.get("coach_name") or "tu coach"
+            reasoning = f"WOD personalizado por {coach_name} para hoy."
+            if row.get("notes"):
+                reasoning += f" {row['notes']}"
+            now = datetime.utcnow()
+            return RecommendedWodResponse(
+                title=row["title"],
+                type=row["type"],
+                duration_sec=int(row["duration_sec"] or 1200),
+                movements=movements_out,
+                intensity_target=row.get("intensity_target") or "medium",
+                reasoning=reasoning,
+                risk_score=0,  # custom · no engine risk
+                alternatives=[],
+                template_id=f"custom:{row['id']}",
+                meta=WodMeta(
+                    engine_version=f"custom-coach/{coach_name}",
+                    generated_at=row["created_at"],
+                    expires_at=_midnight_after(now),
+                    fallback=False,
+                    reason=None,
+                ),
+            )
+    except Exception:
+        return None
+
+
 @router.get("/today", response_model=RecommendedWodResponse)
 async def get_today_wod(
     refresh: bool = False,
@@ -294,8 +351,19 @@ async def get_today_wod(
     """
     Devuelve el WOD recomendado para hoy. Cache TTL hasta medianoche por user.
     Pasa `?refresh=true` para invalidar (ej. después de un wellness check-in).
+
+    PRIORIDAD:
+    1) Si el coach asignó un custom WOD para hoy (atleta competidor) → ese gana.
+       NO se cachea · el coach puede actualizar en cualquier momento del día.
+    2) Sino, recommender engine (cacheado hasta medianoche).
     """
     user_id = str(user.id)
+
+    # 1) Custom WOD override (no cacheado)
+    custom = await _check_custom_wod_today(user_id)
+    if custom is not None:
+        return custom
+
     if refresh:
         _cache.pop(user_id, None)
 

@@ -10,6 +10,7 @@ import {
 import SkillFocusAssign from './SkillFocusAssign';
 import ManualSessionAssigner from './ManualSessionAssigner';
 import SkillEvaluationPanel from './SkillEvaluationPanel';
+import CustomWodAssigner from './CustomWodAssigner';
 
 // ──────────────────────────────────────────────────────────────────
 // Tipos internos
@@ -595,6 +596,9 @@ const AthleteTrainingView: React.FC<Props> = ({ athlete }) => {
 
       {/* ── Sección 3.7 · ASIGNACIÓN MANUAL DEL DÍA ──────────── */}
       <ManualSessionAssigner athlete={athlete} />
+
+      {/* ── Sección 3.8 · TIER COMPETIDOR · VOLTA (promote + custom WOD) ── */}
+      <CustomWodAssigner athlete={athlete} />
 
       {/* ── Sección 4 · CTAs COACH ───────────────────────────── */}
       <section>
