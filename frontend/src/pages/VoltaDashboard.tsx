@@ -48,18 +48,64 @@ const AlertBadge: React.FC<{ kind: 'critical' | 'warning' | 'info'; children: Re
   );
 };
 
-const WellnessRow: React.FC<{ icon: string; title: string; sub: string; pct: number; color: string; alert: 'critical' | 'warning' | 'info'; label: string }> = ({ icon, title, sub, pct, color, alert, label }) => (
-  <div style={{ marginBottom: 10 }}>
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ fontSize: 14 }}>{icon}</span>
-        <div>
-          <div style={{ fontSize: 12, fontWeight: 700, color: C.text }}>{title}</div>
-          <div style={{ fontSize: 10, color: C.muted }}>{sub}</div>
+interface WellnessRowProps {
+  icon: string;
+  title: string;
+  /** Valor principal grande (ej "52", "64", "88mg") */
+  value: string;
+  /** Descripción corta debajo del valor (ej "del baseline", "Score 0-100") */
+  valueLabel?: string;
+  /** Contexto · qué significa o cómo va vs ayer */
+  context: string;
+  pct: number;
+  color: string;
+  alert: 'critical' | 'warning' | 'info';
+  label: string;
+}
+
+const WellnessRow: React.FC<WellnessRowProps> = ({ icon, title, value, valueLabel, context, pct, color, alert, label }) => (
+  <div style={{
+    marginBottom: 10,
+    background: 'rgba(255,255,255,0.02)',
+    border: `1px solid ${color}22`,
+    borderRadius: 12,
+    padding: '10px 12px',
+  }}>
+    {/* Top row: icon · title · valor · badge */}
+    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 8 }}>
+      {/* Icono en círculo coloreado */}
+      <div style={{
+        width: 32, height: 32, borderRadius: '50%',
+        background: `${color}1A`, border: `1px solid ${color}44`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: 16, flexShrink: 0,
+      }}>{icon}</div>
+
+      {/* Title + valor grande · ocupa el centro */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 11, fontWeight: 800, color: C.muted, letterSpacing: '.08em', textTransform: 'uppercase' }}>
+            {title}
+          </span>
+          <span style={{ fontSize: 18, fontWeight: 900, color, lineHeight: 1, fontStyle: 'italic', fontVariantNumeric: 'tabular-nums' }}>
+            {value}
+          </span>
+          {valueLabel && (
+            <span style={{ fontSize: 10, color: C.muted, fontWeight: 600 }}>{valueLabel}</span>
+          )}
         </div>
+        <p style={{ fontSize: 11, color: C.text, opacity: 0.7, margin: '4px 0 0', lineHeight: 1.4 }}>
+          {context}
+        </p>
       </div>
-      <AlertBadge kind={alert} small>{label}</AlertBadge>
+
+      {/* Alert badge en columna derecha */}
+      <div style={{ flexShrink: 0 }}>
+        <AlertBadge kind={alert} small>{label}</AlertBadge>
+      </div>
     </div>
+
+    {/* Progress bar al final */}
     <div style={{ height: 4, borderRadius: 2, background: C.line, overflow: 'hidden' }}>
       <div style={{ height: '100%', width: `${pct}%`, background: color, transition: 'width .8s ease' }} />
     </div>
@@ -333,9 +379,21 @@ const VoltaDashboard: React.FC = () => {
         {/* WELLNESS HOY */}
         <Sec style={{ marginBottom: 8 }}>Wellness hoy</Sec>
         <div style={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 18, padding: 14, marginBottom: 14 }}>
-          <WellnessRow icon="💓" title="HRV" sub="-1.8σ del baseline" pct={28} color={C.red} alert="critical" label="🔴 CRÍTICO" />
-          <WellnessRow icon="😴" title="Sueño" sub="Score 64 · 3° día bajo" pct={42} color={C.amber} alert="warning" label="⚠ CRÓNICO" />
-          <WellnessRow icon="☕" title="Cafeína" sub="C_residual 88mg · curfew OK" pct={62} color={C.cyan} alert="info" label="ⓘ INFO" />
+          <WellnessRow
+            icon="💓" title="HRV" value="52" valueLabel="ms · -1.8σ"
+            context="3 días bajo tu baseline. Sistema nervioso bajo carga: priorizá sueño."
+            pct={28} color={C.red} alert="critical" label="🔴 CRÍTICO"
+          />
+          <WellnessRow
+            icon="😴" title="Sueño" value="64" valueLabel="/100"
+            context="Tercer día por debajo. Acumulás deuda de sueño · objetivo 8h hoy."
+            pct={42} color={C.amber} alert="warning" label="⚠ CRÓNICO"
+          />
+          <WellnessRow
+            icon="☕" title="Cafeína" value="88" valueLabel="mg residual"
+            context="Última toma 200mg hace 2.5h. Curfew 19hs OK · no afecta sueño."
+            pct={62} color={C.cyan} alert="info" label="ⓘ INFO"
+          />
         </div>
 
         {/* QUESTS DE LA SEMANA */}
