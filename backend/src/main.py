@@ -113,7 +113,17 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-origins = os.getenv("CORS_ORIGINS", "*").split(",")
+# CORS:
+# - Default explícito (no "*") porque `allow_credentials=True` + `*` viola spec
+#   y el middleware NO emite el header → frontend ve "Failed to fetch".
+# - Override con env var CORS_ORIGINS (comma-separated) si necesitás más dominios.
+_default_origins = (
+    "https://holy-oly.onrender.com,"
+    "https://holy-oly-3.onrender.com,"
+    "http://localhost:5173,"
+    "http://localhost:3000"
+)
+origins = [o.strip() for o in os.getenv("CORS_ORIGINS", _default_origins).split(",") if o.strip()]
 
 app.add_middleware(
     RateLimitMiddleware,

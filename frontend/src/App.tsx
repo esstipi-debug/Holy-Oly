@@ -234,6 +234,8 @@ function AppInner() {
         case 'BASELINE':              return <BaselineAssessment />;
         case 'VOLTA_STATS':           return <VoltaStats />;
         case 'VOLTA_WOD_LOG':         return <LogWodResult />;
+        case 'PREMIUM':               return <Premium />;
+        case 'ONBOARDING':            return <Onboarding />;
         case 'VOLTA_HOME':
         case 'HOME':
         default:
