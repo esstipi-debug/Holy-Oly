@@ -7,7 +7,16 @@ from typing import Optional
 from dataclasses import dataclass, field
 
 from ..infrastructure.mistral_provider import mistral_provider
-from ..rag.service import search_documents
+
+try:
+    from ..infrastructure.gemini_provider import gemini_provider
+except Exception:  # pragma: no cover - optional dependency
+    gemini_provider = None
+
+try:
+    from ..rag.service import search_documents
+except Exception:  # pragma: no cover
+    search_documents = None  # type: ignore
 
 
 @dataclass
@@ -83,6 +92,28 @@ def _build_athlete_profile(ctx: AthleteContext) -> str:
     return "\n".join(lines)
 
 
+def _generate_with_fallback(prompt: str, system: Optional[str] = None) -> str:
+    """Intenta Mistral primero, cae a Gemini si falla o no está configurado."""
+    # Try Mistral
+    try:
+        out = mistral_provider.generate(prompt, model="mistral-small-2603", system_instruction=system)
+        if out and not out.startswith("Mistral error") and not out.startswith("Mistral not configured"):
+            return out
+    except Exception as e:
+        print(f"[SmartCoach] Mistral failed: {e}")
+
+    # Fallback Gemini
+    if gemini_provider is not None:
+        try:
+            out = gemini_provider.generate_flash(prompt, system_instruction=system)
+            if out and not out.startswith("Gemini not configured"):
+                return out
+        except Exception as e:
+            print(f"[SmartCoach] Gemini failed: {e}")
+
+    return "Por ahora estoy sin conexión a mi cerebro. Probá de nuevo en un momento."
+
+
 def run_smart_coach(
     question: str,
     athlete_ctx: AthleteContext,
@@ -95,8 +126,14 @@ def run_smart_coach(
     2. Armar profile del atleta
     3. Llamar Mistral con prompt combinado
     """
-    # 1. RAG
-    results = search_documents(query=question, k=k)
+    # 1. RAG (optional — falla silencioso si Vertex/ADC no configurado)
+    results = []
+    if search_documents is not None:
+        try:
+            results = search_documents(query=question, k=k)
+        except Exception as e:
+            print(f"[SmartCoach] RAG unavailable: {e}")
+            results = []
     rag_parts = []
     for i, r in enumerate(results, 1):
         rag_parts.append(f"[{i}] ({r.get('source', '?')})\n{r.get('content', '')}")
@@ -115,7 +152,7 @@ def run_smart_coach(
         question=question,
     )
 
-    answer = mistral_provider.generate(prompt, model="mistral-small-2603")
+    answer = _generate_with_fallback(prompt)
 
     sources = list({r.get("source", "") for r in results if r.get("source")})
 

@@ -20,6 +20,7 @@ from .api.admin import router as admin_router
 from .rag.router import router as rag_router
 from .rag.feedback import router as rag_feedback_router
 from .coach.router import router as coach_router
+from .coach.wise_router import router as wise_router
 from .api.middleware import SecurityLoggingMiddleware, RateLimitMiddleware
 from .agents.response_agent.router import router as response_router, set_handlers
 from .agents.router import router as agents_router
@@ -150,6 +151,7 @@ app.include_router(router)
 app.include_router(rag_router)
 app.include_router(rag_feedback_router)
 app.include_router(coach_router)
+app.include_router(wise_router)
 app.include_router(response_router)
 app.include_router(agents_router)
 

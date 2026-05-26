@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useRole } from '../context/RoleContext';
 import { useProduct } from '../context/ProductContext';
+import { useAuth } from '../context/AuthContext';
+import { pickPhrase } from '../data/wisePhrases';
 
 const C = {
   cyan: '#00E5FF',
@@ -13,37 +15,59 @@ const C = {
   muted: '#52527A',
 };
 
-type Msg = { role: 'user' | 'wise'; content: string; ts: number };
+type Msg = {
+  role: 'user' | 'wise';
+  content: string;
+  phrase?: string | null;
+  level?: 'llm' | 'lite' | 'local';
+  ts: number;
+};
 
-// Stub respuestas WISE — pattern matching simple hasta que se conecte al backend
-function wiseReply(q: string, ctx: string): string {
-  const lower = q.toLowerCase();
-  if (lower.includes('marco') && (lower.includes('hrv') || lower.includes('cómo está'))) {
-    return `Marco Torres tiene HRV crítico (-1.8σ del baseline) hace 3 días. Recomendación: WOD modificado al 80% o descanso activo. Su Wise Score subiría +50 con un rest day vs +30 con WOD modificado.`;
+// API base (mismo patrón que lib/api.ts)
+const API_URL =
+  (import.meta as any).env?.VITE_API_URL ??
+  ((import.meta as any).env?.DEV ? '' : 'https://holy-oly-3.onrender.com');
+
+// Tier limits — el spec menciona 5 mensajes/semana en FREE
+const FREE_WEEKLY_LIMIT = 5;
+const QUOTA_KEY = 'wise.quota.v1';
+
+interface QuotaState {
+  weekStart: number; // timestamp del lunes de la semana
+  count: number;
+}
+
+function getWeekStart(): number {
+  const d = new Date();
+  const day = (d.getDay() + 6) % 7; // lunes=0
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() - day);
+  return d.getTime();
+}
+
+function loadQuota(): QuotaState {
+  try {
+    const raw = localStorage.getItem(QUOTA_KEY);
+    if (raw) {
+      const q = JSON.parse(raw) as QuotaState;
+      if (q.weekStart === getWeekStart()) return q;
+    }
+  } catch {
+    /* ignore */
   }
-  if (lower.includes('wod') && (lower.includes('crear') || lower.includes('hacer') || lower.includes('hoy'))) {
-    return `Para el box hoy te sugiero: AMRAP 20min con 5 C&J · 10 Pull-ups · 15 Box Jumps. Con 1 atleta en HRV crítico (Marco) y 2 en watch, escalá a 80% para esos 3. Los otros 3 pueden ir Rx. ¿Te lo armo en el planificador?`;
+  return { weekStart: getWeekStart(), count: 0 };
+}
+
+function saveQuota(q: QuotaState) {
+  try {
+    localStorage.setItem(QUOTA_KEY, JSON.stringify(q));
+  } catch {
+    /* ignore */
   }
-  if (lower.includes('macro') || lower.includes('periodiz')) {
-    return `Estás en semana 4/8 del bloque Conditioning. Adherencia promedio: 71%. Pablo Iglesias está en 38% — riesgo de salir del bloque. Sugerencia: 1:1 esta semana o reasignar a un macrociclo más liviano.`;
-  }
-  if (lower.includes('lesion') || lower.includes('riesgo')) {
-    return `Atletas en riesgo: Marco (HRV crítico), Pablo (V-Form rojo + HRV bajo). Diego en watch (HRV amber). Nadie con lesión activa registrada. Activá Injury Shield si Pablo no mejora en 48h.`;
-  }
-  if (lower.includes('comparar') || lower.includes('vs')) {
-    return `Decime los 2-3 atletas que querés comparar y armo la tabla con: CF Index, V-Form, HRV, adherencia, último PR.`;
-  }
-  if (lower.includes('hola') || lower.includes('hey') || lower.includes('buenas')) {
-    return `Hey coach. Estoy mirando ${ctx}. ¿Necesitás revisar a alguien, planificar el WOD de hoy o ver tendencias del box?`;
-  }
-  if (lower.includes('top') || lower.includes('mejor')) {
-    return `Top 3 esta semana: Camila Vega (CF 89, adherencia 94%), Lucía Ramos (CF 81, 88%), Sofía Méndez (CF 76, 71%). Camila lleva PR Snatch +3kg.`;
-  }
-  return `Tengo el contexto del box y los 6 atletas activos. Puedo ayudarte con: estado de un atleta, sugerir WOD del día, revisar macrociclo, detectar riesgos, comparar atletas o resumir tendencias. ¿Por dónde arrancamos?`;
 }
 
 const SUGGESTIONS_COACH = [
-  '¿Cómo está Marco?',
+  '¿Cómo está el box hoy?',
   'Sugerí el WOD de hoy',
   'Atletas en riesgo',
   'Top performers semana',
@@ -53,40 +77,63 @@ const SUGGESTIONS_ATHLETE_HO = [
   '¿Estoy listo para entrenar?',
   '¿Cómo voy con la arrancada?',
   'Tip de técnica',
-  'Plan de la semana',
+  'Estoy cansado, ¿qué hago?',
 ];
 
 const SUGGESTIONS_ATHLETE_VOLTA = [
   '¿Cómo está mi HRV?',
   'Sugerí escalado para hoy',
-  'Mi progreso del mes',
-  'Próximo nivel · pull-ups',
+  'Tip para mi snatch',
+  'Estoy cansado',
 ];
 
-function wiseGreeting(role: 'atleta' | 'coach', product: 'holy-oly' | 'volta'): string {
+function wiseGreeting(role: 'atleta' | 'coach', product: 'holy-oly' | 'volta', name?: string): string {
+  const who = name ? `, ${name}` : '';
   if (role === 'coach') {
-    return `Hey coach. Soy WISE, tu asistente del box. Tengo el contexto de los 6 atletas activos, el WOD de hoy y el macrociclo en curso. ¿En qué te ayudo?`;
+    return `Hey coach${who}. Soy WISE. Tengo el contexto del box, los atletas activos y el WOD del día. ¿En qué te ayudo?`;
   }
   if (product === 'volta') {
-    return `Hola. Soy WISE, tu asistente. Te ayudo a leer tu HRV, escalar el WOD del día y trackear progresión. ¿Por dónde arrancamos?`;
+    return `Hola${who}. Soy WISE. Te leo el HRV, te escalo el WOD y trackeo progresión. ¿Por dónde arrancamos?`;
   }
-  return `Hola. Soy WISE, tu asistente. Conozco tu macrociclo, tus máximos y tu readiness. Preguntame si te conviene cargar hoy o necesitás tip técnico.`;
+  return `Hola${who}. Soy WISE. Conozco tu macrociclo, tus máximos y tu readiness. ¿Te conviene cargar hoy o necesitás tip técnico?`;
 }
 
 interface Props {
-  context?: string; // ej. "Volta Coach · WOD Builder"
-  /** Distancia desde el fondo en px. Subí este valor en pantallas con CTA sticky. */
+  context?: string;
   bottomOffset?: number;
+  /** Datos del atleta para pasar al backend (HRV, racha, etc). Opcional. */
+  athleteContext?: {
+    name?: string;
+    sport?: string;
+    streak_days?: number;
+    hrv?: number;
+    hrv_baseline?: number;
+    sleep_hours?: number;
+    vform_color?: 'green' | 'yellow' | 'red';
+    belt?: string;
+    last_pr?: string;
+    macro_block?: string;
+  };
 }
 
-const WiseAssistant: React.FC<Props> = ({ context = 'Volta Coach', bottomOffset = 96 }) => {
+const WiseAssistant: React.FC<Props> = ({
+  context = 'Volta Coach',
+  bottomOffset = 96,
+  athleteContext,
+}) => {
   const { role } = useRole();
   const { product } = useProduct();
+  const { user, token } = useAuth();
   const [open, setOpen] = useState(false);
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [input, setInput] = useState('');
   const [typing, setTyping] = useState(false);
+  const [quota, setQuota] = useState<QuotaState>(loadQuota);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const tier = (user as any)?.tier as string | undefined;
+  const isFree = !tier || tier === 'trial' || tier === 'free';
+  const remaining = isFree ? Math.max(0, FREE_WEEKLY_LIMIT - quota.count) : Infinity;
 
   const suggestions = role === 'coach'
     ? SUGGESTIONS_COACH
@@ -110,30 +157,125 @@ const WiseAssistant: React.FC<Props> = ({ context = 'Volta Coach', bottomOffset 
       setTimeout(() => {
         setMsgs([{
           role: 'wise',
-          content: wiseGreeting(role, product),
+          content: wiseGreeting(role, product, user?.name),
           ts: Date.now(),
         }]);
       }, 200);
     }
-  }, [open, msgs.length, role, product]);
+  }, [open, msgs.length, role, product, user?.name]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [msgs, typing]);
 
-  const send = (text: string) => {
+  const localFallback = (q: string): Msg => {
+    // Fallback de último recurso si el backend cae completamente
+    const lq = q.toLowerCase();
+    let answer = `Estoy con vos. Decime qué pasa con el entreno y te ayudo concreto.`;
+    let phraseCtx: Parameters<typeof pickPhrase>[0] = 'default';
+
+    if (lq.includes('cansado') || lq.includes('fatig')) {
+      answer = 'Si estás cansado escuchá. Movilidad + zona 1, 30min. Mañana revisás HRV.';
+      phraseCtx = 'tired';
+    } else if (lq.includes('hrv') || lq.includes('listo')) {
+      if (athleteContext?.vform_color === 'red') {
+        answer = 'V-Form rojo. Hoy es descanso o técnica al 60%.';
+        phraseCtx = 'vform_red';
+      } else if (athleteContext?.vform_color === 'yellow') {
+        answer = 'V-Form amarillo. Trabajá al 80%, foco en técnica.';
+        phraseCtx = 'vform_yellow';
+      } else {
+        answer = 'Sin datos claros de HRV, asumí día normal. Calentá y leé las primeras series.';
+      }
+    } else if (lq.includes('snatch') || lq.includes('arrancad')) {
+      answer = 'Foco en primera tracción lenta, segunda explosiva. Complejo snatch pull + hang snatch + snatch al 75%, 4x3.';
+    } else if (lq.includes('streak') || lq.includes('racha')) {
+      phraseCtx = 'streak';
+    }
+
+    return {
+      role: 'wise',
+      content: answer,
+      phrase: pickPhrase(phraseCtx, {
+        name: user?.name,
+        streak: athleteContext?.streak_days,
+      }),
+      level: 'local',
+      ts: Date.now(),
+    };
+  };
+
+  const send = async (text: string) => {
     const q = text.trim();
-    if (!q) return;
-    const userMsg: Msg = { role: 'user', content: q, ts: Date.now() };
-    setMsgs(prev => [...prev, userMsg]);
+    if (!q || typing) return;
+
+    // Quota check FREE tier
+    if (isFree && remaining <= 0) {
+      setMsgs(prev => [
+        ...prev,
+        { role: 'user', content: q, ts: Date.now() },
+        {
+          role: 'wise',
+          content: `Llegaste al límite de ${FREE_WEEKLY_LIMIT} mensajes/semana del plan FREE. Subí a PRO para WISE ilimitado.`,
+          ts: Date.now(),
+        },
+      ]);
+      setInput('');
+      return;
+    }
+
+    setMsgs(prev => [...prev, { role: 'user', content: q, ts: Date.now() }]);
     setInput('');
     setTyping(true);
-    // Simular delay de pensamiento
-    const delay = 600 + Math.random() * 800;
-    setTimeout(() => {
-      setMsgs(prev => [...prev, { role: 'wise', content: wiseReply(q, context), ts: Date.now() }]);
+
+    // Update quota
+    if (isFree) {
+      const next = { ...quota, count: quota.count + 1 };
+      setQuota(next);
+      saveQuota(next);
+    }
+
+    try {
+      const res = await fetch(`${API_URL}/v1/wise/ask`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          question: q,
+          athlete_id: user?.id,
+          name: user?.name,
+          role: role === 'coach' ? 'coach' : 'athlete',
+          product,
+          tier,
+          ...(athleteContext ?? {}),
+        }),
+      });
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = (await res.json()) as {
+        answer: string;
+        phrase?: string | null;
+        level: 'llm' | 'lite';
+      };
+
+      setMsgs(prev => [
+        ...prev,
+        {
+          role: 'wise',
+          content: data.answer,
+          phrase: data.phrase ?? null,
+          level: data.level,
+          ts: Date.now(),
+        },
+      ]);
+    } catch (err) {
+      console.warn('[WISE] backend fail, using local fallback', err);
+      setMsgs(prev => [...prev, localFallback(q)]);
+    } finally {
       setTyping(false);
-    }, delay);
+    }
   };
 
   return (
@@ -196,6 +338,7 @@ const WiseAssistant: React.FC<Props> = ({ context = 'Volta Coach', bottomOffset 
                   <p style={{ fontSize: 14, fontWeight: 900, color: C.text, letterSpacing: '.02em' }}>WISE</p>
                   <p style={{ fontSize: 9, color: brandStatusColor, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase' }}>
                     ● {context}
+                    {isFree && ` · ${remaining} / ${FREE_WEEKLY_LIMIT}`}
                   </p>
                 </div>
               </div>
@@ -224,16 +367,32 @@ const WiseAssistant: React.FC<Props> = ({ context = 'Volta Coach', bottomOffset 
                       flexShrink: 0, fontSize: 12,
                     }}>✦</div>
                   )}
-                  <div style={{
-                    maxWidth: '78%',
-                    padding: '10px 13px',
-                    background: m.role === 'user' ? brandAccent : C.surface,
-                    color: m.role === 'user' ? '#07070F' : C.text,
-                    border: m.role === 'user' ? 'none' : `1px solid ${C.line}`,
-                    borderRadius: m.role === 'user' ? '16px 16px 4px 16px' : '4px 16px 16px 16px',
-                    fontSize: 12, lineHeight: 1.5, fontWeight: m.role === 'user' ? 600 : 400,
-                    whiteSpace: 'pre-wrap',
-                  }}>{m.content}</div>
+                  <div style={{ maxWidth: '78%', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <div style={{
+                      padding: '10px 13px',
+                      background: m.role === 'user' ? brandAccent : C.surface,
+                      color: m.role === 'user' ? '#07070F' : C.text,
+                      border: m.role === 'user' ? 'none' : `1px solid ${C.line}`,
+                      borderRadius: m.role === 'user' ? '16px 16px 4px 16px' : '4px 16px 16px 16px',
+                      fontSize: 12, lineHeight: 1.5, fontWeight: m.role === 'user' ? 600 : 400,
+                      whiteSpace: 'pre-wrap',
+                    }}>{m.content}</div>
+                    {m.phrase && (
+                      <div style={{
+                        padding: '8px 12px',
+                        background: `rgba(${brandAccentRgb},0.08)`,
+                        border: `1px dashed rgba(${brandAccentRgb},0.35)`,
+                        borderRadius: 12,
+                        fontSize: 11,
+                        lineHeight: 1.45,
+                        color: brandAccent,
+                        fontStyle: 'italic',
+                        fontWeight: 600,
+                      }}>
+                        “{m.phrase}”
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
               {typing && (
@@ -294,24 +453,26 @@ const WiseAssistant: React.FC<Props> = ({ context = 'Volta Coach', bottomOffset 
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && send(input)}
-                placeholder="Preguntale a WISE…"
+                placeholder={isFree && remaining <= 0 ? 'Sin mensajes esta semana — pasá a PRO' : 'Preguntale a WISE…'}
+                disabled={isFree && remaining <= 0}
                 style={{
                   flex: 1, padding: '12px 14px',
                   background: C.surface, border: `1px solid ${C.line}`,
                   borderRadius: 14, fontSize: 13, color: C.text,
                   fontFamily: 'inherit', outline: 'none',
+                  opacity: isFree && remaining <= 0 ? 0.5 : 1,
                 }}
               />
               <button
                 onClick={() => send(input)}
-                disabled={!input.trim() || typing}
+                disabled={!input.trim() || typing || (isFree && remaining <= 0)}
                 style={{
                   width: 44, height: 44, borderRadius: 14,
-                  background: input.trim() && !typing ? brandGradient : C.surface,
-                  color: input.trim() && !typing ? '#07070F' : C.muted,
-                  border: input.trim() && !typing ? 'none' : `1px solid ${C.line}`,
+                  background: input.trim() && !typing && remaining > 0 ? brandGradient : C.surface,
+                  color: input.trim() && !typing && remaining > 0 ? '#07070F' : C.muted,
+                  border: input.trim() && !typing && remaining > 0 ? 'none' : `1px solid ${C.line}`,
                   fontSize: 16, fontWeight: 900,
-                  cursor: input.trim() && !typing ? 'pointer' : 'not-allowed',
+                  cursor: input.trim() && !typing && remaining > 0 ? 'pointer' : 'not-allowed',
                   fontFamily: 'inherit',
                 }}
               >→</button>
