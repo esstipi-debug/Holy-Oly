@@ -40,7 +40,20 @@ interface SetLog {
   weight: number;
   reps: number;
   result: 'completed' | 'failed';
+  edited_at?: string;
+  /** Si este set disparó un PR (para idempotencia al anular). */
+  pr_celebration_id?: 'pr_snatch' | 'pr_clean';
 }
+
+/** Formato corto en español: "vie 23 may". */
+const formatShortDate = (iso: string): string => {
+  try {
+    const d = new Date(iso + 'T00:00:00');
+    return d.toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' }).replace(/\./g, '');
+  } catch {
+    return iso;
+  }
+};
 
 interface WarmupSet {
   pct: number;        // % de 1RM
@@ -96,6 +109,27 @@ const ActiveSession: React.FC = () => {
   const [seconds, setSeconds] = useState(0);
   /** Tracking de warmup sets completados por ejercicio. */
   const [warmupDone, setWarmupDone] = useState<Record<number, Set<number>>>({});
+  /** Calentamientos que el atleta saltó explícitamente (persistido en summary). */
+  const [skippedWarmup, setSkippedWarmup] = useState<Record<number, boolean>>({});
+  /** Set actualmente en modo edición (inline). Formato: "exIdx:setIdx" o null. */
+  const [editingSet, setEditingSet] = useState<string | null>(null);
+  /** Set con menú de acciones abierto (inline toggle). Formato: "exIdx:setIdx" o null. */
+  const [setMenuOpen, setSetMenuOpen] = useState<string | null>(null);
+  /** Valores temporales del editor inline. */
+  const [editWeight, setEditWeight] = useState('');
+  const [editReps, setEditReps] = useState('');
+
+  /** Fechas del entreno (banner fuera-de-fecha). */
+  const todayISO = new Date().toISOString().slice(0, 10);
+  const [plannedDate] = useState<string>(() => {
+    try {
+      return localStorage.getItem('active_session:planned_date') || todayISO;
+    } catch {
+      return todayISO;
+    }
+  });
+  const [bannerVisible, setBannerVisible] = useState(true);
+  const outOfDate = plannedDate !== todayISO;
 
   // Crono
   useEffect(() => {
@@ -130,6 +164,17 @@ const ActiveSession: React.FC = () => {
     const w = parseFloat(weight) || 0;
     const r = parseInt(reps) || 0;
     if (w === 0 || r === 0) return;
+    // PR detection (computado antes para poder marcar el set con pr_celebration_id)
+    let prCelebrationId: 'pr_snatch' | 'pr_clean' | undefined;
+    let prDelta = 0;
+    if (result === 'completed' && athlete && r >= 1) {
+      const pr = exerciseToPRTarget(current.name, athlete.maxes);
+      if (pr && w > pr.max && !prFiredFor.has(pr.celebrationId)) {
+        prCelebrationId = pr.celebrationId;
+        prDelta = Math.round((w - pr.max) * 10) / 10;
+      }
+    }
+
     let inserted = false;
     // Guard race-condition-safe: lee dentro del updater, no del closure.
     // Sin esto, clicks rápidos (programatic o doble-tap) en el mismo frame
@@ -141,36 +186,235 @@ const ActiveSession: React.FC = () => {
         return prev; // no-op
       }
       inserted = true;
-      return { ...prev, [exIdx]: [...existing, { weight: w, reps: r, result }] };
+      const newSet: SetLog = { weight: w, reps: r, result };
+      if (prCelebrationId) newSet.pr_celebration_id = prCelebrationId;
+      return { ...prev, [exIdx]: [...existing, newSet] };
     });
     if (!inserted) return;
     setWeight(String(targetWeight));
     setReps(String(current.targetReps));
 
-    // Auto-PR detection: solo en sets completados con reps ≥ 1 que superen el max conocido
-    if (result === 'completed' && athlete && r >= 1) {
-      const pr = exerciseToPRTarget(current.name, athlete.maxes);
-      if (pr && w > pr.max && !prFiredFor.has(pr.celebrationId)) {
-        const delta = Math.round((w - pr.max) * 10) / 10;
-        setPrFiredFor(prev => new Set(prev).add(pr.celebrationId));
-        try {
-          localStorage.setItem('social:preferred_celebration', pr.celebrationId);
-          localStorage.setItem('social:preferred_variant', 'stadium');
-          localStorage.setItem('social:pr_value', String(w));
-          localStorage.setItem('social:pr_delta', String(delta));
-        } catch { /* ignore */ }
-        showToast({
-          message: `🔥 NUEVO PR · ${pr.label} ${w}kg (+${delta}kg)`,
-          variant: 'success',
-          duration: 3500,
-        });
-      }
+    if (prCelebrationId && athlete) {
+      const pr = exerciseToPRTarget(current.name, athlete.maxes)!;
+      setPrFiredFor(prev => new Set(prev).add(prCelebrationId!));
+      try {
+        localStorage.setItem('social:preferred_celebration', prCelebrationId);
+        localStorage.setItem('social:preferred_variant', 'stadium');
+        localStorage.setItem('social:pr_value', String(w));
+        localStorage.setItem('social:pr_delta', String(prDelta));
+      } catch { /* ignore */ }
+      showToast({
+        message: `🔥 NUEVO PR · ${pr.label} ${w}kg (+${prDelta}kg)`,
+        variant: 'success',
+        duration: 3500,
+      });
     }
+  };
+
+  /** Toggle completed ↔ failed sobre un set ya logueado. */
+  const toggleSetResult = (setIdx: number) => {
+    setLogs(prev => {
+      const existing = prev[exIdx] ?? [];
+      if (setIdx < 0 || setIdx >= existing.length) return prev;
+      const next = existing.slice();
+      const old = next[setIdx];
+      next[setIdx] = {
+        ...old,
+        result: old.result === 'completed' ? 'failed' : 'completed',
+        edited_at: new Date().toISOString(),
+      };
+      return { ...prev, [exIdx]: next };
+    });
+    setSetMenuOpen(null);
+  };
+
+  /** Comenzar edición inline de peso/reps. */
+  const beginEditSet = (setIdx: number) => {
+    const existing = logs[exIdx] ?? [];
+    const s = existing[setIdx];
+    if (!s) return;
+    setEditWeight(String(s.weight));
+    setEditReps(String(s.reps));
+    setEditingSet(`${exIdx}:${setIdx}`);
+    setSetMenuOpen(null);
+  };
+
+  const commitEditSet = (setIdx: number) => {
+    const w = parseFloat(editWeight) || 0;
+    const r = parseInt(editReps) || 0;
+    if (w === 0 || r === 0) {
+      setEditingSet(null);
+      return;
+    }
+    setLogs(prev => {
+      const existing = prev[exIdx] ?? [];
+      if (setIdx < 0 || setIdx >= existing.length) return prev;
+      const next = existing.slice();
+      next[setIdx] = {
+        ...next[setIdx],
+        weight: w,
+        reps: r,
+        edited_at: new Date().toISOString(),
+      };
+      return { ...prev, [exIdx]: next };
+    });
+    setEditingSet(null);
+  };
+
+  /** Anula (elimina) un set. Si era el set que disparó un PR, limpia el localStorage social:* y libera el guard. */
+  const deleteSet = (setIdx: number) => {
+    const existing = logs[exIdx] ?? [];
+    const target = existing[setIdx];
+    if (!target) return;
+    if (!window.confirm('¿Eliminar este set? Esta acción no se puede deshacer.')) return;
+
+    setLogs(prev => {
+      const ex = prev[exIdx] ?? [];
+      if (setIdx < 0 || setIdx >= ex.length) return prev;
+      return { ...prev, [exIdx]: ex.filter((_, i) => i !== setIdx) };
+    });
+
+    // Si el set anulado había disparado un PR, limpiar idempotentemente.
+    if (target.pr_celebration_id) {
+      setPrFiredFor(prev => {
+        const next = new Set(prev);
+        next.delete(target.pr_celebration_id!);
+        return next;
+      });
+      try {
+        const stored = localStorage.getItem('social:preferred_celebration');
+        if (stored === target.pr_celebration_id) {
+          localStorage.removeItem('social:preferred_celebration');
+          localStorage.removeItem('social:preferred_variant');
+          localStorage.removeItem('social:pr_value');
+          localStorage.removeItem('social:pr_delta');
+        }
+      } catch { /* ignore */ }
+    }
+    setSetMenuOpen(null);
+    setEditingSet(null);
+  };
+
+  /** Saltar el ramp-up técnico: marca todos los warmup sets como done. */
+  const skipWarmup = () => {
+    if (!window.confirm('¿Saltar el ramp-up? El coach lo recomienda hacer.')) return;
+    setWarmupDone(prev => {
+      const all = new Set<number>();
+      for (let i = 0; i < current.warmupSets.length; i++) all.add(i);
+      return { ...prev, [exIdx]: all };
+    });
+    setSkippedWarmup(prev => ({ ...prev, [exIdx]: true }));
+  };
+
+  /**
+   * Persiste el resumen de la sesión a localStorage con métricas pre-calculadas
+   * para que VictoryScreen las consuma sin replicar lógica.
+   *
+   * IMR (Intensidad Media Relativa) = avg(weight / max_for_lift) * 100,
+   * promediado sobre los sets COMPLETADOS de toda la sesión. Sets fallidos
+   * no cuentan (no son trabajo efectivo).
+   *
+   * Tonelaje = Σ weight * reps (solo sets completados).
+   *
+   * Distribución por zona: cada set completado se asigna a una zona según
+   * % 1RM (Liviano <60 · Técnico 60-75 · Fuerza 75-90 · Máximo >90).
+   */
+  const persistSessionSummary = () => {
+    const ZONE_BOUNDS = { liviano: [0, 60], tecnico: [60, 75], fuerza: [75, 90], maximo: [90, Infinity] } as const;
+    const summaryExercises = exercises.map((ex, i) => {
+      const exLogs = logs[i] ?? [];
+      const sets_completed = exLogs.filter(l => l.result === 'completed').length;
+      const sets_failed = exLogs.filter(l => l.result === 'failed').length;
+      return {
+        name: ex.name,
+        targetSets: ex.targetSets,
+        targetReps: ex.targetReps,
+        pct: Math.round(ex.pct * 100),
+        max: ex.max,
+        sets_completed,
+        sets_failed,
+        skipped_warmup: !!skippedWarmup[i],
+        sets: exLogs.map(l => ({
+          weight: l.weight,
+          reps: l.reps,
+          result: l.result,
+          ...(l.edited_at ? { edited_at: l.edited_at } : {}),
+        })),
+      };
+    });
+
+    let total_tonelaje = 0;
+    let imrSum = 0;
+    let imrCount = 0;
+    const zone_distribution = { liviano: 0, tecnico: 0, fuerza: 0, maximo: 0 };
+
+    exercises.forEach((ex, i) => {
+      const exLogs = logs[i] ?? [];
+      exLogs.forEach(l => {
+        if (l.result !== 'completed') return;
+        total_tonelaje += l.weight * l.reps;
+        if (ex.max > 0) {
+          const pct = (l.weight / ex.max) * 100;
+          imrSum += pct;
+          imrCount += 1;
+          if (pct < ZONE_BOUNDS.liviano[1]) zone_distribution.liviano += 1;
+          else if (pct < ZONE_BOUNDS.tecnico[1]) zone_distribution.tecnico += 1;
+          else if (pct < ZONE_BOUNDS.fuerza[1]) zone_distribution.fuerza += 1;
+          else zone_distribution.maximo += 1;
+        }
+      });
+    });
+
+    const imr_pct = imrCount > 0 ? Math.round(imrSum / imrCount) : 0;
+
+    // PRs detectados: leídos del localStorage social:* que setea logSet
+    const prs_detected: Array<{ label: string; weight: number; delta: number }> = [];
+    try {
+      const cel = localStorage.getItem('social:preferred_celebration');
+      const w = parseFloat(localStorage.getItem('social:pr_value') || '0');
+      const d = parseFloat(localStorage.getItem('social:pr_delta') || '0');
+      if (cel && w > 0) {
+        const label = cel === 'pr_snatch' ? 'Snatch' : cel === 'pr_clean' ? 'Clean & Jerk' : 'PR';
+        prs_detected.push({ label, weight: w, delta: d });
+      }
+    } catch { /* ignore */ }
+
+    const summary = {
+      date: new Date().toISOString(),
+      planned_date: plannedDate,
+      actual_date: todayISO,
+      product: 'holy-oly' as const,
+      duration_seconds: seconds,
+      exercises: summaryExercises,
+      total_tonelaje: Math.round(total_tonelaje),
+      imr_pct,
+      zone_distribution,
+      prs_detected,
+    };
+
+    try {
+      localStorage.setItem('last_session:summary', JSON.stringify(summary));
+      localStorage.setItem(`active_session:${Date.now()}`, JSON.stringify(summary));
+    } catch { /* ignore quota */ }
+
+    return summary;
+  };
+
+  const finishSession = () => {
+    const summary = persistSessionSummary();
+    const mmFin = Math.floor(summary.duration_seconds / 60).toString().padStart(2, '0');
+    const ssFin = (summary.duration_seconds % 60).toString().padStart(2, '0');
+    showToast({
+      message: `✓ Sesión guardada · ${summary.total_tonelaje.toLocaleString('es')}kg en ${mmFin}:${ssFin}`,
+      variant: 'success',
+      duration: 3000,
+    });
+    navigate('VICTORY');
   };
 
   const goNextExercise = () => {
     if (exIdx < exercises.length - 1) setExIdx(exIdx + 1);
-    else navigate('VICTORY');
+    else finishSession();
   };
 
   const goPrevExercise = () => {
@@ -192,8 +436,40 @@ const ActiveSession: React.FC = () => {
     });
   };
 
+  const showBanner = outOfDate && bannerVisible;
+
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100%', paddingBottom: allDone ? 180 : 100 }}>
+
+      {/* BANNER · entrenando fuera de fecha */}
+      {showBanner && (
+        <div style={{
+          position: 'sticky', top: 0, zIndex: 11,
+          height: 44,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '0 14px',
+          background: 'rgba(245,158,11,0.10)',
+          borderBottom: '1px solid rgba(245,158,11,0.30)',
+          color: '#F59E0B',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, fontWeight: 800, letterSpacing: '.01em', overflow: 'hidden' }}>
+            <span style={{ fontSize: 14 }}>📅</span>
+            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              Entrenando fuera de fecha · esperado: {formatShortDate(plannedDate)} · hoy: {formatShortDate(todayISO)}
+            </span>
+          </div>
+          <button
+            onClick={() => setBannerVisible(false)}
+            aria-label="Cerrar banner"
+            style={{
+              background: 'transparent', border: 'none',
+              color: '#F59E0B', fontSize: 16, fontWeight: 900,
+              cursor: 'pointer', padding: '0 6px', fontFamily: 'inherit',
+              flexShrink: 0,
+            }}
+          >×</button>
+        </div>
+      )}
 
       {/* HEADER */}
       <div style={{
@@ -250,7 +526,7 @@ const ActiveSession: React.FC = () => {
               }}
             >← Ant</button>
             <button
-              onClick={() => navigate('VICTORY')}
+              onClick={finishSession}
               title="Terminar sesión"
               style={{
                 padding: '4px 8px', borderRadius: 8,
@@ -301,15 +577,31 @@ const ActiveSession: React.FC = () => {
               <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
                 Ramp-up técnico
               </p>
-              <span style={{
-                fontSize: 10, fontWeight: 700,
-                padding: '3px 8px', borderRadius: 10,
-                background: warmupComplete ? 'rgba(34,197,94,0.12)' : 'var(--surface)',
-                color: warmupComplete ? '#22C55E' : 'var(--text-secondary)',
-                border: `1px solid ${warmupComplete ? 'rgba(34,197,94,0.3)' : 'var(--card-border)'}`,
-              }}>
-                {currentWarmupDone.size}/{current.warmupSets.length} {warmupComplete ? '✓' : ''}
-              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                {!warmupComplete && (
+                  <button
+                    onClick={skipWarmup}
+                    style={{
+                      fontSize: 10, fontWeight: 700,
+                      padding: '3px 8px', borderRadius: 10,
+                      background: 'rgba(255,255,255,0.04)',
+                      color: 'var(--text-secondary)',
+                      border: '1px solid var(--card-border)',
+                      cursor: 'pointer', fontFamily: 'inherit',
+                      letterSpacing: '.02em',
+                    }}
+                  >⏩ Saltar calentamiento</button>
+                )}
+                <span style={{
+                  fontSize: 10, fontWeight: 700,
+                  padding: '3px 8px', borderRadius: 10,
+                  background: warmupComplete ? 'rgba(34,197,94,0.12)' : 'var(--surface)',
+                  color: warmupComplete ? '#22C55E' : 'var(--text-secondary)',
+                  border: `1px solid ${warmupComplete ? 'rgba(34,197,94,0.3)' : 'var(--card-border)'}`,
+                }}>
+                  {currentWarmupDone.size}/{current.warmupSets.length} {warmupComplete ? '✓' : ''}
+                </span>
+              </div>
             </div>
 
             <div style={{
@@ -488,28 +780,163 @@ const ActiveSession: React.FC = () => {
               Historial · {current.name}
             </p>
             <div style={{ background: 'var(--surface)', border: '1px solid var(--card-border)', borderRadius: 14, overflow: 'hidden', marginBottom: 20 }}>
-              {currentLogs.map((log, i) => (
-                <div key={i} style={{
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                  padding: '12px 14px',
-                  borderBottom: i < currentLogs.length - 1 ? '1px solid var(--card-border)' : 'none',
-                }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: '.06em' }}>
-                    Set {i + 1}
-                  </span>
-                  <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                    <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>
-                      {log.weight} kg
-                    </span>
-                    <span style={{ fontSize: 13, fontWeight: 800, color: log.result === 'completed' ? 'var(--primary)' : '#f87171', fontVariantNumeric: 'tabular-nums' }}>
-                      {log.reps} reps
-                    </span>
-                    <span style={{ fontSize: 14 }}>
-                      {log.result === 'completed' ? '✓' : '✗'}
-                    </span>
+              {currentLogs.map((log, i) => {
+                const rowKey = `${exIdx}:${i}`;
+                const isEditing = editingSet === rowKey;
+                const isMenuOpen = setMenuOpen === rowKey;
+                const isEdited = !!log.edited_at;
+                return (
+                  <div key={i} style={{
+                    borderBottom: i < currentLogs.length - 1 ? '1px solid var(--card-border)' : 'none',
+                  }}>
+                    {isEditing ? (
+                      /* Editor inline · peso + reps + confirmar/cancelar */
+                      <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--primary)', letterSpacing: '.06em' }}>
+                            Editar Set {i + 1}
+                          </span>
+                          <button
+                            onClick={() => setEditingSet(null)}
+                            style={{
+                              background: 'transparent', border: 'none',
+                              color: 'var(--text-secondary)', fontSize: 11, fontWeight: 700,
+                              cursor: 'pointer', fontFamily: 'inherit',
+                            }}
+                          >Cancelar</button>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                          <input
+                            type="number"
+                            step="0.5"
+                            value={editWeight}
+                            onChange={(e) => setEditWeight(e.target.value)}
+                            placeholder="kg"
+                            style={{
+                              padding: '10px 8px', background: 'var(--bg)',
+                              border: '1px solid var(--card-border)', borderRadius: 10,
+                              fontSize: 14, fontWeight: 800, color: 'var(--text)',
+                              fontFamily: 'inherit', textAlign: 'center', outline: 'none',
+                            }}
+                          />
+                          <input
+                            type="number"
+                            value={editReps}
+                            onChange={(e) => setEditReps(e.target.value)}
+                            placeholder="reps"
+                            style={{
+                              padding: '10px 8px', background: 'var(--bg)',
+                              border: '1px solid var(--card-border)', borderRadius: 10,
+                              fontSize: 14, fontWeight: 800, color: 'var(--text)',
+                              fontFamily: 'inherit', textAlign: 'center', outline: 'none',
+                            }}
+                          />
+                        </div>
+                        <div style={{ display: 'flex', gap: 6 }}>
+                          <button
+                            onClick={() => toggleSetResult(i)}
+                            style={{
+                              flex: 1, padding: '8px 0', borderRadius: 10,
+                              background: log.result === 'completed' ? 'rgba(239,68,68,0.08)' : 'rgba(34,197,94,0.10)',
+                              color: log.result === 'completed' ? '#f87171' : 'var(--primary)',
+                              border: `1px solid ${log.result === 'completed' ? 'rgba(239,68,68,0.25)' : 'rgba(34,197,94,0.30)'}`,
+                              fontSize: 10, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase',
+                              cursor: 'pointer', fontFamily: 'inherit',
+                            }}
+                          >{log.result === 'completed' ? '→ Marcar fallo' : '→ Marcar completado'}</button>
+                          <button
+                            onClick={() => commitEditSet(i)}
+                            style={{
+                              flex: 1, padding: '8px 0', borderRadius: 10,
+                              background: 'var(--cta-bg)', color: 'var(--cta-text)',
+                              border: 'none',
+                              fontSize: 11, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase',
+                              cursor: 'pointer', fontFamily: 'inherit',
+                            }}
+                          >Guardar</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => setSetMenuOpen(isMenuOpen ? null : rowKey)}
+                          style={{
+                            width: '100%', display: 'flex',
+                            justifyContent: 'space-between', alignItems: 'center',
+                            padding: '12px 14px',
+                            background: isMenuOpen ? 'rgba(255,255,255,0.04)' : 'transparent',
+                            border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+                            textAlign: 'left',
+                          }}
+                        >
+                          <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: '.06em', display: 'flex', alignItems: 'center', gap: 6 }}>
+                            Set {i + 1}
+                            {isEdited && (
+                              <span style={{
+                                fontSize: 8, fontWeight: 800, color: '#F59E0B',
+                                background: 'rgba(245,158,11,0.10)', padding: '1px 5px',
+                                borderRadius: 4, letterSpacing: '.04em',
+                              }}>EDIT</span>
+                            )}
+                          </span>
+                          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                            <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>
+                              {log.weight} kg
+                            </span>
+                            <span style={{ fontSize: 13, fontWeight: 800, color: log.result === 'completed' ? 'var(--primary)' : '#f87171', fontVariantNumeric: 'tabular-nums' }}>
+                              {log.reps} reps
+                            </span>
+                            <span style={{ fontSize: 14 }}>
+                              {log.result === 'completed' ? '✓' : '✗'}
+                            </span>
+                          </div>
+                        </button>
+                        {isMenuOpen && (
+                          <div style={{
+                            display: 'flex', gap: 6,
+                            padding: '0 14px 12px',
+                            background: 'rgba(255,255,255,0.02)',
+                          }}>
+                            <button
+                              onClick={() => beginEditSet(i)}
+                              style={{
+                                flex: 1, padding: '8px 0', borderRadius: 10,
+                                background: 'rgba(255,255,255,0.05)',
+                                color: 'var(--text)',
+                                border: '1px solid var(--card-border)',
+                                fontSize: 10, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase',
+                                cursor: 'pointer', fontFamily: 'inherit',
+                              }}
+                            >✏️ Editar</button>
+                            <button
+                              onClick={() => toggleSetResult(i)}
+                              style={{
+                                flex: 1, padding: '8px 0', borderRadius: 10,
+                                background: log.result === 'completed' ? 'rgba(239,68,68,0.08)' : 'rgba(34,197,94,0.10)',
+                                color: log.result === 'completed' ? '#f87171' : 'var(--primary)',
+                                border: `1px solid ${log.result === 'completed' ? 'rgba(239,68,68,0.25)' : 'rgba(34,197,94,0.30)'}`,
+                                fontSize: 10, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase',
+                                cursor: 'pointer', fontFamily: 'inherit',
+                              }}
+                            >{log.result === 'completed' ? '✗ Fallo' : '✓ Completado'}</button>
+                            <button
+                              onClick={() => deleteSet(i)}
+                              style={{
+                                flex: 1, padding: '8px 0', borderRadius: 10,
+                                background: 'rgba(239,68,68,0.08)',
+                                color: '#f87171',
+                                border: '1px solid rgba(239,68,68,0.25)',
+                                fontSize: 10, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase',
+                                cursor: 'pointer', fontFamily: 'inherit',
+                              }}
+                            >🗑 Anular</button>
+                          </div>
+                        )}
+                      </>
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </>
         )}
