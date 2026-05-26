@@ -24,6 +24,9 @@ CREDENTIALS_BACKUP.md
 # Render
 .render/
 
+# Claude session artifacts (contiene tokens JWT, configs locales)
+.claire/
+
 # Temp files
 backend/alloydb-auth-proxy.exe
 backend/check_env.py
