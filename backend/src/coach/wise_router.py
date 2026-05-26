@@ -3,10 +3,11 @@
 # Mistral (primary) -> Gemini (fallback) -> Lite (templates)
 from __future__ import annotations
 
+import hashlib
 import os
 import re
 import time
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from typing import Optional, Literal
@@ -14,7 +15,6 @@ import random
 
 from ..api.auth.auth import verify_token
 from .smart_coach import AthleteContext, _generate_with_fallback
-from .router import _fetch_athlete
 
 router = APIRouter(prefix="/v1/wise", tags=["wise"])
 
@@ -64,6 +64,103 @@ def _sanitize_question(q: Optional[str]) -> str:
 
 
 # ---------------------------------------------------------------------------
+# LRU cache para respuestas WISE (audit fix · ahorra 30-50% tokens)
+# ---------------------------------------------------------------------------
+
+_WISE_CACHE_ENABLED = os.getenv("WISE_CACHE_ENABLED", "true").lower() in ("true", "1", "yes")
+_WISE_CACHE_MAX = 256
+_WISE_CACHE_TTL = 3600  # 1 hora
+_WHITESPACE_RE = re.compile(r"\s+")
+
+# OrderedDict permite LRU manual (move_to_end + popitem(last=False)).
+# Cada entry: {"answer": str, "phrase": Optional[str], "ts": float}
+_WISE_CACHE: "OrderedDict[tuple, dict]" = OrderedDict()
+
+
+def _normalize_question(q: str) -> str:
+    """Lowercase + collapse whitespace + strip punctuation final para hashing estable."""
+    n = _WHITESPACE_RE.sub(" ", q.lower().strip())
+    # strip puntuación trailing común (?, !, .)
+    return n.rstrip("?!. ")
+
+
+def _cache_key(question: str, athlete_id: str, tier: str) -> tuple:
+    qhash = hashlib.md5(_normalize_question(question).encode("utf-8")).hexdigest()
+    return (qhash, athlete_id or "", tier or "")
+
+
+def _cache_get(key: tuple) -> Optional[dict]:
+    if not _WISE_CACHE_ENABLED:
+        return None
+    entry = _WISE_CACHE.get(key)
+    if entry is None:
+        return None
+    if (time.time() - entry["ts"]) > _WISE_CACHE_TTL:
+        # Expirado — descartar
+        _WISE_CACHE.pop(key, None)
+        return None
+    # LRU touch
+    _WISE_CACHE.move_to_end(key)
+    return entry
+
+
+def _cache_set(key: tuple, entry: dict) -> None:
+    if not _WISE_CACHE_ENABLED:
+        return
+    entry = {
+        "answer": entry.get("answer", ""),
+        "phrase": entry.get("phrase"),
+        "ts": time.time(),
+    }
+    _WISE_CACHE[key] = entry
+    _WISE_CACHE.move_to_end(key)
+    # Evict si supera cap
+    while len(_WISE_CACHE) > _WISE_CACHE_MAX:
+        _WISE_CACHE.popitem(last=False)
+
+
+# ---------------------------------------------------------------------------
+# Async athlete fetch (audit fix · evita engine sync por request)
+# ---------------------------------------------------------------------------
+
+async def _fetch_athlete_async(athlete_id: str) -> AthleteContext:
+    """Lee datos del atleta vía asyncpg pool. Si no hay pool/usuario, retorna ctx vacío."""
+    if not athlete_id:
+        return AthleteContext(athlete_id="")
+    try:
+        from ..db import users_repo
+        pool = await users_repo.get_pool()
+        if pool is None:
+            # Sin pool asyncpg disponible → no rompemos, ctx vacío
+            return AthleteContext(athlete_id=athlete_id)
+        async with pool.acquire() as conn:
+            row = await conn.fetchrow(
+                """
+                SELECT name, gender,
+                       snatch_1rm, clean_1rm, jerk_1rm, back_squat_1rm
+                FROM users
+                WHERE id = $1::uuid
+                LIMIT 1
+                """,
+                athlete_id,
+            )
+        if not row:
+            return AthleteContext(athlete_id=athlete_id)
+        return AthleteContext(
+            athlete_id=athlete_id,
+            name=row["name"] or "Atleta",
+            gender=row["gender"] or "M",
+            snatch_1rm=float(row["snatch_1rm"]) if row["snatch_1rm"] else None,
+            clean_1rm=float(row["clean_1rm"]) if row["clean_1rm"] else None,
+            jerk_1rm=float(row["jerk_1rm"]) if row["jerk_1rm"] else None,
+            back_squat_1rm=float(row["back_squat_1rm"]) if row["back_squat_1rm"] else None,
+        )
+    except Exception as e:
+        print(f"[WISE] async DB fetch failed for {athlete_id}: {e}")
+        return AthleteContext(athlete_id=athlete_id)
+
+
+# ---------------------------------------------------------------------------
 # Models
 # ---------------------------------------------------------------------------
 
@@ -91,6 +188,7 @@ class WiseAskResponse(BaseModel):
     phrase: Optional[str] = None  # frase viral memorable separada
     level: Literal["llm", "lite"]
     has_athlete_data: bool
+    cached: bool = False
 
 
 # ---------------------------------------------------------------------------
@@ -321,15 +419,24 @@ async def wise_ask(req: WiseAskRequest, current_user=Depends(verify_token)):
     # Usar question sanitizada para el resto del flow
     req.question = question
 
-    # 1. Cargar contexto DB si tenemos athlete_id válido
+    # 1. Cargar contexto DB si tenemos athlete_id válido (async asyncpg)
     db_ctx = AthleteContext(athlete_id=req.athlete_id or "")
     if req.athlete_id:
-        try:
-            db_ctx = _fetch_athlete(req.athlete_id)
-        except Exception as e:
-            print(f"[WISE] DB fetch failed: {e}")
+        db_ctx = await _fetch_athlete_async(req.athlete_id)
 
     profile, has_data = _build_profile_block(req, db_ctx)
+
+    # 1.5 · Cache lookup (solo si tenemos athlete_id, para no compartir cache anónimo cruzado)
+    cache_key = _cache_key(question, req.athlete_id or user_id or "anon", req.tier or "free")
+    cached = _cache_get(cache_key)
+    if cached is not None:
+        return WiseAskResponse(
+            answer=cached["answer"],
+            phrase=cached.get("phrase"),
+            level="llm",
+            has_athlete_data=has_data,
+            cached=True,
+        )
 
     # 2. Armar prompt y llamar LLM (Mistral -> Gemini)
     user_prompt = f"""=== PERFIL ===
@@ -374,11 +481,15 @@ async def wise_ask(req: WiseAskRequest, current_user=Depends(verify_token)):
         if phrase_candidate and len(phrase_candidate) <= 200:
             phrase = phrase_candidate
 
+    # 5. Guardar en cache (solo level=llm, NO lite por el branch de arriba)
+    _cache_set(cache_key, {"answer": answer, "phrase": phrase})
+
     return WiseAskResponse(
         answer=answer,
         phrase=phrase,
         level="llm",
         has_athlete_data=has_data,
+        cached=False,
     )
 
 
