@@ -28,6 +28,7 @@ from pydantic import BaseModel, Field, field_validator
 from ..auth.auth import verify_token
 from ..auth.jwt_utils import User
 from ...db import users_repo
+from ...services.push_sender import send_notification
 
 
 router = APIRouter(prefix="/v1/coach/skill-focus", tags=["skill-focus"])
@@ -256,9 +257,11 @@ async def update_skill_focus(
         async with pool.acquire() as conn:
             target = await conn.fetchrow(
                 """
-                SELECT id, coach_id, athlete_id, status
-                FROM coach_skill_focus
-                WHERE id = $1
+                SELECT f.id, f.coach_id, f.athlete_id, f.status,
+                       a.name AS athlete_name
+                FROM coach_skill_focus f
+                LEFT JOIN users a ON a.id = f.athlete_id
+                WHERE f.id = $1
                 """,
                 focus_id,
             )
@@ -292,7 +295,39 @@ async def update_skill_focus(
                 """,
                 payload.status, focus_id,
             )
-            return _row_to_response(dict(row))
+
+            response = _row_to_response(dict(row))
+
+        # Push notif al coach cuando el atleta marca dominated.
+        # Fuera del `async with conn` para no bloquear el release del pool.
+        # Coach que se updatea a sí mismo NO dispara push (achievement viene del atleta).
+        # Solo status='dominated' (active/retired no son achievement).
+        actor_is_athlete_only = is_athlete_target and not is_coach_owner
+        if payload.status == "dominated" and actor_is_athlete_only:
+            athlete_name = (
+                target["athlete_name"]
+                or (user.email.split("@")[0] if user.email else "Un atleta")
+            )
+            try:
+                # TODO: el frontend SW todavía no maneja deep links a /athlete-detail?id=...
+                # cuando se implemente, el click del push va a abrir la vista del atleta.
+                await send_notification(
+                    user_id=str(target["coach_id"]),
+                    payload={
+                        "title": "🎯 Foco dominado",
+                        "body": f"{athlete_name} marcó como dominado: {row['movement_id']}",
+                        "url": f"/athlete-detail?id={target['athlete_id']}",
+                        "icon": "/icon-192.png",
+                        "badge": "/icon-192.png",
+                        "tag": f"skill-dominated-{row['id']}",
+                    },
+                    ttl=86400,
+                )
+            except Exception as e:
+                # No romper el PATCH: el atleta debe ver éxito aunque la notif falle.
+                print(f"[skill_focus] push notif al coach falló: {e}")
+
+        return response
     except HTTPException:
         raise
     except Exception as e:
