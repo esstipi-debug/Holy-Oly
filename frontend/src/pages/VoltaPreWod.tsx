@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNav } from '../context/NavigationContext';
 import WiseAssistant from '../components/WiseAssistant';
-import WodTimer, { type WodMode } from '../components/wod/WodTimer';
 
 const C = {
   bg: '#07070F',
@@ -43,7 +42,6 @@ const Emoji: React.FC<{ children: React.ReactNode; active?: boolean; tint?: 'red
 
 const VoltaPreWod: React.FC = () => {
   const { navigate } = useNav();
-  const [timerMode, setTimerMode] = useState<WodMode | null>(null);
 
   // Cafeína: simulamos toma hace ~2.5h. Decaimiento exp con t1/2 = 5h.
   const intakeMg = 200;
@@ -182,42 +180,6 @@ const VoltaPreWod: React.FC = () => {
               Tomá descanso activo → +50 pts · Override → 0 pts
             </div>
           </div>
-        </div>
-
-        {/* TIMER PREVIEW · CrossFit canónico */}
-        <div style={{ marginTop: 18, marginBottom: 18 }}>
-          <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.08em', color: C.muted, textTransform: 'uppercase', marginBottom: 8 }}>
-            Practicar timer
-          </p>
-          {!timerMode ? (
-            <div style={{ display: 'flex', gap: 6 }}>
-              <button onClick={() => setTimerMode('amrap')}
-                style={{ flex: 1, padding: 10, background: 'rgba(0,229,255,0.10)', color: C.cyan, border: `1px solid ${C.cyan}55`, borderRadius: 10, fontSize: 11, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', textTransform: 'uppercase', letterSpacing: '.06em' }}>
-                AMRAP 20'
-              </button>
-              <button onClick={() => setTimerMode('emom')}
-                style={{ flex: 1, padding: 10, background: 'rgba(0,229,255,0.10)', color: C.cyan, border: `1px solid ${C.cyan}55`, borderRadius: 10, fontSize: 11, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', textTransform: 'uppercase', letterSpacing: '.06em' }}>
-                EMOM 10×1'
-              </button>
-              <button onClick={() => setTimerMode('for_time')}
-                style={{ flex: 1, padding: 10, background: 'rgba(0,229,255,0.10)', color: C.cyan, border: `1px solid ${C.cyan}55`, borderRadius: 10, fontSize: 11, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', textTransform: 'uppercase', letterSpacing: '.06em' }}>
-                For Time
-              </button>
-            </div>
-          ) : (
-            <>
-              <WodTimer
-                mode={timerMode}
-                durationSec={timerMode === 'amrap' ? 1200 : timerMode === 'emom' ? 60 : undefined}
-                totalRounds={10}
-                color={C.cyan}
-              />
-              <button onClick={() => setTimerMode(null)}
-                style={{ marginTop: 8, padding: 8, background: 'transparent', color: C.muted, border: 'none', fontSize: 10, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', width: '100%', textTransform: 'uppercase', letterSpacing: '.08em' }}>
-                ← Cambiar modo
-              </button>
-            </>
-          )}
         </div>
 
         {/* CTAS */}

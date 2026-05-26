@@ -470,8 +470,8 @@ const MovementProgression: React.FC = () => {
         </div>
       </div>
 
-      {/* SUBJECT TABS */}
-      <div className="scroll-x-no-bar" style={{ padding: '0 16px 14px', display: 'flex', gap: 6, overflowX: 'auto' }}>
+      {/* SUBJECT TABS · wrap a múltiples líneas (no scroll horizontal) */}
+      <div style={{ padding: '0 16px 14px', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
         {view === 'list' && (
           <button
             onClick={() => setSubjectFilter('all')}
