@@ -41,6 +41,7 @@ import VoltaWodSummary from './pages/VoltaWodSummary';
 import VoltaCoachDash from './pages/VoltaCoachDash';
 import VoltaCoachWod from './pages/VoltaCoachWod';
 import VoltaCoachTools from './pages/VoltaCoachTools';
+import CoachMacroView from './pages/CoachMacroView';
 import MovementProgression from './pages/MovementProgression';
 import type { View } from './context/NavigationContext';
 
@@ -52,11 +53,12 @@ const NAV_MAP_HO: Record<string, NavTab> = {
   PROFILE: 'profile', ONBOARDING: 'profile', PREMIUM: 'profile',
   COACH_DASH: 'home', ATHLETE_DETAIL: 'home', ASSIGN_MACRO: 'home', NEW_ATHLETE: 'home',
   COACH_STATS: 'stats',
+  COACH_MACRO_VIEW: 'stats',
 };
 
 // Vistas exclusivas por rol — al cambiar de rol, redirige al home apropiado
 const ATHLETE_ONLY: View[] = ['WARMUP', 'SESSION', 'SUMMARY', 'VICTORY', 'PULSE', 'PILLS', 'INDEX', 'SCHEDULE', 'ONBOARDING', 'PREMIUM', 'VOLTA_PREWOD', 'SOCIAL', 'PERFORMANCE'];
-const COACH_ONLY: View[]   = ['COACH_DASH', 'COACH_STATS', 'ATHLETE_DETAIL', 'ASSIGN_MACRO', 'NEW_ATHLETE', 'VOLTA_COACH', 'VOLTA_COACH_WOD', 'VOLTA_COACH_TOOLS', 'VOLTA_COACH_MACRO', 'VOLTA_COACH_INVENTORY'];
+const COACH_ONLY: View[]   = ['COACH_DASH', 'COACH_STATS', 'ATHLETE_DETAIL', 'ASSIGN_MACRO', 'NEW_ATHLETE', 'COACH_MACRO_VIEW', 'VOLTA_COACH', 'VOLTA_COACH_WOD', 'VOLTA_COACH_TOOLS', 'VOLTA_COACH_MACRO', 'VOLTA_COACH_INVENTORY'];
 
 const NAV_MAP_VOLTA: Record<string, NavTab> = {
   VOLTA_HOME: 'home', VOLTA_COACH: 'home',
@@ -66,6 +68,7 @@ const NAV_MAP_VOLTA: Record<string, NavTab> = {
   // Logros slot en coach es Box (inventario)
   VOLTA_COACH_INVENTORY: 'logros',
   VOLTA_STATS: 'stats', PROGRESSION: 'stats',
+  COACH_MACRO_VIEW: 'stats',
   PERFORMANCE: 'stats', INDEX: 'stats', SCHEDULE: 'stats', PULSE: 'stats', PILLS: 'stats',
   SOCIAL: 'logros', SOCIAL_GALLERY: 'logros',
   PROFILE: 'profile',
@@ -219,6 +222,7 @@ function AppInner() {
         case 'VOLTA_COACH_TOOLS':     return <VoltaCoachTools />;
         case 'VOLTA_COACH_MACRO':     return <VoltaCoachTools initialTab="macro" />;
         case 'VOLTA_COACH_INVENTORY': return <VoltaCoachTools initialTab="inventario" />;
+        case 'COACH_MACRO_VIEW':      return <CoachMacroView />;
         case 'PROGRESSION':           return <MovementProgression />;
         case 'VOLTA_PREWOD':          return <VoltaPreWod />;
         // Pantallas Volta-específicas para el flow del WOD (NO usar las HO)
@@ -263,6 +267,7 @@ function AppInner() {
       case 'PROFILE':        return <Profile />;
       case 'COACH_DASH':     return <CommandCenter />;
       case 'COACH_STATS':    return <CoachStatsHO />;
+      case 'COACH_MACRO_VIEW': return <CoachMacroView />;
       case 'ATHLETE_DETAIL': return <AthleteDeepDive />;
       case 'ASSIGN_MACRO':   return <AssignMacrocycle />;
       case 'NEW_ATHLETE':    return <NewAthlete />;

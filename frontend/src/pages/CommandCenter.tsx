@@ -210,6 +210,30 @@ const CommandCenter: React.FC = () => {
         </div>
       </div>
 
+      {/* MACROCICLO ENTRY */}
+      <div style={{ padding: '0 20px 16px' }}>
+        <button
+          onClick={() => navigate('COACH_MACRO_VIEW')}
+          style={{
+            width: '100%', padding: '14px 14px', borderRadius: 16,
+            background: 'linear-gradient(135deg, rgba(245,197,24,0.12), transparent)',
+            border: '1px solid rgba(245,197,24,0.35)',
+            color: 'var(--text)', textAlign: 'left',
+            cursor: 'pointer', fontFamily: 'inherit',
+            display: 'flex', alignItems: 'center', gap: 12,
+          }}
+        >
+          <span style={{ fontSize: 22 }}>📅</span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ fontSize: 13, fontWeight: 800, color: 'var(--text)' }}>Ver macrociclo</p>
+            <p style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 2 }}>
+              Timeline · fase actual · alertas del club
+            </p>
+          </div>
+          <span style={{ fontSize: 18, color: 'var(--text-secondary)' }}>›</span>
+        </button>
+      </div>
+
       {/* BOTTOM ACTIONS */}
       <div style={{ padding: '0 20px 20px', display: 'flex', gap: 8 }}>
         <button

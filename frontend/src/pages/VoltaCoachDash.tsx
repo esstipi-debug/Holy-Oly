@@ -121,14 +121,23 @@ const VoltaCoachDash: React.FC = () => {
       <div style={{ padding: '14px 16px' }}>
 
         {/* MACROCICLO ACTIVO */}
-        <Sec right={<button onClick={() => navigate('VOLTA_COACH_MACRO')} style={{ fontSize: 10, color: C.cyan, fontWeight: 700, background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>Editar →</button>}>
+        <Sec right={
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button onClick={() => navigate('COACH_MACRO_VIEW')} style={{ fontSize: 10, color: C.cyan, fontWeight: 700, background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>Ver friendly →</button>
+            <button onClick={() => navigate('VOLTA_COACH_MACRO')} style={{ fontSize: 10, color: C.muted, fontWeight: 700, background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>Eval →</button>
+          </div>
+        }>
           Macrociclo activo
         </Sec>
-        <div style={{
-          background: C.surface,
-          border: '1px solid rgba(0,229,255,0.2)',
-          borderRadius: 16, padding: 14, marginBottom: 18,
-        }}>
+        <div
+          onClick={() => navigate('COACH_MACRO_VIEW')}
+          style={{
+            background: C.surface,
+            border: '1px solid rgba(0,229,255,0.2)',
+            borderRadius: 16, padding: 14, marginBottom: 18,
+            cursor: 'pointer',
+          }}>
+
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
             <div>
               <p style={{ fontSize: 13, fontWeight: 800, color: C.text }}>CrossFit Open Prep · Q2</p>

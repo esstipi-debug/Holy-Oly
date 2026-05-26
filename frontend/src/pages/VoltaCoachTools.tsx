@@ -563,6 +563,24 @@ const VoltaCoachTools: React.FC<VoltaCoachToolsProps> = ({ initialTab = 'progres
 
           return (
             <>
+              {/* Link a vista friendly del macrociclo */}
+              <button
+                onClick={() => navigate('COACH_MACRO_VIEW')}
+                style={{
+                  width: '100%', padding: '10px 14px', borderRadius: 12,
+                  background: 'rgba(0,229,255,0.06)',
+                  border: '1px solid rgba(0,229,255,0.25)',
+                  color: C.cyan, fontSize: 11, fontWeight: 800,
+                  letterSpacing: '.04em', textAlign: 'left',
+                  cursor: 'pointer', fontFamily: 'inherit',
+                  marginBottom: 12,
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
+                }}
+              >
+                <span>📅 Vista friendly del macrociclo</span>
+                <span style={{ fontSize: 14 }}>→</span>
+              </button>
+
               {/* HERO: progress + verdict */}
               <div style={{
                 background: C.surface, border: `1px solid ${C.line}`,

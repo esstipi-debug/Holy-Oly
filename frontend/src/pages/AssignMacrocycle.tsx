@@ -1,8 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNav } from '../context/NavigationContext';
 import { useAthlete } from '../context/AthleteContext';
 import { useProduct } from '../context/ProductContext';
 import { MACROCYCLES, type Macrocycle } from '../data/macrocycles';
+import { tryFetchMacrocycles, type RemoteMacrocycle } from '../lib/macrocycleApi';
 
 const Bars: React.FC<{ value: number; color: string }> = ({ value, color }) => (
   <div style={{ display: 'flex', gap: 2, marginTop: 4 }}>
@@ -18,20 +19,88 @@ const Bars: React.FC<{ value: number; color: string }> = ({ value, color }) => (
   </div>
 );
 
-type FamilyFilter = 'TODOS' | Macrocycle['family'];
+// Shape común UI (super-set entre Macrocycle local y RemoteMacrocycle).
+type UIMacro = {
+  id: string;
+  name: string;
+  family: string;
+  product: 'holy-oly' | 'volta';
+  desc: string;
+  frequency: string;
+  duration: string;
+  intensity: number;
+  volume: number;
+  color: string;
+  bestFor?: string;
+  focus?: string;     // sólo backend
+  school?: string;    // sólo backend
+};
+
+function toUI(m: Macrocycle | RemoteMacrocycle): UIMacro {
+  return {
+    id: m.id,
+    name: m.name,
+    family: m.family,
+    product: m.product,
+    desc: m.desc,
+    frequency: m.frequency,
+    duration: m.duration,
+    intensity: m.intensity,
+    volume: m.volume,
+    color: m.color,
+    bestFor: m.bestFor,
+    focus: 'focus' in m ? m.focus : undefined,
+    school: 'school' in m ? m.school : undefined,
+  };
+}
+
+type FamilyFilter = 'TODOS' | string;
+type FocusFilter = 'TODOS' | string;
 
 const AssignMacrocycle: React.FC = () => {
   const { navigate } = useNav();
   const { selectedAthlete, athlete: currentAthlete } = useAthlete();
   const { product } = useProduct();
   const target = selectedAthlete ?? currentAthlete;
-  const [selected, setSelected] = useState<string | null>(null);
-  const [filter, setFilter] = useState<FamilyFilter>('TODOS');
 
-  // Solo macros del producto activo
+  const [selected, setSelected] = useState<string | null>(null);
+  const [familyFilter, setFamilyFilter] = useState<FamilyFilter>('TODOS');
+  const [focusFilter, setFocusFilter] = useState<FocusFilter>('TODOS');
+  const [remoteMacros, setRemoteMacros] = useState<RemoteMacrocycle[] | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [source, setSource] = useState<'api' | 'local'>('local');
+
+  // Fetch desde el backend real (con fallback a data local)
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const remote = await tryFetchMacrocycles();
+      if (cancelled) return;
+      if (remote && remote.length > 0) {
+        setRemoteMacros(remote);
+        setSource('api');
+      } else {
+        setSource('local');
+      }
+      setLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  // Pool combinado: backend (holy-oly real) + locales de Volta que no están en backend.
+  // Los 23 del backend son halterofilia (holy-oly). Para Volta seguimos con la data local.
+  const allMacros: UIMacro[] = useMemo(() => {
+    const local = MACROCYCLES.map(toUI);
+    if (!remoteMacros) return local;
+    const remoteUI = remoteMacros.map(toUI);
+    // Mantener locales de Volta + remoto holy-oly
+    const voltaLocal = local.filter(m => m.product === 'volta');
+    return [...remoteUI, ...voltaLocal];
+  }, [remoteMacros]);
+
   const macrosForProduct = useMemo(
-    () => MACROCYCLES.filter(m => m.product === product),
-    [product],
+    () => allMacros.filter(m => m.product === product),
+    [allMacros, product],
   );
 
   const familiesForProduct = useMemo(
@@ -39,10 +108,28 @@ const AssignMacrocycle: React.FC = () => {
     [macrosForProduct],
   );
 
-  const filtered = useMemo(
-    () => filter === 'TODOS' ? macrosForProduct : macrosForProduct.filter(m => m.family === filter),
-    [filter, macrosForProduct],
+  const focusesForProduct = useMemo(
+    () => Array.from(new Set(macrosForProduct.map(m => m.focus).filter(Boolean) as string[])),
+    [macrosForProduct],
   );
+
+  const filtered = useMemo(() => {
+    return macrosForProduct.filter(m => {
+      const familyOk = familyFilter === 'TODOS' || m.family === familyFilter;
+      const focusOk = focusFilter === 'TODOS' || m.focus === focusFilter;
+      return familyOk && focusOk;
+    });
+  }, [familyFilter, focusFilter, macrosForProduct]);
+
+  // Reset filtros si cambia el producto y el filter ya no aplica
+  useEffect(() => {
+    if (familyFilter !== 'TODOS' && !familiesForProduct.includes(familyFilter)) {
+      setFamilyFilter('TODOS');
+    }
+    if (focusFilter !== 'TODOS' && !focusesForProduct.includes(focusFilter)) {
+      setFocusFilter('TODOS');
+    }
+  }, [product, familyFilter, focusFilter, familiesForProduct, focusesForProduct]);
 
   const handleConfirm = () => {
     if (!selected) return;
@@ -50,7 +137,7 @@ const AssignMacrocycle: React.FC = () => {
   };
 
   const initials = target ? target.name.split(' ').slice(0, 2).map(n => n[0]).join('') : '';
-  const selectedMacro = selected ? MACROCYCLES.find(m => m.id === selected) : null;
+  const selectedMacro = selected ? macrosForProduct.find(m => m.id === selected) : null;
 
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100%', paddingBottom: 170 }}>
@@ -61,7 +148,9 @@ const AssignMacrocycle: React.FC = () => {
           Asignar Macrociclo
         </h1>
         <p style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', marginTop: 4 }}>
-          {MACROCYCLES.length} sistemas · Filtrá por escuela
+          {loading
+            ? 'Cargando programas…'
+            : `${macrosForProduct.length} sistemas · ${source === 'api' ? 'engine real' : 'local fallback'}`}
         </p>
       </div>
 
@@ -90,18 +179,21 @@ const AssignMacrocycle: React.FC = () => {
         </div>
       )}
 
-      {/* FAMILY FILTER (chips horizontales) */}
-      <div style={{ padding: '0 20px 16px' }}>
+      {/* FAMILY FILTER (escuelas) */}
+      <div style={{ padding: '0 20px 8px' }}>
+        <p style={{ fontSize: 9, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 6 }}>
+          Escuela
+        </p>
         <div
           className="scroll-x-no-bar"
           style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 4 }}
         >
           {(['TODOS', ...familiesForProduct] as FamilyFilter[]).map(f => {
-            const active = filter === f;
+            const active = familyFilter === f;
             return (
               <button
                 key={f}
-                onClick={() => setFilter(f)}
+                onClick={() => setFamilyFilter(f)}
                 style={{
                   flexShrink: 0,
                   padding: '7px 13px', borderRadius: 999,
@@ -117,6 +209,39 @@ const AssignMacrocycle: React.FC = () => {
           })}
         </div>
       </div>
+
+      {/* FOCUS FILTER (sólo si la API devolvió focus) */}
+      {focusesForProduct.length > 0 && (
+        <div style={{ padding: '0 20px 16px' }}>
+          <p style={{ fontSize: 9, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 6 }}>
+            Foco
+          </p>
+          <div
+            className="scroll-x-no-bar"
+            style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 4 }}
+          >
+            {(['TODOS', ...focusesForProduct] as FocusFilter[]).map(f => {
+              const active = focusFilter === f;
+              return (
+                <button
+                  key={f}
+                  onClick={() => setFocusFilter(f)}
+                  style={{
+                    flexShrink: 0,
+                    padding: '6px 11px', borderRadius: 999,
+                    background: active ? '#06B6D4' : 'var(--surface)',
+                    color: active ? '#fff' : 'var(--text-secondary)',
+                    border: `1px solid ${active ? '#06B6D4' : 'var(--card-border)'}`,
+                    fontSize: 10, fontWeight: 700, letterSpacing: '.04em',
+                    textTransform: 'uppercase',
+                    cursor: 'pointer', fontFamily: 'inherit',
+                  }}
+                >{f}</button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* SCHOOLS */}
       <div style={{ padding: '0 20px 20px' }}>
@@ -159,6 +284,13 @@ const AssignMacrocycle: React.FC = () => {
                         background: 'var(--surface2)', color: 'var(--text-secondary)',
                         letterSpacing: '.04em', textTransform: 'uppercase',
                       }}>{macro.duration}</span>
+                      {macro.focus && (
+                        <span style={{
+                          fontSize: 9, fontWeight: 700, padding: '3px 7px', borderRadius: 6,
+                          background: `${macro.color}1a`, color: macro.color,
+                          letterSpacing: '.04em', textTransform: 'uppercase',
+                        }}>{macro.focus}</span>
+                      )}
                     </div>
                   </div>
                   <div style={{
