@@ -7,6 +7,7 @@ import {
   upsertPlannedSession,
   clearDate,
 } from '../lib/plannedSessions';
+import SkillFocusAssign from './SkillFocusAssign';
 
 // ──────────────────────────────────────────────────────────────────
 // Tipos internos
@@ -460,6 +461,9 @@ const AthleteTrainingView: React.FC<Props> = ({ athlete }) => {
           </div>
         )}
       </section>
+
+      {/* ── Sección 2.5 · FOCOS TÉCNICOS · SKILL TREE ────────── */}
+      <SkillFocusAssign athlete={athlete} />
 
       {/* ── Sección 3 · CALENDAR 30 DÍAS ─────────────────────── */}
       <section>

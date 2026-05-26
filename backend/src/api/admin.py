@@ -30,6 +30,7 @@ MIGRATION_FILES = [
     "005_github_oauth.sql",
     "006_wod_results.sql",
     "007_push_subscriptions.sql",
+    "008_coach_skill_focus.sql",
 ]
 
 

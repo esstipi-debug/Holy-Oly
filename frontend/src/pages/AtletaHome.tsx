@@ -5,6 +5,7 @@ import WiseAssistant from '../components/WiseAssistant';
 import QuestsSection, { type QuestProgress } from '../components/QuestsSection';
 import MetricHistoryModal, { type MetricType } from '../components/MetricHistoryModal';
 import { getPendingForToday, setActiveSlot } from '../lib/plannedSessions';
+import { skillFocus, type SkillFocusResponse } from '../lib/skillFocus';
 import type { PlannedSession, TrainingSlot } from '../types/training';
 
 const ringColor = (r: number) => r >= 70 ? '#22C55E' : r >= 50 ? '#F59E0B' : '#EF4444';
@@ -61,6 +62,16 @@ const AtletaHome: React.FC = () => {
   const { navigate } = useNav();
   const { athlete, stress, stressLoading } = useAthlete();
   const [activeMetric, setActiveMetric] = useState<MetricType | null>(null);
+  const [coachFocuses, setCoachFocuses] = useState<SkillFocusResponse[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    skillFocus.list()
+      .then((list) => { if (!cancelled) setCoachFocuses(list); })
+      .catch(() => { /* no auth o no atleta · silenciamos */ });
+    return () => { cancelled = true; };
+  }, []);
+
   if (!athlete) return null;
 
   const { macrocycle, maxes, injuries } = athlete;
@@ -394,6 +405,55 @@ const AtletaHome: React.FC = () => {
           ))}
         </div>
       </div>
+
+      {/* SKILLS CHIP · focos del coach (si hay) */}
+      {(() => {
+        const activeCount = coachFocuses.filter(f => f.status === 'active').length;
+        const hasFocus = activeCount > 0;
+        return (
+          <div style={{ padding: '0 20px 16px' }}>
+            <button
+              onClick={() => navigate('PROGRESSION')}
+              className="btn-press"
+              style={{
+                width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '12px 14px', borderRadius: 14,
+                background: hasFocus
+                  ? 'linear-gradient(135deg, rgba(245,197,24,0.16) 0%, rgba(245,197,24,0.04) 100%)'
+                  : 'var(--surface)',
+                border: `1px solid ${hasFocus ? 'rgba(245,197,24,0.5)' : 'var(--card-border)'}`,
+                color: 'var(--text)', cursor: 'pointer', fontFamily: 'inherit',
+                boxShadow: hasFocus ? '0 0 18px rgba(245,197,24,0.18)' : 'none',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ fontSize: 18 }}>{hasFocus ? '🎯' : '🌳'}</span>
+                <div style={{ textAlign: 'left' }}>
+                  <p style={{ fontSize: 12, fontWeight: 900, color: 'var(--text)', margin: 0 }}>
+                    Skill tree · mi progresión
+                  </p>
+                  <p style={{ fontSize: 10, color: 'var(--text-secondary)', margin: 0, marginTop: 2 }}>
+                    {hasFocus
+                      ? `${activeCount} foco${activeCount === 1 ? '' : 's'} del coach esta semana`
+                      : '95 movimientos · 5 niveles'}
+                  </p>
+                </div>
+              </div>
+              {hasFocus && (
+                <span style={{
+                  background: '#F5C518', color: '#000',
+                  fontSize: 11, fontWeight: 900,
+                  padding: '4px 10px', borderRadius: 10,
+                  letterSpacing: '.04em',
+                }}>{activeCount}</span>
+              )}
+              {!hasFocus && (
+                <span style={{ fontSize: 14, color: 'var(--text-secondary)', fontWeight: 900 }}>→</span>
+              )}
+            </button>
+          </div>
+        );
+      })()}
 
       {/* OLY INDEX + RACHA row */}
       <div style={{ padding: '0 20px 16px', display: 'flex', gap: 12 }}>

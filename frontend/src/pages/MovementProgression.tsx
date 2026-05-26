@@ -5,6 +5,8 @@ import {
   type SubjectId, type Skill, type SkillProgress,
 } from '../data/skillTree';
 import BottomSheet from '../components/BottomSheet';
+import { skillFocus, type SkillFocusResponse } from '../lib/skillFocus';
+import { useToast } from '../components/Toast';
 
 /**
  * Movement Progression — Skill Tree CrossFit con 95 movimientos.
@@ -54,30 +56,39 @@ interface SkillCardProps {
   accent: string;
   highlighted?: boolean;
   faded?: boolean;
+  /** Si tiene un foco activo del coach: nota técnica para mostrar inline */
+  coachFocusNote?: string | null;
+  /** Nombre del coach que asignó el foco */
+  coachFocusName?: string | null;
   onClick: () => void;
 }
 
-const SkillCard: React.FC<SkillCardProps> = ({ skill, progress, accent, highlighted, faded, onClick }) => {
+const SkillCard: React.FC<SkillCardProps> = ({ skill, progress, accent, highlighted, faded, coachFocusNote, coachFocusName, onClick }) => {
   const unlocked = isSkillUnlocked(skill, progress);
   const mastered = isSkillMastered(skill, progress);
   const inProgress = isSkillInProgress(skill, progress);
 
   const prereqs = skill.prerequisites.map(pid => SKILLS.find(s => s.id === pid)).filter(Boolean) as Skill[];
+  const hasCoachFocus = !!coachFocusNote || coachFocusNote === '';
+  const focusGlow = hasCoachFocus;
 
   return (
     <button
       onClick={onClick}
-      className="btn-press"
+      className={`btn-press${focusGlow ? ' anim-pulse' : ''}`}
       style={{
         width: '100%',
-        background: mastered
-          ? `linear-gradient(135deg, ${accent}25, ${accent}08)`
-          : inProgress
-            ? `${accent}10`
-            : unlocked
-              ? C.surface
-              : 'rgba(255,255,255,0.02)',
+        background: focusGlow
+          ? `linear-gradient(135deg, ${C.gold}1f, ${C.gold}08)`
+          : mastered
+            ? `linear-gradient(135deg, ${accent}25, ${accent}08)`
+            : inProgress
+              ? `${accent}10`
+              : unlocked
+                ? C.surface
+                : 'rgba(255,255,255,0.02)',
         border: `1px solid ${
+          focusGlow ? C.gold :
           highlighted ? C.gold :
           mastered ? `${accent}80` :
           inProgress ? `${accent}50` :
@@ -90,7 +101,9 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, progress, accent, highligh
         cursor: 'pointer',
         fontFamily: 'inherit',
         textAlign: 'left',
-        boxShadow: highlighted ? `0 0 16px ${C.gold}50` : 'none',
+        boxShadow: focusGlow
+          ? `0 0 18px ${C.gold}66, inset 0 0 0 1px ${C.gold}33`
+          : highlighted ? `0 0 16px ${C.gold}50` : 'none',
         transition: 'all .25s ease',
       }}
     >
@@ -107,6 +120,25 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, progress, accent, highligh
           letterSpacing: '.04em', flexShrink: 0,
         }}>T{skill.tier}</span>
       </div>
+      {hasCoachFocus && (
+        <div style={{
+          background: `${C.gold}14`, border: `1px solid ${C.gold}55`,
+          borderRadius: 10, padding: '6px 8px', marginBottom: 8,
+          display: 'flex', alignItems: 'flex-start', gap: 6,
+        }}>
+          <span style={{ fontSize: 11 }}>🎯</span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ fontSize: 9, color: C.gold, fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase' }}>
+              Foco coach{coachFocusName ? ` · ${coachFocusName}` : ''}
+            </p>
+            {coachFocusNote && (
+              <p style={{ fontSize: 10, color: C.text, lineHeight: 1.4, marginTop: 2, fontStyle: 'italic' }}>
+                "{coachFocusNote}"
+              </p>
+            )}
+          </div>
+        </div>
+      )}
       <p style={{ fontSize: 10, color: C.muted, lineHeight: 1.4, marginBottom: 6 }}>{skill.description}</p>
       <p style={{ fontSize: 9, color: accent, fontWeight: 700, letterSpacing: '.04em', marginBottom: prereqs.length ? 8 : 0 }}>📊 {skill.volume}</p>
       {prereqs.length > 0 && (
@@ -323,6 +355,42 @@ const MovementProgression: React.FC = () => {
   const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null); // skill resaltada (rama visible)
   const [modalSkill, setModalSkill] = useState<Skill | null>(null);       // skill abierta en BottomSheet
   const [highlightedPath, setHighlightedPath] = useState<{ upstream: Set<string>; downstream: Set<string> } | null>(null);
+  const [coachFocuses, setCoachFocuses] = useState<SkillFocusResponse[]>([]);
+  const [markingDominated, setMarkingDominated] = useState<boolean>(false);
+  const { showToast } = useToast();
+
+  // Fetch focos del coach (best-effort · si no hay backend o usuario no es atleta, queda vacío)
+  useEffect(() => {
+    let cancelled = false;
+    skillFocus.list()
+      .then((list) => { if (!cancelled) setCoachFocuses(list); })
+      .catch(() => { /* sin sesión / no atleta · ignoramos */ });
+    return () => { cancelled = true; };
+  }, []);
+
+  const focusByMovement = useMemo(() => {
+    const m = new Map<string, SkillFocusResponse>();
+    for (const f of coachFocuses) {
+      if (f.status === 'active') m.set(f.movement_id, f);
+    }
+    return m;
+  }, [coachFocuses]);
+
+  // Scroll automático al primer movimiento focused la primera vez que cargan focos.
+  const didScrollFocusRef = useRef(false);
+  useEffect(() => {
+    if (didScrollFocusRef.current) return;
+    if (coachFocuses.length === 0) return;
+    const first = coachFocuses.find(f => f.status === 'active');
+    if (!first) return;
+    didScrollFocusRef.current = true;
+    // Pequeño defer para que el DOM termine de pintar las cards
+    window.setTimeout(() => {
+      const el = document.querySelector(`[data-skill-id="${first.movement_id}"]`) as HTMLElement | null;
+      if (!el) return;
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 300);
+  }, [coachFocuses]);
 
   const tierRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
@@ -580,16 +648,20 @@ const MovementProgression: React.FC = () => {
                       const isActive = selectedSkill?.id === skill.id;
                       const highlighted = isActive || inUp || inDown;
                       const faded = highlightedPath !== null && !highlighted;
+                      const focus = focusByMovement.get(skill.id);
                       return (
-                        <SkillCard
-                          key={skill.id}
-                          skill={skill}
-                          progress={progress}
-                          accent={subjectAccent(skill)}
-                          highlighted={highlighted}
-                          faded={faded}
-                          onClick={() => handleSkillClick(skill)}
-                        />
+                        <div key={skill.id} data-skill-id={skill.id}>
+                          <SkillCard
+                            skill={skill}
+                            progress={progress}
+                            accent={subjectAccent(skill)}
+                            highlighted={highlighted}
+                            faded={faded}
+                            coachFocusNote={focus?.note ?? null}
+                            coachFocusName={focus?.coach_name ?? null}
+                            onClick={() => handleSkillClick(skill)}
+                          />
+                        </div>
                       );
                     })}
                   </div>
@@ -761,6 +833,58 @@ const MovementProgression: React.FC = () => {
                   </div>
                 </div>
               )}
+
+              {(() => {
+                const focus = focusByMovement.get(modalSkill.id);
+                if (!focus) return null;
+                const handleMarkDominated = async () => {
+                  setMarkingDominated(true);
+                  try {
+                    await skillFocus.markDominated(focus.id);
+                    setCoachFocuses(prev => prev.filter(f => f.id !== focus.id));
+                    setProgress(prev => ({ ...prev, [modalSkill.id]: 'mastered' }));
+                    showToast({
+                      message: `Avisamos al coach: dominaste ${modalSkill.name}`,
+                      variant: 'success',
+                    });
+                    closeModal();
+                  } catch (e) {
+                    const msg = e instanceof Error ? e.message : 'No pudimos avisar al coach';
+                    showToast({ message: msg, variant: 'error' });
+                  } finally {
+                    setMarkingDominated(false);
+                  }
+                };
+                return (
+                  <div style={{
+                    background: `${C.gold}14`, border: `1px solid ${C.gold}55`,
+                    borderRadius: 12, padding: 12, marginTop: 4,
+                  }}>
+                    <p style={{ fontSize: 10, color: C.gold, fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase' }}>
+                      🎯 Foco del coach{focus.coach_name ? ` · ${focus.coach_name}` : ''}
+                    </p>
+                    {focus.note && (
+                      <p style={{ fontSize: 11, color: C.text, marginTop: 6, fontStyle: 'italic', lineHeight: 1.5 }}>
+                        "{focus.note}"
+                      </p>
+                    )}
+                    <button
+                      onClick={handleMarkDominated}
+                      disabled={markingDominated}
+                      className="btn-press"
+                      style={{
+                        width: '100%', marginTop: 10, padding: '12px 0', borderRadius: 10,
+                        background: C.gold, color: '#000', border: 'none',
+                        fontSize: 11, fontWeight: 900, letterSpacing: '.06em', textTransform: 'uppercase',
+                        cursor: markingDominated ? 'wait' : 'pointer', fontFamily: 'inherit',
+                        opacity: markingDominated ? 0.6 : 1,
+                      }}
+                    >
+                      {markingDominated ? 'Avisando…' : 'Marcar dominado · avisar coach'}
+                    </button>
+                  </div>
+                );
+              })()}
 
               <button
                 onClick={() => toggleSkillProgress(modalSkill.id)}
