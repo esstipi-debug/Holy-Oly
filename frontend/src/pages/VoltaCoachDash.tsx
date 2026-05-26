@@ -3,6 +3,7 @@ import { useNav } from '../context/NavigationContext';
 import { useAthlete } from '../context/AthleteContext';
 import WiseAssistant from '../components/WiseAssistant';
 import AthleteTrainingView from '../components/AthleteTrainingView';
+import { useAthleteStress, fallbackReadiness } from '../hooks/useAthleteStress';
 
 const C = {
   bg: '#07070F',
@@ -76,6 +77,19 @@ const VoltaCoachDash: React.FC = () => {
   const trainingViewAthlete = trainingViewId
     ? allAthletes.find(a => a.id === trainingViewId) ?? null
     : null;
+
+  // Engine real (Banister + CNS) para el atleta seleccionado.
+  // Fallback graceful si la API falla.
+  const { stress: selectedStress, loading: selectedStressLoading } = useAthleteStress(trainingViewAthlete);
+  const readinessVal = trainingViewAthlete
+    ? (selectedStress ? selectedStress.readiness : fallbackReadiness(trainingViewAthlete))
+    : 0;
+  // Convert 0-10 → 0-100 para el ring style Volta.
+  const readinessPct = Math.round(readinessVal * 10);
+  const ringColor = readinessPct >= 70 ? C.green : readinessPct >= 40 ? C.amber : C.red;
+  const fitnessChip = selectedStress ? Math.round(selectedStress.fitness) : (trainingViewAthlete?.prior_fitness ?? 0);
+  const fatigueChip = selectedStress ? Math.round(selectedStress.fatigue) : (trainingViewAthlete?.prior_fatigue ?? 0);
+  const cnsChip = selectedStress?.cns_zone ?? null;
 
   const openAthlete = (mockIdx: number) => {
     const real = allAthletes[mockIdx];
@@ -278,7 +292,7 @@ const VoltaCoachDash: React.FC = () => {
           })}
         </div>
 
-        {/* ENTRENAMIENTO DEL ATLETA · selector + vista inline */}
+        {/* WELLNESS + ENTRENAMIENTO DEL ATLETA · selector + engines reales */}
         {trainingViewAthlete && (
           <>
             <Sec
@@ -307,8 +321,90 @@ const VoltaCoachDash: React.FC = () => {
                 </select>
               }
             >
-              Entrenamiento del atleta
+              Wellness del atleta
             </Sec>
+            <div
+              style={{
+                background: C.surface,
+                border: `1px solid ${ringColor}33`,
+                borderRadius: 16,
+                padding: 14,
+                marginBottom: 12,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 14,
+              }}
+            >
+              {/* Readiness Ring */}
+              <div
+                style={{
+                  width: 72,
+                  height: 72,
+                  borderRadius: '50%',
+                  background: `conic-gradient(${ringColor} ${readinessPct * 3.6}deg, ${C.line} 0deg)`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <div
+                  style={{
+                    width: 58,
+                    height: 58,
+                    borderRadius: '50%',
+                    background: C.surface,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <div style={{ fontSize: 18, fontWeight: 900, color: ringColor, lineHeight: 1 }}>
+                    {readinessPct}
+                  </div>
+                  <div style={{ fontSize: 8, color: C.muted, fontWeight: 700, letterSpacing: '.06em', marginTop: 2 }}>
+                    READY
+                  </div>
+                </div>
+              </div>
+
+              {/* Engine chips */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 6 }}>
+                  <span style={{
+                    fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 8,
+                    background: 'rgba(0,229,255,0.08)', color: C.cyan, border: '1px solid rgba(0,229,255,0.2)',
+                  }}>
+                    Fitness {fitnessChip}
+                  </span>
+                  <span style={{
+                    fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 8,
+                    background: 'rgba(255,179,0,0.08)', color: C.amber, border: '1px solid rgba(255,179,0,0.2)',
+                  }}>
+                    Fatiga {fatigueChip}
+                  </span>
+                  {cnsChip && (
+                    <span style={{
+                      fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 8,
+                      background: 'rgba(168,85,247,0.08)', color: C.purple, border: '1px solid rgba(168,85,247,0.25)',
+                      textTransform: 'uppercase',
+                    }}>
+                      CNS · {cnsChip}
+                    </span>
+                  )}
+                </div>
+                <p style={{ fontSize: 10, color: C.muted, lineHeight: 1.4 }}>
+                  {selectedStressLoading
+                    ? 'Calculando con engine Banister…'
+                    : selectedStress
+                      ? `Engine: ${selectedStress.readiness_category}`
+                      : 'Engine no disponible · usando estimación local'}
+                </p>
+              </div>
+            </div>
+
+            <Sec>Entrenamiento del atleta</Sec>
             <div
               style={{
                 background: C.surface,

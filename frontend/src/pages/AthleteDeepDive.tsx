@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { useNav } from '../context/NavigationContext';
 import { useAthlete } from '../context/AthleteContext';
 import AthleteTrainingView from '../components/AthleteTrainingView';
+import { useAthleteStress, fallbackReadiness } from '../hooks/useAthleteStress';
 
 const AthleteDeepDive: React.FC = () => {
   const { navigate } = useNav();
   const { selectedAthlete, athlete: currentAthlete } = useAthlete();
   const a = selectedAthlete ?? currentAthlete;
+  const { stress: athleteStress, loading: stressLoading } = useAthleteStress(a);
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState('');
   const [feedbackSent, setFeedbackSent] = useState(false);
@@ -38,12 +40,20 @@ const AthleteDeepDive: React.FC = () => {
   }
 
   const completed = a.sessions_last_7.filter(s => s.completed);
-  const readiness = Math.max(0, Math.min(10, ((a.prior_fitness - a.prior_fatigue) / 12 + 0.5) * 10));
-  const ratio = a.prior_fatigue / Math.max(a.prior_fitness, 1);
+  // Engine real (Banister) si está disponible; sino fórmula local proxy.
+  const readiness = athleteStress ? athleteStress.readiness : fallbackReadiness(a);
+  // Para fatigue label/color usamos el ratio fatigue/fitness del engine si lo tenemos.
+  const fitnessVal = athleteStress?.fitness ?? a.prior_fitness;
+  const fatigueVal = athleteStress?.fatigue ?? a.prior_fatigue;
+  const ratio = fatigueVal / Math.max(fitnessVal, 1);
   const fatigueLabel = ratio > 1.1 ? 'CRASH' : ratio > 0.9 ? 'ALTO' : ratio > 0.7 ? 'NORMAL' : 'BAJO';
   const fatigueColor = ratio > 0.9 ? '#EF4444' : ratio > 0.7 ? '#F59E0B' : '#22C55E';
   const restHours = ratio > 1.1 ? 48 : ratio > 0.9 ? 24 : 0;
-  const consistency = Math.round((completed.length / a.sessions_last_7.length) * 100);
+  const consistency = a.sessions_last_7.length > 0
+    ? Math.round((completed.length / a.sessions_last_7.length) * 100)
+    : 0;
+  const cnsZone = athleteStress?.cns_zone ?? null;
+  const isEngineReal = !!athleteStress;
 
   // Carga semanal: ATL (acute) approximation per día
   const loads = a.sessions_last_7.map(s => s.load);
@@ -123,7 +133,7 @@ const AthleteDeepDive: React.FC = () => {
             background: 'var(--surface)', border: `1px solid ${fatigueColor}33`, borderRadius: 16, padding: 14,
           }}>
             <p style={{ fontSize: 9, color: 'var(--text-secondary)', fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 6 }}>
-              Fatiga (Banister)
+              Fatiga (Banister) {stressLoading && <span style={{ color: '#F59E0B' }}>· …</span>}
             </p>
             <p style={{ fontSize: 22, fontWeight: 900, color: fatigueColor, letterSpacing: '-.02em', lineHeight: 1 }}>
               {fatigueLabel}
@@ -131,12 +141,15 @@ const AthleteDeepDive: React.FC = () => {
             <p style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 4 }}>
               {restHours > 0 ? `Descanso sugerido: ${restHours}h` : 'Sin alertas'}
             </p>
+            <p style={{ fontSize: 9, color: 'var(--text-secondary)', marginTop: 4, opacity: 0.7 }}>
+              F {fitnessVal.toFixed(0)} · Ftg {fatigueVal.toFixed(0)}
+            </p>
           </div>
           <div style={{
             background: 'var(--surface)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 16, padding: 14,
           }}>
             <p style={{ fontSize: 9, color: 'var(--text-secondary)', fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 6 }}>
-              Readiness Avg
+              Readiness {isEngineReal ? '· Engine' : '· ~Local'}
             </p>
             <p style={{ fontSize: 22, fontWeight: 900, color: 'var(--primary)', letterSpacing: '-.02em', lineHeight: 1 }}>
               {readiness.toFixed(1)}
@@ -144,6 +157,11 @@ const AthleteDeepDive: React.FC = () => {
             <p style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 4 }}>
               Consistencia: {consistency}%
             </p>
+            {cnsZone && (
+              <p style={{ fontSize: 9, color: 'var(--primary)', fontWeight: 700, marginTop: 4, letterSpacing: '.06em', textTransform: 'uppercase' }}>
+                CNS: {cnsZone}
+              </p>
+            )}
           </div>
         </div>
 

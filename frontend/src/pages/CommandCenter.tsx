@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useNav } from '../context/NavigationContext';
 import { useAthlete } from '../context/AthleteContext';
+import { useRosterStress, fallbackReadiness } from '../hooks/useAthleteStress';
 
 type Status = 'ACTIVE' | 'FATIGUED' | 'WARMUP' | 'IDLE' | 'INJURED';
 
@@ -26,12 +27,17 @@ const CommandCenter: React.FC = () => {
   const { navigate } = useNav();
   const { allAthletes, selectAthlete } = useAthlete();
   const [filter, setFilter] = useState<'todos' | 'activos' | 'fatiga' | 'lesion'>('todos');
+  const { stressByAthlete, loading: stressLoading } = useRosterStress(allAthletes);
 
   const enriched = useMemo(() => allAthletes.map(a => {
     const status = computeStatus(a);
-    const readiness = Math.max(0, Math.min(10, ((a.prior_fitness - a.prior_fatigue) / 12 + 0.5) * 10));
-    return { athlete: a, status, readiness };
-  }), [allAthletes]);
+    const engine = stressByAthlete[a.id];
+    // Engine readiness es 0-10 directo. Si no hay (fail/loading), fallback local.
+    const readiness = engine ? engine.readiness : fallbackReadiness(a);
+    const cnsZone = engine?.cns_zone ?? null;
+    const isReal = !!engine;
+    return { athlete: a, status, readiness, cnsZone, isReal };
+  }), [allAthletes, stressByAthlete]);
 
   const filtered = enriched.filter(e => {
     if (filter === 'todos') return true;
@@ -111,8 +117,19 @@ const CommandCenter: React.FC = () => {
           <p style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase' }}>
             Estado en tiempo real · {filtered.length}
           </p>
-          <span style={{ fontSize: 9, color: '#22C55E', fontWeight: 700, padding: '3px 8px', borderRadius: 10, background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)' }}>
-            ● LIVE
+          <span
+            title={stressLoading ? 'Calculando con engine Banister...' : 'Engine Banister activo'}
+            style={{
+              fontSize: 9,
+              fontWeight: 700,
+              padding: '3px 8px',
+              borderRadius: 10,
+              color: stressLoading ? '#F59E0B' : '#22C55E',
+              background: stressLoading ? 'rgba(245,158,11,0.1)' : 'rgba(34,197,94,0.1)',
+              border: `1px solid ${stressLoading ? 'rgba(245,158,11,0.25)' : 'rgba(34,197,94,0.25)'}`,
+            }}
+          >
+            {stressLoading ? '◐ ENGINE' : '● LIVE'}
           </span>
         </div>
 
@@ -127,7 +144,7 @@ const CommandCenter: React.FC = () => {
         )}
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {filtered.map(({ athlete, status, readiness }) => {
+          {filtered.map(({ athlete, status, readiness, cnsZone, isReal }) => {
             const meta = statusMeta[status];
             const initials = athlete.name.split(' ').slice(0, 2).map(n => n[0]).join('');
             const todaySession = athlete.sessions_last_7.at(-1);
@@ -173,8 +190,17 @@ const CommandCenter: React.FC = () => {
                       color: readiness > 7 ? '#22C55E' : readiness < 4 ? '#EF4444' : '#F59E0B',
                       letterSpacing: '-.03em', lineHeight: 1,
                     }}>{readiness.toFixed(1)}</p>
-                    <p style={{ fontSize: 8, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.06em', marginTop: 2 }}>
-                      READY
+                    <p
+                      title={isReal ? 'Calculado por engine Banister' : 'Estimación local (engine no disponible)'}
+                      style={{
+                        fontSize: 8,
+                        color: isReal ? 'var(--primary)' : 'var(--text-secondary)',
+                        fontWeight: 700,
+                        letterSpacing: '.06em',
+                        marginTop: 2,
+                      }}
+                    >
+                      {isReal ? `READY${cnsZone ? ` · ${cnsZone.toUpperCase()}` : ''}` : 'READY ~'}
                     </p>
                   </div>
                   <span style={{ fontSize: 18, color: 'var(--text-secondary)' }}>›</span>
