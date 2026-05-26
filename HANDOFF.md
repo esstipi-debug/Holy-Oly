@@ -1,7 +1,7 @@
 # HANDOFF · Holy Oly + Volta
 
 > Documento maestro para arrancar un nuevo chat con contexto completo.
-> Última actualización: 2026-05-26 · sesión cerrada en commit `fb6863a`.
+> Última actualización: 2026-05-26 (sesión Opus 4.7) · cerrada en commit `9a9906d`.
 
 ---
 
@@ -41,29 +41,60 @@
 | CoachMacroView amigable HO + VOL | ✅ |
 | Coach HO bottom nav funcional | ✅ |
 | Audit fixes: confirm deletes + input duración + IMR visible | ✅ |
-| ActiveSession bug 4×4 → no permite más sets del prescripto | ✅ |
+| ActiveSession bug 4×4 → no permite más sets del prescripto | ✅ (verify post-CORS-fix) |
 | VictoryScreen informativa (sin botones, todo data) | ✅ |
 | Radar charts (HO 4 ejes · VOL 5 dim) | ✅ |
 | WOD result log + auto-PR detect benchmark | ✅ |
 | Skill tree 95 movimientos + categorías wrap | ✅ |
+| **Leaderboard atleta** (podio + top 10 + 5 métricas HO/VOL) | ✅ nuevo |
+| **1RM auto-PR** durante ActiveSession (toast + celebration trigger) | ✅ nuevo |
+| **Belt ceremony fullscreen** con partículas + halo + 3 fases | ✅ nuevo |
+| **PreWOD share 9:16** (2 variantes Stadium/Minimalist) | ✅ nuevo |
+| **Coach viral content tools** (Atleta del mes + Recap + Cita) | ✅ nuevo |
+| **Wise Score** visible en AtletaHome (ring + 3 chips) | ✅ nuevo |
+| **ATL persistente** (último cuadrante usado restaurado) | ✅ nuevo |
+| **Baseline backend sync** (offline-first + SyncBadge) | ✅ nuevo |
+| **WOD results backend endpoint** + migration 006 corrida en prod | ✅ nuevo |
+| **Simulator QA subagent** (`.claude/agents/simulator.md` local · gitignored) | ✅ nuevo |
+| **8 usuarios sim seedeados** en prod (`@holyolysim.com`) · password `SimTest123!` | ✅ nuevo |
 
 ### ⏸ Pendiente (orden de impacto)
 
+#### ✅ Cerrados en sesión 2026-05-26 (commits c7c1305 → 9a9906d)
+- ~~#1 Leaderboard atleta~~ ✅ commit `8c1f897` · podio + top 10 + 5 métricas HO/VOL · CTA en HoStats/VoltaStats/AtletaHome
+- ~~#2 1RM auto-PR ActiveSession~~ ✅ commit `8c1f897` · toast + `preferred_celebration` → SocialCard
+- ~~#3 Belt ceremony fullscreen~~ ✅ commit `8c1f897` · 28 partículas + 3 fases + medalla hexagonal + trigger auto desde AtletaHome
+- ~~#4 PreWOD share 9:16~~ ✅ commit `8c1f897` · 360×640 portrait · 2 variantes Stadium/Minimalist
+- ~~#5 Coach viral content tools~~ ✅ commit `8c1f897` · 3 templates ciclables (Atleta del mes · Recap box · Cita motivacional)
+- ~~#6 Wise Score visible en home~~ ✅ commit `8c1f897` · card con ring + 3 chips diarios en AtletaHome
+- ~~#7 ATL "último cuadrante usado"~~ ✅ commit `8c1f897` · persiste `nav:last:{product}:{role}` · restaura en switcher + login
+- ~~#10 Baseline localStorage ↔ backend sync~~ ✅ commit `690e2e5` · offline-first · SyncBadge UI
+- ~~#11 WOD results backend endpoint~~ ✅ commits `30b7f00` + migration `006_wod_results.sql` corrida en prod · POST/GET/DELETE/best · is_pr en transacción
+
+#### 🚨 Bloqueante AHORA (acción de Esteban)
+- **CORS_ORIGINS en Render**: env var override está rechazando `holy-oly.onrender.com`. Frontend live no puede hablar con backend live. Fix: borrar la env var (default del código está bien) o setearla a `https://holy-oly.onrender.com,https://holy-oly-3.onrender.com,http://localhost:5173,http://localhost:3000`. ~2min · ⚠ Sin esto, la app solo funciona en demo mode.
+- **MISTRAL_API_KEY revocada por Esteban** (key expuesta en chat anterior). WISE corre en Lite hasta que se setee key nueva. Cuando se setee, aplicar primero los 3 fixes críticos del audit (ver abajo).
+
+#### 🚨 Fixes críticos antes de activar Mistral con tráfico real
+Del QA audit del 2026-05-26 (veredicto AMARILLO):
+| Fix | Severidad | Tiempo |
+|---|---|---|
+| `max_tokens` + `temperature` no se pasan a Mistral (`mistral_provider.py`). Runaway output. | 🔴 crítico | 30min |
+| Rate limit por-IP, no por-user. Quota free solo en localStorage (bypasseable). | 🔴 crítico | 1h |
+| Billing alerts en console.mistral.ai · tarea del usuario | 🔴 crítico | 5min Esteban |
+| Sanitización prompt-injection (`question` raw) | 🟡 medio | 30min |
+| Cache LRU para preguntas repetidas (ahorra 30-50%) | 🟡 medio | 45min |
+| `_fetch_athlete` sync dentro de async endpoint | 🟡 medio | 30min |
+
+Costo estimado con fixes: ~$6-21/mes para 1000 calls/día. Sin fixes: $100+/hora si hay abuso.
+
+#### ⏸ Backlog grande
 | # | Item | Tiempo | Por qué |
 |---|---|---|---|
-| 1 | **Leaderboard atleta** (Top 10 box · OLY/CF Index) | 3h | Audit dijo "Top X% aislado, sin comparación social" |
-| 2 | **1RM auto-PR durante ActiveSession** | 1.5h | Al loggear set que supera maxes → trigger SocialCard auto (B.6 roadmap) |
-| 3 | **Belt ceremony fullscreen** con partículas | 2h | Subida de cinturón hoy silenciosa, spec viral lo pide |
-| 4 | **PreWOD share 9:16** | 1.5h | Spec viral lo llama "joya de la corona" (C.10) |
-| 5 | **Coach viral content tools** (Atleta del mes, etc) | 2h | Spec viral: coach genera contenido para propagar |
-| 6 | Wise Score visible destacado en home | 30min | Existe en backend, no se ve |
-| 7 | ATL · función real ("último cuadrante usado") | 15min | Audit #2 |
-| 8 | Push notifications | 4h | C.13 roadmap |
+| 8 | Push notifications PWA | 4h | C.13 roadmap |
 | 9 | Heatmap 365 anual | 3h | E roadmap |
-| 10 | Baseline localStorage ↔ backend sync | 2h | Hoy localStorage solo |
-| 11 | WOD results backend endpoint | 2h | Hoy localStorage solo |
-| 12 | Setear env vars MP en Render (para activar pagos reales) | 5min · tarea del usuario | MP_ACCESS_TOKEN está pero no MP_PLAN_ID_* |
-| 13 | Setear MISTRAL_API_KEY o GOOGLE_API_KEY en Render | 1min · tarea del usuario | Para activar WISE LLM real (vs Lite actual) |
+| 12 | Setear env vars MP_PLAN_ID_* en Render | 5min · Esteban | Activa pagos sandbox |
+| 13 | Setear MISTRAL_API_KEY nuevo (post-fixes) | 1min · Esteban | Activa WISE LLM real |
 
 ---
 
@@ -177,26 +208,33 @@
 ## 7. Commits recientes (cronológico)
 
 ```
-7cb9aff feat(ho): HoStats screen (volumen + intensidad + 1RM + mesociclo)
-fadcfc7 feat(admin): /v1/admin/migrate endpoint
-ae9834d feat(payments): MercadoPago Checkout Pro · Chile · CLP
-0b1284b feat(payments): MP Subscriptions API · precios USD-anchored
-2631bed fix(payments): MP body constraints + coach annual price cap
-7c71079 feat(premium): pantalla Plan PRO real con MP Subscriptions + fix CORS
-d5d7a54 feat(charts): radar chart kind + integración en HoStats/VoltaStats
-cd97597 ux(social): quitar botón 'GENERAR PNG'
-9084c53 fix(payments): pivot a Checkout Pro como default
-871892b fix(auth): verify_token busca primero en Postgres antes de MOCK
-fcd256d feat(wod): WodTimer (no usado, queda en repo)
-3a797dc fix(ux): quitar timer del PreWod + skill tree categorías wrap
-23c1f1f feat(victory): rediseño completo · informativa · sin botones
-146e03e ux(volta): WodSummary rico en data + WellnessRow legible
-a209710 feat: 3 agentes en paralelo + login fix · 5 mejoras del audit
-7c11888 feat: macrociclos engine real (23 programas) + CoachMacroView amigable
-f93e50c ux(coach): fix audit · confirm en deletes + input duración affordance
-a6ca975 ux(ho): IMR visible en AtletaHome + card tappable → HoStats
-90619e3 feat(wise): LLM real con fallback Lite · system prompt viral + banco frases
+9a9906d ux(ho): CTA Top 10 del club también en HOME atleta
+690e2e5 feat(baseline): sync localStorage ↔ /v1/baseline/results · offline-first
+30b7f00 feat(wod-results): endpoint /v1/wod-results + persistencia post-WOD
+e5546c1 chore(qa): seed script para usuarios sim + .gitignore .claire/
+8c1f897 feat(viral): leaderboard + belt ceremony + prewod share + coach viral tools
+c7c1305 feat(wise): default mistral-small-latest + MISTRAL_MODEL env var
+d57e4e7 docs: HANDOFF actualizado al cierre de sesión fb6863a
 fb6863a fix(session): bloquear sets más allá de la prescripción (4×4 ≠ 8 sets)
+90619e3 feat(wise): LLM real con fallback Lite · system prompt viral + banco frases
+a6ca975 ux(ho): IMR visible en AtletaHome + card tappable → HoStats
+f93e50c ux(coach): fix audit · confirm en deletes + input duración affordance
+7c11888 feat: macrociclos engine real (23 programas) + CoachMacroView amigable
+a209710 feat: 3 agentes en paralelo + login fix · 5 mejoras del audit
+146e03e ux(volta): WodSummary rico en data + WellnessRow legible
+23c1f1f feat(victory): rediseño completo · informativa · sin botones
+3a797dc fix(ux): quitar timer del PreWod + skill tree categorías wrap
+fcd256d feat(wod): WodTimer (no usado, queda en repo)
+871892b fix(auth): verify_token busca primero en Postgres antes de MOCK
+9084c53 fix(payments): pivot a Checkout Pro como default
+cd97597 ux(social): quitar botón 'GENERAR PNG'
+d5d7a54 feat(charts): radar chart kind + integración en HoStats/VoltaStats
+7c71079 feat(premium): pantalla Plan PRO real con MP Subscriptions + fix CORS
+2631bed fix(payments): MP body constraints + coach annual price cap
+0b1284b feat(payments): MP Subscriptions API · precios USD-anchored
+ae9834d feat(payments): MercadoPago Checkout Pro · Chile · CLP
+fadcfc7 feat(admin): /v1/admin/migrate endpoint
+7cb9aff feat(ho): HoStats screen (volumen + intensidad + 1RM + mesociclo)
 ```
 
 ---
@@ -213,35 +251,47 @@ fb6863a fix(session): bloquear sets más allá de la prescripción (4×4 ≠ 8 s
 ## 9. Cómo arrancar un chat nuevo · prompt sugerido
 
 ```
-Leé HANDOFF.md primero. Estamos en commit fb6863a de
+Leé HANDOFF.md primero. Estamos en commit 9a9906d de
 github.com/esstipi-debug/Holy-Oly. La app live es 
 https://holy-oly.onrender.com (frontend) y 
 https://holy-oly-3.onrender.com (backend).
 
-Lo más reciente que se hizo:
-- 3 agentes en paralelo cerraron 5 debilidades del audit (engines wiring,
-  login UI real, coach HO nav, athlete tap, cards gallery)
-- Macrociclos engine real (23 programas) + CoachMacroView amigable
-- WISE LLM con fallback Lite + frases virales del banco
-- Audit fixes (confirm deletes, IMR visible, ActiveSession bug 4×4)
+Lo más reciente (sesión 2026-05-26 Opus 4.7):
+- 7 features del backlog viral cerradas: Leaderboard, 1RM auto-PR,
+  Belt ceremony, PreWOD share 9:16, Coach viral tools, Wise Score
+  card, ATL persistente.
+- Backend sync: baseline (offline-first) + WOD results endpoint
+  (migration 006 corrida en prod).
+- Subagent simulator QA · 8 usuarios sim seedeados (@holyolysim.com).
+- Mistral: código preparado con mistral-small-latest + MISTRAL_MODEL
+  env. QA audit hecho · 3 fixes críticos pendientes (max_tokens,
+  rate limit per-user, billing alerts) antes de activar tráfico real.
 
-Próximas tareas pendientes (orden de impacto):
-  1. Leaderboard atleta (Top 10 box · OLY/CF Index) · 3h
-  2. 1RM auto-PR durante ActiveSession · 1.5h
-  3. Belt ceremony fullscreen · 2h
-  4. PreWOD share 9:16 · 1.5h
-  5. Coach viral content tools · 2h
-  6. Wise Score visible en home · 30min
-  7. ATL función real · 15min
+Bloqueantes ACTIVOS (acción de Esteban):
+  - CORS_ORIGINS en Render env: borrar la var (default del código OK)
+    o setearla con holy-oly.onrender.com incluida. Sin esto, la app
+    SOLO funciona en demo mode (frontend live no habla con backend).
+  - MISTRAL_API_KEY revocada · setear nueva DESPUÉS de los 3 fixes
+    críticos del audit (ver sección Pendientes del HANDOFF).
+  - MP_PLAN_ID_* en Render para activar pagos.
 
-Bloqueantes que necesitan acción de Esteban (usuario):
-  - Setear MP_PLAN_ID_* en Render (códigos disponibles en MP dashboard)
-  - Opcional: MISTRAL_API_KEY o GOOGLE_API_KEY para activar WISE LLM real
+Workflow probado en esta sesión:
+- Hasta 3 agentes en paralelo funciona bien (probado con paralelo
+  ho_atleta + vol_atleta + coach simulator browser).
+- Memoria: feedback workflow_momentum.md aplica: mantener cola visible,
+  pedir decisiones intermedias, encadenar tareas sin confirmar entre cada
+  una salvo scope real.
 
-Workflow recomendado: paralelizar con agentes para tareas independientes
-(probado funciona con 3 agentes en paralelo).
+Próximas tareas (orden):
+  1. Esteban: fix CORS env var en Render
+  2. Esteban: revoke + nueva MISTRAL_API_KEY post-fixes
+  3. Aplicar 3 fixes críticos Mistral (~2h paralelo)
+  4. QA real post-CORS (rerun simulator)
+  5. #8 Push notifications PWA · 4h
+  6. #9 Heatmap 365 anual · 3h
+  7. Otros del audit
 
-Empezá con la #1 (leaderboard atleta) o decime cuál priorizar.
+Empezá pidiendo el siguiente paso o decime cuál priorizar.
 ```
 
 ---
