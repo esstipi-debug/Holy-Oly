@@ -198,21 +198,48 @@ async def log_screenshot(
     dwell_time_ms: Optional[int] = None,
     detection_method: str = "visibilitychange",
 ) -> dict:
+    """
+    Log probable-screenshot event para analytics viral.
+
+    user_id es opcional (anónimos están permitidos · ver social.py · gate de
+    `optional_user`). El INSERT debe usar paths separados según haya UUID o
+    no, porque `$1::uuid` con None puede fallar la codificación en asyncpg
+    según versión (BUG-002 del QA simulator post-CORS).
+    """
     pool = await get_pool()
     if pool is None:
         return {"logged": False, "reason": "no_db"}
-    async with pool.acquire() as conn:
-        row = await conn.fetchrow(
-            """
-            INSERT INTO social_screenshots
-                (user_id, card_variant, achievement_type, achievement_id,
-                 dwell_time_ms, detection_method)
-            VALUES ($1::uuid, $2, $3, $4, $5, $6)
-            RETURNING id, created_at
-            """,
-            user_id, card_variant, achievement_type, achievement_id,
-            dwell_time_ms, detection_method,
-        )
-        d = dict(row); d["id"] = str(d["id"]); d["logged"] = True
-        return d
+    try:
+        async with pool.acquire() as conn:
+            if user_id:
+                row = await conn.fetchrow(
+                    """
+                    INSERT INTO social_screenshots
+                        (user_id, card_variant, achievement_type, achievement_id,
+                         dwell_time_ms, detection_method)
+                    VALUES ($1::uuid, $2, $3, $4, $5, $6)
+                    RETURNING id, created_at
+                    """,
+                    user_id, card_variant, achievement_type, achievement_id,
+                    dwell_time_ms, detection_method,
+                )
+            else:
+                # Path anónimo · sin cast ::uuid sobre None
+                row = await conn.fetchrow(
+                    """
+                    INSERT INTO social_screenshots
+                        (card_variant, achievement_type, achievement_id,
+                         dwell_time_ms, detection_method)
+                    VALUES ($1, $2, $3, $4, $5)
+                    RETURNING id, created_at
+                    """,
+                    card_variant, achievement_type, achievement_id,
+                    dwell_time_ms, detection_method,
+                )
+            d = dict(row); d["id"] = str(d["id"]); d["logged"] = True
+            return d
+    except Exception as e:
+        # Fail-soft: analytics no debe romper el flow viral del frontend
+        print(f"[social] log_screenshot failed: {e}")
+        return {"logged": False, "reason": "db_error", "error": str(e)[:200]}
 

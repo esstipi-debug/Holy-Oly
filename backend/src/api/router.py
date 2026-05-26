@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional, List
 from .auth.auth import verify_token
 from ..infrastructure.gemini_provider import gemini_provider
@@ -204,17 +204,11 @@ async def adapt_session(
             },
             "recommendation": result.recommendation,
             "original_plan": result.original_plan,
-            "adapted_plan": [
-                {
-                    "exercise": ap.exercise.exercise_name,
-                    "sets": ap.sets,
-                    "reps": ap.reps,
-                    "weight": f"{ap.weight_pct}%",
-                    "degradation": ap.degradation_level,
-                    "reasoning": ap.reasoning
-                }
-                for ap in result.adapted_plan
-            ],
+            # adapted_plan ya viene como lista de dicts del engine
+            # (session_adaptation_engine.py:450-459). NO desempacar como
+            # si fueran objetos AdaptedExercise · BUG-001 del QA simulator
+            # post-CORS.
+            "adapted_plan": result.adapted_plan,
             "warnings": result.warnings
         }
     except Exception as e:
@@ -225,12 +219,15 @@ async def adapt_session(
 # ============ MACROCYCLE ENGINE ============
 
 class AthleteMaxesRequest(BaseModel):
-    snatch: float
-    clean: float
-    jerk: float
-    back_squat: float
-    front_squat: float = 0.0
-    body_weight: float = 0.0
+    # BUG-003 del QA simulator: aceptábamos maxes negativos (físicamente imposible)
+    # → generaba planes corruptos con pesos negativos. gt=0 strict en lifts olímpicos.
+    # front_squat y body_weight quedan ge=0 porque son opcionales (0 = "no especificado").
+    snatch: float = Field(..., gt=0, le=400)
+    clean: float = Field(..., gt=0, le=400)
+    jerk: float = Field(..., gt=0, le=400)
+    back_squat: float = Field(..., gt=0, le=600)
+    front_squat: float = Field(default=0.0, ge=0, le=600)
+    body_weight: float = Field(default=0.0, ge=0, le=300)
 
 
 class GenerateProgramRequest(BaseModel):
