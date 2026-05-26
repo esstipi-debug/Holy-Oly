@@ -29,7 +29,7 @@ class MistralProvider:
         except Exception as e:
             print(f"[Warning] Mistral config failed: {e}")
 
-    def generate(self, prompt: str, model: str = "mistral-small-2603", system_instruction: str = None) -> str:
+    def generate(self, prompt: str, model: str = "mistral-small-latest", system_instruction: str = None) -> str:
         if not self._configured:
             return "Mistral not configured - set MISTRAL_API_KEY to enable"
 

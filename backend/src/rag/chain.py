@@ -49,7 +49,7 @@ def query_rag(
 
     prompt = RAG_PROMPT_TEMPLATE.format(context=context, question=question)
 
-    return mistral_provider.generate(prompt, model="mistral-small-2603")
+    return mistral_provider.generate(prompt, model="mistral-small-latest")
 
 
 def query_rag_with_sources(

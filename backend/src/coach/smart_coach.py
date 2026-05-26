@@ -3,6 +3,7 @@
 # RAG (knowledge base) + Athlete DB data -> Mistral personalized answer
 
 from __future__ import annotations
+import os
 from typing import Optional
 from dataclasses import dataclass, field
 
@@ -92,11 +93,14 @@ def _build_athlete_profile(ctx: AthleteContext) -> str:
     return "\n".join(lines)
 
 
+_MISTRAL_MODEL = os.getenv("MISTRAL_MODEL", "mistral-small-latest")
+
+
 def _generate_with_fallback(prompt: str, system: Optional[str] = None) -> str:
     """Intenta Mistral primero, cae a Gemini si falla o no está configurado."""
     # Try Mistral
     try:
-        out = mistral_provider.generate(prompt, model="mistral-small-2603", system_instruction=system)
+        out = mistral_provider.generate(prompt, model=_MISTRAL_MODEL, system_instruction=system)
         if out and not out.startswith("Mistral error") and not out.startswith("Mistral not configured"):
             return out
     except Exception as e:
