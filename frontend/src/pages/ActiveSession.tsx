@@ -130,15 +130,20 @@ const ActiveSession: React.FC = () => {
     const w = parseFloat(weight) || 0;
     const r = parseInt(reps) || 0;
     if (w === 0 || r === 0) return;
-    // Hard guard: no permitir loggear más sets de los prescriptos
-    const completedSoFar = (logs[exIdx] ?? []).filter(l => l.result === 'completed').length;
-    if (result === 'completed' && completedSoFar >= current.targetSets) {
-      return;
-    }
-    setLogs(prev => ({
-      ...prev,
-      [exIdx]: [...(prev[exIdx] ?? []), { weight: w, reps: r, result }],
-    }));
+    let inserted = false;
+    // Guard race-condition-safe: lee dentro del updater, no del closure.
+    // Sin esto, clicks rápidos (programatic o doble-tap) en el mismo frame
+    // bypasean el límite porque todos leen el mismo `logs` stale.
+    setLogs(prev => {
+      const existing = prev[exIdx] ?? [];
+      const completedSoFar = existing.filter(l => l.result === 'completed').length;
+      if (result === 'completed' && completedSoFar >= current.targetSets) {
+        return prev; // no-op
+      }
+      inserted = true;
+      return { ...prev, [exIdx]: [...existing, { weight: w, reps: r, result }] };
+    });
+    if (!inserted) return;
     setWeight(String(targetWeight));
     setReps(String(current.targetReps));
 
