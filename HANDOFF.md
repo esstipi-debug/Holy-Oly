@@ -1,7 +1,7 @@
 # HANDOFF · Holy Oly + Volta
 
 > Documento maestro para arrancar un nuevo chat con contexto completo.
-> Última actualización: 2026-05-26 (sesión Opus 4.7) · cerrada en commit `cf5b118`.
+> Última actualización: 2026-05-26 (sesión Opus 4.7 · larga) · cerrada en commit `be1b7df`+.
 
 ---
 
@@ -76,10 +76,26 @@
 - ~~BUG-002 race condition setLogs~~ ✅ commit `b08ccbd` · guard movido dentro de `setLogs(prev => ...)` · clicks rápidos no bypasean el 4×2
 - ~~/v1/coach/ask legacy apagado~~ ✅ commit `cf5b118` · cero callers · funcionalidad duplicada por wise_router. smart_coach.py se conserva (wise lo importa)
 - ~~pyc files untracked~~ ✅ commit `c92cf06`
+- ~~VictoryScreen HO con KPIs (IMR + tonelaje + zonas + PRs)~~ ✅ commit `215b4ce` · toast guardado + recomendación post-sesión
+- ~~ActiveSession flex series (edit/delete/toggle) + skip warmup + planned_date banner~~ ✅ commit `215b4ce`
+- ~~MetricHistoryModal · 5 métricas tappables con sparkline histórico~~ ✅ commit `c21f4a7`
+- ~~Coach HO AthleteTrainingView · hoy + semana + calendar 30d intensidades~~ ✅ commit `9856bb6`
+- ~~Doble sesión AM/PM · coach asigna + atleta ve cards + SessionSlotBadge~~ ✅ commit `9856bb6`
+- ~~Volta WOD sin timer · solo score sheet~~ ✅ commit `3502d1d`
+- ~~PWA Push notifications · manifest + sw + backend endpoints + migration 007~~ ✅ commit `be1b7df` + migration corrida en prod
+- ~~Cleanup backend · run_smart_coach removido (legacy)~~ ✅ (cleanup pendiente de commit)
 
-#### 🚨 Bloqueante AHORA (acción de Esteban)
-- **CORS_ORIGINS en Render**: env var override está rechazando `holy-oly.onrender.com`. Frontend live no puede hablar con backend live. Fix: borrar la env var (default del código está bien) o setearla a `https://holy-oly.onrender.com,https://holy-oly-3.onrender.com,http://localhost:5173,http://localhost:3000`. ~2min · ⚠ Sin esto, la app solo funciona en demo mode.
-- **MISTRAL_API_KEY revocada por Esteban** (key expuesta en chat anterior). WISE corre en Lite hasta que se setee key nueva. Cuando se setee, aplicar primero los 3 fixes críticos del audit (ver abajo).
+#### 🚨 Bloqueantes AHORA (acción de Esteban)
+
+Ver `.claire/bloqueantes_runbook.md` con instrucciones paso-a-paso (15-20 min total).
+
+Resumen:
+- **CORS_ORIGINS** en Render env · borrar la var o setear con `holy-oly.onrender.com` (2min)
+- **Migration 007** ✅ ya corrida (`push_subscriptions` creada en prod)
+- **VAPID keys** para PWA · `python scripts/generate_vapid_keys.py` + setear 3 env vars (5min)
+- **PWA icons** `frontend/public/icon-192.png` + `icon-512.png` (5min)
+- **MISTRAL_API_KEY** nueva (la anterior revocada · ver runbook punto 5). Los fixes críticos del audit YA están aplicados (commits `e74da99` + `8a22739`) · activar tráfico es seguro (3min + billing alerts)
+- **MP_PLAN_ID_*** en Render env para pagos sandbox (5min)
 
 #### 🚨 Fixes críticos antes de activar Mistral con tráfico real
 ✅ Todos los fixes del audit aplicados en commits `e74da99` (críticos) y `8a22739` (medios).
@@ -90,10 +106,16 @@ Costo estimado con fixes: ~$6-21/mes para 1000 calls/día. Cache LRU baja ese n�
 #### ⏸ Backlog grande
 | # | Item | Tiempo | Por qué |
 |---|---|---|---|
-| 8 | Push notifications PWA | 4h | C.13 roadmap · agente lanzado al cierre de sesión, ver branch siguiente |
-| 12 | Setear env vars MP_PLAN_ID_* en Render | 5min · Esteban | Activa pagos sandbox |
-| 13 | Setear MISTRAL_API_KEY nuevo (post-fixes) + billing alerts | 1min · Esteban | Activa WISE LLM real con caps seguros |
-| 14 | Env vars WISE_* en Render (opcional, todos tienen default sano): `WISE_MAX_TOKENS=400`, `WISE_TEMPERATURE=0.7`, `WISE_USER_MAX_PER_MIN=20`, `WISE_USER_MAX_PER_DAY=200`, `WISE_CACHE_ENABLED=true` | 5min · Esteban | Tuning fino sin redeploy |
+| — | Skill tree coach↔atleta interactivity | 4h | Spec en `.claire/draft_skill_tree_interactivity.md` · agente lanzado al cierre de sesión |
+| — | Doble sesión Volta (2 WODs/día) | 1h | Hoy solo HO · módulo product-agnostic |
+| — | AthleteTrainingView para Volta coach | 1h | Hoy solo HO via AthleteDeepDive |
+| — | Endpoints backend `/v1/planned_sessions` | 2h | Reemplaza localStorage para doble sesión |
+| — | Endpoints backend `/v1/sessions` para sync ActiveSession | 2h | Hoy localStorage solo |
+| — | Endpoint `/v1/stress/history` para MetricHistoryModal | 1h | Hoy mock determinista |
+| — | Wise Score backend real (engine real, no proxy readiness) | 2h | Hoy AtletaHome muestra readiness como proxy |
+| — | Persist coach comments al atleta + asignar descanso | 2-3h | UI listo · falta backend |
+| — | Migrar gemini_provider a google.genai (paquete deprecated warning) | 1h | Spinoff del cleanup técnico |
+| — | Setear env vars WISE_* (opcionales, defaults sanos) en Render: `WISE_MAX_TOKENS=400`, `WISE_TEMPERATURE=0.7`, `WISE_USER_MAX_PER_MIN=20`, `WISE_USER_MAX_PER_DAY=200`, `WISE_CACHE_ENABLED=true` | 5min · Esteban | Tuning fino sin redeploy |
 
 ---
 
@@ -207,6 +229,19 @@ Costo estimado con fixes: ~$6-21/mes para 1000 calls/día. Cache LRU baja ese n�
 ## 7. Commits recientes (cronológico)
 
 ```
+be1b7df feat(pwa): #8 push notifications · manifest + sw + frontend + backend
+3502d1d ux(volta): VoltaActiveWod sin timer · solo score sheet
+9856bb6 feat(coach-ho): vista entrenamiento del atleta + doble sesión AM/PM
+c21f4a7 feat(metrics): historial tappable con MetricHistoryModal
+215b4ce feat(session): VictoryScreen HO con KPIs + flex series + fecha + skip warmup
+1b31ec2 docs(handoff): cerrar #9 Heatmap + Mistral fixes (críticos + medios)
+cf5b118 chore(coach): apagar endpoint /v1/coach/ask legacy (orphan)
+8a22739 perf(wise): LRU cache + async _fetch_athlete
+b08ccbd fix(session): race condition BUG-002
+d1370a9 feat(viz): Heatmap 365 anual
+c92cf06 chore(repo): untrack pyc
+e74da99 fix(wise): max_tokens + rate limit + sanitization
+98bd7ec docs(handoff)
 9a9906d ux(ho): CTA Top 10 del club también en HOME atleta
 690e2e5 feat(baseline): sync localStorage ↔ /v1/baseline/results · offline-first
 30b7f00 feat(wod-results): endpoint /v1/wod-results + persistencia post-WOD
