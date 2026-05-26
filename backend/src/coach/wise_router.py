@@ -3,6 +3,10 @@
 # Mistral (primary) -> Gemini (fallback) -> Lite (templates)
 from __future__ import annotations
 
+import os
+import re
+import time
+from collections import defaultdict
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from typing import Optional, Literal
@@ -13,6 +17,50 @@ from .smart_coach import AthleteContext, _generate_with_fallback
 from .router import _fetch_athlete
 
 router = APIRouter(prefix="/v1/wise", tags=["wise"])
+
+
+# ---------------------------------------------------------------------------
+# Per-user rate limiting + prompt sanitization (audit fixes #2 + #4)
+# ---------------------------------------------------------------------------
+
+_USER_REQUESTS: dict[str, list[float]] = defaultdict(list)
+_WISE_USER_MAX_PER_MIN = int(os.getenv("WISE_USER_MAX_PER_MIN", "20"))
+_WISE_USER_MAX_PER_DAY = int(os.getenv("WISE_USER_MAX_PER_DAY", "200"))
+_SUSPICIOUS_RE = re.compile(
+    r"\b(ignore|ignora|forget|olvida|disregard|previous|previa|prior|anterior|system|sistema|instruction|instrucci)\b",
+    re.IGNORECASE,
+)
+
+
+def _check_user_rate_limit(user_id: str) -> Optional[str]:
+    """Per-user in-memory rate limit. Retorna None si OK, mensaje si excedió."""
+    if not user_id:
+        # Sin user_id no podemos limitar per-user; dejamos pasar (global middleware igual aplica).
+        return None
+    now = time.time()
+    history = _USER_REQUESTS[user_id]
+    cutoff_day = now - 86400
+    history[:] = [t for t in history if t > cutoff_day]
+    if len(history) >= _WISE_USER_MAX_PER_DAY:
+        return f"Límite diario alcanzado ({_WISE_USER_MAX_PER_DAY} consultas/día)"
+    cutoff_min = now - 60
+    recent = sum(1 for t in history if t > cutoff_min)
+    if recent >= _WISE_USER_MAX_PER_MIN:
+        return f"Límite por minuto alcanzado ({_WISE_USER_MAX_PER_MIN}/min)"
+    history.append(now)
+    return None
+
+
+def _sanitize_question(q: Optional[str]) -> str:
+    """Trim, truncate 500 chars, strip control chars (excepto \\n y \\t)."""
+    if not q:
+        return ""
+    q = q.strip()[:500]
+    q = "".join(
+        c for c in q
+        if c == "\n" or c == "\t" or not (ord(c) < 32 or ord(c) == 127)
+    )
+    return q
 
 
 # ---------------------------------------------------------------------------
@@ -256,7 +304,23 @@ def _lite_answer(req: WiseAskRequest) -> str:
 # ---------------------------------------------------------------------------
 
 @router.post("/ask", response_model=WiseAskResponse)
-async def wise_ask(req: WiseAskRequest, _: dict = Depends(verify_token)):
+async def wise_ask(req: WiseAskRequest, current_user=Depends(verify_token)):
+    # 0. Rate limit per-user (audit fix #2) + sanitización (#4)
+    user_id = getattr(current_user, "id", None) or ""
+    err = _check_user_rate_limit(user_id)
+    if err:
+        raise HTTPException(status_code=429, detail=err)
+
+    question = _sanitize_question(req.question)
+    if not question:
+        raise HTTPException(status_code=400, detail="Pregunta vacía")
+    if _SUSPICIOUS_RE.search(question):
+        print(
+            f"[WISE] suspicious question pattern from user={user_id}: {question[:100]}"
+        )
+    # Usar question sanitizada para el resto del flow
+    req.question = question
+
     # 1. Cargar contexto DB si tenemos athlete_id válido
     db_ctx = AthleteContext(athlete_id=req.athlete_id or "")
     if req.athlete_id:
@@ -272,7 +336,7 @@ async def wise_ask(req: WiseAskRequest, _: dict = Depends(verify_token)):
 {profile}
 
 === PREGUNTA DEL ATLETA ===
-{req.question}
+{question}
 """
 
     try:

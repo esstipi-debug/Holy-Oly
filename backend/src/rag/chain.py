@@ -49,7 +49,12 @@ def query_rag(
 
     prompt = RAG_PROMPT_TEMPLATE.format(context=context, question=question)
 
-    return mistral_provider.generate(prompt, model="mistral-small-latest")
+    return mistral_provider.generate(
+        prompt,
+        model="mistral-small-latest",
+        max_tokens=600,
+        temperature=0.25,
+    )
 
 
 def query_rag_with_sources(
@@ -64,7 +69,12 @@ def query_rag_with_sources(
     context = _format_context(results)
 
     prompt = RAG_PROMPT_TEMPLATE.format(context=context, question=question)
-    answer = mistral_provider.generate(prompt, model="mistral-small-latest")
+    answer = mistral_provider.generate(
+        prompt,
+        model="mistral-small-latest",
+        max_tokens=600,
+        temperature=0.25,
+    )
 
     sources = list({r.get("source", "") for r in results if r.get("source")})
 

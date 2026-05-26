@@ -94,13 +94,26 @@ def _build_athlete_profile(ctx: AthleteContext) -> str:
 
 
 _MISTRAL_MODEL = os.getenv("MISTRAL_MODEL", "mistral-small-latest")
+_WISE_MAX_TOKENS = int(os.getenv("WISE_MAX_TOKENS", "400"))
+_WISE_TEMPERATURE = float(os.getenv("WISE_TEMPERATURE", "0.7"))
 
 
-def _generate_with_fallback(prompt: str, system: Optional[str] = None) -> str:
+def _generate_with_fallback(
+    prompt: str,
+    system: Optional[str] = None,
+    max_tokens: int = _WISE_MAX_TOKENS,
+    temperature: float = _WISE_TEMPERATURE,
+) -> str:
     """Intenta Mistral primero, cae a Gemini si falla o no está configurado."""
     # Try Mistral
     try:
-        out = mistral_provider.generate(prompt, model=_MISTRAL_MODEL, system_instruction=system)
+        out = mistral_provider.generate(
+            prompt,
+            model=_MISTRAL_MODEL,
+            system_instruction=system,
+            max_tokens=max_tokens,
+            temperature=temperature,
+        )
         if out and not out.startswith("Mistral error") and not out.startswith("Mistral not configured"):
             return out
     except Exception as e:

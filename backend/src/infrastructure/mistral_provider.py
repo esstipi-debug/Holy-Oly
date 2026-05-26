@@ -29,7 +29,14 @@ class MistralProvider:
         except Exception as e:
             print(f"[Warning] Mistral config failed: {e}")
 
-    def generate(self, prompt: str, model: str = "mistral-small-latest", system_instruction: str = None) -> str:
+    def generate(
+        self,
+        prompt: str,
+        model: str = "mistral-small-latest",
+        system_instruction: str = None,
+        max_tokens: int = 400,
+        temperature: float = 0.7,
+    ) -> str:
         if not self._configured:
             return "Mistral not configured - set MISTRAL_API_KEY to enable"
 
@@ -39,7 +46,12 @@ class MistralProvider:
         messages.append({"role": "user", "content": prompt})
 
         try:
-            response = self.client.chat.complete(model=model, messages=messages)
+            response = self.client.chat.complete(
+                model=model,
+                messages=messages,
+                max_tokens=max_tokens,
+                temperature=temperature,
+            )
             return response.choices[0].message.content
         except Exception as e:
             return f"Mistral error: {e}"
