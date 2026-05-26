@@ -4,7 +4,6 @@ import { buildCelebrationCatalog } from '../data/celebrations';
 import MinimalistCard from '../components/social/MinimalistCard';
 import StadiumCard from '../components/social/StadiumCard';
 import StatSheetCard from '../components/social/StatSheetCard';
-import { useShareCard } from '../components/social/useShareCard';
 
 /**
  * Social Card — pantalla full-screen optimizada para screenshot.
@@ -93,30 +92,9 @@ const SocialCard: React.FC = () => {
   const celebration = catalog[celebrationIdx] ?? catalog[0];
   const variant = VARIANTS[variantIdx];
 
-  // Share 9:16 PNG
+  // Ref por si en el futuro se quiere reactivar export PNG vía useShareCard.
+  // Por ahora el atleta toma screenshot nativo del dispositivo (más rápido + sin botón que estorbe).
   const cardRef = useRef<HTMLDivElement | null>(null);
-  const { state: shareState, share } = useShareCard();
-
-  const handleShare = () => {
-    const msg = `${celebration.title} · ${celebration.value}${celebration.unit ?? ''} · holyoly.app · #${celebration.hashtag}`;
-    share({
-      node: cardRef.current,
-      message: msg,
-      filename: `holyoly-${celebration.id}`,
-      variant: variant.id,
-      achievementType: celebration.type,
-      achievementId: celebration.id,
-    });
-  };
-
-  const shareLabel = {
-    idle: 'COMPARTIR · GENERAR PNG',
-    rendering: 'GENERANDO...',
-    sharing: 'COMPARTIENDO...',
-    shared: '✓ LISTO',
-    downloaded: '✓ LISTO',
-    error: 'REINTENTAR',
-  }[shareState.status];
 
   const hideCurrent = () => {
     const next = new Set(hidden); next.add(celebration.id); saveHidden(next); setHidden(next);
@@ -165,44 +143,16 @@ const SocialCard: React.FC = () => {
         )}
       </div>
 
-      {/* Área shareable · sin overlays · screenshot-friendly */}
-      {/*
-        Wrapper interno con aspect 9:16 fijo para que el PNG exportado tenga
-        proporción Instagram Stories. El layout visible se adapta al viewport.
-      */}
-      <div className="flex-1 flex flex-col relative">
-        <div ref={cardRef} className="flex-1 flex flex-col" style={{ minHeight: 0 }}>
-          {variant.id === 'minimalist' && (
-            <MinimalistCard celebration={celebration} athleteName={name} club={club} />
-          )}
-          {variant.id === 'stadium' && (
-            <StadiumCard celebration={celebration} athleteName={name} club={club} />
-          )}
-          {variant.id === 'statsheet' && (
-            <StatSheetCard celebration={celebration} athleteName={name} club={club} />
-          )}
-        </div>
-
-        {/* Botón share flotante · NO entra al PNG porque está fuera del cardRef */}
-        <button
-          onClick={handleShare}
-          disabled={shareState.status === 'rendering' || shareState.status === 'sharing'}
-          className="absolute bottom-4 left-4 right-4 z-20 py-3 rounded-full font-black text-xs tracking-widest uppercase text-white shadow-2xl active:scale-95 transition disabled:opacity-60"
-          style={{
-            background: shareState.status === 'shared' || shareState.status === 'downloaded'
-              ? 'linear-gradient(135deg, #22C55E, #16A34A)'
-              : shareState.status === 'error'
-              ? 'linear-gradient(135deg, #EF4444, #DC2626)'
-              : 'linear-gradient(135deg, #7C5CFF, #5B3FE8)',
-            boxShadow: '0 10px 30px rgba(124,92,255,0.45)',
-          }}
-        >
-          {shareLabel}
-        </button>
-        {shareState.error && (
-          <p className="absolute bottom-16 left-4 right-4 z-20 text-center text-[10px] text-red-300">
-            {shareState.error}
-          </p>
+      {/* Área shareable · CERO overlays para screenshot limpio del atleta */}
+      <div ref={cardRef} className="flex-1 flex flex-col">
+        {variant.id === 'minimalist' && (
+          <MinimalistCard celebration={celebration} athleteName={name} club={club} />
+        )}
+        {variant.id === 'stadium' && (
+          <StadiumCard celebration={celebration} athleteName={name} club={club} />
+        )}
+        {variant.id === 'statsheet' && (
+          <StatSheetCard celebration={celebration} athleteName={name} club={club} />
         )}
       </div>
     </div>
