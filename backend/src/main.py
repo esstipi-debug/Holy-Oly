@@ -19,6 +19,10 @@ from .api.skill_focus import router as skill_focus_router
 from .api.notifications import notifications_router
 from .api.wellness import router as wellness_router
 from .api.deviations import router as deviations_router
+from .api.macro_suggester import router as macro_suggester_router
+from .api.volta_wod import router as volta_wod_router
+from .api.manual_sessions import router as manual_sessions_router
+from .api.skill_evaluation import router as skill_evaluation_router
 from .api.social import router as social_router
 from .api.payments import router as payments_router
 from .api.admin import router as admin_router
@@ -162,6 +166,10 @@ app.include_router(skill_focus_router)
 app.include_router(notifications_router)
 app.include_router(wellness_router)
 app.include_router(deviations_router)
+app.include_router(macro_suggester_router)
+app.include_router(volta_wod_router)
+app.include_router(manual_sessions_router)
+app.include_router(skill_evaluation_router)
 app.include_router(social_router)
 app.include_router(payments_router)
 app.include_router(admin_router)

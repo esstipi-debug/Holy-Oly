@@ -9,6 +9,7 @@ import WellnessButton from '../components/WellnessButton';
 import { loadResults, overallProgress, personalizationTier } from '../data/baseline';
 import { getPendingForToday, setActiveSlot } from '../lib/plannedSessions';
 import type { PlannedSession, TrainingSlot } from '../types/training';
+import { voltaWod, type RecommendedWodResponse, type WodScale } from '../lib/voltaWod';
 
 const C = {
   bg: '#07070F',
@@ -271,6 +272,218 @@ const BaselinePromptCard: React.FC<{ onNavigate: () => void }> = ({ onNavigate }
   );
 };
 
+// ──────────────────────────────────────────────────────────────────
+// VoltaWodTodayCard
+// DIFERENCIADOR del producto: WOD recomendado del día con justificación
+// del engine (readiness + cns + wellness + skill focuses + variedad).
+// Se monta como PRIMERA card del dashboard · es lo primero que ve el
+// atleta al abrir la app.
+// ──────────────────────────────────────────────────────────────────
+
+const TYPE_STYLE: Record<string, { bg: string; fg: string; border: string }> = {
+  'AMRAP':           { bg: 'rgba(0,229,255,0.10)',  fg: C.cyan,  border: 'rgba(0,229,255,0.30)' },
+  'EMOM':            { bg: 'rgba(168,139,255,0.10)', fg: '#A88BFF', border: 'rgba(168,139,255,0.30)' },
+  'For Time':        { bg: 'rgba(255,179,0,0.10)',  fg: C.amber, border: 'rgba(255,179,0,0.30)' },
+  'Strength':        { bg: 'rgba(255,61,0,0.10)',   fg: C.red,   border: 'rgba(255,61,0,0.30)' },
+  'Active Recovery': { bg: 'rgba(0,230,118,0.10)',  fg: C.green, border: 'rgba(0,230,118,0.30)' },
+};
+
+const INTENSITY_LABEL: Record<string, { label: string; color: string }> = {
+  low:    { label: 'BAJA',  color: C.green },
+  medium: { label: 'MEDIA', color: C.amber },
+  high:   { label: 'ALTA',  color: C.red },
+};
+
+interface VoltaWodTodayCardProps {
+  onStart: () => void;
+}
+
+const VoltaWodTodayCard: React.FC<VoltaWodTodayCardProps> = ({ onStart }) => {
+  const [wod, setWod] = useState<RecommendedWodResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [scale, setScale] = useState<WodScale>(() => voltaWod.getScale());
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    voltaWod
+      .today()
+      .then((res) => {
+        if (cancelled) return;
+        setWod(res);
+        setError(null);
+      })
+      .catch((e: unknown) => {
+        if (cancelled) return;
+        setError(e instanceof Error ? e.message : 'No pudimos cargar el WOD de hoy');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const pickScale = (s: WodScale) => {
+    voltaWod.setScale(s);
+    setScale(s);
+  };
+
+  if (loading) {
+    return (
+      <div style={{
+        background: C.surface, border: `1px solid ${C.line}`,
+        borderRadius: 18, padding: 16, marginBottom: 14,
+      }}>
+        <div style={{ fontSize: 11, color: C.muted }}>Generando tu WOD de hoy…</div>
+      </div>
+    );
+  }
+
+  if (error || !wod) {
+    return (
+      <div style={{
+        background: C.surface, border: '1px solid rgba(255,61,0,0.25)',
+        borderRadius: 18, padding: 16, marginBottom: 14,
+      }}>
+        <div style={{ fontSize: 11, fontWeight: 800, color: C.red, marginBottom: 4 }}>
+          No pudimos cargar el WOD del día
+        </div>
+        <div style={{ fontSize: 11, color: C.muted }}>{error ?? 'Reintentá en unos segundos.'}</div>
+      </div>
+    );
+  }
+
+  const ts = TYPE_STYLE[wod.type] ?? TYPE_STYLE.AMRAP;
+  const intensity = INTENSITY_LABEL[wod.intensity_target] ?? INTENSITY_LABEL.medium;
+  const durationMin = Math.round(wod.duration_sec / 60);
+
+  return (
+    <div style={{
+      background: C.surface,
+      border: `1px solid ${ts.border}`,
+      borderRadius: 18, overflow: 'hidden',
+      marginBottom: 14,
+      boxShadow: `0 0 20px ${ts.fg}1A`,
+    }}>
+      {/* Header · tipo + duración + intensidad */}
+      <div style={{
+        padding: '12px 14px',
+        background: `linear-gradient(135deg, ${ts.bg}, transparent)`,
+        borderBottom: `1px solid ${C.line}`,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+          <div style={{
+            fontSize: 10, fontWeight: 800, letterSpacing: '.1em', color: ts.fg,
+            textTransform: 'uppercase',
+          }}>
+            TU WOD DE HOY
+          </div>
+          {wod.meta.fallback && (
+            <span style={{ fontSize: 9, color: C.muted, fontWeight: 700 }}>📡 modo offline</span>
+          )}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
+          <div style={{ fontSize: 22, fontWeight: 900, color: C.text, letterSpacing: '-.02em' }}>
+            {wod.title}
+          </div>
+          <div style={{
+            fontSize: 9, fontWeight: 800, letterSpacing: '.08em', color: ts.fg,
+            background: ts.bg, border: `1px solid ${ts.border}`,
+            padding: '3px 8px', borderRadius: 8, textTransform: 'uppercase',
+          }}>
+            {wod.type}
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 14, marginTop: 6, fontSize: 10, color: C.muted }}>
+          <span>⏱ {durationMin} min</span>
+          <span style={{ color: intensity.color, fontWeight: 800 }}>● Intensidad {intensity.label}</span>
+          <span>Risk {wod.risk_score}</span>
+        </div>
+      </div>
+
+      {/* Movimientos · scaling según escala default */}
+      <div style={{ padding: '12px 14px' }}>
+        {wod.movements.map((m, i) => (
+          <div key={i} style={{
+            display: 'flex', alignItems: 'baseline', justifyContent: 'space-between',
+            padding: '6px 0',
+            borderBottom: i === wod.movements.length - 1 ? 'none' : `1px solid ${C.line}`,
+          }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: C.text }}>{m.name}</span>
+            <span style={{ fontSize: 11, color: C.cyan, fontWeight: 700, textAlign: 'right' }}>
+              {m.scaling[scale]}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Reasoning · justificación del engine */}
+      <div style={{
+        padding: '10px 14px', background: 'rgba(0,229,255,0.04)',
+        borderTop: `1px solid ${C.line}`,
+      }}>
+        <div style={{ fontSize: 11, color: C.text, lineHeight: 1.5, opacity: 0.85 }}>
+          <span style={{ marginRight: 6 }}>💭</span>{wod.reasoning}
+        </div>
+        {wod.alternatives.length > 0 && (
+          <div style={{ fontSize: 10, color: C.muted, marginTop: 6, lineHeight: 1.5 }}>
+            <span style={{ fontWeight: 700, color: C.muted }}>Alt:</span> {wod.alternatives[0]}
+          </div>
+        )}
+      </div>
+
+      {/* Selector de escala · persistido en localStorage */}
+      <div style={{
+        padding: '10px 14px', display: 'flex', gap: 6,
+        borderTop: `1px solid ${C.line}`, alignItems: 'center',
+      }}>
+        <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '.08em', color: C.muted, marginRight: 4 }}>
+          ESCALA
+        </span>
+        {(['rx', 'scaled', 'beginner'] as WodScale[]).map((s) => {
+          const active = scale === s;
+          return (
+            <button
+              key={s}
+              onClick={() => pickScale(s)}
+              style={{
+                padding: '5px 10px',
+                background: active ? ts.fg : 'transparent',
+                color: active ? '#07070F' : C.muted,
+                border: `1px solid ${active ? ts.fg : C.line}`,
+                borderRadius: 10,
+                fontSize: 10, fontWeight: 800,
+                letterSpacing: '.06em', textTransform: 'uppercase',
+                cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >
+              {s}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* CTA · start WOD reusa el flow existente VoltaPreWod */}
+      <div style={{ padding: '10px 14px 14px', display: 'flex', gap: 8 }}>
+        <button
+          onClick={onStart}
+          style={{
+            flex: 1, padding: 12, background: ts.fg, color: '#07070F',
+            border: 'none', borderRadius: 12,
+            fontSize: 13, fontWeight: 900, cursor: 'pointer', fontFamily: 'inherit',
+            letterSpacing: '.02em',
+          }}
+        >
+          ▶ Empezar WOD
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const VoltaDashboard: React.FC = () => {
   const { navigate } = useNav();
   const { athlete, stress, stressLoading, adaptation } = useAthlete();
@@ -374,6 +587,9 @@ const VoltaDashboard: React.FC = () => {
       </div>
 
       <div style={{ padding: '14px 16px 80px' }}>
+
+        {/* WOD RECOMENDADO DEL DÍA · DIFERENCIADOR · primero que ve el atleta */}
+        <VoltaWodTodayCard onStart={() => navigate('VOLTA_PREWOD')} />
 
         {/* BASELINE PROMPT · invita a completar tests */}
         <BaselinePromptCard onNavigate={() => navigate('BASELINE')} />

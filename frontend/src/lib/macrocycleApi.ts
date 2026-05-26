@@ -140,3 +140,55 @@ export async function tryFetchMacrocycles(): Promise<RemoteMacrocycle[] | null> 
     return null;
   }
 }
+
+// ── Macro Suggester · top-3 recomendados ──────────────────────────────────
+export type SuggesterGoal =
+  | 'general_strength'
+  | 'snatch_focus'
+  | 'clean_jerk_focus'
+  | 'volume_block'
+  | 'pre_competition';
+
+export interface MacroSuggestionItem {
+  macro_id: string;
+  macro_name: string;
+  school: string;
+  focus: string;
+  duration_weeks: number;
+  sessions_per_week: number;
+  difficulty: number;
+  score: number;
+  reasoning: string;
+  estimated_difficulty: string;
+  estimated_weeks: number;
+}
+
+export interface MacroSuggestResponse {
+  suggestions: MacroSuggestionItem[];
+  rationale: string;
+  athlete_level: string;
+  goal: string;
+  inputs_used: Record<string, unknown>;
+}
+
+export async function suggestMacrosFor(
+  athleteId: string,
+  goal?: SuggesterGoal,
+): Promise<MacroSuggestResponse> {
+  return api.post<MacroSuggestResponse>('/v1/macros/suggest', {
+    athlete_id: athleteId,
+    ...(goal ? { goal } : {}),
+  });
+}
+
+export async function trySuggestMacrosFor(
+  athleteId: string,
+  goal?: SuggesterGoal,
+): Promise<MacroSuggestResponse | null> {
+  try {
+    return await suggestMacrosFor(athleteId, goal);
+  } catch (e) {
+    console.warn('[macrocycleApi] suggest fallback:', (e as Error).message);
+    return null;
+  }
+}

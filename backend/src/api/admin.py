@@ -32,6 +32,8 @@ MIGRATION_FILES = [
     "007_push_subscriptions.sql",
     "008_coach_skill_focus.sql",
     "009_wellness_checkins.sql",
+    "010_manual_sessions.sql",
+    "011_coach_skill_evaluation.sql",
 ]
 
 
