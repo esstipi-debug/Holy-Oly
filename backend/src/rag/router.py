@@ -1,6 +1,7 @@
 # rag/router.py
 # Holy Oly — RAG API Router
 
+import os
 from fastapi import APIRouter, HTTPException, Query
 from typing import Optional
 from pydantic import BaseModel
@@ -51,6 +52,11 @@ async def ingest_document(doc: DocumentInput):
 @router.post("/query", response_model=QueryResponse, summary="Consulta RAG")
 async def ask_question(request: QueryRequest):
     """Pipeline RAG completo: búsqueda semántica + Gemini 2.5 Flash."""
+    if os.getenv("GOOGLE_API_KEY", "") == "":
+        raise HTTPException(
+            status_code=503,
+            detail="RAG no disponible · GOOGLE_API_KEY no configurada en backend"
+        )
     try:
         filters = {
             k: v for k, v in {
@@ -72,6 +78,11 @@ async def ask_question(request: QueryRequest):
 @router.post("/query/sources", response_model=QueryWithSourcesResponse, summary="Consulta RAG con fuentes")
 async def ask_with_sources(request: QueryRequest):
     """Como /query pero incluye las fuentes usadas en la respuesta."""
+    if os.getenv("GOOGLE_API_KEY", "") == "":
+        raise HTTPException(
+            status_code=503,
+            detail="RAG no disponible · GOOGLE_API_KEY no configurada en backend"
+        )
     try:
         filters = {
             k: v for k, v in {

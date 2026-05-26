@@ -18,7 +18,7 @@ router = APIRouter(prefix="/v1/baseline", tags=["baseline"])
 
 class BaselineResultIn(BaseModel):
     test_id: str = Field(..., min_length=1, max_length=64)
-    value: float = Field(..., gt=0)
+    value: float = Field(..., gt=0, le=1000)
     unit: Literal['kg', 'reps', 'seconds', 'cm', 'meters', 'ml/kg/min']
 
 

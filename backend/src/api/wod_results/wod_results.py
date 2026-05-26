@@ -41,7 +41,7 @@ class WodResultCreate(BaseModel):
     wod_name: str = Field(..., min_length=1, max_length=120)
     rx_or_scaled: RxOrScaled
     score_type: ScoreType
-    score_value: float = Field(..., gt=0)
+    score_value: float = Field(..., gt=0, le=10000)
     notes: Optional[str] = Field(default=None, max_length=2000)
 
     @field_validator("wod_name")
