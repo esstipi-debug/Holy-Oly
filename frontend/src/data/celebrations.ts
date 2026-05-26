@@ -27,7 +27,9 @@ export type CelebrationType =
   | 'consecutive_days'
   | 'weekly_intensity'
   | 'adherence'
-  | 'progress_compare';
+  | 'progress_compare'
+  | 'radar_ho'
+  | 'radar_vol';
 
 export type AccentTheme = 'gold' | 'primary' | 'fire' | 'ice' | 'royal' | 'forest';
 
@@ -405,6 +407,72 @@ function adherence(athlete: AthleteProfile | null): Celebration {
   };
 }
 
+function radarHO(athlete: AthleteProfile | null): Celebration {
+  const m = athlete?.maxes ?? { snatch: 110, clean: 100, jerk: 130, back_squat: 175, front_squat: 152, body_weight: 72 };
+  const cleanAndJerk = m.clean + m.jerk - m.clean;  // jerk como aprox CJ
+  return {
+    id: 'radar_ho_strength',
+    type: 'radar_ho',
+    headline: 'PERFIL DE FUERZA',
+    title: 'BALANCE OLÍMPICO',
+    value: `${(m.snatch / m.body_weight).toFixed(2)}`,
+    unit: '× BW',
+    context: `Snatch · C&J · Squat Back · Squat Front`,
+    icon: '🎯',
+    accent: 'gold',
+    date: new Date().toISOString(),
+    hashtag: 'HolyOlyBalance',
+    stats: [
+      { label: 'Snatch / C&J',          value: `${Math.round((m.snatch / cleanAndJerk) * 100)}% (ideal 80%)` },
+      { label: 'C&J / Squat Back',      value: `${Math.round((cleanAndJerk / m.back_squat) * 100)}% (ideal 80%)` },
+      { label: 'Front / Back Squat',    value: `${Math.round((m.front_squat / m.back_squat) * 100)}% (ideal 90%)` },
+      { label: 'Total / Peso corporal', value: `${((m.snatch + cleanAndJerk) / m.body_weight).toFixed(2)}×` },
+    ],
+    chart: {
+      kind: 'radar',
+      axes: [
+        { label: 'Snatch',  value: Math.round((m.snatch / cleanAndJerk) * 100),       ideal: 80,  max: 100 },
+        { label: 'C&J',     value: Math.round((cleanAndJerk / m.back_squat) * 100),   ideal: 80,  max: 100 },
+        { label: 'Sq Back', value: 100,                                                ideal: 100, max: 100 },
+        { label: 'Sq Front',value: Math.round((m.front_squat / m.back_squat) * 100), ideal: 90,  max: 100 },
+      ],
+    },
+  };
+}
+
+function radarVOL(): Celebration {
+  return {
+    id: 'radar_vol_profile',
+    type: 'radar_vol',
+    headline: 'PERFIL CROSSFIT',
+    title: '5 DIMENSIONES',
+    value: '70',
+    unit: '/100',
+    context: 'Score global · percentil vs población',
+    icon: '🎯',
+    accent: 'ice',
+    date: new Date().toISOString(),
+    hashtag: 'HolyOlyPerfil',
+    stats: [
+      { label: 'Strength',    value: '78 · sólido' },
+      { label: 'Engine',      value: '46 · punto débil ⚠' },
+      { label: 'Gymnastics',  value: '82 · tu fuerte' },
+      { label: 'Benchmarks',  value: '70 · bueno' },
+      { label: 'Consistency', value: '76 · regular' },
+    ],
+    chart: {
+      kind: 'radar',
+      axes: [
+        { label: 'Strength',    value: 78, ideal: 75, max: 100 },
+        { label: 'Engine',      value: 46, ideal: 75, max: 100 },
+        { label: 'Gymnastics',  value: 82, ideal: 75, max: 100 },
+        { label: 'Benchmarks',  value: 70, ideal: 75, max: 100 },
+        { label: 'Consistency', value: 76, ideal: 75, max: 100 },
+      ],
+    },
+  };
+}
+
 function progressCompare(athlete: AthleteProfile | null): Celebration {
   const now = athlete?.maxes.snatch ?? 110;
   const before = Math.max(Math.round(now * 0.78), 60);
@@ -443,6 +511,9 @@ export function buildCelebrationCatalog(athlete: AthleteProfile | null): Celebra
     weeklyIntensity(athlete),
     adherence(athlete),
     progressCompare(athlete),
+    // Radar charts
+    radarHO(athlete),
+    radarVOL(),
     // Hitos puntuales
     prClean(athlete),
     prSnatch(athlete),

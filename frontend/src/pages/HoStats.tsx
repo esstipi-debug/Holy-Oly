@@ -300,6 +300,27 @@ const HoStats: React.FC = () => {
           </Section>
 
           {maxes && (
+            <Section title="Perfil de fuerza" hint="Tu polígono real (oro) vs perfil ideal de élite (gris)">
+              {/* Polígono compara ratios reales del atleta contra valores ideales IWF
+                  · Snatch ~80% del C&J · C&J ~80% del Squat Back · Squat Front ~110% del C&J */}
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <Chart
+                  data={{
+                    kind: 'radar',
+                    axes: [
+                      { label: 'Snatch',  value: Math.round((maxes.snatch / cleanAndJerk) * 100),     ideal: 80,  max: 100 },
+                      { label: 'C&J',     value: Math.round((cleanAndJerk / maxes.back_squat) * 100), ideal: 80,  max: 100 },
+                      { label: 'Sq Back', value: 100,                                                   ideal: 100, max: 100 },
+                      { label: 'Sq Front',value: Math.round((maxes.front_squat / maxes.back_squat) * 100), ideal: 90, max: 100 },
+                    ],
+                  }}
+                  color={C.gold} width={280} height={280} scheme="dark"
+                />
+              </div>
+            </Section>
+          )}
+
+          {maxes && (
             <Section title="Ratios técnicos" hint="Indicadores de balance entre levantamientos">
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <Mini label="Snatch / C&J" value={`${Math.round((maxes.snatch / cleanAndJerk) * 100)}%`} color={C.gold} />

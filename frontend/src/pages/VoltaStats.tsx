@@ -47,7 +47,7 @@ const WOD_TYPES = [
 const VoltaStats: React.FC = () => {
   const { navigate } = useNav();
   const { athlete } = useAthlete();
-  const [tab, setTab] = useState<'volume' | 'benchmarks'>('volume');
+  const [tab, setTab] = useState<'volume' | 'benchmarks' | 'profile'>('volume');
 
   // Volumen real desde sessions_last_7 → expandir a 14d con padding histórico simulado
   const recent = athlete?.sessions_last_7.map(s => Math.round(s.load)) ?? [];
@@ -78,6 +78,7 @@ const VoltaStats: React.FC = () => {
       <div style={{ padding: '6px 16px 14px', display: 'flex', gap: 8 }}>
         <Chip active={tab === 'volume'}     onClick={() => setTab('volume')}     label="Volumen" />
         <Chip active={tab === 'benchmarks'} onClick={() => setTab('benchmarks')} label="Benchmarks" />
+        <Chip active={tab === 'profile'}    onClick={() => setTab('profile')}    label="Perfil" />
         <button
           onClick={() => navigate('PROGRESSION')}
           className="btn-press"
@@ -223,6 +224,42 @@ const VoltaStats: React.FC = () => {
                 </div>
               ))}
             </div>
+          </Section>
+        </div>
+      )}
+
+      {tab === 'profile' && (
+        <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <Section title="Perfil CrossFit" hint="5 dimensiones · percentil 0-100 vs población">
+            {/* Datos estimados desde sesiones + benchmarks · TODO: calcular real cuando haya backend con histórico
+                Strength · 1RM Back/Front/Press normalizado a peso corporal
+                Engine · tiempos en cardio (Row, Run, Bike)
+                Gymnastics · skills unbroken (Pull-ups, MU, HSPU)
+                Benchmarks · ranking promedio en WODs named
+                Consistency · adherencia 30 días */}
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <Chart
+                data={{
+                  kind: 'radar',
+                  axes: [
+                    { label: 'Strength',    value: 78, ideal: 75, max: 100 },
+                    { label: 'Engine',      value: 46, ideal: 75, max: 100 },
+                    { label: 'Gymnastics',  value: 82, ideal: 75, max: 100 },
+                    { label: 'Benchmarks',  value: 70, ideal: 75, max: 100 },
+                    { label: 'Consistency', value: 76, ideal: 75, max: 100 },
+                  ],
+                }}
+                color={C.cyan} width={300} height={300} scheme="dark"
+              />
+            </div>
+          </Section>
+
+          <Section title="WISE recomienda" hint="Insight automático de tu perfil">
+            <p style={{ fontSize: 12, color: C.text, lineHeight: 1.5 }}>
+              ⚠️ <strong style={{ color: C.amber }}>Engine es tu punto débil</strong> (46/100). Tu Strength
+              y Gymnastics están compensando, pero eso tiene un techo. Agregá 1 WOD largo de capacidad
+              (20-30 min con Row + Run) por semana durante el próximo mes.
+            </p>
           </Section>
         </div>
       )}

@@ -17,7 +17,8 @@ export type ChartData =
   | { kind: 'bars'; values: number[]; labels?: string[]; highlight?: number }
   | { kind: 'ring'; value: number; max: number; centerLabel?: string }
   | { kind: 'heatmap14'; days: Array<{ date: string; intensity: number }> }
-  | { kind: 'comparison'; before: number; after: number; unit?: string };
+  | { kind: 'comparison'; before: number; after: number; unit?: string }
+  | { kind: 'radar'; axes: Array<{ label: string; value: number; ideal?: number; max?: number }> };
 
 interface Props {
   data: ChartData;
@@ -37,6 +38,7 @@ const Chart: React.FC<Props> = ({ data, color, width = 280, height = 80, scheme 
   if (data.kind === 'ring') return <Ring {...data} color={color} mute={mute} width={Math.min(width, height)} />;
   if (data.kind === 'heatmap14') return <Heatmap14 {...data} color={color} mute={mute} width={width} />;
   if (data.kind === 'comparison') return <Comparison {...data} color={color} mute={mute} muteText={muteText} width={width} height={height} />;
+  if (data.kind === 'radar') return <Radar {...data} color={color} mute={mute} muteText={muteText} width={Math.min(width, height)} />;
   return null;
 };
 
@@ -202,6 +204,108 @@ const Comparison: React.FC<{ before: number; after: number; unit?: string; color
       <text x={pad + 38 + afterW + 4} y={pad + barH + 4 + barH / 2 + 3} fontSize="9" fontWeight="900" fill={color}>{after}{unit}</text>
 
       <line x1={pad + 38} x2={pad + 38} y1={pad - 2} y2={pad + barH * 2 + 6} stroke={mute} strokeWidth="0.5" />
+    </svg>
+  );
+};
+
+/* ------------------------------------------------------------------ */
+
+const Radar: React.FC<{ axes: Array<{ label: string; value: number; ideal?: number; max?: number }>; color: string; mute: string; muteText: string; width: number }> = ({ axes, color, mute, muteText, width }) => {
+  const size = width;
+  const cx = size / 2;
+  const cy = size / 2;
+  const r = (size / 2) - 22;  // padding para labels
+
+  const n = axes.length;
+  if (n < 3) return null;
+
+  // Cada eje a normalizado [0..1] usando max o el max del eje (default 100)
+  const norm = axes.map(a => Math.min(1, Math.max(0, a.value / (a.max ?? 100))));
+  const normIdeal = axes.map(a => a.ideal != null ? Math.min(1, Math.max(0, a.ideal / (a.max ?? 100))) : null);
+
+  // Coords en círculo: ángulo i = -π/2 + 2π*i/n (empezando arriba)
+  const pointAt = (i: number, factor: number) => {
+    const angle = -Math.PI / 2 + (2 * Math.PI * i) / n;
+    return [cx + Math.cos(angle) * r * factor, cy + Math.sin(angle) * r * factor];
+  };
+
+  // Grid (4 anillos: 0.25, 0.5, 0.75, 1.0)
+  const gridLevels = [0.25, 0.5, 0.75, 1];
+  const buildPath = (factors: number[]) => factors.map((f, i) => {
+    const [x, y] = pointAt(i, f);
+    return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ') + ' Z';
+
+  const valuePath = buildPath(norm);
+  const idealPath = normIdeal.every(v => v != null) ? buildPath(normIdeal as number[]) : null;
+
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="block">
+      <defs>
+        <radialGradient id={`radar-fill-${color.replace('#','')}`} cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor={color} stopOpacity="0.6" />
+          <stop offset="100%" stopColor={color} stopOpacity="0.1" />
+        </radialGradient>
+      </defs>
+
+      {/* Grid anillos */}
+      {gridLevels.map((level, li) => (
+        <path
+          key={li}
+          d={buildPath(Array(n).fill(level))}
+          fill="none"
+          stroke={mute}
+          strokeWidth={level === 1 ? 1 : 0.5}
+          strokeDasharray={level === 1 ? '' : '2 2'}
+        />
+      ))}
+
+      {/* Spokes (líneas de centro a vértices) */}
+      {axes.map((_, i) => {
+        const [x, y] = pointAt(i, 1);
+        return <line key={i} x1={cx} y1={cy} x2={x} y2={y} stroke={mute} strokeWidth="0.5" />;
+      })}
+
+      {/* Ideal polygon (referencia, opcional) */}
+      {idealPath && (
+        <path d={idealPath} fill="none" stroke={muteText} strokeWidth="1.5" strokeDasharray="3 3" />
+      )}
+
+      {/* Value polygon (perfil real) */}
+      <path d={valuePath} fill={`url(#radar-fill-${color.replace('#','')})`} stroke={color} strokeWidth="2" strokeLinejoin="round" />
+
+      {/* Dots en vértices */}
+      {norm.map((f, i) => {
+        const [x, y] = pointAt(i, f);
+        return <circle key={i} cx={x} cy={y} r="3" fill={color} />;
+      })}
+
+      {/* Labels en cada eje (afuera) */}
+      {axes.map((a, i) => {
+        const [x, y] = pointAt(i, 1.18);
+        const angle = -Math.PI / 2 + (2 * Math.PI * i) / n;
+        const anchor = Math.cos(angle) > 0.3 ? 'start' : Math.cos(angle) < -0.3 ? 'end' : 'middle';
+        return (
+          <g key={`label-${i}`}>
+            <text
+              x={x} y={y}
+              fontSize="8.5" fontWeight="800" fill={muteText}
+              textAnchor={anchor}
+              dominantBaseline="middle"
+            >
+              {a.label.toUpperCase()}
+            </text>
+            <text
+              x={x} y={y + 10}
+              fontSize="9" fontWeight="900" fill={color}
+              textAnchor={anchor}
+              dominantBaseline="middle"
+            >
+              {Math.round(a.value)}{a.max && a.max <= 100 ? '%' : ''}
+            </text>
+          </g>
+        );
+      })}
     </svg>
   );
 };
