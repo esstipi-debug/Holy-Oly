@@ -217,6 +217,21 @@ const CoachStatsHO: React.FC = () => {
           </div>
         )}
 
+        {/* CTA → contenido viral */}
+        <button
+          onClick={() => navigate('COACH_VIRAL_TOOLS')}
+          className="btn-press"
+          style={{
+            width: '100%', padding: '14px 0', borderRadius: 14,
+            background: 'linear-gradient(135deg, rgba(245,197,24,0.18), rgba(245,197,24,0.06))',
+            border: '1px solid rgba(245,197,24,0.35)',
+            color: '#F5C518',
+            fontSize: 13, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase',
+            cursor: 'pointer', fontFamily: 'inherit',
+            marginBottom: 10,
+          }}
+        >📢 Generar contenido viral</button>
+
         {/* CTA → ir al roster */}
         <button
           onClick={() => navigate('COACH_DASH')}

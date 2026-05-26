@@ -116,6 +116,30 @@ const HoStats: React.FC = () => {
         >Skills →</button>
       </div>
 
+      {/* CTA · Leaderboard del club */}
+      <div style={{ padding: '0 16px 12px' }}>
+        <button
+          onClick={() => navigate('LEADERBOARD')}
+          className="btn-press"
+          style={{
+            width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '12px 14px', borderRadius: 14,
+            background: 'linear-gradient(135deg, rgba(245,197,24,0.10) 0%, rgba(245,197,24,0.02) 100%)',
+            border: '1px solid rgba(245,197,24,0.30)',
+            color: C.text, cursor: 'pointer', fontFamily: 'inherit',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 18 }}>🏆</span>
+            <div style={{ textAlign: 'left' }}>
+              <p style={{ fontSize: 12, fontWeight: 900, color: C.text, margin: 0 }}>Top 10 del club</p>
+              <p style={{ fontSize: 10, color: C.muted, margin: 0, marginTop: 2 }}>OLY Index · ranking semanal</p>
+            </div>
+          </div>
+          <span style={{ fontSize: 14, color: C.gold, fontWeight: 900 }}>→</span>
+        </button>
+      </div>
+
       {tab === 'volume' && (
         <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
 

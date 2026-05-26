@@ -32,6 +32,10 @@ import SocialCardsGallery from './pages/SocialCardsGallery';
 import BaselineAssessment from './pages/BaselineAssessment';
 import VoltaStats from './pages/VoltaStats';
 import HoStats from './pages/HoStats';
+import Leaderboard from './pages/Leaderboard';
+import BeltCeremony from './pages/BeltCeremony';
+import PrewodShare from './pages/PrewodShare';
+import CoachViralTools from './pages/CoachViralTools';
 import LogWodResult from './pages/LogWodResult';
 import VoltaDashboard from './pages/VoltaDashboard';
 import VoltaPreWod from './pages/VoltaPreWod';
@@ -49,7 +53,7 @@ const NAV_MAP_HO: Record<string, NavTab> = {
   HOME: 'home',
   WARMUP: 'train', SESSION: 'train', SUMMARY: 'train', VICTORY: 'train',
   PERFORMANCE: 'stats', INDEX: 'stats', SCHEDULE: 'stats', PULSE: 'stats', PILLS: 'stats', SOCIAL: 'stats', SOCIAL_GALLERY: 'stats',
-  PROGRESSION: 'stats', HO_STATS: 'stats',
+  PROGRESSION: 'stats', HO_STATS: 'stats', LEADERBOARD: 'stats', COACH_VIRAL_TOOLS: 'stats',
   PROFILE: 'profile', ONBOARDING: 'profile', PREMIUM: 'profile',
   COACH_DASH: 'home', ATHLETE_DETAIL: 'home', ASSIGN_MACRO: 'home', NEW_ATHLETE: 'home',
   COACH_STATS: 'stats',
@@ -67,7 +71,8 @@ const NAV_MAP_VOLTA: Record<string, NavTab> = {
   VOLTA_COACH_MACRO: 'stats', VOLTA_COACH_TOOLS: 'stats',
   // Logros slot en coach es Box (inventario)
   VOLTA_COACH_INVENTORY: 'logros',
-  VOLTA_STATS: 'stats', PROGRESSION: 'stats',
+  VOLTA_STATS: 'stats', PROGRESSION: 'stats', LEADERBOARD: 'stats', COACH_VIRAL_TOOLS: 'stats',
+  PREWOD_SHARE: 'wod',
   COACH_MACRO_VIEW: 'stats',
   PERFORMANCE: 'stats', INDEX: 'stats', SCHEDULE: 'stats', PULSE: 'stats', PILLS: 'stats',
   SOCIAL: 'logros', SOCIAL_GALLERY: 'logros',
@@ -100,12 +105,26 @@ const navGroups = [
   { title: 'Volta Coach',  views: ['VOLTA_COACH', 'VOLTA_COACH_WOD', 'VOLTA_COACH_TOOLS', 'VOLTA_COACH_MACRO', 'VOLTA_COACH_INVENTORY'] },
 ];
 
+/** Lee el último view "home-set" que el usuario visitó en el combo (product, role). */
+function readLastView(p: string, r: string): View | null {
+  try {
+    const v = localStorage.getItem(`nav:last:${p}:${r}`);
+    return v ? (v as View) : null;
+  } catch { return null; }
+}
+
 function ProductRoleSwitcher() {
   const { product, setProduct } = useProduct();
   const { role, setRole } = useRole();
   const { navigate } = useNav();
 
+  /**
+   * Al switchear de cuadrante, restaura el último view "home-set" usado en ese combo.
+   * Si nunca estuvo en ese combo, cae al home default del producto+rol.
+   */
   const goHome = (p: typeof product, r: typeof role) => {
+    const last = readLastView(p, r);
+    if (last && HOME_VIEWS.has(last)) { navigate(last); return; }
     if (p === 'volta') navigate(r === 'coach' ? 'VOLTA_COACH' : 'VOLTA_HOME');
     else navigate(r === 'coach' ? 'COACH_DASH' : 'HOME');
   };
@@ -203,14 +222,29 @@ function AppInner() {
     }
   }, [role, currentView, product, isAuthenticated, navigate]);
 
+  // Persistir último view "home-set" por combo (product, role).
+  // Permite que el switcher (ProductRoleSwitcher) y el login restauren la ubicación.
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    if (!HOME_VIEWS.has(currentView)) return;
+    if (currentView === 'LOGIN' || currentView === 'REGISTER') return;
+    try { localStorage.setItem(`nav:last:${product}:${role}`, currentView); } catch { /* ignore */ }
+  }, [currentView, product, role, isAuthenticated]);
+
   const isPublic = PUBLIC_VIEWS.has(currentView);
+  // Vistas fullscreen ceremoniales: ocultan nav inferior + switcher para experiencia inmersiva
+  const isImmersive = currentView === 'BELT_CEREMONY';
 
   const renderView = () => {
     // PUBLIC views (sin auth)
     if (currentView === 'LOGIN') {
-      return <Login onSuccess={() => navigate(role === 'coach'
-        ? (product === 'volta' ? 'VOLTA_COACH' : 'COACH_DASH')
-        : (product === 'volta' ? 'VOLTA_HOME' : 'HOME'))} />;
+      return <Login onSuccess={() => {
+        const last = readLastView(product, role);
+        if (last && HOME_VIEWS.has(last)) { navigate(last); return; }
+        navigate(role === 'coach'
+          ? (product === 'volta' ? 'VOLTA_COACH' : 'COACH_DASH')
+          : (product === 'volta' ? 'VOLTA_HOME' : 'HOME'));
+      }} />;
     }
     if (currentView === 'REGISTER') return <Register />;
 
@@ -239,6 +273,9 @@ function AppInner() {
         case 'SOCIAL_GALLERY':        return <SocialCardsGallery />;
         case 'BASELINE':              return <BaselineAssessment />;
         case 'VOLTA_STATS':           return <VoltaStats />;
+        case 'LEADERBOARD':           return <Leaderboard />;
+        case 'PREWOD_SHARE':          return <PrewodShare />;
+        case 'COACH_VIRAL_TOOLS':     return <CoachViralTools />;
         case 'VOLTA_WOD_LOG':         return <LogWodResult />;
         case 'PREMIUM':               return <Premium />;
         case 'ONBOARDING':            return <Onboarding />;
@@ -273,6 +310,9 @@ function AppInner() {
       case 'NEW_ATHLETE':    return <NewAthlete />;
       case 'PROGRESSION':    return <MovementProgression />;
       case 'HO_STATS':       return <HoStats />;
+      case 'LEADERBOARD':    return <Leaderboard />;
+      case 'BELT_CEREMONY':  return <BeltCeremony />;
+      case 'COACH_VIRAL_TOOLS': return <CoachViralTools />;
       case 'HOME':
       default:
         return role === 'coach' ? <CommandCenter /> : <AtletaHome />;
@@ -305,10 +345,10 @@ function AppInner() {
         onNavChange={handleNavChange}
         product={product}
         role={role}
-        showBack={showBack && !isPublic}
-        hideNav={isPublic}
+        showBack={showBack && !isPublic && !isImmersive}
+        hideNav={isPublic || isImmersive}
       >
-        {!isPublic && <ProductRoleSwitcher />}
+        {!isPublic && !isImmersive && <ProductRoleSwitcher />}
         {renderView()}
       </PhoneLayout>
 

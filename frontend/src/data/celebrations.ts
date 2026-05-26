@@ -498,6 +498,46 @@ function progressCompare(athlete: AthleteProfile | null): Celebration {
   };
 }
 
+function readLB(key: string, fallback: string): string {
+  try {
+    const v = typeof window !== 'undefined' ? localStorage.getItem(key) : null;
+    return v ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function leaderboardTop10(athlete: AthleteProfile | null): Celebration {
+  const rank = parseInt(readLB('social:lb_rank', '7'), 10);
+  const total = parseInt(readLB('social:lb_total', '15'), 10);
+  const metricLabel = readLB('social:lb_metric', 'OLY Index');
+  const value = readLB('social:lb_value', '3.42');
+  const periodLabel = readLB('social:lb_period_label', 'Esta semana');
+  const club = athlete?.club ?? readLB('social:lb_club', 'tu club');
+  const percentile = Math.max(1, Math.round((rank / Math.max(total, 1)) * 100));
+  const accent: AccentTheme = rank <= 3 ? 'gold' : rank <= 10 ? 'royal' : 'primary';
+  const icon = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '🏆';
+  return {
+    id: 'leaderboard_top10',
+    type: 'leaderboard',
+    headline: rank <= 10 ? '🏆 RANKING DEL CLUB' : '📈 SUBIENDO EN EL RANKING',
+    title: `TOP ${rank <= 3 ? rank : rank <= 10 ? '10' : Math.ceil(percentile / 5) * 5 + '%'}`,
+    value: `#${rank}`,
+    unit: `de ${total}`,
+    context: `${metricLabel} · ${periodLabel}`,
+    icon,
+    accent,
+    date: new Date().toISOString(),
+    hashtag: `HolyOlyTop${rank}`,
+    stats: [
+      { label: 'Posición', value: `#${rank} de ${total}` },
+      { label: metricLabel, value },
+      { label: 'Club', value: club },
+      { label: 'Período', value: periodLabel },
+    ],
+  };
+}
+
 /* ------------------------------------------------------------------ */
 /* Catálogo público                                                    */
 /* ------------------------------------------------------------------ */
@@ -523,6 +563,8 @@ export function buildCelebrationCatalog(athlete: AthleteProfile | null): Celebra
     wodBenchmark(),
     skillMilestone(),
     consistency(),
+    // Social ranking
+    leaderboardTop10(athlete),
   ];
 }
 

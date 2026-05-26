@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useAthlete } from '../context/AthleteContext';
 import { useNav } from '../context/NavigationContext';
 import WiseAssistant from '../components/WiseAssistant';
@@ -96,6 +96,23 @@ const AtletaHome: React.FC = () => {
   const xpNextBase = (beltIdx + 1) * 22500;
   const xpPct = Math.max(4, Math.min(100, Math.round(((xpNow - xpCurrentBase) / (xpNextBase - xpCurrentBase)) * 100)));
 
+  // Belt ceremony trigger: si subió de cinturón desde la última celebración, dispará la fullscreen.
+  useEffect(() => {
+    let lastCelebrated = -1;
+    try {
+      const raw = localStorage.getItem('belt:last_celebrated_idx');
+      lastCelebrated = raw === null ? beltIdx - 1 : parseInt(raw, 10);
+      // Si nunca se celebró nada (raw null), seedeamos con beltIdx-1 para que el siguiente up sí dispare.
+      if (raw === null) {
+        try { localStorage.setItem('belt:last_celebrated_idx', String(Math.max(0, beltIdx))); } catch { /* ignore */ }
+        return;
+      }
+    } catch { /* ignore */ }
+    if (beltIdx > lastCelebrated) {
+      navigate('BELT_CEREMONY');
+    }
+  }, [beltIdx, navigate]);
+
   return (
     <div className="anim-fade-in" style={{ background: 'var(--bg)', paddingBottom: 90, minHeight: '100%' }}>
 
@@ -182,6 +199,78 @@ const AtletaHome: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* WISE SCORE — surfacing del puntaje "smart trainer" del engine */}
+      {stress && (
+        <div style={{ padding: '0 20px 18px' }}>
+          <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: 10 }}>
+            Wise Score · entrenás con criterio
+          </p>
+          {(() => {
+            const wise = Math.round(stress.readiness);
+            const wiseColor = wise >= 70 ? '#22C55E' : wise >= 50 ? '#F59E0B' : '#EF4444';
+            const wiseLabel = wise >= 70 ? 'Smart trainer ✓' : wise >= 50 ? 'Carga consciente' : 'Forzando · ajustá';
+            const sessions = athlete.sessions_last_7 ?? [];
+            const last3 = sessions.slice(-3);
+            const chips = last3.length === 3 ? last3.map((s, i) => {
+              const delta = s.completed ? (s.rpe_reported && s.rpe_reported <= 7 ? '+30' : s.rpe_reported && s.rpe_reported >= 9 ? '−20' : '+10') : '−15';
+              const sub = s.completed
+                ? (s.rpe_reported && s.rpe_reported <= 7 ? 'Carga safe' : s.rpe_reported && s.rpe_reported >= 9 ? 'RPE alto ⚠' : `RPE ${s.rpe_reported ?? '–'}`)
+                : 'Skip';
+              const isPos = delta.startsWith('+');
+              return { day: i === 0 ? 'Hace 3d' : i === 1 ? 'Hace 2d' : 'Ayer', val: delta, sub, color: isPos ? '#22C55E' : '#EF4444', border: isPos ? 'rgba(34,197,94,0.20)' : 'rgba(239,68,68,0.20)' };
+            }) : [];
+            return (
+              <div style={{
+                background: `${wiseColor}0F`,
+                border: `1px solid ${wiseColor}33`,
+                borderRadius: 18, padding: 14,
+              }}>
+                <button
+                  onClick={() => navigate('PULSE')}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 14, width: '100%',
+                    background: 'transparent', border: 'none', cursor: 'pointer',
+                    fontFamily: 'inherit', padding: 0, textAlign: 'left',
+                  }}
+                >
+                  <div style={{
+                    width: 64, height: 64, borderRadius: '50%',
+                    border: `4px solid ${wiseColor}`,
+                    background: `radial-gradient(circle, ${wiseColor}1A, transparent)`,
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                    flexShrink: 0, boxShadow: `0 0 18px ${wiseColor}33`,
+                  }}>
+                    <span style={{ fontSize: 22, fontWeight: 900, color: wiseColor, lineHeight: 1 }}>{wise}</span>
+                    <span style={{ fontSize: 8, fontWeight: 700, color: `${wiseColor}AA`, letterSpacing: '.04em' }}>WISE</span>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 12, fontWeight: 800, color: wiseColor, marginBottom: 4 }}>{wiseLabel}</div>
+                    <div style={{ fontSize: 10, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                      Puntos por seguir las recomendaciones del engine y no sobre-entrenarte.
+                    </div>
+                  </div>
+                </button>
+                {chips.length === 3 && (
+                  <div style={{ marginTop: 12, display: 'flex', gap: 6 }}>
+                    {chips.map((d) => (
+                      <div key={d.day} style={{
+                        flex: 1, background: 'var(--surface)',
+                        border: `1px solid ${d.border}`, borderRadius: 10,
+                        padding: 8, textAlign: 'center',
+                      }}>
+                        <div style={{ fontSize: 9, color: 'var(--text-secondary)', marginBottom: 3 }}>{d.day}</div>
+                        <div style={{ fontSize: 13, fontWeight: 800, color: d.color }}>{d.val}</div>
+                        <div style={{ fontSize: 8, color: 'var(--text-secondary)' }}>{d.sub}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+        </div>
+      )}
 
       {/* PÍLDORAS — story-style rings con emojis grandes */}
       <div style={{ padding: '0 20px 20px' }}>

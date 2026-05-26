@@ -17,11 +17,12 @@ const C = {
   purple: '#A855F7',
 };
 
-export type Tab = 'templates' | 'comparativa' | 'tendencias' | 'macro' | 'calendario' | 'notas' | 'bulk' | 'progresion' | 'inventario';
+export type Tab = 'templates' | 'comparativa' | 'tendencias' | 'macro' | 'calendario' | 'notas' | 'bulk' | 'progresion' | 'inventario' | 'viral';
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'progresion', label: 'Progresión',    icon: '🎚️' },
   { id: 'templates',  label: 'Templates',     icon: '📋' },
+  { id: 'viral',      label: 'Viral',         icon: '📢' },
   { id: 'bulk',       label: 'Masiva',        icon: '⚡' },
   { id: 'comparativa',label: 'Comparar',      icon: '⚖️' },
   { id: 'tendencias', label: 'Tendencias',    icon: '📈' },
@@ -169,7 +170,7 @@ const VoltaCoachTools: React.FC<VoltaCoachToolsProps> = ({ initialTab = 'progres
         {TABS.map(t => (
           <button
             key={t.id}
-            onClick={() => setTab(t.id)}
+            onClick={() => t.id === 'viral' ? navigate('COACH_VIRAL_TOOLS') : setTab(t.id)}
             style={{
               flexShrink: 0, padding: '8px 12px', borderRadius: 12,
               background: tab === t.id ? C.cyan : C.surface,

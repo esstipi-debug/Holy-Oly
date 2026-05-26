@@ -107,6 +107,33 @@ const VoltaPreWod: React.FC = () => {
 
       <div style={{ padding: '14px 16px 80px' }}>
 
+        {/* SHARE PRE-WOD CTA */}
+        <button
+          onClick={() => navigate('PREWOD_SHARE')}
+          className="btn-press"
+          style={{
+            width: '100%',
+            padding: '12px 16px',
+            marginBottom: 16,
+            background: `linear-gradient(135deg, ${C.cyan} 0%, #00B8D4 100%)`,
+            color: '#07070F',
+            border: 'none',
+            borderRadius: 14,
+            fontSize: 13,
+            fontWeight: 900,
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+            letterSpacing: '.04em',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            boxShadow: `0 8px 24px -8px ${C.cyan}88`,
+          }}
+        >
+          <span>Compartir pre-WOD</span>
+          <span style={{ fontSize: 16, fontStyle: 'italic' }}>↗</span>
+        </button>
+
         {/* ESTADO AHORA */}
         <Sec style={{ marginBottom: 8 }}>Tu estado ahora mismo</Sec>
         <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>

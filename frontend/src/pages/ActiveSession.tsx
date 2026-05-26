@@ -1,6 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { useNav } from '../context/NavigationContext';
 import { useAthlete } from '../context/AthleteContext';
+import { useToast } from '../components/Toast';
+
+/**
+ * Mapea nombre de ejercicio (UI) → clave de `athlete.maxes` y celebration id.
+ * Retorna null si no es un lift trackeable para PR.
+ */
+function exerciseToPRTarget(name: string, maxes: { snatch: number; clean: number; jerk: number; back_squat: number; front_squat: number }):
+  | { maxKey: 'snatch' | 'clean' | 'jerk' | 'back_squat' | 'front_squat'; max: number; celebrationId: 'pr_snatch' | 'pr_clean'; label: string }
+  | null {
+  switch (name) {
+    case 'Arrancada':
+    case 'Snatch':
+      return { maxKey: 'snatch', max: maxes.snatch, celebrationId: 'pr_snatch', label: 'Snatch' };
+    case 'Clean & Jerk': {
+      // Comparar contra el mayor de los dos (clean o jerk)
+      const useJerk = maxes.jerk >= maxes.clean;
+      return {
+        maxKey: useJerk ? 'jerk' : 'clean',
+        max: useJerk ? maxes.jerk : maxes.clean,
+        celebrationId: 'pr_clean',
+        label: 'Clean & Jerk',
+      };
+    }
+    case 'Envión':
+      return { maxKey: 'jerk', max: maxes.jerk, celebrationId: 'pr_clean', label: 'Envión' };
+    case 'Sentadilla Frontal':
+      return { maxKey: 'front_squat', max: maxes.front_squat, celebrationId: 'pr_clean', label: 'Front Squat' };
+    case 'Sentadilla':
+    case 'Back Squat':
+      return { maxKey: 'back_squat', max: maxes.back_squat, celebrationId: 'pr_clean', label: 'Back Squat' };
+    default:
+      return null;
+  }
+}
 
 interface SetLog {
   weight: number;
@@ -31,6 +65,9 @@ const roundToPlate = (kg: number) => Math.round(kg / 2.5) * 2.5;
 const ActiveSession: React.FC = () => {
   const { navigate } = useNav();
   const { athlete } = useAthlete();
+  const { showToast } = useToast();
+  /** PRs detectados en esta sesión, para evitar disparar la misma celebration dos veces. */
+  const [prFiredFor, setPrFiredFor] = useState<Set<string>>(new Set());
 
   // Build exercises from athlete maxes
   // Olympic lifts: ramp-up técnico extendido (4 sets pre-trabajo).
@@ -104,6 +141,26 @@ const ActiveSession: React.FC = () => {
     }));
     setWeight(String(targetWeight));
     setReps(String(current.targetReps));
+
+    // Auto-PR detection: solo en sets completados con reps ≥ 1 que superen el max conocido
+    if (result === 'completed' && athlete && r >= 1) {
+      const pr = exerciseToPRTarget(current.name, athlete.maxes);
+      if (pr && w > pr.max && !prFiredFor.has(pr.celebrationId)) {
+        const delta = Math.round((w - pr.max) * 10) / 10;
+        setPrFiredFor(prev => new Set(prev).add(pr.celebrationId));
+        try {
+          localStorage.setItem('social:preferred_celebration', pr.celebrationId);
+          localStorage.setItem('social:preferred_variant', 'stadium');
+          localStorage.setItem('social:pr_value', String(w));
+          localStorage.setItem('social:pr_delta', String(delta));
+        } catch { /* ignore */ }
+        showToast({
+          message: `🔥 NUEVO PR · ${pr.label} ${w}kg (+${delta}kg)`,
+          variant: 'success',
+          duration: 3500,
+        });
+      }
+    }
   };
 
   const goNextExercise = () => {
