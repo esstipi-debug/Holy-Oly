@@ -3,6 +3,19 @@ import { useAuth } from './AuthContext';
 import { athleteByEmail, athletes, type AthleteProfile } from '../data/athletes';
 import { api } from '../lib/api';
 
+// Lee el producto activo desde localStorage. AthleteProvider está MONTADO ARRIBA de
+// ProductProvider (ver App.tsx) por lo que no podemos usar useProduct() acá sin
+// reordenar providers. Leemos directo del storage (misma key que ProductContext)
+// y nos suscribimos a 'storage' + un poll suave para reaccionar a cambios.
+const PRODUCT_KEY = 'product:current';
+function readProduct(): 'holy-oly' | 'volta' {
+  try {
+    const stored = localStorage.getItem(PRODUCT_KEY);
+    if (stored === 'volta' || stored === 'holy-oly') return stored;
+  } catch { /* ignore */ }
+  return 'holy-oly';
+}
+
 interface StressResult {
   fitness: number;
   fatigue: number;
@@ -139,6 +152,25 @@ function computeAdaptationLocally(input: {
 
 export function AthleteProvider({ children }: { children: ReactNode }) {
   const { user, demoMode } = useAuth();
+  const [product, setProduct] = useState<'holy-oly' | 'volta'>(readProduct);
+
+  // Re-sync product desde localStorage cuando cambia (otra tab, switch product…)
+  // y con poll suave para mismo tab (storage event NO dispara en mismo tab).
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === PRODUCT_KEY) setProduct(readProduct());
+    };
+    window.addEventListener('storage', onStorage);
+    const id = window.setInterval(() => {
+      const next = readProduct();
+      setProduct(prev => prev === next ? prev : next);
+    }, 800);
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.clearInterval(id);
+    };
+  }, []);
+
   const [stress, setStress] = useState<StressResult | null>(null);
   const [stressLoading, setStressLoading] = useState(false);
   const [adaptation, setAdaptation] = useState<AdaptationResult | null>(null);
@@ -146,13 +178,19 @@ export function AthleteProvider({ children }: { children: ReactNode }) {
   const [roster, setRoster] = useState<AthleteProfile[]>(athletes);
 
   // Resolución de perfil:
-  // 1. demoMode → Matías (roster[0]) para reviewers
-  // 2. user con seed match → usar seed (devs internos: user@example.com, etc.)
-  // 3. user real registrado → stub derivado del user (NO usar Matías como fallback)
+  // 1. demoMode + product=='volta' → primer atleta Volta (perfil CrossFit con benchmarks/skills)
+  // 2. demoMode → Matías (primer atleta HO) para reviewers
+  // 3. user con seed match → usar seed (devs internos: user@example.com, etc.)
+  // 4. user real registrado → stub derivado del user (NO usar Matías como fallback)
+  const demoAthlete = demoMode
+    ? (product === 'volta'
+        ? (roster.find(a => a.product === 'volta') ?? roster.find(a => a.product !== 'volta') ?? roster[0])
+        : (roster.find(a => a.product !== 'volta') ?? roster[0]))
+    : null;
   const athlete = !user
     ? null
     : demoMode
-      ? (roster[0] ?? buildStubProfile(user))
+      ? (demoAthlete ?? buildStubProfile(user))
       : (athleteByEmail[user.email] ?? buildStubProfile(user));
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selectedAthlete = selectedId ? (roster.find(a => a.id === selectedId) ?? null) : null;

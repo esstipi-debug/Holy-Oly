@@ -20,6 +20,21 @@ export interface AthleteMaxes {
   body_weight: number;
 }
 
+export interface CFBenchmark {
+  name: string;
+  time?: string;      // ej "3:42"
+  rounds?: string;    // ej "24 rounds"
+  scale: 'rx' | 'scaled' | 'rx_plus';
+}
+
+export interface CFSkills {
+  pullups_strict: number;
+  hspu: number;       // hand-stand push-ups
+  muscle_ups_bar: number;
+  muscle_ups_ring: number;
+  double_unders_unbroken: number;
+}
+
 export interface AthleteProfile {
   id: string;
   email: string;
@@ -32,6 +47,8 @@ export interface AthleteProfile {
   province: string;
   coach_id: string;
   role: 'athlete';
+  /** Producto al que pertenece el perfil. Default 'holy-oly' si no se especifica. */
+  product?: 'holy-oly' | 'volta';
   macrocycle: {
     program_id: string;
     program_name: string;
@@ -46,6 +63,10 @@ export interface AthleteProfile {
   prior_fitness: number;
   prior_fatigue: number;
   subscription: 'FREE' | 'PRO' | 'ELITE';
+  /** Benchmarks CrossFit · opcional, sólo perfiles Volta. */
+  cf_benchmarks?: CFBenchmark[];
+  /** Skills/destrezas CF · opcional, sólo perfiles Volta. */
+  cf_skills?: CFSkills;
 }
 
 export interface CoachProfile {
@@ -298,6 +319,63 @@ export const athletes: AthleteProfile[] = [
       { date: '2026-05-03', load: 4600, rpe_reported: 7, rpe_expected: 8, sleep_hours: 7.0, soreness: 4, motivation: 7, life_stress: 4, completed: true },
       { date: '2026-05-04', load: 0,    rpe_reported: 0, rpe_expected: 0, sleep_hours: 8.0, soreness: 3, motivation: 8, life_stress: 3, completed: false, notes: 'Descanso' },
       { date: '2026-05-05', load: 0,    rpe_reported: 0, rpe_expected: 0, sleep_hours: 7.5, soreness: 3, motivation: 8, life_stress: 3, completed: false, notes: 'Primer día nuevo macrociclo' },
+    ],
+  },
+  // ── VOLTA · perfil CrossFit (demo mode cuando product=='volta') ────────────
+  {
+    id: 'ath_volta_001',
+    email: 'camila@volta.com',
+    password: 'volta123',
+    name: 'Camila Bravo',
+    age: 26,
+    gender: 'F',
+    weight_class: '-63kg',
+    club: 'CrossFit Palermo',
+    province: 'Buenos Aires',
+    coach_id: 'coach_001',
+    role: 'athlete',
+    product: 'volta',
+    subscription: 'PRO',
+    macrocycle: {
+      program_id: 'cf_open_prep_q2',
+      program_name: 'CF Open Prep · Q2',
+      week: 5,
+      day: 4,
+      total_weeks: 10,
+      focus: 'Engine-Gymnastics',
+    },
+    maxes: {
+      snatch: 62,
+      clean: 82,
+      jerk: 80,
+      back_squat: 115,
+      front_squat: 100,
+      body_weight: 62.4,
+    },
+    prior_fitness: 64.8,
+    prior_fatigue: 41.2,
+    cf_benchmarks: [
+      { name: 'Fran',  time: '3:42',  scale: 'rx' },
+      { name: 'Helen', time: '9:15',  scale: 'rx' },
+      { name: 'Grace', time: '3:58',  scale: 'rx' },
+      { name: 'Murph', time: '41:20', scale: 'scaled' },
+      { name: 'Cindy', rounds: '22 rounds', scale: 'rx' },
+    ],
+    cf_skills: {
+      pullups_strict: 12,
+      hspu: 8,
+      muscle_ups_bar: 4,
+      muscle_ups_ring: 2,
+      double_unders_unbroken: 80,
+    },
+    sessions_last_7: [
+      { date: '2026-04-29', load: 2100, rpe_reported: 7, rpe_expected: 7, sleep_hours: 7.5, soreness: 4, motivation: 9, life_stress: 3, completed: true,  notes: 'Fran 3:42 Rx · PR -33s' },
+      { date: '2026-04-30', load: 1850, rpe_reported: 7, rpe_expected: 7, sleep_hours: 7.0, soreness: 5, motivation: 8, life_stress: 3, completed: true,  notes: 'EMOM 20 Snatch 50kg + Box jump' },
+      { date: '2026-05-01', load: 0,    rpe_reported: 0, rpe_expected: 0, sleep_hours: 8.5, soreness: 3, motivation: 8, life_stress: 2, completed: false, notes: 'Mobility + foam · descanso activo' },
+      { date: '2026-05-02', load: 2400, rpe_reported: 8, rpe_expected: 8, sleep_hours: 7.0, soreness: 6, motivation: 8, life_stress: 4, completed: true,  notes: 'Helen 9:15 Rx · 2do mejor' },
+      { date: '2026-05-03', load: 1700, rpe_reported: 6, rpe_expected: 7, sleep_hours: 8.0, soreness: 4, motivation: 9, life_stress: 3, completed: true,  notes: 'Strength · Back Squat 5×3 @ 95kg' },
+      { date: '2026-05-04', load: 2050, rpe_reported: 7, rpe_expected: 7, sleep_hours: 7.5, soreness: 4, motivation: 8, life_stress: 3, completed: true,  notes: 'AMRAP 15 · DU + Wall ball + T2B' },
+      { date: '2026-05-05', load: 0,    rpe_reported: 0, rpe_expected: 0, sleep_hours: 7.5, soreness: 3, motivation: 9, life_stress: 2, completed: false, notes: 'WOD del día pendiente · Cindy' },
     ],
   },
 ];
