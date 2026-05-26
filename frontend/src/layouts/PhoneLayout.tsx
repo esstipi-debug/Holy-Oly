@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNav } from '../context/NavigationContext';
+import SessionSlotBadge from '../components/SessionSlotBadge';
 
 export type NavTab = 'home' | 'train' | 'stats' | 'profile' | 'wod' | 'logros' | 'roster';
 
@@ -201,6 +202,9 @@ const PhoneLayout: React.FC<PhoneLayoutProps> = ({
         <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: 'none', paddingBottom: hideNav ? 0 : 76 }}>
           {children}
         </div>
+
+        {/* Overlay global · pill AM/PM cuando hay slot activo (doble sesión) */}
+        <SessionSlotBadge />
 
         {/* Bottom Nav */}
         {!hideNav && (

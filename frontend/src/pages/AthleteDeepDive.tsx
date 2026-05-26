@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNav } from '../context/NavigationContext';
 import { useAthlete } from '../context/AthleteContext';
+import AthleteTrainingView from '../components/AthleteTrainingView';
 
 const AthleteDeepDive: React.FC = () => {
   const { navigate } = useNav();
@@ -220,6 +221,14 @@ const AthleteDeepDive: React.FC = () => {
               </p>
             </div>
           )}
+        </div>
+
+        {/* ENTRENAMIENTO · vista del coach sobre lo que entrena el atleta */}
+        <p style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 10 }}>
+          Entrenamiento
+        </p>
+        <div style={{ marginBottom: 20 }}>
+          <AthleteTrainingView athlete={a} />
         </div>
 
         {/* RMs */}
