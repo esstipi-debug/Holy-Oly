@@ -1,8 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useAthlete } from '../context/AthleteContext';
 import { useNav } from '../context/NavigationContext';
 import WiseAssistant from '../components/WiseAssistant';
 import QuestsSection, { type QuestProgress } from '../components/QuestsSection';
+import MetricHistoryModal, { type MetricType } from '../components/MetricHistoryModal';
+import { getPendingForToday, setActiveSlot } from '../lib/plannedSessions';
+import type { PlannedSession, TrainingSlot } from '../types/training';
 
 const ringColor = (r: number) => r >= 70 ? '#22C55E' : r >= 50 ? '#F59E0B' : '#EF4444';
 const ringLabel = (r: number) => r >= 70 ? 'Listo para carga alta' : r >= 50 ? 'Carga moderada' : 'Tu cuerpo pide descanso';
@@ -57,6 +60,7 @@ const formatDate = (d: Date) => {
 const AtletaHome: React.FC = () => {
   const { navigate } = useNav();
   const { athlete, stress, stressLoading } = useAthlete();
+  const [activeMetric, setActiveMetric] = useState<MetricType | null>(null);
   if (!athlete) return null;
 
   const { macrocycle, maxes, injuries } = athlete;
@@ -161,7 +165,16 @@ const AtletaHome: React.FC = () => {
         <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.18em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: 14 }}>
           Readiness · Hoy
         </p>
-        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <button
+          onClick={() => { if (readiness !== null) setActiveMetric('readiness'); }}
+          disabled={readiness === null}
+          aria-label="Ver historial de readiness"
+          style={{
+            position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'transparent', border: 'none', padding: 0, cursor: readiness !== null ? 'pointer' : 'default',
+            fontFamily: 'inherit',
+          }}
+        >
           {stressLoading ? (
             <div style={{
               width: RADIUS * 2 + STROKE * 2, height: RADIUS * 2 + STROKE * 2,
@@ -183,18 +196,50 @@ const AtletaHome: React.FC = () => {
               </div>
             </>
           )}
-        </div>
+        </button>
         <p style={{ fontSize: 14, color: 'var(--text)', fontWeight: 600, marginTop: 18, textAlign: 'center', maxWidth: 280 }}>
           {rl}
         </p>
         {stress && (
-          <div style={{ display: 'flex', gap: 18, marginTop: 12 }}>
-            <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
+          <div style={{ display: 'flex', gap: 12, marginTop: 12, alignItems: 'center' }}>
+            <button
+              onClick={() => setActiveMetric('fitness')}
+              className="btn-press"
+              style={{
+                fontSize: 11, color: 'var(--text-secondary)',
+                background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)',
+                borderRadius: 14, padding: '4px 10px',
+                cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >
               Fitness <strong style={{ color: 'var(--text)', fontWeight: 700 }}>{Math.round(stress.fitness)}</strong>
-            </span>
-            <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
+            </button>
+            <button
+              onClick={() => setActiveMetric('fatigue')}
+              className="btn-press"
+              style={{
+                fontSize: 11, color: 'var(--text-secondary)',
+                background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)',
+                borderRadius: 14, padding: '4px 10px',
+                cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >
               Fatiga <strong style={{ color: 'var(--text)', fontWeight: 700 }}>{Math.round(stress.fatigue)}</strong>
-            </span>
+            </button>
+            {stress.cns_score != null && (
+              <button
+                onClick={() => setActiveMetric('cns')}
+                className="btn-press"
+                style={{
+                  fontSize: 11, color: 'var(--text-secondary)',
+                  background: 'rgba(168,85,247,0.08)', border: '1px solid rgba(168,85,247,0.25)',
+                  borderRadius: 14, padding: '4px 10px',
+                  cursor: 'pointer', fontFamily: 'inherit',
+                }}
+              >
+                CNS <strong style={{ color: 'var(--text)', fontWeight: 700 }}>{Math.round(stress.cns_score)}</strong>
+              </button>
+            )}
             <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{athlete.weight_class}</span>
           </div>
         )}
@@ -248,8 +293,23 @@ const AtletaHome: React.FC = () => {
               <div style={{
                 background: `${wiseColor}0F`,
                 border: `1px solid ${wiseColor}33`,
-                borderRadius: 18, padding: 14,
+                borderRadius: 18, padding: 14, position: 'relative',
               }}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveMetric('stress');
+                  }}
+                  aria-label="Ver historial de stress"
+                  style={{
+                    position: 'absolute', top: 8, right: 8,
+                    width: 26, height: 26, borderRadius: '50%',
+                    background: `${wiseColor}22`, border: `1px solid ${wiseColor}55`,
+                    color: wiseColor, fontSize: 11, fontWeight: 900,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    cursor: 'pointer', fontFamily: 'inherit', zIndex: 1,
+                  }}
+                >ⓘ</button>
                 <button
                   onClick={() => navigate('PULSE')}
                   style={{
@@ -449,6 +509,9 @@ const AtletaHome: React.FC = () => {
         </div>
       </div>
 
+      {/* DOBLE SESIÓN · si el coach asignó AM + PM hoy */}
+      <DoubleSessionCards athleteId={athlete.id} maxes={maxes} onStart={() => navigate('WARMUP')} />
+
       {/* SESIÓN DE HOY */}
       <div style={{ padding: '0 20px 20px' }}>
         <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: 10 }}>
@@ -643,6 +706,134 @@ const AtletaHome: React.FC = () => {
       </div>
 
       <WiseAssistant context="Holy Oly · Dashboard Atleta" />
+
+      {/* MODAL · historial 14d de la métrica seleccionada */}
+      {activeMetric && stress && (
+        <MetricHistoryModal
+          metric={activeMetric}
+          currentValue={
+            activeMetric === 'readiness' ? stress.readiness
+            : activeMetric === 'fitness' ? stress.fitness
+            : activeMetric === 'fatigue' ? stress.fatigue
+            : activeMetric === 'cns' ? (stress.cns_score ?? 50)
+            : stress.fitness  // 'stress' usa CTL (fitness) como aproximación de carga acumulada
+          }
+          onClose={() => setActiveMetric(null)}
+        />
+      )}
+    </div>
+  );
+};
+
+// ──────────────────────────────────────────────────────────────────
+// DoubleSessionCards
+// Si el coach asignó 2 sesiones (am + pm) hoy → muestra 2 cards stacked.
+// Si asignó 1 (full) → renderiza 1 card.
+// Si no asignó nada → no renderiza (deja que la sección hardcoded muestre).
+// ──────────────────────────────────────────────────────────────────
+
+interface DoubleSessionCardsProps {
+  athleteId: string;
+  maxes: { snatch: number; clean: number; jerk: number; back_squat: number; front_squat: number };
+  onStart: () => void;
+}
+
+const SLOT_LABEL: Record<TrainingSlot, string> = { am: 'AM · Mañana', pm: 'PM · Tarde', full: 'Sesión' };
+const FOCUS_EMOJI: Record<string, string> = {
+  olympic: '🏋️', technique: '🎯', strength: '💪', accessory: '🧰', metcon: '🔥',
+};
+
+const DoubleSessionCards: React.FC<DoubleSessionCardsProps> = ({ athleteId, maxes, onStart }) => {
+  const [pending, setPending] = useState<PlannedSession[]>([]);
+
+  const refresh = useMemo(() => () => setPending(getPendingForToday(athleteId)), [athleteId]);
+
+  useEffect(() => {
+    refresh();
+    const onStorage = () => refresh();
+    window.addEventListener('storage', onStorage);
+    // Poll suave porque storage no dispara en mismo tab
+    const id = window.setInterval(refresh, 1500);
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.clearInterval(id);
+    };
+  }, [refresh]);
+
+  if (pending.length === 0) return null;
+
+  const handlePick = (slot: TrainingSlot) => {
+    setActiveSlot(slot);
+    onStart();
+  };
+
+  const isDouble = pending.length === 2 && pending.some(s => s.slot === 'am') && pending.some(s => s.slot === 'pm');
+
+  const HO_GOLD = '#F5C518';
+
+  return (
+    <div style={{ padding: '0 20px 20px' }}>
+      <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: 10 }}>
+        {isDouble ? 'Doble sesión · hoy' : 'Sesión asignada · hoy'}
+      </p>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {pending
+          .slice()
+          .sort((a, b) => (a.slot === 'am' ? -1 : b.slot === 'am' ? 1 : 0))
+          .map(s => {
+            const avgPct = s.exercises.reduce((a, e) => a + e.pct, 0) / Math.max(1, s.exercises.length);
+            const totalKg = s.exercises.reduce((acc, e) => acc + Math.round((maxes[e.max_key] ?? 0) * e.pct), 0);
+            const statusColor =
+              s.status === 'completed' ? '#22C55E' :
+              s.status === 'in_progress' ? HO_GOLD :
+              'var(--text-secondary)';
+            const statusLabel =
+              s.status === 'completed' ? '✓ Completada' :
+              s.status === 'in_progress' ? '🏃 En curso' :
+              '⏸ Pendiente';
+            return (
+              <button
+                key={`${s.date}-${s.slot}`}
+                onClick={() => handlePick(s.slot)}
+                className="btn-press"
+                style={{
+                  width: '100%', textAlign: 'left', cursor: 'pointer', fontFamily: 'inherit',
+                  background: 'var(--surface)',
+                  border: `1px solid ${s.slot === 'am' ? `${HO_GOLD}55` : 'rgba(124,92,255,0.45)'}`,
+                  borderRadius: 18, padding: '14px 16px',
+                  display: 'flex', alignItems: 'center', gap: 12,
+                }}
+              >
+                <div style={{
+                  width: 46, height: 46, borderRadius: 14,
+                  background: s.slot === 'am' ? `${HO_GOLD}22` : 'rgba(124,92,255,0.18)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 22, flexShrink: 0,
+                }}>
+                  {FOCUS_EMOJI[s.focus] ?? '💪'}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                    <p style={{ fontSize: 13, fontWeight: 900, color: 'var(--text)', letterSpacing: '-.01em' }}>
+                      {SLOT_LABEL[s.slot]}
+                    </p>
+                    <span style={{ fontSize: 9, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase' }}>
+                      {s.focus}
+                    </span>
+                  </div>
+                  <p style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 3, fontVariantNumeric: 'tabular-nums' }}>
+                    {s.exercises.length} ejerc · ~{Math.round(avgPct * 100)}% · {totalKg}kg total
+                  </p>
+                  <p style={{ fontSize: 10, fontWeight: 700, color: statusColor, marginTop: 4 }}>
+                    {statusLabel}
+                  </p>
+                </div>
+                <span style={{ fontSize: 16, color: HO_GOLD, fontWeight: 900 }}>→</span>
+              </button>
+            );
+          })}
+      </div>
     </div>
   );
 };

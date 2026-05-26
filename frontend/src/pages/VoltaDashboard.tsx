@@ -4,6 +4,7 @@ import { useAthlete } from '../context/AthleteContext';
 import WiseAssistant from '../components/WiseAssistant';
 import QuestsSection, { type QuestProgress } from '../components/QuestsSection';
 import BottomSheet from '../components/BottomSheet';
+import MetricHistoryModal, { type MetricType } from '../components/MetricHistoryModal';
 import { loadResults, overallProgress, personalizationTier } from '../data/baseline';
 
 const C = {
@@ -61,16 +62,25 @@ interface WellnessRowProps {
   color: string;
   alert: 'critical' | 'warning' | 'info';
   label: string;
+  /** Si está presente, la fila es clickable (abre modal de historial) */
+  onClick?: () => void;
 }
 
-const WellnessRow: React.FC<WellnessRowProps> = ({ icon, title, value, valueLabel, context, pct, color, alert, label }) => (
-  <div style={{
-    marginBottom: 10,
-    background: 'rgba(255,255,255,0.02)',
-    border: `1px solid ${color}22`,
-    borderRadius: 12,
-    padding: '10px 12px',
-  }}>
+const WellnessRow: React.FC<WellnessRowProps> = ({ icon, title, value, valueLabel, context, pct, color, alert, label, onClick }) => (
+  <div
+    onClick={onClick}
+    role={onClick ? 'button' : undefined}
+    tabIndex={onClick ? 0 : undefined}
+    onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } } : undefined}
+    style={{
+      marginBottom: 10,
+      background: 'rgba(255,255,255,0.02)',
+      border: `1px solid ${color}22`,
+      borderRadius: 12,
+      padding: '10px 12px',
+      cursor: onClick ? 'pointer' : 'default',
+    }}
+  >
     {/* Top row: icon · title · valor · badge */}
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 8 }}>
       {/* Icono en círculo coloreado */}
@@ -262,6 +272,7 @@ const VoltaDashboard: React.FC = () => {
   const { navigate } = useNav();
   const { athlete, stress, stressLoading, adaptation } = useAthlete();
   const [activeInfo, setActiveInfo] = useState<CFComponentInfo | null>(null);
+  const [activeMetric, setActiveMetric] = useState<MetricType | null>(null);
 
   // ─── Wellness real (derivado de stress/adaptation/sessions) ───
   const today = athlete?.sessions_last_7?.at(-1);
@@ -408,7 +419,16 @@ const VoltaDashboard: React.FC = () => {
             </div>
           </button>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <div style={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 18, padding: 13 }}>
+            <button
+              onClick={() => stress && setActiveMetric('readiness')}
+              disabled={!stress}
+              className="btn-press"
+              style={{
+                background: C.surface, border: `1px solid ${C.line}`, borderRadius: 18, padding: 13,
+                cursor: stress ? 'pointer' : 'default', fontFamily: 'inherit', textAlign: 'left',
+                color: C.text,
+              }}
+            >
               <Sec style={{ marginBottom: 6 }}>V-Form</Sec>
               {stress ? (
                 <>
@@ -423,7 +443,7 @@ const VoltaDashboard: React.FC = () => {
               ) : (
                 <div style={{ fontSize: 11, color: C.muted }}>{stressLoading ? 'Calculando…' : '—'}</div>
               )}
-            </div>
+            </button>
             <div style={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 18, padding: 13 }}>
               <Sec style={{ marginBottom: 4 }}>Racha</Sec>
               <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
@@ -446,6 +466,7 @@ const VoltaDashboard: React.FC = () => {
               ? `Sistema nervioso ${hrvZone === 'RED' ? 'sobrecargado · priorizá sueño' : hrvZone === 'YELLOW' || hrvZone === 'ORANGE' ? 'bajo carga moderada' : 'recuperado · listo'}`
               : 'Calculando readiness real desde tus últimos 7 días.'}
             pct={hrvPct} color={hrvColor} alert={hrvAlert} label={hrvLabel}
+            onClick={stress?.cns_score != null ? () => setActiveMetric('cns') : undefined}
           />
           <WellnessRow
             icon="😴" title="Sueño"
@@ -492,11 +513,18 @@ const VoltaDashboard: React.FC = () => {
 
         {/* WISE SCORE */}
         <Sec style={{ marginBottom: 8 }}>Wise Score — entrenás con criterio</Sec>
-        <div style={{
-          background: 'rgba(0,230,118,0.03)',
-          border: '1px solid rgba(0,230,118,0.2)',
-          borderRadius: 18, padding: 14, marginBottom: 14,
-        }}>
+        <button
+          onClick={() => stress && setActiveMetric('readiness')}
+          disabled={!stress}
+          className="btn-press"
+          style={{
+            width: '100%', textAlign: 'left', fontFamily: 'inherit',
+            background: 'rgba(0,230,118,0.03)',
+            border: '1px solid rgba(0,230,118,0.2)',
+            borderRadius: 18, padding: 14, marginBottom: 14,
+            cursor: stress ? 'pointer' : 'default', color: C.text,
+          }}
+        >
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
             <div style={{
               width: 64, height: 64, borderRadius: '50%',
@@ -532,7 +560,7 @@ const VoltaDashboard: React.FC = () => {
               </div>
             ))}
           </div>
-        </div>
+        </button>
 
         {/* WOD DE HOY */}
         <Sec style={{ marginBottom: 8 }}>WOD de hoy · Semana {semana} · Día {dia}</Sec>
@@ -703,6 +731,21 @@ const VoltaDashboard: React.FC = () => {
           </div>
         )}
       </BottomSheet>
+
+      {/* MODAL · historial 14d de la métrica seleccionada */}
+      {activeMetric && stress && (
+        <MetricHistoryModal
+          metric={activeMetric}
+          currentValue={
+            activeMetric === 'readiness' ? stress.readiness
+            : activeMetric === 'fitness' ? stress.fitness
+            : activeMetric === 'fatigue' ? stress.fatigue
+            : activeMetric === 'cns' ? (stress.cns_score ?? 50)
+            : stress.fitness
+          }
+          onClose={() => setActiveMetric(null)}
+        />
+      )}
 
       <WiseAssistant context="Volta Atleta · Dashboard" />
     </div>
