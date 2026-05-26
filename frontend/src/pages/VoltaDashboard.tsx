@@ -5,6 +5,7 @@ import WiseAssistant from '../components/WiseAssistant';
 import QuestsSection, { type QuestProgress } from '../components/QuestsSection';
 import BottomSheet from '../components/BottomSheet';
 import MetricHistoryModal, { type MetricType } from '../components/MetricHistoryModal';
+import WellnessButton from '../components/WellnessButton';
 import { loadResults, overallProgress, personalizationTier } from '../data/baseline';
 import { getPendingForToday, setActiveSlot } from '../lib/plannedSessions';
 import type { PlannedSession, TrainingSlot } from '../types/training';
@@ -514,7 +515,15 @@ const VoltaDashboard: React.FC = () => {
         </div>
 
         {/* WISE SCORE */}
-        <Sec style={{ marginBottom: 8 }}>Wise Score — entrenás con criterio</Sec>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
+          <Sec style={{ margin: 0 }}>Wise Score — entrenás con criterio</Sec>
+          <WellnessButton
+            variant="pill"
+            accentPending={C.cyan}
+            currentReadiness={stress?.readiness ?? null}
+            historyMetric="readiness"
+          />
+        </div>
         <button
           onClick={() => stress && setActiveMetric('readiness')}
           disabled={!stress}

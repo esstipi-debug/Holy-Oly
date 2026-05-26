@@ -4,6 +4,7 @@ import { useNav } from '../context/NavigationContext';
 import WiseAssistant from '../components/WiseAssistant';
 import QuestsSection, { type QuestProgress } from '../components/QuestsSection';
 import MetricHistoryModal, { type MetricType } from '../components/MetricHistoryModal';
+import WellnessButton from '../components/WellnessButton';
 import { getPendingForToday, setActiveSlot } from '../lib/plannedSessions';
 import { skillFocus, type SkillFocusResponse } from '../lib/skillFocus';
 import type { PlannedSession, TrainingSlot } from '../types/training';
@@ -283,9 +284,16 @@ const AtletaHome: React.FC = () => {
       {/* WISE SCORE — surfacing del puntaje "smart trainer" del engine */}
       {stress && (
         <div style={{ padding: '0 20px 18px' }}>
-          <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: 10 }}>
-            Wise Score · entrenás con criterio
-          </p>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 10 }}>
+            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--text-secondary)', margin: 0 }}>
+              Wise Score · entrenás con criterio
+            </p>
+            <WellnessButton
+              variant="pill"
+              currentReadiness={stress.readiness}
+              historyMetric="readiness"
+            />
+          </div>
           {(() => {
             const wise = Math.round(stress.readiness);
             const wiseColor = wise >= 70 ? '#22C55E' : wise >= 50 ? '#F59E0B' : '#EF4444';
