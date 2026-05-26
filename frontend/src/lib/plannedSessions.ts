@@ -14,6 +14,7 @@
  */
 
 import type { PlannedSession, TrainingSlot } from '../types/training';
+import { manualSessionsApi, type ManualSessionResponse } from './api';
 
 const STORAGE_PREFIX = 'planned:';
 const STATUS_PREFIX = 'planned_status:';
@@ -156,4 +157,59 @@ export const getActiveSlot = (): TrainingSlot | null => {
   } catch {
     return null;
   }
+};
+
+// ──────────────────────────────────────────────────────────────────
+// Backend-aware wrappers · offline-first
+// Si el backend retorna manual_sessions del atleta para hoy, se mergean
+// con las locales (las del backend tienen prioridad por (date, slot)).
+// ──────────────────────────────────────────────────────────────────
+
+const manualToPlanned = (m: ManualSessionResponse): PlannedSession => ({
+  date: m.date,
+  slot: m.slot,
+  focus: m.focus,
+  exercises: m.exercises.map((e) => ({
+    name: e.name,
+    sets: e.sets,
+    reps: e.reps,
+    pct: e.pct,
+    max_key: e.max_key,
+  })),
+});
+
+/**
+ * Fetch sesiones manuales del backend para HOY · si falla devuelve [].
+ * El caller las mergea con las locales vía getPendingForTodayAsync.
+ */
+export const fetchTodayManualSessions = async (): Promise<PlannedSession[]> => {
+  try {
+    const sessions = await manualSessionsApi.meToday();
+    return sessions.map(manualToPlanned);
+  } catch {
+    return [];
+  }
+};
+
+/**
+ * Versión async de getPendingForToday · mergea backend (prioridad) + localStorage.
+ * Útil cuando el atleta consume sesiones asignadas por el coach desde otro device.
+ * NOTE: status se setea desde localStorage del cliente actual (no del backend).
+ */
+export const getPendingForTodayAsync = async (
+  athleteId: string,
+): Promise<PlannedSession[]> => {
+  const today = todayISO();
+  const local = getPendingForToday(athleteId);
+  const remote = await fetchTodayManualSessions();
+  if (remote.length === 0) return local;
+
+  // Merge por slot · backend gana
+  const bySlot = new Map<TrainingSlot, PlannedSession>();
+  for (const s of local) bySlot.set(s.slot, s);
+  for (const r of remote) {
+    const status = getSlotStatus(athleteId, today, r.slot);
+    bySlot.set(r.slot, { ...r, status });
+  }
+  return Array.from(bySlot.values()).filter((s) => s.status !== 'completed');
 };

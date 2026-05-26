@@ -5,7 +5,7 @@ import WiseAssistant from '../components/WiseAssistant';
 import QuestsSection, { type QuestProgress } from '../components/QuestsSection';
 import MetricHistoryModal, { type MetricType } from '../components/MetricHistoryModal';
 import WellnessButton from '../components/WellnessButton';
-import { getPendingForToday, setActiveSlot } from '../lib/plannedSessions';
+import { getPendingForToday, getPendingForTodayAsync, setActiveSlot } from '../lib/plannedSessions';
 import { skillFocus, type SkillFocusResponse } from '../lib/skillFocus';
 import type { PlannedSession, TrainingSlot } from '../types/training';
 
@@ -814,19 +814,32 @@ const FOCUS_EMOJI: Record<string, string> = {
 const DoubleSessionCards: React.FC<DoubleSessionCardsProps> = ({ athleteId, maxes, onStart }) => {
   const [pending, setPending] = useState<PlannedSession[]>([]);
 
-  const refresh = useMemo(() => () => setPending(getPendingForToday(athleteId)), [athleteId]);
+  // Sync (localStorage) + async (backend) refresh.
+  // Local primero para UX instantánea · backend mergea cuando llega.
+  const refreshSync = useMemo(() => () => setPending(getPendingForToday(athleteId)), [athleteId]);
+  const refreshAsync = useMemo(() => async () => {
+    try {
+      const merged = await getPendingForTodayAsync(athleteId);
+      setPending(merged);
+    } catch {
+      // Sin backend → ya tenemos lo de localStorage
+    }
+  }, [athleteId]);
 
   useEffect(() => {
-    refresh();
-    const onStorage = () => refresh();
+    refreshSync();
+    refreshAsync();
+    const onStorage = () => refreshSync();
     window.addEventListener('storage', onStorage);
-    // Poll suave porque storage no dispara en mismo tab
-    const id = window.setInterval(refresh, 1500);
+    // Poll suave: localStorage cada 1.5s · backend cada 30s
+    const localId = window.setInterval(refreshSync, 1500);
+    const remoteId = window.setInterval(refreshAsync, 30000);
     return () => {
       window.removeEventListener('storage', onStorage);
-      window.clearInterval(id);
+      window.clearInterval(localId);
+      window.clearInterval(remoteId);
     };
-  }, [refresh]);
+  }, [refreshSync, refreshAsync]);
 
   if (pending.length === 0) return null;
 

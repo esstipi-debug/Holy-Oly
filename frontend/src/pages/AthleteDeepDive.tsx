@@ -3,6 +3,7 @@ import { useNav } from '../context/NavigationContext';
 import { useAthlete } from '../context/AthleteContext';
 import AthleteTrainingView from '../components/AthleteTrainingView';
 import DeviationsCard from '../components/DeviationsCard';
+import WeeklyAnalysisCharts from '../components/WeeklyAnalysisCharts';
 import { useAthleteStress, fallbackReadiness } from '../hooks/useAthleteStress';
 
 const AthleteDeepDive: React.FC = () => {
@@ -256,6 +257,9 @@ const AthleteDeepDive: React.FC = () => {
           athleteId={a.id}
           weeks={4}
         />
+
+        {/* ANÁLISIS SEMANAL · 6 mini-charts con tendencias + alerta opcional */}
+        <WeeklyAnalysisCharts athleteId={a.id} weeks={8} />
 
         {/* RMs */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>

@@ -6,6 +6,11 @@ import {
 } from '../data/skillTree';
 import BottomSheet from '../components/BottomSheet';
 import { skillFocus, type SkillFocusResponse } from '../lib/skillFocus';
+import {
+  skillEvaluation,
+  type SkillEvaluationResponse,
+  type SkillEvaluationLevel,
+} from '../lib/skillEvaluation';
 import { useToast } from '../components/Toast';
 
 /**
@@ -60,10 +65,21 @@ interface SkillCardProps {
   coachFocusNote?: string | null;
   /** Nombre del coach que asignó el foco */
   coachFocusName?: string | null;
+  /** Evaluación formal del coach (1-5 stars) sobre este movimiento */
+  coachEvaluation?: SkillEvaluationResponse | null;
   onClick: () => void;
 }
 
-const SkillCard: React.FC<SkillCardProps> = ({ skill, progress, accent, highlighted, faded, coachFocusNote, coachFocusName, onClick }) => {
+const STAR_GOLD = '#FBBF24';
+const LEVEL_LABELS: Record<SkillEvaluationLevel, string> = {
+  1: 'novato',
+  2: 'básico',
+  3: 'funcional',
+  4: 'sólido',
+  5: 'maestría',
+};
+
+const SkillCard: React.FC<SkillCardProps> = ({ skill, progress, accent, highlighted, faded, coachFocusNote, coachFocusName, coachEvaluation, onClick }) => {
   const unlocked = isSkillUnlocked(skill, progress);
   const mastered = isSkillMastered(skill, progress);
   const inProgress = isSkillInProgress(skill, progress);
@@ -139,6 +155,55 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, progress, accent, highligh
           </div>
         </div>
       )}
+      {coachEvaluation && (() => {
+        const lv = coachEvaluation.level;
+        const isSolid = lv >= 4;
+        const needsWork = lv <= 2;
+        const badgeColor = isSolid ? '#4ade80' : needsWork ? '#f87171' : STAR_GOLD;
+        const badgeBg = isSolid
+          ? 'rgba(34,197,94,0.10)'
+          : needsWork
+            ? 'rgba(239,68,68,0.10)'
+            : `${STAR_GOLD}14`;
+        return (
+          <div style={{
+            background: badgeBg, border: `1px solid ${badgeColor}55`,
+            borderRadius: 10, padding: '6px 8px', marginBottom: 8,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ display: 'inline-flex', gap: 1 }}>
+                {[1, 2, 3, 4, 5].map(i => (
+                  <span key={i} style={{
+                    fontSize: 11, lineHeight: 1,
+                    color: i <= lv ? STAR_GOLD : C.line,
+                  }}>★</span>
+                ))}
+              </span>
+              <span style={{
+                fontSize: 9, fontWeight: 800, color: badgeColor,
+                letterSpacing: '.04em', textTransform: 'uppercase',
+              }}>
+                {LEVEL_LABELS[lv]}
+              </span>
+              {coachEvaluation.coach_name && (
+                <span style={{ fontSize: 9, color: C.muted, marginLeft: 'auto' }}>
+                  · {coachEvaluation.coach_name}
+                </span>
+              )}
+            </div>
+            {isSolid && (
+              <p style={{ fontSize: 9, color: '#4ade80', fontWeight: 700, marginTop: 3 }}>
+                ✓ Evaluado por coach · sólido
+              </p>
+            )}
+            {needsWork && (
+              <p style={{ fontSize: 9, color: '#f87171', fontWeight: 700, marginTop: 3 }}>
+                Tu coach indica trabajo extra · revisá los focos
+              </p>
+            )}
+          </div>
+        );
+      })()}
       <p style={{ fontSize: 10, color: C.muted, lineHeight: 1.4, marginBottom: 6 }}>{skill.description}</p>
       <p style={{ fontSize: 9, color: accent, fontWeight: 700, letterSpacing: '.04em', marginBottom: prereqs.length ? 8 : 0 }}>📊 {skill.volume}</p>
       {prereqs.length > 0 && (
@@ -356,6 +421,7 @@ const MovementProgression: React.FC = () => {
   const [modalSkill, setModalSkill] = useState<Skill | null>(null);       // skill abierta en BottomSheet
   const [highlightedPath, setHighlightedPath] = useState<{ upstream: Set<string>; downstream: Set<string> } | null>(null);
   const [coachFocuses, setCoachFocuses] = useState<SkillFocusResponse[]>([]);
+  const [coachEvaluations, setCoachEvaluations] = useState<SkillEvaluationResponse[]>([]);
   const [markingDominated, setMarkingDominated] = useState<boolean>(false);
   const { showToast } = useToast();
 
@@ -367,6 +433,21 @@ const MovementProgression: React.FC = () => {
       .catch(() => { /* sin sesión / no atleta · ignoramos */ });
     return () => { cancelled = true; };
   }, []);
+
+  // Fetch evaluaciones formales del coach (best-effort)
+  useEffect(() => {
+    let cancelled = false;
+    skillEvaluation.listMe()
+      .then((list) => { if (!cancelled) setCoachEvaluations(list); })
+      .catch(() => { /* sin sesión / no atleta · ignoramos */ });
+    return () => { cancelled = true; };
+  }, []);
+
+  const evaluationByMovement = useMemo(() => {
+    const m = new Map<string, SkillEvaluationResponse>();
+    for (const e of coachEvaluations) m.set(e.movement_id, e);
+    return m;
+  }, [coachEvaluations]);
 
   const focusByMovement = useMemo(() => {
     const m = new Map<string, SkillFocusResponse>();
@@ -649,6 +730,7 @@ const MovementProgression: React.FC = () => {
                       const highlighted = isActive || inUp || inDown;
                       const faded = highlightedPath !== null && !highlighted;
                       const focus = focusByMovement.get(skill.id);
+                      const evaluation = evaluationByMovement.get(skill.id);
                       return (
                         <div key={skill.id} data-skill-id={skill.id}>
                           <SkillCard
@@ -659,6 +741,7 @@ const MovementProgression: React.FC = () => {
                             faded={faded}
                             coachFocusNote={focus?.note ?? null}
                             coachFocusName={focus?.coach_name ?? null}
+                            coachEvaluation={evaluation ?? null}
                             onClick={() => handleSkillClick(skill)}
                           />
                         </div>

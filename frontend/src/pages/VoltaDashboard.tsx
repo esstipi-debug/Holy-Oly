@@ -378,8 +378,9 @@ const VoltaWodTodayCard: React.FC<VoltaWodTodayCardProps> = ({ onStart }) => {
           <div style={{
             fontSize: 10, fontWeight: 800, letterSpacing: '.1em', color: ts.fg,
             textTransform: 'uppercase',
+            display: 'flex', alignItems: 'center', gap: 6,
           }}>
-            TU WOD DE HOY
+            <span style={{ fontSize: 12 }}>✦</span> WISE TE SUGIERE PARA HOY
           </div>
           {wod.meta.fallback && (
             <span style={{ fontSize: 9, color: C.muted, fontWeight: 700 }}>📡 modo offline</span>
@@ -426,13 +427,16 @@ const VoltaWodTodayCard: React.FC<VoltaWodTodayCardProps> = ({ onStart }) => {
         borderTop: `1px solid ${C.line}`,
       }}>
         <div style={{ fontSize: 11, color: C.text, lineHeight: 1.5, opacity: 0.85 }}>
-          <span style={{ marginRight: 6 }}>💭</span>{wod.reasoning}
+          <span style={{ marginRight: 6, color: '#F5C518', fontWeight: 900 }}>✦ WISE:</span>{wod.reasoning}
         </div>
         {wod.alternatives.length > 0 && (
           <div style={{ fontSize: 10, color: C.muted, marginTop: 6, lineHeight: 1.5 }}>
-            <span style={{ fontWeight: 700, color: C.muted }}>Alt:</span> {wod.alternatives[0]}
+            <span style={{ fontWeight: 700, color: C.muted }}>Alt sugerida:</span> {wod.alternatives[0]}
           </div>
         )}
+        <div style={{ fontSize: 9, color: C.muted, marginTop: 8, fontStyle: 'italic', opacity: 0.7 }}>
+          Es una sugerencia · podés cambiar el WOD si tu coach o vos prefieren otra cosa.
+        </div>
       </div>
 
       {/* Selector de escala · persistido en localStorage */}

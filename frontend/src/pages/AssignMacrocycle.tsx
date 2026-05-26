@@ -214,9 +214,9 @@ const AssignMacrocycle: React.FC = () => {
             borderRadius: 16, padding: 14,
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-              <span style={{ fontSize: 16 }}>🎯</span>
+              <span style={{ fontSize: 16, color: '#F5C518' }}>✦</span>
               <p style={{ fontSize: 12, fontWeight: 800, color: 'var(--text)', letterSpacing: '.04em', textTransform: 'uppercase' }}>
-                Recomendados para {target.name.split(' ')[0]}
+                WISE sugiere para {target.name.split(' ')[0]}
               </p>
               {suggestions?.athlete_level && (
                 <span style={{
@@ -326,9 +326,16 @@ const AssignMacrocycle: React.FC = () => {
                     fontSize: 10, color: 'var(--text-secondary)',
                     marginTop: 10, fontStyle: 'italic', lineHeight: 1.4,
                   }}>
+                    <span style={{ color: '#F5C518', fontWeight: 700 }}>✦ WISE: </span>
                     {suggestions.rationale}
                   </p>
                 )}
+                <p style={{
+                  fontSize: 9, color: 'var(--text-secondary)',
+                  marginTop: 8, opacity: 0.7, lineHeight: 1.4,
+                }}>
+                  Son sugerencias del sistema · vos decidís el macrociclo final.
+                </p>
               </>
             )}
 

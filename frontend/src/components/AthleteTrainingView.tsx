@@ -8,6 +8,8 @@ import {
   clearDate,
 } from '../lib/plannedSessions';
 import SkillFocusAssign from './SkillFocusAssign';
+import ManualSessionAssigner from './ManualSessionAssigner';
+import SkillEvaluationPanel from './SkillEvaluationPanel';
 
 // ──────────────────────────────────────────────────────────────────
 // Tipos internos
@@ -587,6 +589,12 @@ const AthleteTrainingView: React.FC<Props> = ({ athlete }) => {
 
       {/* ── Sección 3.5 · DOBLE SESIÓN ───────────────────────── */}
       <DoubleSessionPanel athlete={athlete} today={today} />
+
+      {/* ── Sección 3.6 · EVALUACIÓN DE DESTREZA (coach califica skill tree) ── */}
+      <SkillEvaluationPanel athlete={athlete} />
+
+      {/* ── Sección 3.7 · ASIGNACIÓN MANUAL DEL DÍA ──────────── */}
+      <ManualSessionAssigner athlete={athlete} />
 
       {/* ── Sección 4 · CTAs COACH ───────────────────────────── */}
       <section>

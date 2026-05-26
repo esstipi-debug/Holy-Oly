@@ -168,6 +168,7 @@ const DeviationsCard: React.FC<Props> = ({ macroId, athleteId, weeks = 4 }) => {
               ✓ Sin desvíos
             </p>
             <p style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+              <span style={{ color: '#F5C518', fontWeight: 700 }}>✦ WISE: </span>
               {data.recommendation}
             </p>
           </>
@@ -205,6 +206,7 @@ const DeviationsCard: React.FC<Props> = ({ macroId, athleteId, weeks = 4 }) => {
               padding: '8px 10px', borderRadius: 8,
               background: 'var(--bg)', border: '1px solid var(--card-border)',
             }}>
+              <span style={{ color: '#F5C518', fontWeight: 700, fontStyle: 'normal' }}>✦ WISE te sugiere: </span>
               "{data.recommendation}"
             </p>
 
