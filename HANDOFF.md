@@ -1,7 +1,7 @@
 # HANDOFF · Holy Oly + Volta
 
 > Documento maestro para arrancar un nuevo chat con contexto completo.
-> Última actualización: 2026-05-26 (sesión Opus 4.7) · cerrada en commit `9a9906d`.
+> Última actualización: 2026-05-26 (sesión Opus 4.7) · cerrada en commit `cf5b118`.
 
 ---
 
@@ -70,31 +70,30 @@
 - ~~#7 ATL "último cuadrante usado"~~ ✅ commit `8c1f897` · persiste `nav:last:{product}:{role}` · restaura en switcher + login
 - ~~#10 Baseline localStorage ↔ backend sync~~ ✅ commit `690e2e5` · offline-first · SyncBadge UI
 - ~~#11 WOD results backend endpoint~~ ✅ commits `30b7f00` + migration `006_wod_results.sql` corrida en prod · POST/GET/DELETE/best · is_pr en transacción
+- ~~#9 Heatmap 365 anual~~ ✅ commit `d1370a9` · 53×7 grid · 5 niveles · color dinámico HO/VOL · mock determinista · stats (total/racha/mejor/adherencia)
+- ~~Mistral críticos~~ ✅ commit `e74da99` · max_tokens 400/600 + temperature 0.7/0.25 + rate limit per-user 20/min 200/día + sanitización question (500 chars max + control chars filter + suspicious patterns log)
+- ~~Mistral medios~~ ✅ commit `8a22739` · LRU cache 256/1h TTL (ahorra 30-50% tokens si hay preguntas repetidas) + async `_fetch_athlete` con asyncpg pool
+- ~~BUG-002 race condition setLogs~~ ✅ commit `b08ccbd` · guard movido dentro de `setLogs(prev => ...)` · clicks rápidos no bypasean el 4×2
+- ~~/v1/coach/ask legacy apagado~~ ✅ commit `cf5b118` · cero callers · funcionalidad duplicada por wise_router. smart_coach.py se conserva (wise lo importa)
+- ~~pyc files untracked~~ ✅ commit `c92cf06`
 
 #### 🚨 Bloqueante AHORA (acción de Esteban)
 - **CORS_ORIGINS en Render**: env var override está rechazando `holy-oly.onrender.com`. Frontend live no puede hablar con backend live. Fix: borrar la env var (default del código está bien) o setearla a `https://holy-oly.onrender.com,https://holy-oly-3.onrender.com,http://localhost:5173,http://localhost:3000`. ~2min · ⚠ Sin esto, la app solo funciona en demo mode.
 - **MISTRAL_API_KEY revocada por Esteban** (key expuesta en chat anterior). WISE corre en Lite hasta que se setee key nueva. Cuando se setee, aplicar primero los 3 fixes críticos del audit (ver abajo).
 
 #### 🚨 Fixes críticos antes de activar Mistral con tráfico real
-Del QA audit del 2026-05-26 (veredicto AMARILLO):
-| Fix | Severidad | Tiempo |
-|---|---|---|
-| `max_tokens` + `temperature` no se pasan a Mistral (`mistral_provider.py`). Runaway output. | 🔴 crítico | 30min |
-| Rate limit por-IP, no por-user. Quota free solo en localStorage (bypasseable). | 🔴 crítico | 1h |
-| Billing alerts en console.mistral.ai · tarea del usuario | 🔴 crítico | 5min Esteban |
-| Sanitización prompt-injection (`question` raw) | 🟡 medio | 30min |
-| Cache LRU para preguntas repetidas (ahorra 30-50%) | 🟡 medio | 45min |
-| `_fetch_athlete` sync dentro de async endpoint | 🟡 medio | 30min |
+✅ Todos los fixes del audit aplicados en commits `e74da99` (críticos) y `8a22739` (medios).
+**Único pendiente:** billing alerts en console.mistral.ai (tarea de Esteban).
 
-Costo estimado con fixes: ~$6-21/mes para 1000 calls/día. Sin fixes: $100+/hora si hay abuso.
+Costo estimado con fixes: ~$6-21/mes para 1000 calls/día. Cache LRU baja ese número 30-50% más.
 
 #### ⏸ Backlog grande
 | # | Item | Tiempo | Por qué |
 |---|---|---|---|
-| 8 | Push notifications PWA | 4h | C.13 roadmap |
-| 9 | Heatmap 365 anual | 3h | E roadmap |
+| 8 | Push notifications PWA | 4h | C.13 roadmap · agente lanzado al cierre de sesión, ver branch siguiente |
 | 12 | Setear env vars MP_PLAN_ID_* en Render | 5min · Esteban | Activa pagos sandbox |
-| 13 | Setear MISTRAL_API_KEY nuevo (post-fixes) | 1min · Esteban | Activa WISE LLM real |
+| 13 | Setear MISTRAL_API_KEY nuevo (post-fixes) + billing alerts | 1min · Esteban | Activa WISE LLM real con caps seguros |
+| 14 | Env vars WISE_* en Render (opcional, todos tienen default sano): `WISE_MAX_TOKENS=400`, `WISE_TEMPERATURE=0.7`, `WISE_USER_MAX_PER_MIN=20`, `WISE_USER_MAX_PER_DAY=200`, `WISE_CACHE_ENABLED=true` | 5min · Esteban | Tuning fino sin redeploy |
 
 ---
 
