@@ -175,3 +175,61 @@ export const wodResults = {
     api.delete<void>(`/v1/wod-results/${encodeURIComponent(id)}`),
 };
 
+/* ------------------------------------------------------------------ */
+/* Macrocycle Deviations · 5 tipos de desvío del plan                 */
+/* ------------------------------------------------------------------ */
+
+export type DeviationType =
+  | 'load_deviation'
+  | 'intensity_low'
+  | 'intensity_high'
+  | 'skip'
+  | 'early_termination';
+
+export type DeviationSeverity = 'low' | 'medium' | 'high';
+
+export interface DeviationItem {
+  type: DeviationType;
+  session_date: string;
+  expected: string;
+  actual: string;
+  delta: string;
+  severity: DeviationSeverity;
+  explanation: string;
+}
+
+export interface WeekDeviations {
+  week: number;
+  week_start: string;
+  deviations: DeviationItem[];
+}
+
+export interface DeviationsResponse {
+  macro_id: string;
+  athlete_id: string;
+  weeks_analyzed: number;
+  summary: {
+    total_deviations: number;
+    severity: DeviationSeverity;
+    by_type: Partial<Record<DeviationType, number>>;
+  };
+  weeks: WeekDeviations[];
+  recommendation: string;
+  data_source: 'db' | 'empty';
+}
+
+export const deviationsApi = {
+  /**
+   * GET /v1/macrocycles/{macro_id}/deviations?weeks=N&athlete_id=UUID
+   * Coach DEBE pasar athlete_id · atleta puede omitirlo (default = self).
+   */
+  get: (opts: { macro_id: string; weeks?: number; athlete_id?: string }) => {
+    const params = new URLSearchParams();
+    if (opts.weeks !== undefined) params.set('weeks', String(opts.weeks));
+    if (opts.athlete_id) params.set('athlete_id', opts.athlete_id);
+    const qs = params.toString();
+    return api.get<DeviationsResponse>(
+      `/v1/macrocycles/${encodeURIComponent(opts.macro_id)}/deviations${qs ? `?${qs}` : ''}`,
+    );
+  },
+};

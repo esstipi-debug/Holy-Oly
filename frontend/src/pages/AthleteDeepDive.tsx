@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNav } from '../context/NavigationContext';
 import { useAthlete } from '../context/AthleteContext';
 import AthleteTrainingView from '../components/AthleteTrainingView';
+import DeviationsCard from '../components/DeviationsCard';
 import { useAthleteStress, fallbackReadiness } from '../hooks/useAthleteStress';
 
 const AthleteDeepDive: React.FC = () => {
@@ -248,6 +249,13 @@ const AthleteDeepDive: React.FC = () => {
         <div style={{ marginBottom: 20 }}>
           <AthleteTrainingView athlete={a} />
         </div>
+
+        {/* DESVÍOS DEL MACROCICLO · plan vs real con tooltip explicativo */}
+        <DeviationsCard
+          macroId={a.macrocycle.program_id}
+          athleteId={a.id}
+          weeks={4}
+        />
 
         {/* RMs */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>

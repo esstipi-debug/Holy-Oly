@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useAthlete } from '../context/AthleteContext';
 import { useNav } from '../context/NavigationContext';
 import BottomSheet from '../components/BottomSheet';
+import DeviationsCard from '../components/DeviationsCard';
 
 /**
  * Stats del club para HO Coach (reemplaza la vista atleta `PerformanceDeepDive`).
@@ -164,6 +165,20 @@ const CoachStatsHO: React.FC = () => {
             }} />
           </div>
         </button>
+
+        {/* DESVÍOS DEL MACROCICLO · primer atleta del top como muestra */}
+        {stats.topPerformers.length > 0 && (
+          <>
+            <p className="type-caption" style={{ color: 'var(--text-secondary)', marginBottom: 10 }}>
+              Desvíos del macrociclo · {stats.topPerformers[0].name.split(' ')[0]}
+            </p>
+            <DeviationsCard
+              macroId={stats.topPerformers[0].macrocycle.program_id}
+              athleteId={stats.topPerformers[0].id}
+              weeks={4}
+            />
+          </>
+        )}
 
         {/* TOP PERFORMERS */}
         <p className="type-caption" style={{ color: 'var(--text-secondary)', marginBottom: 10 }}>

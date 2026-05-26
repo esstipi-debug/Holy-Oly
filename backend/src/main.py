@@ -18,6 +18,7 @@ from .api.wod_results import router as wod_results_router
 from .api.skill_focus import router as skill_focus_router
 from .api.notifications import notifications_router
 from .api.wellness import router as wellness_router
+from .api.deviations import router as deviations_router
 from .api.social import router as social_router
 from .api.payments import router as payments_router
 from .api.admin import router as admin_router
@@ -160,6 +161,7 @@ app.include_router(wod_results_router)
 app.include_router(skill_focus_router)
 app.include_router(notifications_router)
 app.include_router(wellness_router)
+app.include_router(deviations_router)
 app.include_router(social_router)
 app.include_router(payments_router)
 app.include_router(admin_router)
