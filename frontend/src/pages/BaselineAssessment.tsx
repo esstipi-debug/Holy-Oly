@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNav } from '../context/NavigationContext';
 import {
   TESTS,
@@ -7,6 +7,8 @@ import {
   type BaselineCategoryId, type BaselineResult, type BaselineTest,
 } from '../data/baseline';
 import LogTestSheet from '../components/baseline/LogTestSheet';
+import { baselineApi, type BaselineResultsMap } from '../lib/api';
+import { useToast } from '../components/Toast';
 
 /**
  * Tests de Referencia · base sobre la que se calculan cargas y volúmenes.
@@ -20,26 +22,88 @@ import LogTestSheet from '../components/baseline/LogTestSheet';
  * Persistencia local (`baseline:results`) hasta que haya backend (Fase 2).
  */
 
+type SyncState = 'idle' | 'syncing' | 'ok' | 'offline';
+
 const BaselineAssessment: React.FC = () => {
   const { back } = useNav();
+  const { showToast } = useToast();
+  // Lectura inmediata desde localStorage (caché primario, offline-first).
   const [results, setResults] = useState<Record<string, BaselineResult>>(() => loadResults());
   const [activeTest, setActiveTest] = useState<BaselineTest | null>(null);
   const [expanded, setExpanded] = useState<BaselineCategoryId | null>('olympic');
+  const [syncState, setSyncState] = useState<SyncState>('idle');
+  const okTimerRef = useRef<number | null>(null);
+
+  const flashOk = () => {
+    setSyncState('ok');
+    if (okTimerRef.current) window.clearTimeout(okTimerRef.current);
+    okTimerRef.current = window.setTimeout(() => setSyncState('idle'), 1500);
+  };
+
+  // Lazy load: merge backend → localStorage al montar. Backend wins en conflicto.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setSyncState('syncing');
+      try {
+        const remote: BaselineResultsMap = await baselineApi.list();
+        if (cancelled) return;
+        const local = loadResults();
+        const merged: Record<string, BaselineResult> = { ...local };
+        // Backend wins en conflicto
+        for (const [testId, r] of Object.entries(remote)) {
+          merged[testId] = { value: r.value, unit: r.unit, date: r.date };
+        }
+        // Persistir merge en localStorage
+        for (const [testId, r] of Object.entries(merged)) {
+          saveResult(testId, r);
+        }
+        setResults(merged);
+        flashOk();
+      } catch {
+        if (cancelled) return;
+        setSyncState('offline');
+        // Mantener localStorage como source of truth; reintentará en próxima carga.
+      }
+    })();
+    return () => {
+      cancelled = true;
+      if (okTimerRef.current) window.clearTimeout(okTimerRef.current);
+    };
+  }, []);
 
   const overall = overallProgress(results);
   const cats = categoryProgress(results);
   const tier = personalizationTier(overall.pct);
 
   const handleSave = (testId: string, r: BaselineResult) => {
+    // 1) Optimistic local save
     saveResult(testId, r);
     setResults(loadResults());
     setActiveTest(null);
+    // 2) Sync backend en background (no bloquea UI)
+    setSyncState('syncing');
+    baselineApi.upsert(testId, r.value, r.unit)
+      .then(() => flashOk())
+      .catch(() => {
+        setSyncState('offline');
+        showToast({ message: 'Sin conexión · guardado local', variant: 'warning' });
+      });
   };
 
   const handleDelete = (testId: string) => {
+    // 1) Optimistic local delete
     deleteResult(testId);
     setResults(loadResults());
     setActiveTest(null);
+    // 2) Sync backend en background
+    setSyncState('syncing');
+    baselineApi.delete(testId)
+      .then(() => flashOk())
+      .catch(() => {
+        setSyncState('offline');
+        showToast({ message: 'Sin conexión · borrado local', variant: 'warning' });
+      });
   };
 
   return (
@@ -56,6 +120,7 @@ const BaselineAssessment: React.FC = () => {
           <p style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.12em', color: '#7C5CFF', textTransform: 'uppercase' }}>BASE · COMPTRAIN</p>
           <h1 style={{ fontSize: 20, fontWeight: 900, letterSpacing: '-.02em', margin: 0 }}>Tests de Referencia</h1>
         </div>
+        <SyncBadge state={syncState} />
       </div>
 
       {/* HERO · progress ring + tier */}
@@ -209,6 +274,58 @@ const BaselineAssessment: React.FC = () => {
         onDelete={activeTest && results[activeTest.id] ? () => handleDelete(activeTest.id) : undefined}
       />
     </div>
+  );
+};
+
+const SyncBadge: React.FC<{ state: SyncState }> = ({ state }) => {
+  if (state === 'idle') return null;
+  const common: React.CSSProperties = {
+    fontSize: 10,
+    fontWeight: 800,
+    letterSpacing: '.06em',
+    padding: '4px 8px',
+    borderRadius: 999,
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 6,
+  };
+  if (state === 'syncing') {
+    return (
+      <span
+        aria-label="Sincronizando"
+        style={{ ...common, background: 'rgba(124,92,255,0.15)', color: '#A88BFF', border: '1px solid rgba(124,92,255,0.35)' }}
+      >
+        <span
+          style={{
+            width: 10, height: 10, borderRadius: '50%',
+            border: '2px solid rgba(168,139,255,0.3)',
+            borderTopColor: '#A88BFF',
+            display: 'inline-block',
+            animation: 'spin 0.8s linear infinite',
+          }}
+        />
+        SYNC
+      </span>
+    );
+  }
+  if (state === 'ok') {
+    return (
+      <span
+        aria-label="Sincronizado"
+        style={{ ...common, background: 'rgba(34,197,94,0.15)', color: '#22C55E', border: '1px solid rgba(34,197,94,0.35)' }}
+      >
+        ✓
+      </span>
+    );
+  }
+  // offline
+  return (
+    <span
+      aria-label="Sin conexión"
+      style={{ ...common, background: 'rgba(245,158,11,0.15)', color: '#F59E0B', border: '1px solid rgba(245,158,11,0.35)' }}
+    >
+      ⚠ OFFLINE
+    </span>
   );
 };
 
