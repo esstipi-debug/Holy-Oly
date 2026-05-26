@@ -29,6 +29,7 @@ MIGRATION_FILES = [
     "004_rag_self_healing.sql",
     "005_github_oauth.sql",
     "006_wod_results.sql",
+    "007_push_subscriptions.sql",
 ]
 
 
