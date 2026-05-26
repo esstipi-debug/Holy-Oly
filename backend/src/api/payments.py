@@ -77,8 +77,10 @@ PLANS = {
         "audience":       "coach",
     },
     "coach_pro_12m": {
+        # MP Chile limita transacciones individuales a CLP 350.000 → tope 349.900
+        # = ~22% off vs 12 mensuales (44.990 × 12 = 539.880)
         "label":          "PRO Coach · Anual",
-        "amount":         int(os.getenv("PRICE_COACH_PRO_YEARLY", "449900")),
+        "amount":         int(os.getenv("PRICE_COACH_PRO_YEARLY", "349900")),
         "frequency":      12,
         "frequency_type": "months",
         "days":           365,
@@ -179,17 +181,20 @@ async def create_mp_preapproval_plan(*, plan_key: str, plan: dict) -> dict:
     if not MP_ACCESS_TOKEN:
         raise HTTPException(503, "MP_ACCESS_TOKEN no configurado en server")
 
+    # Notas MP Chile:
+    # - NO mandar `status` en el body (MP lo setea solo, mandarlo da 400)
+    # - back_url NO admite hash (#) ni query string (?), solo path
+    # - reason no admite `·` ni otros caracteres especiales (causa 400)
     import httpx
     body = {
-        "reason": f"Holy Oly · {plan['label']}",
+        "reason": f"Holy Oly {plan['label'].replace('·', '-')}",
         "auto_recurring": {
             "frequency":          plan["frequency"],
             "frequency_type":     plan["frequency_type"],
             "transaction_amount": plan["amount"],
             "currency_id":        "CLP",
         },
-        "back_url": f"{FRONTEND_URL}/#PAYMENT_SUCCESS?plan={plan_key}",
-        "status":   "active",
+        "back_url": FRONTEND_URL,  # MP redirige acá tras checkout, el frontend lee query params para detectar success
     }
     async with httpx.AsyncClient(timeout=15) as client:
         resp = await client.post(
@@ -222,11 +227,11 @@ async def create_mp_preapproval(*, code: str, plan_key: str, plan: dict, user_em
     import httpx
     body = {
         "preapproval_plan_id": plan_id,
-        "reason":              f"Holy Oly · {plan['label']}",
+        "reason":              f"Holy Oly {plan['label'].replace('·', '-')}",
         "external_reference":  code,
         "payer_email":         user_email,
-        "back_url":            f"{FRONTEND_URL}/#PAYMENT_SUCCESS?code={code}",
-        "status":              "pending",
+        "back_url":            FRONTEND_URL,  # MP no acepta hash/query · frontend detecta state via webhook
+        # MP setea status automático
     }
     async with httpx.AsyncClient(timeout=15) as client:
         resp = await client.post(
