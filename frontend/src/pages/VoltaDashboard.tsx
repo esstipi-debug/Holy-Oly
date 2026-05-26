@@ -260,8 +260,59 @@ const BaselinePromptCard: React.FC<{ onNavigate: () => void }> = ({ onNavigate }
 
 const VoltaDashboard: React.FC = () => {
   const { navigate } = useNav();
-  const { athlete } = useAthlete();
+  const { athlete, stress, stressLoading, adaptation } = useAthlete();
   const [activeInfo, setActiveInfo] = useState<CFComponentInfo | null>(null);
+
+  // ─── Wellness real (derivado de stress/adaptation/sessions) ───
+  const today = athlete?.sessions_last_7?.at(-1);
+
+  // HRV estimado: baseline 60ms ± 0.3ms por punto de cns_score (50 = baseline)
+  // Sin baseline real, usamos 50 cns → 60ms, 0 cns → 45ms, 100 cns → 75ms.
+  const hrvValue = stress?.cns_score != null
+    ? Math.round(45 + (stress.cns_score / 100) * 30)
+    : null;
+  const hrvPct = stress?.cns_score != null ? Math.max(8, Math.min(100, stress.cns_score)) : 0;
+  const hrvZone = stress?.cns_zone?.toUpperCase() ?? null;
+  const hrvAlert: 'critical' | 'warning' | 'info' =
+    hrvZone === 'RED' ? 'critical' : hrvZone === 'YELLOW' || hrvZone === 'ORANGE' ? 'warning' : 'info';
+  const hrvColor =
+    hrvZone === 'RED' ? C.red : hrvZone === 'YELLOW' || hrvZone === 'ORANGE' ? C.amber : C.green;
+  const hrvLabel = hrvZone === 'RED' ? '🔴 CRÍTICO' : hrvZone === 'YELLOW' || hrvZone === 'ORANGE' ? '⚠ MEDIO' : '✓ OK';
+
+  // Sueño score: sleep_hours × 10 con bonus por motivación y penalización por soreness
+  // (rango aproximado 0-100). 8h + buen estado ≈ 90, 5h + sore ≈ 40.
+  const sleepScore = today
+    ? Math.max(0, Math.min(100, Math.round(today.sleep_hours * 10 + today.motivation - today.soreness)))
+    : null;
+  const sleepAlert: 'critical' | 'warning' | 'info' =
+    sleepScore == null ? 'info' : sleepScore < 50 ? 'critical' : sleepScore < 70 ? 'warning' : 'info';
+  const sleepColor = sleepScore == null ? C.muted : sleepScore < 50 ? C.red : sleepScore < 70 ? C.amber : C.green;
+  const sleepLabel = sleepScore == null ? '—' : sleepScore < 50 ? '🔴 BAJO' : sleepScore < 70 ? '⚠ MEDIO' : '✓ OK';
+
+  // V-Form a partir del readiness_category de stress
+  const vFormCat = stress?.readiness_category?.toUpperCase() ?? null;
+  const vFormColor = vFormCat === 'GREEN' || vFormCat === 'READY' || vFormCat === 'OPTIMAL'
+    ? C.green
+    : vFormCat === 'RED' || vFormCat === 'CRITICAL' || vFormCat === 'LOW'
+      ? C.red
+      : C.amber;
+  const vFormBadge = vFormCat === 'GREEN' || vFormCat === 'READY' || vFormCat === 'OPTIMAL'
+    ? '🟢 VERDE'
+    : vFormCat === 'RED' || vFormCat === 'CRITICAL' || vFormCat === 'LOW'
+      ? '🔴 ROJO'
+      : '🟡 AMARILLO';
+  const vFormText = vFormCat === 'GREEN' || vFormCat === 'READY' || vFormCat === 'OPTIMAL'
+    ? 'Listo para carga alta'
+    : vFormCat === 'RED' || vFormCat === 'CRITICAL' || vFormCat === 'LOW'
+      ? 'Tu cuerpo pide descanso'
+      : 'Fatiga acumulada — entrena con criterio';
+
+  // CF Index simple desde readiness (placeholder hasta tener engine CF)
+  const cfIndex = stress ? Math.round(stress.readiness) : null;
+
+  // Ajustes del WOD desde adaptation
+  const wodZone = adaptation?.risk_zone ?? null;
+  const wodModified = wodZone && wodZone !== 'green';
   const userName = athlete?.name ?? 'Atleta';
   const now = new Date();
   const hour = now.getHours();
@@ -349,21 +400,29 @@ const VoltaDashboard: React.FC = () => {
               boxShadow: '0 0 28px rgba(0,229,255,0.3), inset 0 0 12px rgba(0,229,255,0.06)',
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
             }}>
-              <span style={{ fontSize: 30, fontWeight: 900, color: C.cyan, lineHeight: 1 }}>72</span>
+              <span style={{ fontSize: 30, fontWeight: 900, color: C.cyan, lineHeight: 1 }}>{cfIndex ?? '—'}</span>
               <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '.06em', color: C.cyanDim }}>RX · H</span>
             </div>
-            <div style={{ fontSize: 10, color: C.muted }}>↑ +1 esta semana</div>
+            <div style={{ fontSize: 10, color: C.muted }}>
+              {stressLoading ? 'Calculando…' : cfIndex != null ? 'readiness real' : 'sin datos'}
+            </div>
           </button>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
             <div style={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 18, padding: 13 }}>
               <Sec style={{ marginBottom: 6 }}>V-Form</Sec>
-              <div style={{
-                display: 'inline-flex', alignItems: 'center', gap: 5,
-                padding: '4px 10px', borderRadius: 8, fontSize: 11, fontWeight: 700,
-                background: 'rgba(255,179,0,0.12)', color: C.amber,
-                border: '1px solid rgba(255,179,0,0.25)',
-              }}>🟡 AMARILLO</div>
-              <div style={{ fontSize: 10, color: C.muted, marginTop: 5 }}>Fatiga acumulada — entrena con criterio</div>
+              {stress ? (
+                <>
+                  <div style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 5,
+                    padding: '4px 10px', borderRadius: 8, fontSize: 11, fontWeight: 700,
+                    background: `${vFormColor}1F`, color: vFormColor,
+                    border: `1px solid ${vFormColor}55`,
+                  }}>{vFormBadge}</div>
+                  <div style={{ fontSize: 10, color: C.muted, marginTop: 5 }}>{vFormText}</div>
+                </>
+              ) : (
+                <div style={{ fontSize: 11, color: C.muted }}>{stressLoading ? 'Calculando…' : '—'}</div>
+              )}
             </div>
             <div style={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 18, padding: 13 }}>
               <Sec style={{ marginBottom: 4 }}>Racha</Sec>
@@ -380,14 +439,24 @@ const VoltaDashboard: React.FC = () => {
         <Sec style={{ marginBottom: 8 }}>Wellness hoy</Sec>
         <div style={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 18, padding: 14, marginBottom: 14 }}>
           <WellnessRow
-            icon="💓" title="HRV" value="52" valueLabel="ms · -1.8σ"
-            context="3 días bajo tu baseline. Sistema nervioso bajo carga: priorizá sueño."
-            pct={28} color={C.red} alert="critical" label="🔴 CRÍTICO"
+            icon="💓" title="HRV"
+            value={hrvValue != null ? String(hrvValue) : '—'}
+            valueLabel={hrvValue != null ? `ms · CNS ${stress?.cns_score?.toFixed(0) ?? '—'}` : (stressLoading ? 'calculando…' : 'sin datos')}
+            context={hrvValue != null
+              ? `Sistema nervioso ${hrvZone === 'RED' ? 'sobrecargado · priorizá sueño' : hrvZone === 'YELLOW' || hrvZone === 'ORANGE' ? 'bajo carga moderada' : 'recuperado · listo'}`
+              : 'Calculando readiness real desde tus últimos 7 días.'}
+            pct={hrvPct} color={hrvColor} alert={hrvAlert} label={hrvLabel}
           />
           <WellnessRow
-            icon="😴" title="Sueño" value="64" valueLabel="/100"
-            context="Tercer día por debajo. Acumulás deuda de sueño · objetivo 8h hoy."
-            pct={42} color={C.amber} alert="warning" label="⚠ CRÓNICO"
+            icon="😴" title="Sueño"
+            value={sleepScore != null ? String(sleepScore) : '—'}
+            valueLabel={today ? `${today.sleep_hours}h · /100` : '—'}
+            context={sleepScore != null
+              ? sleepScore < 50 ? 'Sueño insuficiente. Apuntá a 8h hoy.'
+                : sleepScore < 70 ? 'Sueño OK pero podés más. Objetivo 8h.'
+                : 'Excelente recuperación de sueño.'
+              : 'Cargá tu última noche para ver el score.'}
+            pct={sleepScore ?? 0} color={sleepColor} alert={sleepAlert} label={sleepLabel}
           />
           <WellnessRow
             icon="☕" title="Cafeína" value="88" valueLabel="mg residual"
@@ -484,17 +553,41 @@ const VoltaDashboard: React.FC = () => {
               <div style={{ fontSize: 13, fontWeight: 800, color: C.text }}>AMRAP 20min</div>
               <div style={{ fontSize: 11, color: C.cyan, marginTop: 2 }}>5 C&amp;J · 10 Pull-ups · 15 Box jumps</div>
             </div>
-            <div style={{
-              display: 'inline-flex', alignItems: 'center', gap: 5,
-              padding: '3px 8px', borderRadius: 8, fontSize: 10, fontWeight: 700,
-              background: 'rgba(255,179,0,0.12)', color: C.amber,
-              border: '1px solid rgba(255,179,0,0.25)',
-            }}>⚠ MODIFICADO</div>
+            {wodModified ? (
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: 5,
+                padding: '3px 8px', borderRadius: 8, fontSize: 10, fontWeight: 700,
+                background: wodZone === 'red' ? 'rgba(255,61,0,0.12)' : 'rgba(255,179,0,0.12)',
+                color: wodZone === 'red' ? C.red : C.amber,
+                border: `1px solid ${wodZone === 'red' ? 'rgba(255,61,0,0.25)' : 'rgba(255,179,0,0.25)'}`,
+              }}>{wodZone === 'red' ? '🛑 DESCANSO' : '⚠ MODIFICADO'}</div>
+            ) : (
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: 5,
+                padding: '3px 8px', borderRadius: 8, fontSize: 10, fontWeight: 700,
+                background: 'rgba(0,230,118,0.12)', color: C.green,
+                border: '1px solid rgba(0,230,118,0.25)',
+              }}>✓ READY</div>
+            )}
           </div>
           <div style={{ padding: '12px 14px' }}>
-            <div style={{ fontSize: 11, color: C.muted, marginBottom: 8 }}>Ajustes automáticos por HRV bajo:</div>
-            <div style={{ fontSize: 11, color: C.text }}>• C&amp;J: 100% → <span style={{ color: C.amber, fontWeight: 700 }}>80% 1RM</span></div>
-            <div style={{ fontSize: 11, color: C.text, marginTop: 4 }}>• Volumen total: <span style={{ color: C.amber, fontWeight: 700 }}>-15%</span> accesorios</div>
+            {adaptation ? (
+              <>
+                <div style={{ fontSize: 11, color: C.muted, marginBottom: 8 }}>
+                  Risk score: <strong style={{ color: C.text }}>{adaptation.risk_score}</strong> · {adaptation.recommendation}
+                  {adaptation.client_side_fallback ? ' · local' : ''}
+                </div>
+                {adaptation.adapted_plan.slice(0, 3).map((ex) => (
+                  <div key={ex.exercise} style={{ fontSize: 11, color: C.text, marginTop: 4 }}>
+                    • {ex.exercise}: <span style={{ color: ex.degradation > 0 ? C.amber : C.green, fontWeight: 700 }}>
+                      {ex.sets}×{ex.reps} @ {ex.weight}
+                    </span>
+                  </div>
+                ))}
+              </>
+            ) : (
+              <div style={{ fontSize: 11, color: C.muted }}>Calculando ajustes…</div>
+            )}
           </div>
           <div style={{ padding: '12px 14px', borderTop: `1px solid ${C.line}`, display: 'flex', gap: 8 }}>
             <button

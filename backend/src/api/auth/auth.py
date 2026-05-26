@@ -157,8 +157,36 @@ auth_router = APIRouter(prefix="/v1/auth", tags=["auth"])
 
 @auth_router.post("/login")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    """Endpoint para obtener token JWT."""
-    user = authenticate_user(form_data.username, form_data.password)
+    """
+    Endpoint para obtener token JWT.
+
+    Busca primero en Postgres (vía users_repo) si hay DB pool configurado,
+    fallback a MOCK_USERS in-memory.
+    """
+    from ...db import users_repo
+    from .jwt_utils import verify_password
+
+    user = None
+    email = form_data.username.lower().strip()
+
+    # 1. Intentar Postgres
+    try:
+        row = await users_repo.find_by_email(email)
+        if row and verify_password(form_data.password, row["password_hash"]):
+            user = User(
+                id=str(row["id"]),
+                email=row["email"],
+                role=row.get("role", "athlete"),
+                coach_id=str(row["coach_id"]) if row.get("coach_id") else None,
+                is_active=row.get("is_active", True),
+            )
+    except Exception:
+        user = None
+
+    # 2. Fallback a MOCK_USERS
+    if user is None:
+        user = authenticate_user(email, form_data.password)
+
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

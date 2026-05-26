@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNav } from '../context/NavigationContext';
+import { useAthlete } from '../context/AthleteContext';
 import WiseAssistant from '../components/WiseAssistant';
 
 const C = {
@@ -64,6 +65,13 @@ const INVENTORY = [
 
 const VoltaCoachDash: React.FC = () => {
   const { navigate } = useNav();
+  const { allAthletes, selectAthlete } = useAthlete();
+
+  const openAthlete = (mockIdx: number) => {
+    const real = allAthletes[mockIdx];
+    if (real) selectAthlete(real.id);
+    navigate('ATHLETE_DETAIL');
+  };
 
   const critical = ROSTER.filter((a) => a.hrv === 'red').length;
   const warning  = ROSTER.filter((a) => a.hrv === 'amber').length;
@@ -213,7 +221,7 @@ const VoltaCoachDash: React.FC = () => {
             return (
               <div
                 key={a.id}
-                onClick={() => navigate('ATHLETE_DETAIL')}
+                onClick={() => openAthlete(i)}
                 style={{
                   padding: '12px 14px',
                   borderBottom: i < ROSTER.length - 1 ? `1px solid ${C.line}` : 'none',

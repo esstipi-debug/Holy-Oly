@@ -45,8 +45,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!token || backendAlive !== true || demoMode) return;
     fetchMe()
       .then((me) => {
-        setUser(me);
-        localStorage.setItem('user', JSON.stringify(me));
+        // /v1/auth/me no devuelve `name` ni `product` — preservar los del cache
+        // para no perder el nombre del usuario registrado.
+        setUser((prev) => {
+          const merged: AuthUser = {
+            ...(prev ?? {} as AuthUser),
+            ...me,
+            name: me.name ?? prev?.name,
+            product: me.product ?? prev?.product,
+          };
+          localStorage.setItem('user', JSON.stringify(merged));
+          return merged;
+        });
       })
       .catch(() => {
         // Token inválido

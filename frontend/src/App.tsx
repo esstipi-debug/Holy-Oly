@@ -28,6 +28,7 @@ import PerformanceDeepDive from './pages/PerformanceDeepDive';
 import SessionSchedule from './pages/SessionSchedule';
 import KnowledgePills from './pages/KnowledgePills';
 import SocialCard from './pages/SocialCard';
+import SocialCardsGallery from './pages/SocialCardsGallery';
 import BaselineAssessment from './pages/BaselineAssessment';
 import VoltaStats from './pages/VoltaStats';
 import HoStats from './pages/HoStats';
@@ -46,7 +47,7 @@ import type { View } from './context/NavigationContext';
 const NAV_MAP_HO: Record<string, NavTab> = {
   HOME: 'home',
   WARMUP: 'train', SESSION: 'train', SUMMARY: 'train', VICTORY: 'train',
-  PERFORMANCE: 'stats', INDEX: 'stats', SCHEDULE: 'stats', PULSE: 'stats', PILLS: 'stats', SOCIAL: 'stats',
+  PERFORMANCE: 'stats', INDEX: 'stats', SCHEDULE: 'stats', PULSE: 'stats', PILLS: 'stats', SOCIAL: 'stats', SOCIAL_GALLERY: 'stats',
   PROGRESSION: 'stats', HO_STATS: 'stats',
   PROFILE: 'profile', ONBOARDING: 'profile', PREMIUM: 'profile',
   COACH_DASH: 'home', ATHLETE_DETAIL: 'home', ASSIGN_MACRO: 'home', NEW_ATHLETE: 'home',
@@ -66,7 +67,7 @@ const NAV_MAP_VOLTA: Record<string, NavTab> = {
   VOLTA_COACH_INVENTORY: 'logros',
   VOLTA_STATS: 'stats', PROGRESSION: 'stats',
   PERFORMANCE: 'stats', INDEX: 'stats', SCHEDULE: 'stats', PULSE: 'stats', PILLS: 'stats',
-  SOCIAL: 'logros',
+  SOCIAL: 'logros', SOCIAL_GALLERY: 'logros',
   PROFILE: 'profile',
 };
 
@@ -231,6 +232,7 @@ function AppInner() {
         case 'PROFILE':               return <Profile />;
         case 'PERFORMANCE':           return <PerformanceDeepDive />;
         case 'SOCIAL':                return <SocialCard />;
+        case 'SOCIAL_GALLERY':        return <SocialCardsGallery />;
         case 'BASELINE':              return <BaselineAssessment />;
         case 'VOLTA_STATS':           return <VoltaStats />;
         case 'VOLTA_WOD_LOG':         return <LogWodResult />;
@@ -256,6 +258,7 @@ function AppInner() {
       case 'PULSE':          return <PulseHub />;
       case 'PILLS':          return <KnowledgePills />;
       case 'SOCIAL':         return <SocialCard />;
+      case 'SOCIAL_GALLERY': return <SocialCardsGallery />;
       case 'BASELINE':       return <BaselineAssessment />;
       case 'PROFILE':        return <Profile />;
       case 'COACH_DASH':     return <CommandCenter />;
@@ -283,7 +286,7 @@ function AppInner() {
       return;
     }
     if (tab === 'home') navigate(role === 'coach' ? 'COACH_DASH' : 'HOME');
-    else if (tab === 'train') navigate('WARMUP');
+    else if (tab === 'train') navigate(role === 'coach' ? 'COACH_DASH' : 'WARMUP');
     else if (tab === 'stats') navigate(role === 'coach' ? 'COACH_STATS' : 'HO_STATS');
     else if (tab === 'profile') navigate('PROFILE');
   };

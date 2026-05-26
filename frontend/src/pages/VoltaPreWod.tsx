@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNav } from '../context/NavigationContext';
+import { useAthlete } from '../context/AthleteContext';
 import WiseAssistant from '../components/WiseAssistant';
 
 const C = {
@@ -42,6 +43,46 @@ const Emoji: React.FC<{ children: React.ReactNode; active?: boolean; tint?: 'red
 
 const VoltaPreWod: React.FC = () => {
   const { navigate } = useNav();
+  const { stress, stressLoading, adaptation, adaptationLoading } = useAthlete();
+
+  // ─── Estado real desde stress + adaptation ───
+  const hrvValue = stress?.cns_score != null ? Math.round(45 + (stress.cns_score / 100) * 30) : null;
+  const hrvZone = stress?.cns_zone?.toUpperCase() ?? null;
+  const hrvColor = hrvZone === 'RED' ? C.red : hrvZone === 'YELLOW' || hrvZone === 'ORANGE' ? C.amber : C.green;
+  const hrvBadge = hrvZone === 'RED' ? '⚠ CRIT' : hrvZone === 'YELLOW' || hrvZone === 'ORANGE' ? '⚠ WARN' : '✓ OK';
+  const hrvKind: 'critical' | 'warning' = hrvZone === 'RED' ? 'critical' : 'warning';
+  const sleepReadiness = stress?.readiness != null ? Math.round(stress.readiness) : null;
+  const sleepColor = sleepReadiness == null ? C.muted : sleepReadiness < 50 ? C.red : sleepReadiness < 70 ? C.amber : C.green;
+  const vFormCat = stress?.readiness_category?.toUpperCase() ?? null;
+  const vFormColor = vFormCat === 'GREEN' || vFormCat === 'READY' || vFormCat === 'OPTIMAL'
+    ? C.green
+    : vFormCat === 'RED' || vFormCat === 'CRITICAL' || vFormCat === 'LOW'
+      ? C.red
+      : C.amber;
+  const vFormBadge = vFormCat === 'GREEN' || vFormCat === 'READY' || vFormCat === 'OPTIMAL'
+    ? '🟢' : vFormCat === 'RED' || vFormCat === 'CRITICAL' || vFormCat === 'LOW' ? '🔴' : '🟡';
+
+  const zone = adaptation?.risk_zone ?? null;
+  // Recomendación principal según zona
+  const recoTitle = zone === 'red'
+    ? '🛑 DESCANSO ACTIVO RECOMENDADO'
+    : zone === 'orange'
+      ? '⚠ Reducir intensidad 20-30%'
+      : zone === 'yellow'
+        ? '⚠ Entrenar con criterio · -10-15% volumen'
+        : zone === 'green'
+          ? '✓ READY · cargá fuerte'
+          : adaptationLoading ? 'Calculando…' : 'Sin datos';
+  const recoColor = zone === 'red' ? C.red : zone === 'orange' ? C.red : zone === 'yellow' ? C.amber : C.green;
+  const recoDesc = zone === 'red'
+    ? 'Tu sistema nervioso no está recuperado. Mejor sesión de movilidad o descanso completo.'
+    : zone === 'orange'
+      ? 'Riesgo elevado. Sustituí movimientos complejos por variantes técnicas; reducí cargas.'
+      : zone === 'yellow'
+        ? 'Estás OK pero con fatiga acumulada. Mantené técnica y bajá volumen accesorio.'
+        : zone === 'green'
+          ? 'Indicadores en verde. Adelante con la sesión planeada.'
+          : '';
 
   // Cafeína: simulamos toma hace ~2.5h. Decaimiento exp con t1/2 = 5h.
   const intakeMg = 200;
@@ -70,9 +111,30 @@ const VoltaPreWod: React.FC = () => {
         <Sec style={{ marginBottom: 8 }}>Tu estado ahora mismo</Sec>
         <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
           {[
-            { label: 'HRV',    value: '52',  sub: '-1.8σ',         color: C.red,   badge: '⚠ CRIT', kind: 'critical' as const },
-            { label: 'Sueño',  value: '64',  sub: '3 días bajo',   color: C.amber, badge: '⚠ WARN', kind: 'warning' as const },
-            { label: 'V-Form', value: '+3',  sub: 'Amarillo',      color: C.amber, badge: '🟡',     kind: 'warning' as const },
+            {
+              label: 'HRV',
+              value: hrvValue != null ? String(hrvValue) : (stressLoading ? '…' : '—'),
+              sub: stress?.cns_zone ? `CNS ${stress.cns_zone}` : '—',
+              color: hrvColor,
+              badge: hrvBadge,
+              kind: hrvKind,
+            },
+            {
+              label: 'Readiness',
+              value: sleepReadiness != null ? String(sleepReadiness) : (stressLoading ? '…' : '—'),
+              sub: stress?.readiness_category ?? '—',
+              color: sleepColor,
+              badge: sleepReadiness != null && sleepReadiness < 50 ? '⚠ CRIT' : '⚠ WARN',
+              kind: (sleepReadiness != null && sleepReadiness < 50 ? 'critical' : 'warning') as 'critical' | 'warning',
+            },
+            {
+              label: 'V-Form',
+              value: vFormCat ?? '—',
+              sub: zone ? `Risk ${adaptation?.risk_score ?? '—'}` : '—',
+              color: vFormColor,
+              badge: vFormBadge,
+              kind: 'warning' as const,
+            },
           ].map((m) => (
             <div key={m.label} style={{
               flex: 1, background: C.surface, border: `1px solid ${C.line}`, borderRadius: 14,
@@ -93,23 +155,45 @@ const VoltaPreWod: React.FC = () => {
           ))}
         </div>
 
-        {/* HRV ALERT BLOCK */}
+        {/* RECOMENDACIÓN PRINCIPAL (Session Adaptation Engine) */}
         <div style={{
-          background: 'rgba(255,61,0,0.06)',
-          border: '1px solid rgba(255,61,0,0.2)',
+          background: `${recoColor}10`,
+          border: `1px solid ${recoColor}33`,
           borderRadius: 14, padding: 14, marginBottom: 16,
         }}>
-          <div style={{ fontSize: 13, fontWeight: 800, color: C.red, marginBottom: 6 }}>
-            🔴 HRV bajo — intensidad limitada
+          <div style={{ fontSize: 13, fontWeight: 800, color: recoColor, marginBottom: 6 }}>
+            {recoTitle}
           </div>
-          <div style={{ fontSize: 12, color: C.muted, lineHeight: 1.5 }}>
-            Tu sistema nervioso no está recuperado. El WOD se ajustó automáticamente a 80% de intensidad.
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 5, marginTop: 10 }}>
-            <div style={{ fontSize: 11, color: C.text }}>• C&amp;J: reducido a <span style={{ color: C.amber, fontWeight: 700 }}>80% 1RM</span></div>
-            <div style={{ fontSize: 11, color: C.text }}>• Volumen accesorio: <span style={{ color: C.amber, fontWeight: 700 }}>-15%</span></div>
-            <div style={{ fontSize: 11, color: C.text }}>• Movilidad extra: <span style={{ color: C.cyan, fontWeight: 700 }}>+5 min</span></div>
-          </div>
+          {recoDesc && (
+            <div style={{ fontSize: 12, color: C.muted, lineHeight: 1.5 }}>
+              {recoDesc}
+            </div>
+          )}
+          {adaptation && zone !== 'red' && adaptation.adapted_plan.length > 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 5, marginTop: 10 }}>
+              {adaptation.adapted_plan.slice(0, 4).map((ex) => (
+                <div key={ex.exercise} style={{ fontSize: 11, color: C.text }}>
+                  • {ex.exercise}:{' '}
+                  <span style={{ color: ex.degradation > 0 ? C.amber : C.green, fontWeight: 700 }}>
+                    {ex.sets}×{ex.reps} @ {ex.weight}
+                  </span>
+                  {ex.reasoning && (
+                    <span style={{ color: C.muted, fontSize: 10 }}> · {ex.reasoning}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+          {adaptation?.client_side_fallback && (
+            <div style={{ fontSize: 9, color: C.muted, marginTop: 8, fontStyle: 'italic' }}>
+              ⓘ Cálculo local (backend no disponible)
+            </div>
+          )}
+          {adaptation && adaptation.risk_score != null && (
+            <div style={{ fontSize: 10, color: C.muted, marginTop: 6 }}>
+              Risk score: <strong style={{ color: C.text }}>{adaptation.risk_score}</strong>/100
+            </div>
+          )}
         </div>
 
         {/* MOOD */}

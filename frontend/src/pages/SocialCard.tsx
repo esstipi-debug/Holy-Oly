@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useAthlete } from '../context/AthleteContext';
+import { useNav } from '../context/NavigationContext';
 import { buildCelebrationCatalog } from '../data/celebrations';
 import MinimalistCard from '../components/social/MinimalistCard';
 import StadiumCard from '../components/social/StadiumCard';
@@ -48,6 +49,7 @@ function saveHidden(set: Set<string>) {
 
 const SocialCard: React.FC = () => {
   const { athlete } = useAthlete();
+  const { navigate } = useNav();
   const fullCatalog = useMemo(() => buildCelebrationCatalog(athlete), [athlete]);
 
   const [hidden, setHidden] = useState<Set<string>>(() => loadHidden());
@@ -108,6 +110,16 @@ const SocialCard: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full bg-holy-bg">
+      {/* Galería link · chip discreto arriba */}
+      <div className="px-4 pt-2 flex justify-end z-20 shrink-0">
+        <button
+          onClick={() => navigate('SOCIAL_GALLERY')}
+          className="text-[10px] font-black uppercase tracking-wider text-holy-text-secondary hover:text-holy-primary active:scale-95 transition bg-white/[0.04] border border-white/10 rounded-full px-3 py-1"
+        >
+          Ver galería completa →
+        </button>
+      </div>
+
       {/* Selector chips — fuera del área de screenshot */}
       <div className="px-4 pt-3 pb-1 flex gap-2 bg-holy-bg/95 backdrop-blur z-20 shrink-0">
         <Pager

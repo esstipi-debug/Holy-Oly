@@ -7,8 +7,8 @@ import QuestsSection, { type QuestProgress } from '../components/QuestsSection';
 const ringColor = (r: number) => r >= 70 ? '#22C55E' : r >= 50 ? '#F59E0B' : '#EF4444';
 const ringLabel = (r: number) => r >= 70 ? 'Listo para carga alta' : r >= 50 ? 'Carga moderada' : 'Tu cuerpo pide descanso';
 const ringTag = (r: number) => r >= 70 ? 'ÓPTIMO' : r >= 50 ? 'MODERADO' : 'BAJO';
-const EMPTY_LABEL = 'Sin datos · conectá un wearable';
-const EMPTY_TAG = 'SIN DATOS';
+const EMPTY_LABEL = 'Completá tu check-in diario para ver tu readiness real';
+const EMPTY_TAG = '—';
 
 const RADIUS = 86;
 const STROKE = 10;
