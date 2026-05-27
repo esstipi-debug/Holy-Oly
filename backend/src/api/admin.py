@@ -223,6 +223,71 @@ async def demote_to_athlete(
         }
 
 
+@router.post("/seed-demo")
+async def run_seed_demo(
+    reset: bool = False,
+    x_admin_token: Optional[str] = Header(default=None),
+):
+    """
+    Corre el seed de datos demo · pobla coach + 6 atletas + baselines +
+    30 días wod_results + 90 días cf_sessions.
+
+    Si reset=True, borra los users demo primero (CASCADE limpia todo lo asociado).
+
+    Idempotente: re-correr sin reset no duplica datos.
+    """
+    check_admin(x_admin_token)
+
+    # Import perezoso · evita ciclo en boot
+    import os
+    if reset:
+        os.environ["DEMO_SEED_RESET"] = "1"
+    try:
+        from ..scripts.seed_demo import seed as _seed_demo  # type: ignore
+    except ImportError:
+        # Si la estructura de paquete no incluye scripts/, intentamos path absoluto
+        import importlib.util
+        from pathlib import Path
+        candidates = [
+            Path("/app/scripts/seed_demo.py"),
+            Path("/app/backend/scripts/seed_demo.py"),
+            Path(__file__).resolve().parent.parent.parent / "scripts" / "seed_demo.py",
+        ]
+        seed_path = next((p for p in candidates if p.exists()), None)
+        if seed_path is None:
+            raise HTTPException(500, f"seed_demo.py not found. Tried: {[str(p) for p in candidates]}")
+        spec = importlib.util.spec_from_file_location("seed_demo", seed_path)
+        if spec is None or spec.loader is None:
+            raise HTTPException(500, "Could not load seed_demo spec")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        _seed_demo = module.seed
+
+    try:
+        await _seed_demo()
+    except Exception as e:
+        raise HTTPException(500, f"Seed failed: {str(e)[:300]}")
+    finally:
+        os.environ.pop("DEMO_SEED_RESET", None)
+
+    pool = await users_repo.get_pool()
+    if pool is not None:
+        async with pool.acquire() as conn:
+            n_demo = await conn.fetchval(
+                "SELECT COUNT(*) FROM users WHERE email LIKE '%.demo@holyoly.app' OR email = 'coach.demo@holyoly.app'",
+            )
+        return {
+            "ok": True,
+            "reset_used": reset,
+            "demo_users_count": n_demo,
+            "credentials": {
+                "coach":  "coach.demo@holyoly.app  /  DemoCoach2026!",
+                "athlete": "<nombre>.demo@holyoly.app  /  DemoAth2026!",
+            },
+        }
+    return {"ok": True, "reset_used": reset}
+
+
 @router.get("/db-status")
 async def db_status(x_admin_token: Optional[str] = Header(default=None)):
     """Inspecciona qué tablas existen + count rápido."""
