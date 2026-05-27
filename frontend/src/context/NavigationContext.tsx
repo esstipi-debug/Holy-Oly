@@ -10,7 +10,8 @@ export type View =
   | 'PRIVACY' | 'TERMS' | 'HORMONAL' | 'PLATE_DEMO' | 'DESIGN_V2'
   | 'V2_HOME' | 'V2_CHECKIN' | 'V2_COACH' | 'V2_SKILL_TREE' | 'CARDS_COMPARE'
   | 'HO_MACRO_CATALOG' | 'HO_MACRO_DETAIL' | 'HO_MACRO_ATHLETE' | 'VOLTA_MACRO_ATHLETE'
-  | 'CONTROL_DANIOS_V2';
+  | 'CONTROL_DANIOS_V2'
+  | 'DEMO_HUB';
 
 interface NavContextType {
   currentView: View;
@@ -34,6 +35,7 @@ const VALID_VIEWS: View[] = [
   'V2_HOME','V2_CHECKIN','V2_COACH','V2_SKILL_TREE','CARDS_COMPARE',
   'HO_MACRO_CATALOG','HO_MACRO_DETAIL','HO_MACRO_ATHLETE','VOLTA_MACRO_ATHLETE',
   'CONTROL_DANIOS_V2',
+  'DEMO_HUB',
 ];
 
 function readInitial(): View {

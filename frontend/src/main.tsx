@@ -35,6 +35,14 @@ import App from './App.tsx'
       localStorage.setItem('demoMode', '1');
       localStorage.setItem('token', 'demo');
       localStorage.setItem('user', JSON.stringify(DEMO_USER));
+
+      // Auto-demo aterriza en DEMO_HUB · entry único que solo lista
+      // pantallas con UI nuevo portado. Evita exponer mocks legacy.
+      // Override solo si NO hay hash explícito (deep links siguen funcionando).
+      if (!window.location.hash) {
+        localStorage.setItem('nav:currentView', 'DEMO_HUB');
+        window.location.hash = '#demo_hub';
+      }
     }
   } catch { /* SSR/private mode · ignore */ }
 })();
