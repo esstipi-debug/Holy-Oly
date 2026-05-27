@@ -50,6 +50,7 @@ import MovementProgression from './pages/MovementProgression';
 import Landing from './pages/Landing';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Terms from './pages/Terms';
+import HormonalSetup from './pages/HormonalSetup';
 import type { View } from './context/NavigationContext';
 
 /**
@@ -266,6 +267,7 @@ function AppInner() {
     // mostramos el selector de producto en vez del Login directo.
     if (currentView === 'PRIVACY') return <PrivacyPolicy />;
     if (currentView === 'TERMS') return <Terms />;
+    if (currentView === 'HORMONAL') return <HormonalSetup />;
     if (currentView === 'LOGIN' && !isAuthenticated && !getDeepLinkProduct()) {
       return <Landing />;
     }

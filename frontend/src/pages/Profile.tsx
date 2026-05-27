@@ -278,6 +278,35 @@ const Profile: React.FC = () => {
           CERRAR SESIÓN
         </button>
 
+        {/* Ciclo hormonal · opcional opt-in · solo atleta */}
+        {!isCoach && (
+          <>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em', marginTop: 32, marginBottom: 10, paddingLeft: 4 }}>
+              Salud · opcional
+            </p>
+            <button
+              onClick={() => navigate('HORMONAL')}
+              style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                padding: '14px 16px', width: '100%',
+                background: 'var(--surface)', border: '1px solid var(--card-border)', borderRadius: 16,
+                cursor: 'pointer', textAlign: 'left', marginBottom: 8,
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <span style={{ fontSize: 18 }}>🌙</span>
+                <div>
+                  <p style={{ color: 'var(--text)', fontSize: 13, fontWeight: 600 }}>Ciclo hormonal</p>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: 10, marginTop: 2 }}>
+                    Adapta entrenamiento al ciclo · opt-in
+                  </p>
+                </div>
+              </div>
+              <span style={{ color: 'var(--text-secondary)', fontSize: 14 }}>→</span>
+            </button>
+          </>
+        )}
+
         {/* Legal & datos · sección requerida app stores (GDPR/Apple/Google) */}
         <p style={{ color: 'var(--text-secondary)', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em', marginTop: 32, marginBottom: 10, paddingLeft: 4 }}>
           Privacidad y datos

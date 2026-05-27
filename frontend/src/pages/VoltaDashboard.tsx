@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNav } from '../context/NavigationContext';
 import { useAthlete } from '../context/AthleteContext';
 import WiseAssistant from '../components/WiseAssistant';
+import HormonalPhaseCard from '../components/HormonalPhaseCard';
 import QuestsSection, { type QuestProgress } from '../components/QuestsSection';
 import BottomSheet from '../components/BottomSheet';
 import MetricHistoryModal, { type MetricType } from '../components/MetricHistoryModal';
@@ -754,6 +755,9 @@ const VoltaDashboard: React.FC = () => {
 
         {/* BASELINE PROMPT · invita a completar tests */}
         <BaselinePromptCard onNavigate={() => navigate('BASELINE')} />
+
+        {/* HORMONAL PHASE · solo aparece si la atleta opted-in (silent si no) */}
+        <HormonalPhaseCard onClick={() => navigate('HORMONAL')} />
 
         {/* VOLUMEN PROMPT · función principal */}
         <VolumePromptCard onNavigate={() => navigate('VOLTA_STATS')} athlete={athlete} />

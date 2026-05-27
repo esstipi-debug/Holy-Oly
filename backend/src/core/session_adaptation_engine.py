@@ -375,9 +375,15 @@ class SessionAdaptationEngine:
     def adapt_session(
         self,
         pre_check: PreCheckInput,
-        original_plan: list
+        original_plan: list,
+        hormonal_phase: Optional[str] = None,  # Engine 13 · optional hormonal modifier
     ) -> AdaptationOutput:
-        """Main adaptation entry point"""
+        """Main adaptation entry point.
+
+        Si hormonal_phase está set (e.g. 'menstruation', 'follicular', 'ovulation', 'luteal'),
+        aplica el load_multiplier del Engine 13 al final del adapted_plan.
+        Es multiplicativo · combina con la degradación por risk_zone.
+        """
         
         # Calculate risk
         risk_score = self.calculate_risk_score(pre_check)
@@ -424,8 +430,30 @@ class SessionAdaptationEngine:
             
             adapted_plan.append(adapted)
         
+        # Engine 13 · Hormonal modifier · multiplica weight_pct si hay fase activa
+        hormonal_note: Optional[str] = None
+        if hormonal_phase:
+            try:
+                from ..services.hormonal_phase import hormonal_modifier_factor, phase_recommendation
+                factor = hormonal_modifier_factor(hormonal_phase)  # type: ignore[arg-type]
+                if factor != 1.0:
+                    for a in adapted_plan:
+                        a.weight_pct = round(a.weight_pct * factor, 1)
+                    rec = phase_recommendation(hormonal_phase)  # type: ignore[arg-type]
+                    pct = int((factor - 1) * 100)
+                    sign = "+" if pct > 0 else ""
+                    hormonal_note = (
+                        f"Fase {hormonal_phase}: cargas ajustadas {sign}{pct}% · {rec['focus']}"
+                    )
+                    warnings.append(hormonal_note)
+            except Exception:
+                # Fallback graceful · si phase es invalido, no rompe el adapt
+                pass
+
         # Recommendation
         recommendation = self.get_recommendation(risk_zone, warnings)
+        if hormonal_note:
+            recommendation = f"{recommendation} · {hormonal_note}"
         
         # Approved always (never blocks)
         approved = True
