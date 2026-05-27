@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNav } from '../context/NavigationContext';
 import { useAthlete } from '../context/AthleteContext';
 import Chart from '../components/social/Chart';
 import Heatmap365 from '../components/Heatmap365';
+import { wodsApi, formatScore, formatDelta, type BenchmarkWithMyBest } from '../lib/wods';
 
 /**
  * VoltaStats · pantalla de números del atleta CrossFit.
@@ -28,15 +29,7 @@ const C = {
   primary: '#7C5CFF',
 };
 
-interface BenchmarkEntry { name: string; current: string; previous: string; delta: string; tier: 'rx' | 'scaled' | 'rx_plus'; }
-
-const BENCHMARKS: BenchmarkEntry[] = [
-  { name: 'Fran',  current: '3:42', previous: '4:15', delta: '-33s', tier: 'rx' },
-  { name: 'Helen', current: '9:18', previous: '10:30', delta: '-72s', tier: 'rx' },
-  { name: 'Grace', current: '3:50', previous: '4:20', delta: '-30s', tier: 'rx' },
-  { name: 'Murph', current: '42:10', previous: '48:30', delta: '-380s', tier: 'scaled' },
-  { name: 'Cindy', current: '24 rounds', previous: '21 rounds', delta: '+3', tier: 'rx' },
-];
+// BENCHMARKS hardcoded eliminados · ahora vienen de wodsApi.benchmarks() · ver useEffect
 
 const WOD_TYPES = [
   { label: 'Cardio',     pct: 38, color: '#56CCF2' },
@@ -49,6 +42,17 @@ const VoltaStats: React.FC = () => {
   const { navigate } = useNav();
   const { athlete } = useAthlete();
   const [tab, setTab] = useState<'volume' | 'benchmarks' | 'profile'>('volume');
+
+  // Benchmarks reales desde backend
+  const [benchmarks, setBenchmarks] = useState<BenchmarkWithMyBest[] | null>(null);
+  const [benchmarksError, setBenchmarksError] = useState<string | null>(null);
+  useEffect(() => {
+    let alive = true;
+    wodsApi.benchmarks()
+      .then(b => { if (alive) setBenchmarks(b); })
+      .catch(err => { if (alive) setBenchmarksError(err?.message ?? 'error'); });
+    return () => { alive = false; };
+  }, []);
 
   // Volumen real desde sessions_last_7 → expandir a 14d con padding histórico simulado
   const recent = athlete?.sessions_last_7.map(s => Math.round(s.load)) ?? [];
@@ -227,33 +231,62 @@ const VoltaStats: React.FC = () => {
           >+ Loggear resultado de WOD</button>
           <Section title="Tus benchmarks RX" hint="WODs named · mejor tiempo personal">
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {BENCHMARKS.map(b => (
-                <div key={b.name} style={{
-                  display: 'flex', alignItems: 'center', gap: 12,
-                  padding: '10px 12px', borderRadius: 12,
-                  background: 'rgba(255,255,255,0.02)',
-                  border: '1px solid rgba(255,255,255,0.05)',
-                }}>
-                  <div style={{
-                    width: 36, height: 36, borderRadius: 10,
-                    background: b.tier === 'rx_plus' ? 'rgba(245,197,24,0.18)'
-                              : b.tier === 'rx' ? 'rgba(34,197,94,0.14)'
-                              : 'rgba(86,204,242,0.14)',
-                    border: `1px solid ${b.tier === 'rx_plus' ? '#F5C518' : b.tier === 'rx' ? C.green : C.cyan}55`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 10, fontWeight: 900,
-                    color: b.tier === 'rx_plus' ? '#F5C518' : b.tier === 'rx' ? C.green : C.cyan,
-                  }}>{b.tier === 'rx_plus' ? 'RX+' : b.tier === 'rx' ? 'RX' : 'SC'}</div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontSize: 14, fontWeight: 900, color: C.text, margin: 0 }}>{b.name}</p>
-                    <p style={{ fontSize: 10, color: C.muted, margin: '2px 0 0' }}>Anterior: {b.previous}</p>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <p style={{ fontSize: 16, fontWeight: 900, color: C.text, margin: 0, fontStyle: 'italic' }}>{b.current}</p>
-                    <p style={{ fontSize: 10, fontWeight: 800, color: C.green, margin: '2px 0 0' }}>▲ {b.delta}</p>
-                  </div>
+              {/* Loading skeleton */}
+              {!benchmarks && !benchmarksError && (
+                <div style={{ padding: 12, fontSize: 12, color: C.muted, textAlign: 'center' }}>Cargando benchmarks…</div>
+              )}
+              {benchmarksError && (
+                <div style={{ padding: 12, fontSize: 12, color: C.amber, textAlign: 'center' }}>
+                  ⚠ No pudimos cargar benchmarks · {benchmarksError}
                 </div>
-              ))}
+              )}
+              {benchmarks?.map(b => {
+                const tier: 'rx' | 'scaled' | 'rx_plus' =
+                  b.my_best_rx === 'rx' ? 'rx' : b.my_best_rx === 'scaled' ? 'scaled' : 'rx';
+                const tierLabel = tier === 'rx_plus' ? 'RX+' : tier === 'rx' ? 'RX' : 'SC';
+                const tierBg = tier === 'rx_plus' ? 'rgba(245,197,24,0.18)'
+                  : tier === 'rx' ? 'rgba(34,197,94,0.14)'
+                  : 'rgba(86,204,242,0.14)';
+                const tierColor = tier === 'rx_plus' ? '#F5C518' : tier === 'rx' ? C.green : C.cyan;
+                const hasBest = b.my_best_value != null;
+                const currentLabel = hasBest ? formatScore(b.my_best_value!, b.score_type) : '—';
+                const previousLabel = b.my_previous_value != null ? formatScore(b.my_previous_value, b.score_type) : '—';
+                const delta = formatDelta(b.my_best_value, b.my_previous_value, b.score_type, b.better_when);
+                return (
+                  <div key={b.id} style={{
+                    display: 'flex', alignItems: 'center', gap: 12,
+                    padding: '10px 12px', borderRadius: 12,
+                    background: 'rgba(255,255,255,0.02)',
+                    border: '1px solid rgba(255,255,255,0.05)',
+                    opacity: hasBest ? 1 : 0.55,
+                  }}>
+                    <div style={{
+                      width: 36, height: 36, borderRadius: 10,
+                      background: tierBg,
+                      border: `1px solid ${tierColor}55`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 10, fontWeight: 900,
+                      color: tierColor,
+                    }}>{hasBest ? tierLabel : '·'}</div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontSize: 14, fontWeight: 900, color: C.text, margin: 0 }}>{b.name}</p>
+                      <p style={{ fontSize: 10, color: C.muted, margin: '2px 0 0' }}>
+                        {hasBest ? `Anterior: ${previousLabel}` : `Sin registro · ${b.rx_standard}`}
+                      </p>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <p style={{ fontSize: 16, fontWeight: 900, color: C.text, margin: 0, fontStyle: 'italic' }}>{currentLabel}</p>
+                      {delta && (
+                        <p style={{
+                          fontSize: 10, fontWeight: 800,
+                          color: delta.startsWith('↓') || delta.startsWith('+') ? C.green : delta === '=' ? C.muted : C.amber,
+                          margin: '2px 0 0',
+                        }}>{delta}</p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </Section>
         </div>

@@ -24,6 +24,7 @@ from .api.volta_wod import router as volta_wod_router
 from .api.manual_sessions import router as manual_sessions_router
 from .api.hormonal import router as hormonal_router
 from .api.progression import router as progression_router
+from .api.wods import router as wods_router
 from .api.skill_evaluation import router as skill_evaluation_router
 from .api.analytics import router as analytics_router
 from .api.competitor import router as competitor_router, custom_wod_router
@@ -175,6 +176,7 @@ app.include_router(volta_wod_router)
 app.include_router(manual_sessions_router)
 app.include_router(hormonal_router)
 app.include_router(progression_router)
+app.include_router(wods_router)
 app.include_router(skill_evaluation_router)
 app.include_router(analytics_router)
 app.include_router(competitor_router)
