@@ -26,11 +26,12 @@ const ITEMS: DemoItem[] = [
   { view: 'HO_MACRO_CATALOG',  title: 'Catálogo Macrociclos',  subtitle: '23 macros · filtros familia · recomendados IA',           status: 'new', block: 'ho-atleta' },
   { view: 'HO_MACRO_DETAIL',   title: 'Detalle Ruso Clásico',  subtitle: 'filosofía · chart 16s · 4 mesos · drawer + Week Picker', status: 'new', block: 'ho-atleta' },
 
-  // 🟡 V2 parcial · de drop anterior · sin refresh batch v4
-  { view: 'V2_HOME',           title: 'Atleta Home (v2)',       subtitle: 'parcial · refresh pendiente',                            status: 'partial', block: 'ho-atleta' },
-  { view: 'V2_CHECKIN',        title: 'Daily Checkin (v2)',     subtitle: 'parcial · refresh pendiente',                            status: 'partial', block: 'ho-atleta' },
-  { view: 'V2_COACH',          title: 'Coach Dashboard (v2)',   subtitle: 'parcial · refresh pendiente',                            status: 'partial', block: 'ho-coach' },
-  { view: 'V2_SKILL_TREE',     title: 'Skill Tree (v2)',        subtitle: 'parcial · refresh pendiente',                            status: 'partial', block: 'ho-atleta' },
+  // 🚧 V2 partial · drop anterior · bloqueadas hasta porteo batch v4
+  //   (CoachDashV2 rompe grid en mobile · resto tampoco está pulido)
+  { view: 'V2_HOME',           title: 'Atleta Home (v2)',       subtitle: 'reemplazo del prompt 30 / refresh · pendiente',         status: 'pending', block: 'ho-atleta' },
+  { view: 'V2_CHECKIN',        title: 'Daily Checkin (v2)',     subtitle: 'reemplazo planeado · pendiente',                          status: 'pending', block: 'ho-atleta' },
+  { view: 'V2_COACH',          title: 'Coach Dashboard (v2)',   subtitle: 'reemplazo del prompt 24 (CommandCenter) · pendiente',     status: 'pending', block: 'ho-coach', promptId: 24 },
+  { view: 'V2_SKILL_TREE',     title: 'Skill Tree (v2)',        subtitle: 'refresh diseño · pendiente',                              status: 'pending', block: 'ho-atleta' },
 
   // 🚧 Pending · batch v4 prompts esperando generación + porteo
   { view: 'LOGIN',             title: 'Login',                  subtitle: 'prompt 02 · batch v4 pendiente',                         status: 'pending', block: 'auth', promptId: 2 },
