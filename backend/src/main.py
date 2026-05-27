@@ -26,6 +26,7 @@ from .api.hormonal import router as hormonal_router
 from .api.progression import router as progression_router
 from .api.wods import router as wods_router
 from .api.inventory import router as inventory_router
+from .api.coach_kpis import router as coach_kpis_router
 from .api.skill_evaluation import router as skill_evaluation_router
 from .api.analytics import router as analytics_router
 from .api.competitor import router as competitor_router, custom_wod_router
@@ -179,6 +180,7 @@ app.include_router(hormonal_router)
 app.include_router(progression_router)
 app.include_router(wods_router)
 app.include_router(inventory_router)
+app.include_router(coach_kpis_router)
 app.include_router(skill_evaluation_router)
 app.include_router(analytics_router)
 app.include_router(competitor_router)
