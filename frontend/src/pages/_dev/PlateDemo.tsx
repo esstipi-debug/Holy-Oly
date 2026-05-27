@@ -1,17 +1,14 @@
 /**
- * Página DEMO · visualización del sistema de Discos + AthleteCard FIFA.
- * Ruta: agregá a View type 'PLATE_DEMO' temporalmente para verla.
- *
- * Sirve para que el Boss apruebe el visual antes de aplicarlo.
+ * Página DEMO · sistema de Discos 3D + AthleteCard FIFA.
+ * Acceso: hash #plate_demo después del login.
  */
 
 import React from 'react';
-import { PlateBadge, type PlateTier } from '../../components/PlateBadge';
+import { PlateBadge, PlateStack, type PlateTier } from '../../components/PlateBadge';
 import { AthleteCardFIFA, type AthleteCardData } from '../../components/AthleteCardFIFA';
 
 const TIERS: PlateTier[] = ['white', 'green', 'yellow', 'blue', 'red'];
 
-// 3 cards demo · 3 tiers distintos · 3 niveles overall
 const CARDS: AthleteCardData[] = [
   {
     name: 'Lucía Ramos',
@@ -54,18 +51,15 @@ const PlateDemo: React.FC = () => {
       padding: '48px 16px 96px',
       fontFamily: 'Inter, system-ui, sans-serif',
     }}>
-      {/* Title */}
       <h1 style={{ fontSize: 22, fontWeight: 900, margin: 0, letterSpacing: '-.02em' }}>
-        Peak Qual · Sistema visual
+        Peak Qual · Sistema Visual 3D
       </h1>
       <p style={{ fontSize: 12, color: '#94A3B8', marginTop: 4 }}>
         Smart Training · Zero Burnout
       </p>
 
-      {/* ── Sección 1 · Tamaños del disco ── */}
-      <Section title="Disco · tamaños">
-        <div style={{ display: 'flex', gap: 16, alignItems: 'end', flexWrap: 'wrap' }}>
-          <PlateBadge tier="blue" size={24} />
+      <Section title="Discos 3D · tamaños">
+        <div style={{ display: 'flex', gap: 18, alignItems: 'end', flexWrap: 'wrap' }}>
           <PlateBadge tier="blue" size={32} />
           <PlateBadge tier="blue" size={48} />
           <PlateBadge tier="blue" size={64} />
@@ -73,67 +67,127 @@ const PlateDemo: React.FC = () => {
           <PlateBadge tier="blue" size={128} animate />
         </div>
         <p style={{ fontSize: 10, color: '#64748B', marginTop: 8 }}>
-          24/32 → chips inline · 48 → cards · 96/128 → hero/ceremony (animate=true)
+          Perspectiva 3D · profundidad lateral visible · hub plateado brilla
         </p>
       </Section>
 
-      {/* ── Sección 2 · Los 5 tiers ── */}
-      <Section title="Los 5 tiers · progresión halterofilia">
-        <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+      <Section title="Los 5 tiers · halterofilia IWF">
+        <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
           {TIERS.map(t => (
-            <PlateBadge key={t} tier={t} size={80} showLabel showWeight />
+            <PlateBadge key={t} tier={t} size={100} showLabel showWeight />
           ))}
         </div>
-        <ul style={{ fontSize: 11, color: '#94A3B8', marginTop: 12, lineHeight: 1.7, paddingLeft: 16 }}>
-          <li><strong style={{ color: '#F8F8F8' }}>Blanco</strong> · onboarding · &lt;30 días</li>
-          <li><strong style={{ color: '#22C55E' }}>Verde</strong> · iniciante · 1 macrocycle + inputs regulares</li>
-          <li><strong style={{ color: '#FBBF24' }}>Amarillo</strong> · intermedio · hábito consolidado</li>
-          <li><strong style={{ color: '#3B82F6' }}>Azul</strong> · avanzado · 90d + Balance check + alertas resueltas</li>
-          <li><strong style={{ color: '#EF4444' }}>Rojo</strong> · élite · 365d + 0 lesiones + macros &gt;85%</li>
-        </ul>
       </Section>
 
-      {/* ── Sección 3 · Inline usage ── */}
-      <Section title="Uso inline · chips + horizontal">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <Section title="PlateStack · visualización de carga">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+          <div>
+            <p style={{ fontSize: 10, color: '#64748B', marginBottom: 8 }}>
+              Carga ligera (atleta inicial · solo verdes)
+            </p>
+            <PlateStack tiers={['green', 'green']} size={64} showTotal animate />
+          </div>
+          <div>
+            <p style={{ fontSize: 10, color: '#64748B', marginBottom: 8 }}>
+              Carga media (verde + amarillo + azul)
+            </p>
+            <PlateStack tiers={['green', 'green', 'yellow', 'blue']} size={64} showTotal animate />
+          </div>
+          <div>
+            <p style={{ fontSize: 10, color: '#64748B', marginBottom: 8 }}>
+              Carga alta (mix completo · élite)
+            </p>
+            <PlateStack
+              tiers={['green', 'yellow', 'blue', 'red', 'red']}
+              size={64}
+              showTotal
+              animate
+            />
+          </div>
+          <div>
+            <p style={{ fontSize: 10, color: '#64748B', marginBottom: 8 }}>
+              Tonelaje semanal · cada disco = sesión completada
+            </p>
+            <PlateStack
+              tiers={['green', 'green', 'yellow', 'green', 'blue']}
+              size={48}
+              showTotal
+              animate
+            />
+          </div>
+        </div>
+      </Section>
+
+      <Section title="Stack vertical · acumulación visual">
+        <div style={{ display: 'flex', gap: 32, alignItems: 'flex-end' }}>
+          <div style={{ textAlign: 'center' }}>
+            <PlateStack
+              tiers={['green', 'green', 'yellow']}
+              size={48}
+              orientation="column"
+              showTotal
+            />
+            <p style={{ fontSize: 10, color: '#64748B', marginTop: 8 }}>Sem 1</p>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <PlateStack
+              tiers={['green', 'yellow', 'yellow', 'blue']}
+              size={48}
+              orientation="column"
+              showTotal
+            />
+            <p style={{ fontSize: 10, color: '#64748B', marginTop: 8 }}>Sem 4</p>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <PlateStack
+              tiers={['yellow', 'blue', 'blue', 'red']}
+              size={48}
+              orientation="column"
+              showTotal
+            />
+            <p style={{ fontSize: 10, color: '#64748B', marginTop: 8 }}>Sem 8</p>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <PlateStack
+              tiers={['blue', 'red', 'red', 'red']}
+              size={48}
+              orientation="column"
+              showTotal
+            />
+            <p style={{ fontSize: 10, color: '#64748B', marginTop: 8 }}>Sem 12 · PR</p>
+          </div>
+        </div>
+        <p style={{ fontSize: 10, color: '#64748B', marginTop: 12 }}>
+          Progresión de carga del atleta a lo largo del macrociclo
+        </p>
+      </Section>
+
+      <Section title="Uso inline · cards con disco">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {TIERS.map(t => (
             <div key={t} style={{
-              display: 'flex', alignItems: 'center', gap: 12,
-              padding: '8px 14px', borderRadius: 12,
+              display: 'flex', alignItems: 'center', gap: 16,
+              padding: '12px 16px', borderRadius: 14,
               background: 'rgba(255,255,255,0.03)',
               border: '1px solid rgba(255,255,255,0.06)',
             }}>
-              <PlateBadge tier={t} size={32} />
-              <span style={{ fontSize: 13, fontWeight: 700, color: '#FFFFFF' }}>
-                Atleta {t === 'white' ? 'nuevo' : 'tier ' + t}
+              <PlateBadge tier={t} size={48} />
+              <span style={{ fontSize: 14, fontWeight: 800, color: '#FFFFFF' }}>
+                Atleta tier {t}
               </span>
               <span style={{ marginLeft: 'auto', fontSize: 11, color: '#64748B', fontFamily: '"JetBrains Mono", monospace' }}>
-                {t}
+                {t.toUpperCase()}
               </span>
             </div>
           ))}
         </div>
       </Section>
 
-      {/* ── Sección 4 · Cards FIFA ── */}
-      <Section title="Athlete Cards · estilo FIFA Modo Leyenda">
+      <Section title="Athlete Cards · FIFA Modo Leyenda">
         <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', justifyContent: 'center' }}>
           <AthleteCardFIFA data={CARDS[0]} size="md" />
           <AthleteCardFIFA data={CARDS[1]} size="md" />
           <AthleteCardFIFA data={CARDS[2]} size="md" hero />
-        </div>
-        <p style={{ fontSize: 10, color: '#64748B', marginTop: 12, lineHeight: 1.5 }}>
-          6 stats derivados de engines:<br/>
-          STR (OLY Index) · CND (Pulse + benchmarks) · MOB (baselines) · REC (Stress + Lifestyle) · CON (Streak + adherencia) · TEC (Skill mastered + evals)
-        </p>
-      </Section>
-
-      {/* ── Sección 5 · Comparativa visual ── */}
-      <Section title="Progresión · 3 cards lado a lado">
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
-          <AthleteCardFIFA data={CARDS[0]} size="sm" />
-          <AthleteCardFIFA data={CARDS[1]} size="sm" />
-          <AthleteCardFIFA data={CARDS[2]} size="sm" hero />
         </div>
       </Section>
     </div>
@@ -141,10 +195,10 @@ const PlateDemo: React.FC = () => {
 };
 
 const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
-  <section style={{ marginTop: 32 }}>
+  <section style={{ marginTop: 40 }}>
     <h2 style={{
       fontSize: 11, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase',
-      color: '#64748B', margin: '0 0 12px',
+      color: '#64748B', margin: '0 0 16px',
     }}>{title}</h2>
     {children}
   </section>
