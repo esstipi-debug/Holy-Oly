@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNav } from '../context/NavigationContext';
 
 /**
  * Landing page · selector de producto.
@@ -11,6 +12,7 @@ import React from 'react';
  * (sirve para distinguir despliegues de QA del prod).
  */
 const Landing: React.FC = () => {
+  const { navigate } = useNav();
   const params = new URLSearchParams(window.location.search);
   const demoFlag = params.get('demo') === '1';
 
@@ -274,9 +276,24 @@ const Landing: React.FC = () => {
         >
           Ya tengo cuenta · iniciar sesión
         </button>
+        <div style={{ marginTop: 20, display: 'flex', gap: 16, justifyContent: 'center', alignItems: 'center' }}>
+          <button
+            onClick={() => navigate('PRIVACY')}
+            style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.35)', fontSize: 11, cursor: 'pointer', fontFamily: 'inherit', padding: 0, textDecoration: 'underline' }}
+          >
+            Privacidad
+          </button>
+          <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 10 }}>·</span>
+          <button
+            onClick={() => navigate('TERMS')}
+            style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.35)', fontSize: 11, cursor: 'pointer', fontFamily: 'inherit', padding: 0, textDecoration: 'underline' }}
+          >
+            Términos
+          </button>
+        </div>
         <p
           style={{
-            marginTop: 18,
+            marginTop: 14,
             fontSize: 9,
             color: 'rgba(255,255,255,0.3)',
             fontWeight: 700,

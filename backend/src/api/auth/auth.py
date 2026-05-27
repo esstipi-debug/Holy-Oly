@@ -284,6 +284,31 @@ class RegisterPayload(BaseModel):
         return v
 
 
+@auth_router.delete("/me")
+async def delete_account(current_user: User = Depends(verify_token)):
+    """Hard delete authenticated user and all their data (GDPR right to erasure)."""
+    from ...db import users_repo
+    deleted = await users_repo.delete_user(current_user.id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    return {"deleted": True, "user_id": current_user.id}
+
+
+@auth_router.get("/me/export")
+async def export_my_data(current_user: User = Depends(verify_token)):
+    """Export all user data as JSON (GDPR/CCPA data portability)."""
+    from ...db import users_repo
+    from fastapi.responses import JSONResponse
+    data = await users_repo.export_user_data(current_user.id)
+    return JSONResponse(
+        content=data,
+        headers={
+            "Content-Disposition": f'attachment; filename="holyoly-data-export.json"',
+            "Content-Type": "application/json",
+        },
+    )
+
+
 @auth_router.post("/register")
 async def register(payload: RegisterPayload, request: Request):
     """

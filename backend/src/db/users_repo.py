@@ -189,6 +189,72 @@ async def delete_baseline_result(user_id: str, test_id: str) -> bool:
 # SOCIAL SCREENSHOTS (analytics de viralidad)
 # ============================================================
 
+async def delete_user(user_id: str) -> bool:
+    """Hard delete user. Cascades to all related tables via FK ON DELETE CASCADE."""
+    pool = await get_pool()
+    if pool is None:
+        from ..api.auth.jwt_utils import MOCK_USERS
+        to_del = [e for e, u in MOCK_USERS.items() if u.get("id") == user_id]
+        for e in to_del:
+            del MOCK_USERS[e]
+        return len(to_del) > 0
+
+    async with pool.acquire() as conn:
+        result = await conn.execute(
+            "DELETE FROM users WHERE id = $1::uuid",
+            user_id,
+        )
+        return result != "DELETE 0"
+
+
+async def export_user_data(user_id: str) -> dict:
+    """Aggregate all user data for GDPR/CCPA data export."""
+    pool = await get_pool()
+    if pool is None:
+        return {"user": None, "baseline_results": [], "note": "no_db_dev_mode"}
+
+    async with pool.acquire() as conn:
+        user_row = await conn.fetchrow(
+            "SELECT id, email, name, role, product, tier, created_at FROM users WHERE id = $1::uuid",
+            user_id,
+        )
+        if not user_row:
+            return {}
+
+        baseline = await conn.fetch(
+            "SELECT test_id, value, unit, tested_at FROM baseline_results WHERE user_id = $1::uuid ORDER BY tested_at",
+            user_id,
+        )
+        wod_results = await conn.fetch(
+            "SELECT * FROM wod_results WHERE user_id = $1::uuid ORDER BY created_at",
+            user_id,
+        )
+        wellness = await conn.fetch(
+            """SELECT date, soreness, fatigue, sleep_quality, hrv_ms, notes
+               FROM wellness_checkins WHERE user_id = $1::uuid ORDER BY date""",
+            user_id,
+        )
+
+        def rows_to_list(rows) -> list[dict]:
+            return [
+                {k: (str(v) if hasattr(v, 'hex') else v) for k, v in dict(r).items()}
+                for r in rows
+            ]
+
+        user_dict = dict(user_row)
+        user_dict["id"] = str(user_dict["id"])
+        if user_dict.get("created_at"):
+            user_dict["created_at"] = str(user_dict["created_at"])
+
+        return {
+            "exported_at": __import__("datetime").datetime.utcnow().isoformat() + "Z",
+            "user": user_dict,
+            "baseline_results": rows_to_list(baseline),
+            "wod_results": rows_to_list(wod_results),
+            "wellness_checkins": rows_to_list(wellness),
+        }
+
+
 async def log_screenshot(
     *,
     user_id: Optional[str],

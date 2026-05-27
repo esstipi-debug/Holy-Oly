@@ -48,6 +48,8 @@ import VoltaCoachTools from './pages/VoltaCoachTools';
 import CoachMacroView from './pages/CoachMacroView';
 import MovementProgression from './pages/MovementProgression';
 import Landing from './pages/Landing';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import Terms from './pages/Terms';
 import type { View } from './context/NavigationContext';
 
 /**
@@ -110,7 +112,7 @@ const HOME_VIEWS = new Set<View>([
 ]);
 
 // Vistas accesibles sin autenticar
-const PUBLIC_VIEWS = new Set<View>(['LOGIN', 'REGISTER']);
+const PUBLIC_VIEWS = new Set<View>(['LOGIN', 'REGISTER', 'PRIVACY', 'TERMS']);
 
 const navGroups = [
   { title: 'Core',         views: ['LOGIN', 'REGISTER', 'ONBOARDING', 'PREMIUM'] },
@@ -262,6 +264,8 @@ function AppInner() {
     // PUBLIC views (sin auth)
     // Landing · cuando no autenticado y no vino por deep-link `?p=`,
     // mostramos el selector de producto en vez del Login directo.
+    if (currentView === 'PRIVACY') return <PrivacyPolicy />;
+    if (currentView === 'TERMS') return <Terms />;
     if (currentView === 'LOGIN' && !isAuthenticated && !getDeepLinkProduct()) {
       return <Landing />;
     }

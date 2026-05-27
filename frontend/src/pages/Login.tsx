@@ -167,7 +167,23 @@ const Login: React.FC<LoginProps> = ({ onSuccess }) => {
         </div>
       )}
 
-      <p style={{ textAlign: 'center', fontSize: 9, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.18em', textTransform: 'uppercase', marginTop: 24 }}>
+      <div style={{ marginTop: 24, display: 'flex', gap: 14, justifyContent: 'center', alignItems: 'center' }}>
+        <button
+          onClick={() => navigate('PRIVACY')}
+          style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', fontSize: 10, cursor: 'pointer', fontFamily: 'inherit', padding: 0, textDecoration: 'underline', opacity: 0.7 }}
+        >
+          Privacidad
+        </button>
+        <span style={{ color: 'var(--text-secondary)', fontSize: 10, opacity: 0.4 }}>·</span>
+        <button
+          onClick={() => navigate('TERMS')}
+          style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', fontSize: 10, cursor: 'pointer', fontFamily: 'inherit', padding: 0, textDecoration: 'underline', opacity: 0.7 }}
+        >
+          Términos
+        </button>
+      </div>
+
+      <p style={{ textAlign: 'center', fontSize: 9, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.18em', textTransform: 'uppercase', marginTop: 14 }}>
         v1.0.0-alpha
       </p>
     </div>

@@ -8,6 +8,8 @@ import { useProduct } from '../context/ProductContext';
 import { useRole } from '../context/RoleContext';
 import { unlockedCount, totalCount, type AthleteState } from '../data/achievements';
 
+const API_URL = import.meta.env.VITE_API_URL ?? (import.meta.env.DEV ? '' : 'https://holy-oly-3.onrender.com');
+
 const SETTINGS_ATLETA = [
   { id: 'biometrics', label: 'Datos Biométricos', icon: '⚖️' },
   { id: 'equipment',  label: 'Equipo Disponible',  icon: '🏋️' },
@@ -275,6 +277,131 @@ const Profile: React.FC = () => {
         >
           CERRAR SESIÓN
         </button>
+
+        {/* Legal & datos · sección requerida app stores (GDPR/Apple/Google) */}
+        <p style={{ color: 'var(--text-secondary)', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em', marginTop: 32, marginBottom: 10, paddingLeft: 4 }}>
+          Privacidad y datos
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <button
+            onClick={() => navigate('PRIVACY')}
+            style={{
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              padding: '14px 16px', width: '100%',
+              background: 'var(--surface)', border: '1px solid var(--card-border)', borderRadius: 16,
+              cursor: 'pointer', textAlign: 'left',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span style={{ fontSize: 18 }}>📄</span>
+              <p style={{ color: 'var(--text)', fontSize: 13, fontWeight: 600 }}>Política de Privacidad</p>
+            </div>
+            <span style={{ color: 'var(--text-secondary)', fontSize: 14 }}>→</span>
+          </button>
+
+          <button
+            onClick={() => navigate('TERMS')}
+            style={{
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              padding: '14px 16px', width: '100%',
+              background: 'var(--surface)', border: '1px solid var(--card-border)', borderRadius: 16,
+              cursor: 'pointer', textAlign: 'left',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span style={{ fontSize: 18 }}>📜</span>
+              <p style={{ color: 'var(--text)', fontSize: 13, fontWeight: 600 }}>Términos y Condiciones</p>
+            </div>
+            <span style={{ color: 'var(--text-secondary)', fontSize: 14 }}>→</span>
+          </button>
+
+          <button
+            onClick={async () => {
+              try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(`${API_URL}/v1/auth/me/export`, {
+                  headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+                });
+                if (!res.ok) throw new Error('Export falló');
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `holyoly-mis-datos-${new Date().toISOString().slice(0,10)}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+              } catch (e) {
+                alert('No se pudo exportar. Probá de nuevo.');
+              }
+            }}
+            style={{
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              padding: '14px 16px', width: '100%',
+              background: 'var(--surface)', border: '1px solid var(--card-border)', borderRadius: 16,
+              cursor: 'pointer', textAlign: 'left',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span style={{ fontSize: 18 }}>⬇️</span>
+              <div>
+                <p style={{ color: 'var(--text)', fontSize: 13, fontWeight: 600 }}>Exportar mis datos</p>
+                <p style={{ color: 'var(--text-secondary)', fontSize: 10, marginTop: 2 }}>JSON descargable · GDPR</p>
+              </div>
+            </div>
+            <span style={{ color: 'var(--text-secondary)', fontSize: 14 }}>→</span>
+          </button>
+
+          <button
+            onClick={async () => {
+              const confirm1 = window.confirm(
+                '¿Eliminar tu cuenta?\n\nSe borrarán PERMANENTEMENTE:\n· Tu perfil y credenciales\n· Todas tus sesiones y resultados\n· Tu historial de bienestar\n· Todos los datos asociados\n\nEsta acción NO se puede deshacer.'
+              );
+              if (!confirm1) return;
+              const confirm2 = window.prompt('Escribí "ELIMINAR" para confirmar:');
+              if (confirm2 !== 'ELIMINAR') {
+                alert('Cancelado · texto no coincide');
+                return;
+              }
+              try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(`${API_URL}/v1/auth/me`, {
+                  method: 'DELETE',
+                  headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+                });
+                if (!res.ok) throw new Error('Delete falló');
+                logout();
+                navigate('LOGIN');
+                alert('Tu cuenta fue eliminada. Lamentamos verte partir.');
+              } catch (e) {
+                alert('No se pudo eliminar. Contactá hola@peakqual.app');
+              }
+            }}
+            style={{
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              padding: '14px 16px', width: '100%',
+              background: 'rgba(239,68,68,0.05)',
+              border: '1px solid rgba(239,68,68,0.2)',
+              borderRadius: 16,
+              cursor: 'pointer', textAlign: 'left',
+              marginTop: 4,
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span style={{ fontSize: 18 }}>🗑️</span>
+              <div>
+                <p style={{ color: '#f87171', fontSize: 13, fontWeight: 700 }}>Eliminar cuenta</p>
+                <p style={{ color: 'rgba(239,68,68,0.6)', fontSize: 10, marginTop: 2 }}>Permanente · irreversible</p>
+              </div>
+            </div>
+            <span style={{ color: '#f87171', fontSize: 14 }}>→</span>
+          </button>
+        </div>
+
+        <p style={{ color: 'var(--text-secondary)', fontSize: 9, textAlign: 'center', marginTop: 24, opacity: 0.5 }}>
+          Peak Qual SpA · hola@peakqual.app
+        </p>
 
       </div>
     </div>

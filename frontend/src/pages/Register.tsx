@@ -171,6 +171,13 @@ const Register: React.FC = () => {
           >admin@holyoly.app</a>
         </p>
       </div>
+
+      <p style={{ fontSize: 10, color: 'var(--text-secondary)', textAlign: 'center', marginTop: 18, lineHeight: 1.5, opacity: 0.7 }}>
+        Al crear cuenta aceptás los{' '}
+        <button onClick={() => navigate('TERMS')} style={{ color: accent, background: 'none', border: 'none', padding: 0, fontSize: 10, cursor: 'pointer', textDecoration: 'underline', fontFamily: 'inherit' }}>Términos</button>
+        {' '}y la{' '}
+        <button onClick={() => navigate('PRIVACY')} style={{ color: accent, background: 'none', border: 'none', padding: 0, fontSize: 10, cursor: 'pointer', textDecoration: 'underline', fontFamily: 'inherit' }}>Política de Privacidad</button>.
+      </p>
     </div>
   );
 };
