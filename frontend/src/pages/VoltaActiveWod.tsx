@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNav } from '../context/NavigationContext';
+import { wodsApi, type TodayWod } from '../lib/wods';
 
 /**
  * Sesión activa CrossFit (Volta) · pantalla de score sheet.
@@ -26,14 +27,13 @@ const C = {
 
 type Scale = 'Rx' | 'Scaled' | 'Beginner';
 
-const WOD = {
+// Fallback WOD si la API devuelve "none" (atleta sin custom_wod hoy)
+const FALLBACK_WOD = {
   type: 'AMRAP' as 'AMRAP' | 'EMOM' | 'For Time',
   durationLabel: '20 min',
-  title: 'AMRAP 20',
+  title: 'WOD del día',
   movements: [
-    { name: '5 Power Clean', detail: '@ 60kg (Rx) / 50kg (Scaled) / 40kg (Beginner)' },
-    { name: '10 Pull-ups', detail: 'Strict (Rx) / Kipping (Scaled) / Banda (Beginner)' },
-    { name: '15 Box Jumps', detail: '24" (Rx) / 20" (Scaled) / 16" (Beginner)' },
+    { name: 'Elegí un benchmark del catálogo', detail: 'Tu coach no asignó WOD hoy · andá a VoltaStats → Benchmarks para escoger' },
   ],
 };
 
@@ -42,6 +42,33 @@ const VoltaActiveWod: React.FC = () => {
   const [scale, setScale] = useState<Scale>('Rx');
   const [rounds, setRounds] = useState(0);
   const [extraReps, setExtraReps] = useState(0);
+
+  // WOD real desde backend (custom_wod del coach si existe)
+  const [todayWod, setTodayWod] = useState<TodayWod | null>(null);
+  useEffect(() => {
+    let alive = true;
+    wodsApi.today()
+      .then(t => { if (alive) setTodayWod(t); })
+      .catch(() => { /* silent · usamos fallback */ });
+    return () => { alive = false; };
+  }, []);
+
+  // Compose WOD final: si hay custom_wod del backend, lo usamos · sino fallback genérico
+  const WOD = todayWod && todayWod.source === 'custom' && todayWod.title
+    ? {
+        type: (todayWod.type as 'AMRAP' | 'EMOM' | 'For Time') ?? 'AMRAP',
+        durationLabel: todayWod.duration_sec
+          ? `${Math.round(todayWod.duration_sec / 60)} min`
+          : '—',
+        title: todayWod.title,
+        movements: todayWod.movements.map(m => ({
+          name: m.name,
+          detail: m.scaling
+            ? [m.scaling.rx, m.scaling.scaled, m.scaling.beginner].filter(Boolean).join(' / ')
+            : (m.tag ?? ''),
+        })),
+      }
+    : FALLBACK_WOD;
 
   const incRound = () => setRounds(r => r + 1);
   const decRound = () => setRounds(r => Math.max(0, r - 1));
