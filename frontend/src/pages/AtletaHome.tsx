@@ -7,6 +7,7 @@ import MetricHistoryModal, { type MetricType } from '../components/MetricHistory
 import WellnessButton from '../components/WellnessButton';
 import { getPendingForToday, getPendingForTodayAsync, setActiveSlot } from '../lib/plannedSessions';
 import { skillFocus, type SkillFocusResponse } from '../lib/skillFocus';
+import { progressionApi } from '../lib/progression';
 import type { PlannedSession, TrainingSlot } from '../types/training';
 
 const ringColor = (r: number) => r >= 70 ? '#22C55E' : r >= 50 ? '#F59E0B' : '#EF4444';
@@ -103,14 +104,29 @@ const AtletaHome: React.FC = () => {
   const greeting = hour < 12 ? 'Buenos días' : hour < 19 ? 'Buenas tardes' : 'Buenas noches';
 
   // Belt / XP derivation
+  // Backend Engine 05 retorna belt_idx + progress_pct hacia el siguiente.
+  // Si la API falla, usamos fallback al hack legacy (prior_fitness/15) · graceful.
   const fitness = athlete.prior_fitness ?? 60;
-  const beltIdx = Math.min(BELTS.length - 1, Math.floor(fitness / 15));
+  const fallbackBeltIdx = Math.min(BELTS.length - 1, Math.floor(fitness / 15));
+
+  const [beltApi, setBeltApi] = React.useState<{ idx: number; progress: number } | null>(null);
+  React.useEffect(() => {
+    let alive = true;
+    progressionApi.belt()
+      .then(b => { if (alive) setBeltApi({ idx: b.belt_idx, progress: b.progress_pct }); })
+      .catch(() => { /* silent · fallback */ });
+    return () => { alive = false; };
+  }, []);
+
+  const beltIdx = Math.min(BELTS.length - 1, beltApi ? beltApi.idx : fallbackBeltIdx);
   const belt = BELTS[beltIdx];
   const beltNext = BELTS[Math.min(BELTS.length - 1, beltIdx + 1)];
   const xpNow = Math.round((fitness * 1500));
   const xpCurrentBase = beltIdx * 22500;
   const xpNextBase = (beltIdx + 1) * 22500;
-  const xpPct = Math.max(4, Math.min(100, Math.round(((xpNow - xpCurrentBase) / (xpNextBase - xpCurrentBase)) * 100)));
+  const xpPctFallback = Math.max(4, Math.min(100, Math.round(((xpNow - xpCurrentBase) / (xpNextBase - xpCurrentBase)) * 100)));
+  // Si tenemos backend progress, usamos eso (más preciso · refleja criterios reales)
+  const xpPct = beltApi ? Math.max(4, Math.min(100, Math.round(beltApi.progress))) : xpPctFallback;
 
   // Belt ceremony trigger: si subió de cinturón desde la última celebración, dispará la fullscreen.
   useEffect(() => {

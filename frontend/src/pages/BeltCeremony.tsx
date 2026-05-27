@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNav } from '../context/NavigationContext';
 import { useAthlete } from '../context/AthleteContext';
+import { progressionApi, type BeltStatus } from '../lib/progression';
 
 /**
  * Belt Ceremony · pantalla fullscreen para subida de cinturón.
@@ -55,8 +56,25 @@ const BeltCeremony: React.FC = () => {
   const { navigate } = useNav();
   const { athlete } = useAthlete();
 
-  const fitness = athlete?.prior_fitness ?? 60;
-  const beltIdx = Math.min(BELTS.length - 1, Math.floor(fitness / 15));
+  // Fallback al hack viejo si la API falla (resiliente · no rompe la ceremonia)
+  const fitnessFallback = athlete?.prior_fitness ?? 60;
+  const fallbackBeltIdx = Math.min(BELTS.length - 1, Math.floor(fitnessFallback / 15));
+
+  // Belt real desde el backend Engine 05 · persistido en DB
+  const [beltStatus, setBeltStatus] = useState<BeltStatus | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    progressionApi.belt()
+      .then((bs) => { if (alive) setBeltStatus(bs); })
+      .catch(() => { /* silent · usamos fallback */ });
+    return () => { alive = false; };
+  }, []);
+
+  const beltIdx = Math.min(
+    BELTS.length - 1,
+    beltStatus ? beltStatus.belt_idx : fallbackBeltIdx,
+  );
   const belt = BELTS[beltIdx];
   const prevBelt = beltIdx > 0 ? BELTS[beltIdx - 1] : null;
 

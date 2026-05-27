@@ -37,6 +37,7 @@ MIGRATION_FILES = [
     "012_volta_competitor.sql",
     "013_custom_wods.sql",
     "014_hormonal_cycle.sql",
+    "015_athlete_belts.sql",
 ]
 
 
