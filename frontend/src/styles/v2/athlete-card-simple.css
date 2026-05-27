@@ -1,0 +1,300 @@
+/* ============================================================
+   PEAK QUAL · AthleteCardSimple · vista atleta
+   Palabras claras · progress visible · CTA hoy
+   ============================================================ */
+
+.acs-card {
+  --tier-c: #22C55E;
+  width: 100%;
+  max-width: 360px;
+  background: linear-gradient(180deg,
+    color-mix(in oklab, var(--tier-c) 15%, var(--surface-1)) 0%,
+    var(--surface-1) 30%,
+    var(--bg-deep) 100%);
+  border: 1.5px solid color-mix(in oklab, var(--tier-c) 45%, transparent);
+  border-radius: 18px;
+  padding: 18px 18px 14px;
+  color: var(--text-hi, #F1F5F9);
+  font-family: var(--font-body, Inter), system-ui, sans-serif;
+  box-shadow:
+    0 0 24px color-mix(in oklab, var(--tier-c) 20%, transparent),
+    0 12px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* ── HEADER · tier + progress ── */
+.acs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.acs-tier-block {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.acs-tier-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.acs-tier-name {
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: .14em;
+  color: var(--tier-c);
+  font-family: var(--font-display, 'Space Grotesk');
+}
+
+.acs-tier-sublabel {
+  font-size: 11px;
+  color: var(--text-mid, #94A3B8);
+  font-weight: 500;
+}
+
+.acs-progress-block {
+  text-align: right;
+}
+
+.acs-progress-pct {
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--tier-c);
+  font-family: var(--font-mono, 'JetBrains Mono');
+  line-height: 1;
+}
+
+.acs-progress-to {
+  font-size: 9.5px;
+  color: var(--text-lo, #64748B);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-top: 4px;
+  font-weight: 700;
+}
+
+.acs-progress-bar {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+
+.acs-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--tier-c), color-mix(in oklab, var(--tier-c) 60%, white));
+  border-radius: 999px;
+  transition: width .8s cubic-bezier(.16, 1, .3, 1);
+  box-shadow: 0 0 8px var(--tier-c);
+}
+
+/* ── AVATAR + IDENTITY ── */
+.acs-identity {
+  text-align: center;
+  padding: 8px 0 14px;
+}
+
+.acs-avatar {
+  width: 88px;
+  height: 88px;
+  margin: 0 auto 10px;
+  border-radius: 50%;
+  padding: 3px;
+  background: linear-gradient(135deg, var(--tier-c), color-mix(in oklab, var(--tier-c) 40%, var(--bg-deep)));
+  box-shadow: 0 0 20px color-mix(in oklab, var(--tier-c) 40%, transparent);
+}
+
+.acs-avatar-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--surface-2, #1A1A28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  color: var(--text-hi);
+  font-family: var(--font-display);
+}
+
+.acs-name {
+  font-size: 18px;
+  font-weight: 800;
+  margin: 0;
+  letter-spacing: -0.01em;
+  color: var(--text-hi);
+}
+
+.acs-product {
+  margin-top: 3px;
+  font-size: 11px;
+  color: var(--text-mid);
+  letter-spacing: .04em;
+}
+
+/* ── STATS ── */
+.acs-stats-block {
+  margin: 12px 0 14px;
+}
+
+.acs-stats-title {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text-lo);
+  margin-bottom: 10px;
+  text-align: center;
+  font-family: var(--font-mono);
+}
+
+.acs-stats-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.acs-stat {
+  border-radius: 8px;
+  transition: background .15s ease;
+}
+
+.acs-stat[role="button"] {
+  cursor: pointer;
+}
+
+.acs-stat[role="button"]:hover {
+  background: rgba(255, 255, 255, 0.03);
+  padding: 2px 4px;
+  margin: -2px -4px;
+}
+
+.acs-stat.open {
+  background: rgba(255, 255, 255, 0.04);
+  padding: 6px 8px;
+  margin: -6px -8px;
+}
+
+.acs-stat-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.acs-stat-emoji {
+  font-size: 15px;
+  width: 18px;
+  flex-shrink: 0;
+}
+
+.acs-stat-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  flex: 0 0 105px;
+}
+
+.acs-stat-bar {
+  flex: 1;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.acs-stat-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width .8s cubic-bezier(.16, 1, .3, 1);
+}
+
+.acs-stat-value {
+  font-size: 13px;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  width: 26px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.acs-stat-desc {
+  margin-top: 6px;
+  padding: 8px 10px;
+  font-size: 11px;
+  color: var(--text-mid);
+  line-height: 1.5;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+  border-left: 2px solid var(--tier-c);
+  margin-left: 28px;
+}
+
+/* ── INSIGHT ── */
+.acs-insight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  background: rgba(0, 229, 255, 0.06);
+  border: 1px solid rgba(0, 229, 255, 0.2);
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.acs-insight-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.acs-insight-text {
+  font-size: 11.5px;
+  color: var(--text);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* ── CTA HOY ── */
+.acs-cta {
+  width: 100%;
+  background: linear-gradient(135deg, var(--engine-stress, #00E5FF), color-mix(in oklab, var(--engine-stress) 55%, black));
+  border: 1.5px solid rgba(0, 229, 255, 0.5);
+  color: #001218;
+  padding: 13px 14px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.01em;
+  box-shadow: 0 0 18px rgba(0, 229, 255, 0.35);
+  transition: transform .15s, box-shadow .2s;
+}
+
+.acs-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 28px rgba(0, 229, 255, 0.55);
+}
+
+.acs-cta-arrow {
+  font-size: 18px;
+  font-weight: 900;
+}
+
+/* ── Compact variant si necesario ── */
+.acs-card.compact {
+  padding: 12px 14px;
+}
+.acs-card.compact .acs-avatar { width: 64px; height: 64px; }
+.acs-card.compact .acs-avatar-inner { font-size: 22px; }
+.acs-card.compact .acs-name { font-size: 15px; }

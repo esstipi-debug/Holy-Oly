@@ -57,6 +57,7 @@ import AtletaHomeV2 from './pages/v2/AtletaHomeV2';
 import CheckinV2 from './pages/v2/CheckinV2';
 import CoachDashV2 from './pages/v2/CoachDashV2';
 import SkillTreeV2 from './pages/v2/SkillTreeV2';
+import CardsCompareDemo from './pages/_dev/CardsCompareDemo';
 import type { View } from './context/NavigationContext';
 
 /**
@@ -280,6 +281,7 @@ function AppInner() {
     if (currentView === 'V2_CHECKIN') return <CheckinV2 />;
     if (currentView === 'V2_COACH') return <CoachDashV2 />;
     if (currentView === 'V2_SKILL_TREE') return <SkillTreeV2 />;
+    if (currentView === 'CARDS_COMPARE') return <CardsCompareDemo />;
     if (currentView === 'LOGIN' && !isAuthenticated && !getDeepLinkProduct()) {
       return <Landing />;
     }

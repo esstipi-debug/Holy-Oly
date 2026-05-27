@@ -1,0 +1,508 @@
+/* ========================================================== */
+    /* PAGE                                                       */
+    /* ========================================================== */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      background: var(--bg-deep);
+      background-image:
+        linear-gradient(rgba(0,229,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,229,255,0.025) 1px, transparent 1px),
+        radial-gradient(ellipse at 50% 0%, rgba(0,229,255,0.06), transparent 60%);
+      background-size: 40px 40px, 40px 40px, 100% 100%;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: var(--font-body);
+      -webkit-font-smoothing: antialiased;
+      padding: 48px 24px 80px;
+    }
+
+    .page-head {
+      max-width: 1100px;
+      margin: 0 auto 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      padding-bottom: 16px;
+      border-bottom: 1px dashed var(--border-soft);
+    }
+    .page-head h1 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 36px;
+      letter-spacing: -0.025em;
+      color: var(--text-hi);
+      line-height: 1;
+    }
+    .page-head h1 .accent { color: var(--engine-stress); }
+    .page-head .num {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      color: var(--text-lo);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .page-head .meta {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: var(--text-mid);
+      text-align: right;
+    }
+    .page-head .meta .v { color: var(--text-hi); }
+
+    /* card row */
+    .card-row {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+      padding-top: 24px;
+    }
+
+    /* ========================================================== */
+    /* CARD · 280 × 426 (1:1.52)                                  */
+    /* ========================================================== */
+    .ac-card {
+      --tier-c: #22C55E;
+      --tier-rgb: 34, 197, 94;
+      width: 280px;
+      height: 426px;
+      position: relative;
+      border-radius: 14px;
+      border: 1.5px solid var(--tier-c);
+      padding: 14px 14px 12px;
+      background:
+        radial-gradient(ellipse 90% 60% at 50% 0%,
+          color-mix(in oklab, var(--tier-c) 22%, transparent) 0%,
+          transparent 55%),
+        linear-gradient(160deg,
+          color-mix(in oklab, var(--tier-c) 22%, var(--surface-2)) 0%,
+          var(--surface-1) 45%,
+          color-mix(in oklab, var(--tier-c) 10%, var(--bg-deep)) 100%);
+      box-shadow:
+        0 0 24px rgba(var(--tier-rgb), 0.30),
+        0 24px 60px rgba(0,0,0,0.55),
+        inset 0 1px 0 rgba(255,255,255,0.06);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: transform 220ms ease, box-shadow 220ms ease;
+    }
+    .ac-card:hover {
+      transform: translateY(-4px);
+      box-shadow:
+        0 0 32px rgba(var(--tier-rgb), 0.45),
+        0 32px 70px rgba(0,0,0,0.6),
+        inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+
+    /* HUD tactical brackets in corners */
+    .ac-card::before, .ac-card::after,
+    .ac-card .br-bl, .ac-card .br-br {
+      content: "";
+      position: absolute;
+      width: 14px; height: 14px;
+      border: 1.5px solid var(--tier-c);
+      opacity: 0.45;
+      pointer-events: none;
+    }
+    .ac-card::before { top: 6px; left: 6px;  border-right: 0; border-bottom: 0; }
+    .ac-card::after  { top: 6px; right: 6px; border-left: 0;  border-bottom: 0; }
+    .ac-card .br-bl  { bottom: 6px; left: 6px;  border-right: 0; border-top: 0; }
+    .ac-card .br-br  { bottom: 6px; right: 6px; border-left: 0;  border-top: 0; }
+
+    /* ============= HEADER ============= */
+    .ac-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 2px 2px 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .ac-disc-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      min-width: 64px;
+    }
+    .ac-tier-label {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 9px;
+      letter-spacing: 0.22em;
+      color: var(--tier-c);
+      text-transform: uppercase;
+      text-shadow: 0 0 8px rgba(var(--tier-rgb), 0.4);
+    }
+    .ac-ovr-block {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      line-height: 1;
+      gap: 2px;
+    }
+    .ac-ovr {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 50px;
+      color: var(--text-hi);
+      line-height: 0.9;
+      letter-spacing: -0.04em;
+      font-variant-numeric: tabular-nums;
+      text-shadow:
+        0 0 12px rgba(var(--tier-rgb), 0.7),
+        0 0 28px rgba(var(--tier-rgb), 0.35);
+    }
+    .ac-ovr-lbl {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 10px;
+      letter-spacing: 0.32em;
+      color: var(--tier-c);
+      text-transform: uppercase;
+    }
+
+    /* ============= AVATAR ============= */
+    .ac-avatar {
+      width: 140px;
+      height: 140px;
+      margin: 14px auto 8px;
+      border-radius: 50%;
+      border: 2px solid var(--tier-c);
+      background:
+        radial-gradient(ellipse 60% 45% at 32% 28%, rgba(255,255,255,0.05), transparent 70%),
+        radial-gradient(circle at 35% 30%, #2a2a3a, var(--bg-deep) 70%);
+      box-shadow:
+        0 0 22px rgba(var(--tier-rgb), 0.45),
+        inset 0 0 30px rgba(var(--tier-rgb), 0.16),
+        inset 0 -4px 14px rgba(0,0,0,0.5);
+      display: grid;
+      place-items: center;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 46px;
+      color: var(--text-hi);
+      letter-spacing: -0.03em;
+      position: relative;
+    }
+    .ac-avatar::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background:
+        repeating-linear-gradient(45deg,
+          transparent 0 6px,
+          rgba(var(--tier-rgb), 0.05) 6px 7px);
+      pointer-events: none;
+    }
+
+    /* ============= NAME / PRODUCT ============= */
+    .ac-id {
+      text-align: center;
+      padding: 4px 0 10px;
+    }
+    .ac-name {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 21px;
+      letter-spacing: -0.02em;
+      color: var(--text-hi);
+      text-transform: uppercase;
+      line-height: 1;
+    }
+    .ac-product {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 10px;
+      letter-spacing: 0.4em;
+      color: var(--tier-c);
+      text-transform: uppercase;
+      margin-top: 6px;
+      text-shadow: 0 0 8px rgba(var(--tier-rgb), 0.4);
+    }
+
+    /* ============= STATS ============= */
+    .ac-stats {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 5px;
+      padding: 8px 2px 0;
+      border-top: 1px solid rgba(255,255,255,0.04);
+      flex: 1;
+      align-content: start;
+    }
+    .ac-stat {
+      display: grid;
+      grid-template-columns: 36px 1fr 22px;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      line-height: 1;
+    }
+    .ac-stat .k {
+      color: var(--text-mid);
+      font-weight: 700;
+      letter-spacing: 0.18em;
+    }
+    .ac-stat .bar {
+      height: 5px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 1px;
+      overflow: hidden;
+      position: relative;
+    }
+    .ac-stat .bar .fill {
+      height: 100%;
+      background: linear-gradient(90deg,
+        color-mix(in oklab, var(--c) 50%, #000) 0%,
+        var(--c) 100%);
+      border-radius: 1px;
+    }
+    .ac-stat .v {
+      color: var(--text-hi);
+      font-weight: 700;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    .ac-stat[data-glow="true"] .v {
+      color: var(--c);
+      text-shadow: 0 0 8px var(--c);
+    }
+    .ac-stat[data-glow="true"] .bar .fill {
+      box-shadow: 0 0 6px var(--c);
+    }
+    /* stat colors per spec */
+    .ac-stat.str { --c: var(--engine-pulse);    }
+    .ac-stat.cnd { --c: var(--engine-stress);   }
+    .ac-stat.mob { --c: var(--engine-adapt);    }
+    .ac-stat.rec { --c: var(--engine-oly);      }
+    .ac-stat.con { --c: var(--engine-macro);    }
+    .ac-stat.tec { --c: var(--engine-hormonal); }
+
+    /* ============= FOOTER ============= */
+    .ac-foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 8px;
+      margin-top: 6px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .ac-foot .box {
+      color: var(--text-mid);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .ac-foot .box .flag { font-size: 13px; }
+    .ac-foot .tier-w {
+      color: var(--tier-c);
+      font-weight: 700;
+      text-shadow: 0 0 6px rgba(var(--tier-rgb), 0.4);
+    }
+
+    /* ========================================================== */
+    /* HERO VARIANT · cardShimmer + diagonal sheen                */
+    /* ========================================================== */
+    .ac-card.hero {
+      border-width: 2px;
+      box-shadow:
+        0 0 44px rgba(var(--tier-rgb), 0.55),
+        0 0 90px rgba(var(--tier-rgb), 0.20),
+        0 30px 70px rgba(0,0,0,0.6),
+        inset 0 1px 0 rgba(255,255,255,0.08);
+      background:
+        radial-gradient(ellipse 100% 50% at 50% 0%,
+          color-mix(in oklab, var(--tier-c) 35%, transparent) 0%,
+          transparent 55%),
+        linear-gradient(160deg,
+          color-mix(in oklab, var(--tier-c) 32%, var(--surface-2)) 0%,
+          color-mix(in oklab, var(--tier-c) 16%, var(--surface-1)) 45%,
+          color-mix(in oklab, var(--tier-c) 18%, var(--bg-deep)) 100%);
+    }
+    .ac-card.hero::before,
+    .ac-card.hero::after,
+    .ac-card.hero .br-bl,
+    .ac-card.hero .br-br {
+      opacity: 0.7;
+      width: 18px; height: 18px;
+      border-width: 2px;
+    }
+
+    /* moving diagonal sheen across the whole card */
+    .ac-card.hero .sheen {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      border-radius: inherit;
+      pointer-events: none;
+      z-index: 4;
+    }
+    .ac-card.hero .sheen::after {
+      content: "";
+      position: absolute;
+      top: -60%; left: -40%;
+      width: 60%; height: 220%;
+      background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(255,255,255,0.0)  20%,
+        rgba(255,255,255,0.18) 48%,
+        rgba(255,255,255,0.32) 50%,
+        rgba(255,255,255,0.18) 52%,
+        rgba(255,255,255,0.0)  80%,
+        transparent 100%);
+      transform: rotate(20deg);
+      animation: cardShimmer 4.5s ease-in-out infinite;
+      mix-blend-mode: screen;
+    }
+    @keyframes cardShimmer {
+      0%   { transform: translateX(-200%) rotate(20deg); }
+      40%  { transform: translateX(280%) rotate(20deg); }
+      100% { transform: translateX(280%) rotate(20deg); }
+    }
+
+    /* subtle hero badge: small bolt at top */
+    .ac-card.hero .hero-badge {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 2px 8px 2px 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--bg-deep);
+      border: 1.5px solid var(--tier-c);
+      color: var(--tier-c);
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 9px;
+      letter-spacing: 0.25em;
+      border-radius: 999px;
+      text-transform: uppercase;
+      box-shadow: 0 0 10px rgba(var(--tier-rgb), 0.5);
+      z-index: 6;
+    }
+    .ac-card.hero .hero-badge::before {
+      content: "✦";
+      font-size: 11px;
+    }
+
+    /* card label below */
+    .ac-card-tag {
+      margin-top: 14px;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      color: var(--text-lo);
+      text-transform: uppercase;
+    }
+    .ac-card-tag .v {
+      display: block;
+      color: var(--text-mid);
+      margin-top: 2px;
+    }
+    .card-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* page footer */
+    .page-foot {
+      max-width: 1100px;
+      margin: 80px auto 0;
+      padding-top: 24px;
+      border-top: 1px dashed var(--border-soft);
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-lo);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+/* ============================================================
+   AthleteCardV2 · TOOLTIPS EXPANDIBLES (Boss request B)
+   ============================================================ */
+
+.ac-card.expandable .ac-stat:hover,
+.ac-card.expandable .ac-disc-wrap:hover,
+.ac-card.expandable .ac-ovr-block:hover,
+.ac-card.expandable .tier-w:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 6px;
+  transition: background .15s ease;
+}
+
+.ac-tooltip {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,
+    color-mix(in oklab, var(--tier-c) 18%, var(--bg-deep)) 0%,
+    var(--bg-deep) 80%);
+  backdrop-filter: blur(8px);
+  border-radius: 14px;
+  padding: 22px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  z-index: 10;
+  animation: tooltipIn 220ms cubic-bezier(.16, 1, .3, 1);
+}
+
+@keyframes tooltipIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.ac-tooltip-close {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--text-mid, #94A3B8);
+  font-weight: 300;
+  cursor: pointer;
+}
+
+.ac-tooltip-title {
+  font-family: var(--font-display, 'Space Grotesk');
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--tier-c);
+  margin-bottom: 12px;
+  letter-spacing: -0.005em;
+}
+
+.ac-tooltip-body {
+  font-family: var(--font-body, Inter);
+  font-size: 12.5px;
+  color: var(--text, #CBD5E1);
+  line-height: 1.55;
+}
+
+.ac-tooltip-body p {
+  margin: 0 0 8px;
+}
+
+.ac-tooltip-body p:last-child {
+  margin: 0;
+}
+
+.ac-tooltip-body strong {
+  color: var(--text-hi, #F1F5F9);
+  font-weight: 700;
+  font-family: var(--font-mono, 'JetBrains Mono');
+}
