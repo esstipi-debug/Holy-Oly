@@ -103,7 +103,7 @@ const VoltaCoachDash: React.FC = () => {
   const avgProgress = Math.round(ROSTER.reduce((acc, a) => acc + a.progress, 0) / ROSTER.length);
 
   return (
-    <div style={{ background: C.bg, minHeight: '100%', paddingBottom: 90, color: C.text }}>
+    <div style={{ background: C.bg, minHeight: '100%', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 76px)', color: C.text }}>
 
       {/* HEADER */}
       <div style={{ padding: '48px 20px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

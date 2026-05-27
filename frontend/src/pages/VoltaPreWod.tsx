@@ -95,7 +95,7 @@ const VoltaPreWod: React.FC = () => {
   const residualMg = Math.round(intakeMg * Math.pow(0.5, 2.5 / 5));
 
   return (
-    <div style={{ background: C.bg, minHeight: '100%', paddingBottom: 90, color: C.text }}>
+    <div style={{ background: C.bg, minHeight: '100%', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 76px)', color: C.text }}>
 
       {/* HEADER */}
       <div style={{ padding: '48px 16px 12px', display: 'flex', alignItems: 'center', gap: 14, borderBottom: `1px solid ${C.line}` }}>

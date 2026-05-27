@@ -55,11 +55,11 @@ const VoltaActiveWod: React.FC = () => {
         scale, rounds, extra_reps: extraReps, wod_name: WOD.title,
       }));
     } catch { /* ignore */ }
-    navigate('VOLTA_WOD_LOG');
+    navigate('SUMMARY');
   };
 
   return (
-    <div style={{ background: C.bg, minHeight: '100%', paddingBottom: 110, color: C.text }}>
+    <div style={{ background: C.bg, minHeight: '100%', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 90px)', color: C.text }}>
       {/* HEADER */}
       <div style={{ padding: '52px 16px 16px', borderBottom: `1px solid ${C.line}` }}>
         <p style={{ fontSize: 10, color: C.cyan, fontWeight: 800, letterSpacing: '.12em', textTransform: 'uppercase' }}>
@@ -209,7 +209,7 @@ const VoltaActiveWod: React.FC = () => {
 
       {/* CTA */}
       <div style={{
-        position: 'absolute', bottom: 76, left: 0, right: 0, zIndex: 30,
+        position: 'absolute', bottom: 'calc(env(safe-area-inset-bottom, 0px) + 76px)', left: 0, right: 0, zIndex: 30,
         padding: '14px 16px 12px',
         background: `linear-gradient(to top, ${C.bg} 0%, ${C.bg} 65%, transparent 100%)`,
         backdropFilter: 'blur(8px)',

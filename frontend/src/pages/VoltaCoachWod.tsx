@@ -56,7 +56,7 @@ const VoltaCoachWod: React.FC = () => {
   const intensityScore = type === 'AMRAP' || type === 'For Time' ? 5 : type === 'EMOM' ? 4 : type === 'Strength' ? 3 : 2;
 
   return (
-    <div style={{ background: C.bg, minHeight: '100%', paddingBottom: 240, color: C.text }}>
+    <div style={{ background: C.bg, minHeight: '100%', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 200px)', color: C.text }}>
 
       {/* HEADER */}
       <div style={{ padding: '48px 20px 12px' }}>
@@ -263,7 +263,7 @@ const VoltaCoachWod: React.FC = () => {
 
       {/* FOOTER (sticky con backdrop para evitar overlay con preview) */}
       <div style={{
-        position: 'absolute', bottom: 76, left: 0, right: 0, zIndex: 40,
+        position: 'absolute', bottom: 'calc(env(safe-area-inset-bottom, 0px) + 76px)', left: 0, right: 0, zIndex: 40,
         padding: '14px 16px 12px',
         background: `linear-gradient(to top, ${C.bg} 0%, ${C.bg} 65%, transparent 100%)`,
         backdropFilter: 'blur(8px)',

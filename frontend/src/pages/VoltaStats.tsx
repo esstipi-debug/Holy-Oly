@@ -68,7 +68,7 @@ const VoltaStats: React.FC = () => {
   const adherencePct = Math.round((wodsDone / wodsPlanned) * 100);
 
   return (
-    <div className="anim-fade-in" style={{ background: C.bg, minHeight: '100%', color: C.text, paddingBottom: 100 }}>
+    <div className="anim-fade-in" style={{ background: C.bg, minHeight: '100%', color: C.text, paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 90px)' }}>
       {/* Header */}
       <div style={{ padding: '14px 16px 8px' }}>
         <p style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.12em', color: C.cyan, textTransform: 'uppercase', margin: 0 }}>TUS NÚMEROS</p>

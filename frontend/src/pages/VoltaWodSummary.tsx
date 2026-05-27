@@ -48,9 +48,18 @@ const SESSION = {
 const VoltaWodSummary: React.FC = () => {
   const { navigate } = useNav();
 
+  // Leer score real desde draft de VoltaActiveWod (si existe)
+  const draft = (() => {
+    try { return JSON.parse(localStorage.getItem('volta_wod:score_draft') ?? '{}') as Record<string, unknown>; }
+    catch { return {} as Record<string, unknown>; }
+  })();
+  const rounds    = typeof draft.rounds    === 'number' ? draft.rounds    : SESSION.rounds;
+  const extraReps = typeof draft.extra_reps === 'number' ? draft.extra_reps : SESSION.extraReps;
+  const scale     = typeof draft.scale     === 'string'  ? draft.scale as typeof SESSION.scale : SESSION.scale;
+
   // Cálculos
   const repsPerRound = SESSION.movements.reduce((sum, m) => sum + m.reps_per_round, 0);
-  const totalReps = SESSION.rounds * repsPerRound + SESSION.extraReps;
+  const totalReps = rounds * repsPerRound + extraReps;
   const prevTotal = SESSION.previousBest.rounds * repsPerRound + SESSION.previousBest.extraReps;
   const isPR = totalReps > prevTotal;
   const delta = totalReps - prevTotal;
@@ -58,18 +67,18 @@ const VoltaWodSummary: React.FC = () => {
   // Tonelaje · solo cuenta movimientos con peso
   const tonelaje = SESSION.movements
     .filter(m => m.weight_kg)
-    .reduce((sum, m) => sum + (m.weight_kg! * m.reps_per_round * SESSION.rounds), 0);
+    .reduce((sum, m) => sum + (m.weight_kg! * m.reps_per_round * rounds), 0);
 
   // Distribución por tipo (% de reps totales)
   const distByType = ['cardio', 'strength', 'gymnastics'].map(type => {
     const reps = SESSION.movements
       .filter(m => m.type === type)
-      .reduce((sum, m) => sum + m.reps_per_round * SESSION.rounds, 0);
-    return { type, reps, pct: Math.round((reps / (repsPerRound * SESSION.rounds)) * 100) };
+      .reduce((sum, m) => sum + m.reps_per_round * rounds, 0);
+    return { type, reps, pct: Math.round((reps / (repsPerRound * rounds)) * 100) };
   });
 
   // Tiempo por ronda promedio (segundos)
-  const timePerRoundSec = SESSION.rounds > 0 ? Math.round(SESSION.timeUsed_sec / SESSION.rounds) : 0;
+  const timePerRoundSec = rounds > 0 ? Math.round(SESSION.timeUsed_sec / rounds) : 0;
   const minPerRound = Math.floor(timePerRoundSec / 60);
   const secPerRound = timePerRoundSec % 60;
 
@@ -77,9 +86,9 @@ const VoltaWodSummary: React.FC = () => {
   const caloriesEst = Math.round((SESSION.timeUsed_sec / 60) * 10);
 
   return (
-    <div style={{ background: C.bg, minHeight: '100%', paddingBottom: 100, color: C.text }}>
+    <div style={{ background: C.bg, minHeight: '100%', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 100px)', color: C.text }}>
       {/* HEADER */}
-      <div style={{ padding: '52px 16px 14px', textAlign: 'center' }}>
+      <div style={{ padding: '16px 16px 14px', textAlign: 'center' }}>
         <p style={{ fontSize: 10, color: C.cyan, fontWeight: 800, letterSpacing: '.12em', textTransform: 'uppercase' }}>
           WOD COMPLETADO
         </p>
@@ -93,7 +102,7 @@ const VoltaWodSummary: React.FC = () => {
             fontSize: 10, fontWeight: 800, padding: '4px 10px',
             background: `${C.cyan}22`, color: C.cyan, borderRadius: 8,
             border: `1px solid ${C.cyan}44`, letterSpacing: '.06em',
-          }}>{SESSION.scale.toUpperCase()}</span>
+          }}>{scale.toUpperCase()}</span>
           <span style={{ fontSize: 10, color: C.muted, fontWeight: 700 }}>·</span>
           <span style={{ fontSize: 10, color: C.muted, fontWeight: 700 }}>{SESSION.mode}</span>
         </div>
@@ -117,7 +126,7 @@ const VoltaWodSummary: React.FC = () => {
             fontSize: 64, fontWeight: 900, color: C.cyan, lineHeight: 1.1,
             letterSpacing: '-.04em', marginTop: 4, fontVariantNumeric: 'tabular-nums', fontStyle: 'italic',
           }}>
-            {SESSION.rounds}<span style={{ fontSize: 32, color: C.text }}> + {SESSION.extraReps}</span>
+            {rounds}<span style={{ fontSize: 32, color: C.text }}> + {extraReps}</span>
           </p>
           <p style={{ fontSize: 11, color: C.muted, marginTop: 4 }}>
             <span style={{ color: C.text, fontWeight: 700 }}>{totalReps}</span> reps totales · {Math.floor(SESSION.timeUsed_sec/60)}:{String(SESSION.timeUsed_sec%60).padStart(2,'0')}
@@ -146,7 +155,7 @@ const VoltaWodSummary: React.FC = () => {
           borderRadius: 14, overflow: 'hidden',
         }}>
           {SESSION.movements.map((m, i) => {
-            const totalRepsForMovement = m.reps_per_round * SESSION.rounds;
+            const totalRepsForMovement = m.reps_per_round * rounds;
             const movementVolume = m.weight_kg ? m.weight_kg * totalRepsForMovement : null;
             return (
               <div
@@ -199,7 +208,7 @@ const VoltaWodSummary: React.FC = () => {
         </p>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
           <Stat label="Tonelaje movido" value={tonelaje.toLocaleString('es')} unit="kg" sub={`${(tonelaje/1000).toFixed(2)} toneladas`} accent={C.amber} />
-          <Stat label="Tiempo / ronda" value={`${minPerRound}:${String(secPerRound).padStart(2,'0')}`} unit="" sub={`${SESSION.rounds} rondas completas`} accent={C.cyan} />
+          <Stat label="Tiempo / ronda" value={`${minPerRound}:${String(secPerRound).padStart(2,'0')}`} unit="" sub={`${rounds} rondas completas`} accent={C.cyan} />
           <Stat label="Calorías est." value={String(caloriesEst)} unit="cal" sub="≈10 cal/min CF moderado" accent={C.red} />
           <Stat label="Ritmo" value={`${(totalReps / (SESSION.timeUsed_sec/60)).toFixed(1)}`} unit="reps/min" sub={`${totalReps} reps en 20 min`} accent={C.primary} />
         </div>
@@ -276,7 +285,7 @@ const VoltaWodSummary: React.FC = () => {
             <div style={{ textAlign: 'right' }}>
               <p style={{ fontSize: 10, color: isPR ? C.green : C.muted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.06em' }}>Hoy</p>
               <p style={{ fontSize: 16, fontWeight: 800, color: isPR ? C.green : C.text, marginTop: 2 }}>
-                {SESSION.rounds} + {SESSION.extraReps}
+                {rounds} + {extraReps}
               </p>
               <p style={{ fontSize: 9, color: isPR ? C.green : C.muted, marginTop: 2 }}>
                 {isPR ? `+${delta}` : delta < 0 ? `${delta}` : '='} reps
@@ -286,8 +295,8 @@ const VoltaWodSummary: React.FC = () => {
         </div>
       </div>
 
-      {/* Logger CTA · solo botón funcional, sin "compartir/volver" que estorban */}
-      <div style={{ padding: '8px 16px 0' }}>
+      {/* CTAs */}
+      <div style={{ padding: '8px 16px 0', display: 'flex', flexDirection: 'column', gap: 8 }}>
         <button
           onClick={() => navigate('VOLTA_WOD_LOG')}
           style={{
@@ -297,7 +306,17 @@ const VoltaWodSummary: React.FC = () => {
             cursor: 'pointer', fontFamily: 'inherit', width: '100%',
             boxShadow: '0 8px 24px rgba(0,229,255,0.30)',
           }}
-        >Loggear oficialmente este resultado →</button>
+        >Loggear oficialmente →</button>
+        <button
+          onClick={() => navigate('VOLTA_HOME')}
+          style={{
+            padding: '12px 0', borderRadius: 14,
+            background: C.surface2, color: C.muted,
+            border: `1px solid ${C.line}`,
+            fontSize: 11, fontWeight: 700,
+            cursor: 'pointer', fontFamily: 'inherit', width: '100%',
+          }}
+        >Volver al inicio</button>
       </div>
     </div>
   );

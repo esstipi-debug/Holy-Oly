@@ -691,7 +691,7 @@ const VoltaDashboard: React.FC = () => {
   const semana = (weekOfYear % 4) + 1;
 
   return (
-    <div className="anim-fade-in" style={{ background: C.bg, minHeight: '100%', paddingBottom: 90, color: C.text }}>
+    <div className="anim-fade-in" style={{ background: C.bg, minHeight: '100%', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 76px)', color: C.text }}>
 
       {/* HEADER */}
       <div className="anim-fade-up" style={{ padding: '12px 20px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

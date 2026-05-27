@@ -150,7 +150,7 @@ const VoltaCoachTools: React.FC<VoltaCoachToolsProps> = ({ initialTab = 'progres
   const vformColor = (v: string) => v === 'V' ? C.green : v === 'A' ? C.amber : C.red;
 
   return (
-    <div style={{ background: C.bg, minHeight: '100%', paddingBottom: 110, color: C.text }}>
+    <div style={{ background: C.bg, minHeight: '100%', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 90px)', color: C.text }}>
 
       {/* HEADER */}
       <div style={{ padding: '48px 20px 12px' }}>
