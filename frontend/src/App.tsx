@@ -57,6 +57,8 @@ import AtletaHomeV2 from './pages/v2/AtletaHomeV2';
 import CheckinV2 from './pages/v2/CheckinV2';
 import CoachDashV2 from './pages/v2/CoachDashV2';
 import SkillTreeV2 from './pages/v2/SkillTreeV2';
+import HolyOlyCatalogV2 from './pages/v2/HolyOlyCatalogV2';
+import HolyOlyDetailV2 from './pages/v2/HolyOlyDetailV2';
 import CardsCompareDemo from './pages/_dev/CardsCompareDemo';
 import type { View } from './context/NavigationContext';
 
@@ -120,7 +122,13 @@ const HOME_VIEWS = new Set<View>([
 ]);
 
 // Vistas accesibles sin autenticar
-const PUBLIC_VIEWS = new Set<View>(['LOGIN', 'REGISTER', 'PRIVACY', 'TERMS']);
+// NOTA: las HO_MACRO_* y CONTROL_DANIOS_V2 son públicas en preview/WIP
+// para iterar visualmente sin login · revertir antes de prod.
+const PUBLIC_VIEWS = new Set<View>([
+  'LOGIN', 'REGISTER', 'PRIVACY', 'TERMS',
+  'HO_MACRO_CATALOG', 'HO_MACRO_DETAIL', 'HO_MACRO_ATHLETE', 'VOLTA_MACRO_ATHLETE',
+  'CONTROL_DANIOS_V2',
+]);
 
 const navGroups = [
   { title: 'Core',         views: ['LOGIN', 'REGISTER', 'ONBOARDING', 'PREMIUM'] },
@@ -282,6 +290,8 @@ function AppInner() {
     if (currentView === 'V2_COACH') return <CoachDashV2 />;
     if (currentView === 'V2_SKILL_TREE') return <SkillTreeV2 />;
     if (currentView === 'CARDS_COMPARE') return <CardsCompareDemo />;
+    if (currentView === 'HO_MACRO_CATALOG') return <HolyOlyCatalogV2 />;
+    if (currentView === 'HO_MACRO_DETAIL') return <HolyOlyDetailV2 />;
     if (currentView === 'LOGIN' && !isAuthenticated && !getDeepLinkProduct()) {
       return <Landing />;
     }

@@ -69,9 +69,9 @@ const DesignV2: React.FC = () => {
 
       <Section title="PlateStack · row · tonelaje sesión">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-          <PlateStack tiers={[1, 1]} size={64} animate />
-          <PlateStack tiers={[1, 1, 2, 3]} size={64} animate />
-          <PlateStack tiers={[1, 2, 3, 4, 4]} size={64} animate />
+          <PlateStack tiers={[1, 1]} size={64} animateIn />
+          <PlateStack tiers={[1, 1, 2, 3]} size={64} animateIn />
+          <PlateStack tiers={[1, 2, 3, 4, 4]} size={64} animateIn />
         </div>
       </Section>
 

@@ -26,10 +26,13 @@ declare global {
       >;
       'plate-stack': React.DetailedHTMLProps<
         React.HTMLAttributes<HTMLElement> & {
-          tiers?: string;       // CSV "1,2,3"
+          tiers?: string;             // CSV "1,2,3"
           size?: string | number;
           orientation?: 'row' | 'column';
-          animate?: boolean | '';
+          overlap?: string | number;  // 0..1
+          weight?: boolean | '';      // boolean attr · presencia muestra suma kg
+          label?: string;
+          'animate-in'?: boolean | '';
         },
         HTMLElement
       >;

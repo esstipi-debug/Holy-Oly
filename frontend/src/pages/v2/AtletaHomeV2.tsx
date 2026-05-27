@@ -466,7 +466,5 @@ function TierWithAnimate({ tier, name, pct, animate }) {
   );
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
-
 
 export default App;
