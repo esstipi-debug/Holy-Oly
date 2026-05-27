@@ -41,6 +41,7 @@ MIGRATION_FILES = [
     "016_box_inventory.sql",
     "017_macrocycle_templates.sql",
     "018_athlete_macro_assignments.sql",
+    "019_smart_coach_alerts.sql",
 ]
 
 
@@ -224,6 +225,149 @@ async def demote_to_athlete(
             "current_role": "athlete",
             "changed": True,
         }
+
+
+@router.post("/seed-macro-templates")
+async def seed_macro_templates(x_admin_token: Optional[str] = Header(default=None)):
+    """
+    Migra los 23 PROGRAMS hardcoded en macrocycle_engine.py a tabla DB.
+    Idempotente · ON CONFLICT DO NOTHING por program_id único.
+    Plus 5 templates Volta (CF Open · CF Conditioning · CF Strength · HYROX · Open Prep).
+    """
+    check_admin(x_admin_token)
+
+    pool = await users_repo.get_pool()
+    if pool is None:
+        raise HTTPException(503, "DB no disponible")
+
+    from ..core.macrocycle_engine import MacrocycleEngine
+    import json as _json
+
+    # Equipment requirements heurísticos por focus
+    EQUIPMENT_BY_FOCUS = {
+        "Strength":   ["barbell_olympic_20kg", "plate_bumper_kg", "rig_pullup", "rack"],
+        "Power":      ["barbell_olympic_20kg", "plate_bumper_kg", "rack"],
+        "Hypertrophy":["barbell_olympic_20kg", "plate_bumper_kg", "dumbbell_set", "rack"],
+        "Peaking":    ["barbell_olympic_20kg", "plate_bumper_kg", "plate_change", "rack"],
+        "Technical":  ["barbell_training_15kg", "plate_change", "barbell_olympic_20kg"],
+    }
+
+    GOAL_BY_FOCUS = {
+        "Strength":    ["strength", "fuerza"],
+        "Power":       ["power", "explosividad"],
+        "Hypertrophy": ["volume", "masa"],
+        "Peaking":     ["meet_prep", "competition"],
+        "Technical":   ["technique", "skill"],
+    }
+
+    LEVEL_BY_DIFFICULTY = {
+        1: ("beginner", "intermediate"),
+        2: ("beginner", "intermediate"),
+        3: ("intermediate", "advanced"),
+        4: ("intermediate", "elite"),
+        5: ("advanced", "elite"),
+    }
+
+    results = []
+    inserted = 0
+
+    async with pool.acquire() as conn:
+        # Holy Oly · 23 programas
+        for p in MacrocycleEngine.PROGRAMS.values():
+            level_min, level_max = LEVEL_BY_DIFFICULTY.get(p.difficulty_level, ("intermediate", "advanced"))
+            equipment = EQUIPMENT_BY_FOCUS.get(p.focus_type, [])
+            goals = GOAL_BY_FOCUS.get(p.focus_type, [])
+
+            try:
+                await conn.execute(
+                    """
+                    INSERT INTO macrocycle_templates
+                        (program_id, name, school, product, description, total_weeks,
+                         focus, level_min, level_max, goal_tags, required_equipment,
+                         typical_athletes, is_system, coach_id)
+                    VALUES ($1, $2, $3, 'holy-oly', $4, $5, $6, $7, $8,
+                            $9::jsonb, $10::jsonb, 1, TRUE, NULL)
+                    ON CONFLICT (program_id) DO NOTHING
+                    """,
+                    p.id, p.name, p.school.lower(), p.description, p.duration_weeks,
+                    p.focus_type.lower(), level_min, level_max,
+                    _json.dumps(goals), _json.dumps(equipment),
+                )
+                results.append({"program_id": p.id, "status": "inserted"})
+                inserted += 1
+            except Exception as e:
+                results.append({"program_id": p.id, "status": "error", "error": str(e)[:200]})
+
+        # Volta · 5 programas CrossFit/HYROX
+        VOLTA_PROGRAMS = [
+            {
+                "program_id": "cf_open_prep",  "name": "CrossFit Open Prep",
+                "school": "crossfit", "weeks": 8, "focus": "peaking",
+                "description": "8 semanas pre-Open · ciclos cortos · benchmarks recurrentes",
+                "equipment": ["barbell_olympic_20kg", "plate_bumper_kg", "rig_pullup", "rower", "bike_assault", "wall_ball", "kettlebell_set", "plyo_box"],
+                "goals": ["crossfit_open", "metcon"], "athletes": 12,
+            },
+            {
+                "program_id": "cf_conditioning", "name": "CrossFit Conditioning Block",
+                "school": "crossfit", "weeks": 6, "focus": "conditioning",
+                "description": "Pulse zones · capacidad aeróbica + anaeróbica",
+                "equipment": ["rower", "bike_assault", "rope_jump", "kettlebell_set", "wall_ball"],
+                "goals": ["conditioning", "engine"], "athletes": 15,
+            },
+            {
+                "program_id": "cf_strength", "name": "CrossFit Strength Cycle",
+                "school": "crossfit", "weeks": 10, "focus": "strength",
+                "description": "Squat + DL + presses · base fuerza para WODs",
+                "equipment": ["barbell_olympic_20kg", "plate_bumper_kg", "rack", "rig_pullup"],
+                "goals": ["strength", "1rm"], "athletes": 10,
+            },
+            {
+                "program_id": "hyrox_prep", "name": "HYROX Race Prep",
+                "school": "hyrox", "weeks": 12, "focus": "endurance",
+                "description": "8 estaciones · 1km run x8 · sled push/pull · burpee broad jumps",
+                "equipment": ["rower", "bike_assault", "sled", "wall_ball", "kettlebell_set", "sandbag"],
+                "goals": ["hyrox", "race", "endurance"], "athletes": 8,
+            },
+            {
+                "program_id": "hyrox_strength_endurance", "name": "HYROX Strength-Endurance",
+                "school": "hyrox", "weeks": 8, "focus": "endurance",
+                "description": "Off-season HYROX · base strength + zone 2",
+                "equipment": ["barbell_olympic_20kg", "kettlebell_set", "rower", "rope_jump"],
+                "goals": ["hyrox_offseason", "base"], "athletes": 10,
+            },
+        ]
+
+        for v in VOLTA_PROGRAMS:
+            product = "axon" if v["school"] == "hyrox" else "volta"
+            try:
+                await conn.execute(
+                    """
+                    INSERT INTO macrocycle_templates
+                        (program_id, name, school, product, description, total_weeks,
+                         focus, level_min, level_max, goal_tags, required_equipment,
+                         typical_athletes, is_system, coach_id)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, 'beginner', 'elite',
+                            $8::jsonb, $9::jsonb, $10, TRUE, NULL)
+                    ON CONFLICT (program_id) DO NOTHING
+                    """,
+                    v["program_id"], v["name"], v["school"], product,
+                    v["description"], v["weeks"], v["focus"],
+                    _json.dumps(v["goals"]), _json.dumps(v["equipment"]),
+                    v["athletes"],
+                )
+                results.append({"program_id": v["program_id"], "status": "inserted", "product": product})
+                inserted += 1
+            except Exception as e:
+                results.append({"program_id": v["program_id"], "status": "error", "error": str(e)[:200]})
+
+        total = await conn.fetchval("SELECT COUNT(*) FROM macrocycle_templates")
+
+    return {
+        "ok": True,
+        "inserted_this_run": inserted,
+        "total_in_db": total,
+        "details": results,
+    }
 
 
 @router.post("/seed-demo")
