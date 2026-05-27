@@ -371,7 +371,7 @@ const Heatmap365: React.FC<Props> = ({ sessions = [], year }) => {
         paddingTop: 12,
         borderTop: '1px solid rgba(255,255,255,0.06)',
         display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
+        gridTemplateColumns: 'repeat(2, 1fr)',
         gap: 8,
       }}>
         <StatBlock label="Total" value={String(stats.total)} hint="sesiones" accent={accent} />

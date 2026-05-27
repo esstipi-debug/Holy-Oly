@@ -103,7 +103,7 @@ const VoltaWarmup: React.FC = () => {
       </div>
 
       {/* PHASE TABS */}
-      <div style={{ padding: '14px 16px 0', display: 'flex', gap: 6, overflowX: 'auto' }}>
+      <div className="scroll-x-no-bar" style={{ padding: '14px 16px 0', display: 'flex', gap: 6, overflowX: 'auto' }}>
         {PHASE_ORDER.map(p => {
           const active = phase === p;
           const doneCount = PHASES[p].movements.filter(m => done.has(m.name)).length;

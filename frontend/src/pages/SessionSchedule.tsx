@@ -47,7 +47,7 @@ const SessionSchedule: React.FC = () => {
         </header>
 
         {/* Calendar Strip */}
-        <div className="flex justify-between items-center mb-10 overflow-x-auto pb-4 scrollbar-hide">
+        <div className="flex justify-between items-center mb-10 overflow-x-auto pb-4 scroll-x-no-bar">
            {days.map((d, i) => (
              <div key={i} className="flex flex-col items-center gap-2 min-w-[50px]">
                 <p className="text-holy-text-secondary text-[9px] font-black uppercase">{d.day}</p>

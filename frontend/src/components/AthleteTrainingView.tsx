@@ -394,9 +394,8 @@ const AthleteTrainingView: React.FC<Props> = ({ athlete }) => {
           Esta semana
         </p>
 
-        <div style={{
+        <div className="scroll-x-no-bar" style={{
           display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 6,
-          scrollbarWidth: 'none',
         }}>
           {weekDays.map((d, i) => {
             const isOpen = expandedDay === i;
