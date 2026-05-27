@@ -25,6 +25,9 @@ const ITEMS: DemoItem[] = [
   // ✅ Nuevo · portado desde batch drop · Claude Design FIFA/Strava
   { view: 'HO_MACRO_CATALOG',  title: 'Catálogo Macrociclos',  subtitle: '23 macros · filtros familia · recomendados IA',           status: 'new', block: 'ho-atleta' },
   { view: 'HO_MACRO_DETAIL',   title: 'Detalle Ruso Clásico',  subtitle: 'filosofía · chart 16s · 4 mesos · drawer + Week Picker', status: 'new', block: 'ho-atleta' },
+  { view: 'HO_MACRO_ATHLETE',  title: 'Mi Macrociclo (atleta)', subtitle: 'vista del atleta de su macro activo · plate stacks',     status: 'new', block: 'ho-atleta' },
+  { view: 'VOLTA_MACRO_ATHLETE', title: 'Volta · Mi Macrocycle', subtitle: '6 bloques timeline + 7 dominios CrossFit',              status: 'new', block: 'volta-atleta' },
+  { view: 'CONTROL_DANIOS_V2', title: 'Control de Daños',      subtitle: 'ajuste auto IA · tono empático · sin culpa',              status: 'new', block: 'ho-atleta' },
 
   // 🚧 V2 partial · drop anterior · bloqueadas hasta porteo batch v4
   //   (CoachDashV2 rompe grid en mobile · resto tampoco está pulido)

@@ -1,0 +1,564 @@
+/* ============================================================
+   ControlDaniosV2 · Pantalla full-screen Control de Daños (Coach IA).
+   Portado de claude_design_drops/2026-05-27_pkql_v2/Control de Danos.html
+   Cambios:
+    - removido reset global (* { margin: 0... }) y wrappers .phone / .phone-inner / .status-bar
+    - todo scoped bajo .cd-root (sin escape de la pantalla)
+    - resto del CSS intacto (selectores cd-* originales)
+   ============================================================ */
+
+.cd-root {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+}
+.cd-root *,
+.cd-root *::before,
+.cd-root *::after { box-sizing: border-box; }
+
+/* ========================================================== */
+/* HEADER                                                     */
+/* ========================================================== */
+.cd-root .cd-header {
+  flex-shrink: 0;
+  padding: 12px 18px 14px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.cd-root .cd-h-text { flex: 1; }
+.cd-root .cd-h-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.25em;
+  color: var(--engine-stress);
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.cd-root .cd-h-eyebrow .pip {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--engine-stress);
+  box-shadow: 0 0 6px var(--engine-stress);
+}
+.cd-root .cd-h-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--text-hi);
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+.cd-root .cd-h-title .accent { color: var(--engine-stress); }
+.cd-root .cd-h-sub {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-mid);
+  margin-top: 4px;
+  letter-spacing: 0.01em;
+}
+.cd-root .cd-h-x {
+  width: 32px; height: 32px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
+  display: grid; place-items: center;
+  cursor: pointer;
+  color: var(--text-mid);
+  flex-shrink: 0;
+}
+.cd-root .cd-h-x:hover { color: var(--text-hi); }
+
+/* ========================================================== */
+/* SCROLL                                                     */
+/* ========================================================== */
+.cd-root .cd-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 14px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scrollbar-width: thin;
+}
+.cd-root .cd-scroll::-webkit-scrollbar { width: 4px; }
+.cd-root .cd-scroll::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 2px; }
+
+/* ========================================================== */
+/* CARD base (soft, no hard brackets)                         */
+/* ========================================================== */
+.cd-root .cd-card {
+  position: relative;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cd-root .cd-card[data-tone="diag"]   { background: linear-gradient(160deg, rgba(255,179,0,0.06), var(--surface-1) 70%); border-color: rgba(255,179,0,0.18); }
+.cd-root .cd-card[data-tone="impact"] { background: linear-gradient(160deg, rgba(255,179,0,0.05), var(--surface-1) 70%); }
+.cd-root .cd-card[data-tone="plan"]   { background: linear-gradient(160deg, rgba(34,197,94,0.06), var(--surface-1) 70%); border-color: rgba(34,197,94,0.18); }
+.cd-root .cd-card[data-tone="ai"]     { background: linear-gradient(160deg, rgba(0,229,255,0.05), var(--surface-1) 70%); border-color: rgba(0,229,255,0.18); }
+
+.cd-root .cd-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+.cd-root .cd-card-head .lbl {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  color: var(--text-lo);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.cd-root .cd-card-head .lbl .ic {
+  color: var(--lc, var(--engine-stress));
+}
+.cd-root .cd-card-head .step {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-lo);
+  letter-spacing: 0.15em;
+}
+.cd-root .cd-card-head .step .n {
+  color: var(--text-mid);
+  font-weight: 700;
+}
+
+/* ========================================================== */
+/* CARD 1 · DIAGNÓSTICO                                       */
+/* ========================================================== */
+.cd-root .cd-diag-summary {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--text-hi);
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+  margin-top: 2px;
+}
+.cd-root .cd-diag-summary .hi {
+  color: var(--engine-macro);
+  font-weight: 700;
+}
+
+.cd-root .cd-factors {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-top: 4px;
+}
+.cd-root .cd-factor {
+  background: var(--bg);
+  border: 1px solid var(--border-soft);
+  border-radius: 6px;
+  padding: 8px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+.cd-root .cd-factor .k {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.18em;
+  color: var(--text-lo);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.cd-root .cd-factor .v {
+  font-family: var(--font-mono);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--c, var(--engine-macro));
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  margin-top: 2px;
+}
+.cd-root .cd-factor .v .u {
+  font-size: 10px;
+  color: var(--text-mid);
+  font-weight: 500;
+  margin-left: 2px;
+}
+.cd-root .cd-factor .sub {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-mid);
+  letter-spacing: 0.04em;
+}
+.cd-root .cd-factor[data-tone="sleep"]  { --c: var(--engine-macro); }
+.cd-root .cd-factor[data-tone="rpe"]    { --c: var(--engine-macro); }
+.cd-root .cd-factor[data-tone="stress"] { --c: var(--engine-macro); }
+
+/* ========================================================== */
+/* CARD 2 · IMPACTO                                           */
+/* ========================================================== */
+.cd-root .cd-impact-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-top: 2px;
+}
+.cd-root .cd-impact {
+  background: var(--bg);
+  border: 1px solid rgba(255,179,0,0.18);
+  border-radius: 6px;
+  padding: 10px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cd-root .cd-impact .k {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.18em;
+  color: var(--text-lo);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.cd-root .cd-impact .v {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 26px;
+  color: var(--engine-macro);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+.cd-root .cd-impact .v .sym {
+  font-size: 16px;
+  color: var(--engine-macro);
+  margin-right: 2px;
+}
+.cd-root .cd-impact .v .u {
+  font-size: 12px;
+  color: var(--text-mid);
+  font-weight: 500;
+  margin-left: 2px;
+}
+.cd-root .cd-impact .note {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-mid);
+  letter-spacing: 0.05em;
+}
+.cd-root .cd-impact-foot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-mid);
+  letter-spacing: 0.04em;
+  padding-top: 6px;
+  border-top: 1px dashed var(--border-soft);
+  margin-top: 4px;
+}
+.cd-root .cd-impact-foot strong {
+  color: var(--engine-macro);
+  font-weight: 700;
+}
+
+/* ========================================================== */
+/* CARD 3 · PLAN                                              */
+/* ========================================================== */
+.cd-root .cd-plan-intro {
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  color: var(--text);
+  line-height: 1.4;
+  margin-top: 2px;
+}
+.cd-root .cd-plan-intro strong { color: var(--engine-oly); font-weight: 600; }
+
+.cd-root .cd-plan-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+.cd-root .cd-plan-row {
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 8px 8px 4px;
+  background: var(--bg);
+  border: 1px solid var(--border-soft);
+  border-left: 2px solid var(--engine-oly);
+  border-radius: 4px;
+}
+.cd-root .cd-plan-row .day {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--engine-oly);
+  text-transform: uppercase;
+  font-weight: 700;
+  padding-left: 6px;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+.cd-root .cd-plan-row .day .date {
+  color: var(--text-mid);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+}
+.cd-root .cd-plan-row .session {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text);
+  letter-spacing: 0.01em;
+  line-height: 1.25;
+}
+.cd-root .cd-plan-row .session strong {
+  color: var(--text-hi);
+  font-weight: 600;
+}
+.cd-root .cd-plan-row .session .change {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--engine-oly);
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+.cd-root .cd-plan-row .delta {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--engine-oly);
+  letter-spacing: 0.05em;
+  font-variant-numeric: tabular-nums;
+}
+.cd-root .cd-plan-row .delta.minus { color: var(--engine-macro); }
+
+.cd-root .cd-plan-foot {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-mid);
+  letter-spacing: 0.03em;
+}
+.cd-root .cd-plan-foot strong { color: var(--engine-oly); font-weight: 700; }
+
+/* ========================================================== */
+/* CARD 4 · MENSAJE IA                                        */
+/* ========================================================== */
+.cd-root .cd-ai-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.cd-root .cd-ai-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse 60% 45% at 32% 28%, rgba(255,255,255,0.18), transparent 70%),
+    radial-gradient(circle at 35% 30%,
+      color-mix(in oklab, var(--engine-stress) 75%, #fff),
+      color-mix(in oklab, var(--engine-stress) 50%, #000) 80%);
+  box-shadow: 0 0 14px rgba(0,229,255,0.5), inset 0 -2px 6px rgba(0,0,0,0.3);
+  display: grid; place-items: center;
+  color: #001218;
+  flex-shrink: 0;
+}
+.cd-root .cd-ai-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.cd-root .cd-ai-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text-hi);
+  letter-spacing: -0.01em;
+}
+.cd-root .cd-ai-name .by {
+  color: var(--text-mid);
+  font-weight: 400;
+  font-size: 10px;
+  margin-left: 4px;
+}
+.cd-root .cd-ai-tag {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  color: var(--engine-stress);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.cd-root .cd-ai-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  color: var(--text);
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+}
+.cd-root .cd-ai-body p strong {
+  color: var(--text-hi);
+  font-weight: 600;
+}
+.cd-root .cd-ai-body .quote {
+  color: var(--text-hi);
+  font-style: italic;
+  padding: 6px 0 6px 10px;
+  border-left: 2px solid var(--engine-stress);
+}
+
+.cd-root .cd-ai-chip {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 9px;
+  background: rgba(0,229,255,0.08);
+  border: 1px solid rgba(0,229,255,0.35);
+  color: var(--engine-stress);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 200ms;
+  margin-top: 4px;
+}
+.cd-root .cd-ai-chip:hover { background: rgba(0,229,255,0.16); }
+.cd-root .cd-ai-chip .chev { transition: transform 200ms; }
+
+.cd-root .cd-ai-why {
+  display: none;
+  padding: 10px 12px;
+  background: var(--bg);
+  border: 1px dashed rgba(0,229,255,0.25);
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--text);
+  line-height: 1.55;
+  letter-spacing: 0.02em;
+  margin-top: 4px;
+}
+.cd-root .cd-ai-why .row {
+  display: grid;
+  grid-template-columns: 14px 1fr;
+  gap: 6px;
+  align-items: baseline;
+  padding: 2px 0;
+}
+.cd-root .cd-ai-why .row::before {
+  content: "▸";
+  color: var(--engine-stress);
+  font-size: 11px;
+}
+.cd-root .cd-ai-why .row strong { color: var(--engine-stress); font-weight: 700; }
+.cd-root .ci-ai-card[data-open="true"] .cd-ai-why { display: block; }
+.cd-root .ci-ai-card[data-open="true"] .cd-ai-chip .chev { transform: rotate(90deg); }
+
+/* ========================================================== */
+/* EDUCATIONAL PILL                                           */
+/* ========================================================== */
+.cd-root .cd-edu {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: rgba(0,229,255,0.05);
+  border: 1px solid rgba(0,229,255,0.20);
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text);
+  letter-spacing: 0.02em;
+  line-height: 1.4;
+}
+.cd-root .cd-edu .ic {
+  color: var(--engine-stress);
+  flex-shrink: 0;
+}
+.cd-root .cd-edu strong { color: var(--engine-stress); font-weight: 700; }
+
+/* ========================================================== */
+/* FOOTER · 2 BUTTONS                                         */
+/* ========================================================== */
+.cd-root .cd-actions {
+  flex-shrink: 0;
+  padding: 12px 14px 16px;
+  background: var(--bg-deep);
+  border-top: 1px solid rgba(255,255,255,0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cd-root .btn-primary {
+  width: 100%;
+  background: linear-gradient(135deg, var(--engine-stress), color-mix(in oklab, var(--engine-stress) 55%, #000));
+  border: 1.5px solid rgba(0,229,255,0.5);
+  color: #001218;
+  padding: 13px 16px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 0 24px rgba(0,229,255,0.42), inset 0 1px 0 rgba(255,255,255,0.3);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14.5px;
+  letter-spacing: -0.005em;
+  transition: transform 150ms, box-shadow 200ms;
+}
+.cd-root .btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 32px rgba(0,229,255,0.6);
+}
+.cd-root .btn-secondary {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--border-soft);
+  color: var(--text-mid);
+  padding: 10px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 12.5px;
+  letter-spacing: 0.01em;
+  transition: all 200ms;
+}
+.cd-root .btn-secondary:hover {
+  color: var(--text);
+  border-color: var(--text-lo);
+}

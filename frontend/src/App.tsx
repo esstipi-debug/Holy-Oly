@@ -59,6 +59,9 @@ import CoachDashV2 from './pages/v2/CoachDashV2';
 import SkillTreeV2 from './pages/v2/SkillTreeV2';
 import HolyOlyCatalogV2 from './pages/v2/HolyOlyCatalogV2';
 import HolyOlyDetailV2 from './pages/v2/HolyOlyDetailV2';
+import HolyOlyMacrocycleV2 from './pages/v2/HolyOlyMacrocycleV2';
+import VoltaMacrocycleV2 from './pages/v2/VoltaMacrocycleV2';
+import ControlDaniosV2 from './pages/v2/ControlDaniosV2';
 import DemoHubV2 from './pages/v2/DemoHubV2';
 import CardsCompareDemo from './pages/_dev/CardsCompareDemo';
 import type { View } from './context/NavigationContext';
@@ -294,6 +297,9 @@ function AppInner() {
     if (currentView === 'CARDS_COMPARE') return <CardsCompareDemo />;
     if (currentView === 'HO_MACRO_CATALOG') return <HolyOlyCatalogV2 />;
     if (currentView === 'HO_MACRO_DETAIL') return <HolyOlyDetailV2 />;
+    if (currentView === 'HO_MACRO_ATHLETE') return <HolyOlyMacrocycleV2 />;
+    if (currentView === 'VOLTA_MACRO_ATHLETE') return <VoltaMacrocycleV2 />;
+    if (currentView === 'CONTROL_DANIOS_V2') return <ControlDaniosV2 />;
     if (currentView === 'DEMO_HUB') return <DemoHubV2 />;
     if (currentView === 'LOGIN' && !isAuthenticated && !getDeepLinkProduct()) {
       return <Landing />;
