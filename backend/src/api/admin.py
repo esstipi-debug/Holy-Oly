@@ -115,6 +115,113 @@ async def create_mp_plans(x_admin_token: Optional[str] = Header(default=None)):
     }
 
 
+@router.post("/promote-to-coach")
+async def promote_to_coach(
+    email: str,
+    x_admin_token: Optional[str] = Header(default=None),
+):
+    """
+    Cambia el role de un user de 'athlete' a 'coach'.
+
+    Útil para:
+    - Boss asignando coaches sin tocar la DB
+    - Onboarding manual de partners box
+
+    Idempotente: si ya es coach, devuelve el estado actual sin error.
+    """
+    check_admin(x_admin_token)
+
+    pool = await users_repo.get_pool()
+    if pool is None:
+        raise HTTPException(503, "No DB pool available")
+
+    email_norm = email.strip().lower()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow(
+            "SELECT id, email, role FROM users WHERE LOWER(email) = $1",
+            email_norm,
+        )
+        if not row:
+            raise HTTPException(404, f"User not found: {email_norm}")
+
+        prev_role = row["role"]
+        if prev_role == "coach":
+            return {
+                "ok": True,
+                "user_id": str(row["id"]),
+                "email": row["email"],
+                "previous_role": prev_role,
+                "current_role": prev_role,
+                "changed": False,
+                "note": "User already had coach role",
+            }
+        if prev_role == "admin":
+            raise HTTPException(400, f"User is admin · refusing to demote to coach")
+
+        await conn.execute(
+            "UPDATE users SET role = 'coach' WHERE id = $1",
+            row["id"],
+        )
+
+        return {
+            "ok": True,
+            "user_id": str(row["id"]),
+            "email": row["email"],
+            "previous_role": prev_role,
+            "current_role": "coach",
+            "changed": True,
+        }
+
+
+@router.post("/demote-to-athlete")
+async def demote_to_athlete(
+    email: str,
+    x_admin_token: Optional[str] = Header(default=None),
+):
+    """Revertir promoción · útil si se asignó coach por error."""
+    check_admin(x_admin_token)
+
+    pool = await users_repo.get_pool()
+    if pool is None:
+        raise HTTPException(503, "No DB pool available")
+
+    email_norm = email.strip().lower()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow(
+            "SELECT id, email, role FROM users WHERE LOWER(email) = $1",
+            email_norm,
+        )
+        if not row:
+            raise HTTPException(404, f"User not found: {email_norm}")
+
+        prev_role = row["role"]
+        if prev_role == "athlete":
+            return {
+                "ok": True,
+                "user_id": str(row["id"]),
+                "email": row["email"],
+                "previous_role": prev_role,
+                "current_role": prev_role,
+                "changed": False,
+            }
+        if prev_role == "admin":
+            raise HTTPException(400, "Refusing to demote admin")
+
+        await conn.execute(
+            "UPDATE users SET role = 'athlete' WHERE id = $1",
+            row["id"],
+        )
+
+        return {
+            "ok": True,
+            "user_id": str(row["id"]),
+            "email": row["email"],
+            "previous_role": prev_role,
+            "current_role": "athlete",
+            "changed": True,
+        }
+
+
 @router.get("/db-status")
 async def db_status(x_admin_token: Optional[str] = Header(default=None)):
     """Inspecciona qué tablas existen + count rápido."""

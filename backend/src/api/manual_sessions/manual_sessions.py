@@ -31,6 +31,7 @@ from pydantic import BaseModel, Field, field_validator
 from ..auth.auth import verify_token
 from ..auth.jwt_utils import User
 from ...db import users_repo
+from ...services.push_sender import send_notification
 
 
 router = APIRouter(prefix="/v1/manual-sessions", tags=["manual-sessions"])
@@ -200,7 +201,41 @@ async def create_manual_session(
                 payload.athlete_id, user.id, payload.date, payload.slot,
                 payload.focus, exercises_json, payload.note,
             )
-            return _row_to_response(dict(row))
+            response = _row_to_response(dict(row))
+
+        # Push notif al atleta (fuera del `async with conn` para liberar pool).
+        # Fail-soft: cualquier error no rompe el response al coach.
+        try:
+            coach_label = row.get("coach_name") or "Tu coach"
+            focus_label = {
+                "technique": "técnica",
+                "strength": "fuerza",
+                "olympic": "olímpico",
+                "accessory": "accesorios",
+                "metcon": "metcon",
+            }.get(payload.focus, payload.focus)
+            slot_label = {
+                "am": " AM",
+                "pm": " PM",
+                "full": "",
+            }.get(payload.slot, "")
+            date_label = payload.date.isoformat()
+            await send_notification(
+                user_id=payload.athlete_id,
+                payload={
+                    "title": "🏋 Nueva sesión asignada",
+                    "body": f"{coach_label} asignó {focus_label}{slot_label} para el {date_label}",
+                    "url": "/#schedule",
+                    "icon": "/icon-192.png",
+                    "badge": "/icon-192.png",
+                    "tag": f"manual-session-{response.id}",
+                },
+                ttl=86400,
+            )
+        except Exception as push_err:
+            print(f"[manual_sessions] push notif failed: {push_err}")
+
+        return response
     except HTTPException:
         raise
     except Exception as e:
@@ -381,7 +416,28 @@ async def update_manual_session(
                 """,
                 *params,
             )
-            return _row_to_response(dict(row))
+            response = _row_to_response(dict(row))
+
+        # Push notif al atleta avisando que la sesión cambió (fail-soft).
+        try:
+            coach_label = row.get("coach_name") or "Tu coach"
+            date_label = response.date.isoformat()
+            await send_notification(
+                user_id=str(response.athlete_id),
+                payload={
+                    "title": "✏️ Sesión modificada",
+                    "body": f"{coach_label} actualizó la sesión del {date_label}",
+                    "url": "/#schedule",
+                    "icon": "/icon-192.png",
+                    "badge": "/icon-192.png",
+                    "tag": f"manual-session-{response.id}",
+                },
+                ttl=86400,
+            )
+        except Exception as push_err:
+            print(f"[manual_sessions] push notif on update failed: {push_err}")
+
+        return response
     except HTTPException:
         raise
     except Exception as e:
