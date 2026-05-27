@@ -42,6 +42,7 @@ MIGRATION_FILES = [
     "017_macrocycle_templates.sql",
     "018_athlete_macro_assignments.sql",
     "019_smart_coach_alerts.sql",
+    "020_lifestyle_inputs.sql",
 ]
 
 
@@ -368,6 +369,127 @@ async def seed_macro_templates(x_admin_token: Optional[str] = Header(default=Non
         "total_in_db": total,
         "details": results,
     }
+
+
+@router.post("/seed-pills")
+async def seed_knowledge_pills(x_admin_token: Optional[str] = Header(default=None)):
+    """Pobla catálogo de píldoras educacionales · sleep · cafeína · alcohol · etc."""
+    check_admin(x_admin_token)
+    pool = await users_repo.get_pool()
+    if pool is None:
+        raise HTTPException(503, "DB no disponible")
+
+    import json as _json
+
+    PILLS = [
+        # Sleep
+        ("sleep_under_6h", "sleep", "warning",
+         "Sueño <6h afecta tu entrenamiento",
+         "Dormir menos de 6 horas reduce capacidad de recuperación 40% · evita carga pesada hoy.",
+         "Dormir <6h reduce síntesis proteica muscular, eleva cortisol matinal, baja testosterona y reduce reaction time. La fuerza máxima cae 5-15% y el RPE percibido sube. Recomendación: hoy entrenar a 70% intensidad o priorizar técnica.",
+         "Watson et al. 2017 · Sports Medicine"),
+        ("sleep_7_9h", "sleep", "info",
+         "Sueño óptimo · 7-9h",
+         "7-9h es la ventana óptima para recovery + síntesis hormonal.",
+         "Durante sueño profundo se libera 70% del GH diario, se consolida memoria motora (skill learning) y se restauran neurotransmisores. Atletas que duermen <7h tienen 1.7x más probabilidad de lesión.",
+         "Mah et al. 2011 · Sleep"),
+
+        # Caffeine
+        ("caffeine_residual", "caffeine", "info",
+         "Cafeína · ¿cuándo te afecta?",
+         "Vida media 5h · 200mg a las 9am = 100mg a las 2pm · 25mg a las 7pm.",
+         "Cafeína se metaboliza con t1/2=5h promedio (varía 2-12h según CYP1A2). Para dormir bien evitar consumo después de las 14h. Para entrenar fuerte: 3-6mg/kg 45min pre-WOD mejora rendimiento 5-15%.",
+         "Goldstein et al. 2010 · J Int Soc Sports Nutr"),
+        ("caffeine_too_much", "caffeine", "warning",
+         "Cafeína >400mg/día puede ser contraproducente",
+         "Más de 400mg/día eleva ansiedad, reduce calidad del sueño y desensibiliza el efecto ergogénico.",
+         "Tolerancia a cafeína se desarrolla en 1-2 semanas con uso diario. Para mantener efecto ergogénico óptimo: ciclar (5 días on, 2 off) o limitar a <300mg/día. >500mg/día se asocia con hipertensión y disritmias.",
+         "Nehlig 2018 · Pharmacol Rev"),
+
+        # Alcohol
+        ("alcohol_post_training", "alcohol", "warning",
+         "Alcohol post-entrenamiento mata el progreso",
+         "≥1 unidad reduce síntesis proteica muscular 24h · pésimo para PR hoy.",
+         "Etanol bloquea mTOR (clave para síntesis proteica), reduce GH nocturno 70%, deshidrata y empeora sueño profundo. 2 unidades post-WOD = pierdes 24h de adaptación. Si vas a tomar: 3+ horas después del entrenamiento, agua + comida proteica.",
+         "Parr et al. 2014 · PLoS One"),
+        ("alcohol_2_units", "alcohol", "critical",
+         "2+ unidades · evita PR mañana",
+         "Tu performance caerá 11% en pruebas anaeróbicas el día siguiente.",
+         "Estudios muestran caída de 11.4% en pruebas anaeróbicas y 6.8% en aeróbicas tras 1g/kg de alcohol. Recuperación cardiovascular tarda 2-3 días. Para halterofilia: máxima caída en jerk + back squat (afecta CNS).",
+         "Lecoultre & Schutz 2009 · Med Sci Sports Exerc"),
+
+        # Smoking
+        ("smoking_vo2", "smoking", "warning",
+         "Fumar reduce VO2max 5-15%",
+         "Cada cigarrillo afecta capacidad pulmonar ~4h · CO en sangre desplaza O2.",
+         "Carboxihemoglobina (HbCO) de fumar reduce transporte de oxígeno. En atletas se traduce en ~5% menos VO2max por cada 10 pack-years. Vida media de CO en sangre: 4-6h. Mejor opción: dejar de fumar 2h antes de entrenar.",
+         "Suminski et al. 2009 · J Smok Cessation"),
+
+        # Stress
+        ("chronic_stress", "stress", "warning",
+         "Stress crónico · enemigo de la fuerza",
+         "Cortisol elevado >2 semanas reduce testosterona, masa muscular y motivación.",
+         "El stress eleva cortisol agudo (normal) y luego crónico (problema). Atletas con HRV crónicamente baja muestran 22% más riesgo de overtraining. Estrategias: respiración 4-7-8, journaling, sleep priority, reducir volumen entrenamiento -20% durante semanas estresantes.",
+         "Stults-Kolehmainen & Bartholomew 2012 · Med Sci Sports Exerc"),
+
+        # Recovery
+        ("recovery_active", "recovery", "info",
+         "Recovery activo > recovery pasivo",
+         "10-15min de movilidad + zona 2 acelera recuperación 30% vs reposo total.",
+         "El flujo sanguíneo bajo intensidad (50-60% FCmax) acelera clearance de lactato y subproductos metabólicos. Recovery activo post-WOD: 5-10min bike easy + foam rolling. En días off: 20-30min caminata + movilidad articular.",
+         "Bahnert et al. 2013 · Sports Med"),
+
+        # Hormonal
+        ("luteal_phase", "hormonal", "info",
+         "Fase lútea · contexto importante",
+         "Días 18-28 · más fatiga + menor tolerancia al calor · bajemos volumen 20-30%.",
+         "En fase lútea el cuerpo prioriza función reproductiva: temperatura basal sube 0.3°C, retención de líquidos aumenta, motivación baja. Estrategia: priorizar técnica, reducir volumen 20-30%, evitar tests máximos. Atletas de élite reportan -5-10% en fuerza máxima durante esta fase.",
+         "Sims & Heather 2018 · Exp Physiol"),
+
+        # Training
+        ("rest_day_purpose", "training", "info",
+         "Día de descanso = día de progreso",
+         "El cuerpo se adapta DURANTE el descanso · no entrenando · si lo saltás, retrocedés.",
+         "Adaptaciones (supercompensación) ocurren post-entrenamiento. Sin recovery suficiente, no hay adaptación. 1-2 días off/semana son obligatorios. Síntomas de under-recovery: HRV ↓, sueño peor, motivación baja, RPE alto en esfuerzos submáximos.",
+         "Bompa & Buzzichelli 2015 · Periodization training"),
+
+        # Injury prevention
+        ("warmup_15min", "injury_prevention", "info",
+         "Calentamiento <10min · riesgo lesión sube 2x",
+         "10-15min de warmup específico reduce lesiones 30-50%.",
+         "Warmup eleva temperatura muscular (mejor compliance), activa CNS (mejor reclutamiento), aumenta rango articular. Estructura: 3min cardio leve + 5min movilidad dinámica + 5min activación específica del WOD.",
+         "Fradkin et al. 2010 · J Strength Cond Res"),
+
+        # Nutrition
+        ("pre_wod_meal", "nutrition", "info",
+         "Comida pre-WOD · 1-3h antes",
+         "Última comida sólida 2-3h antes · evita PR con estómago lleno.",
+         "Comer cerca del entrenamiento desvía flujo sanguíneo al sistema digestivo, reduciendo performance. Ideal: comida balanceada (carbs + proteína + poca grasa) 2-3h antes. Si no es posible: snack ligero (banana, dátiles) 30-60min antes.",
+         "Burke et al. 2011 · J Sports Sci"),
+    ]
+
+    inserted = 0
+    async with pool.acquire() as conn:
+        for slug, category, severity, title, short_text, long_text, citation in PILLS:
+            try:
+                await conn.execute(
+                    """
+                    INSERT INTO knowledge_pills
+                        (slug, category, severity, title, short_text, long_text, citation,
+                         trigger_rules, related_engines)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, '{}'::jsonb, $8::jsonb)
+                    ON CONFLICT (slug) DO NOTHING
+                    """,
+                    slug, category, severity, title, short_text, long_text, citation,
+                    _json.dumps([category]),
+                )
+                inserted += 1
+            except Exception as e:
+                print(f"[seed-pills] {slug}: {e}")
+
+        total = await conn.fetchval("SELECT COUNT(*) FROM knowledge_pills")
+
+    return {"ok": True, "inserted_this_run": inserted, "total_in_db": total}
 
 
 @router.post("/seed-demo")
