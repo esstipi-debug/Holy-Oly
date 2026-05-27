@@ -38,6 +38,9 @@ MIGRATION_FILES = [
     "013_custom_wods.sql",
     "014_hormonal_cycle.sql",
     "015_athlete_belts.sql",
+    "016_box_inventory.sql",
+    "017_macrocycle_templates.sql",
+    "018_athlete_macro_assignments.sql",
 ]
 
 
