@@ -183,24 +183,34 @@ function tierUp(): Celebration {
 }
 
 function wodBenchmark(): Celebration {
+  const name = readLB('social:wod_name', 'Fran');
+  const score = readLB('social:wod_score', '3:42');
+  const previous = readLB('social:wod_previous', '');
+  const delta = readLB('social:wod_delta', '');
+  const context = readLB('social:wod_context', '21-15-9 · Thrusters & Pull-ups');
+  const unit = readLB('social:wod_unit', 'TIME');
+  const hashtag = `HolyOly${name.replace(/[^A-Za-z0-9]/g, '')}`;
+
+  const stats: Array<{ label: string; value: string }> = [
+    { label: 'WOD', value: name },
+    { label: unit === 'TIME' ? 'Tiempo' : 'Score', value: score },
+  ];
+  if (previous) stats.push({ label: 'Anterior', value: previous });
+  if (delta) stats.push({ label: 'Mejora', value: delta });
+
   return {
-    id: 'wod_fran',
+    id: `wod_${name.toLowerCase().replace(/\s+/g, '_')}`,
     type: 'wod_benchmark',
     headline: 'BENCHMARK WOD',
-    title: 'FRAN',
-    value: '3:42',
-    unit: 'TIME',
-    context: '21-15-9 · Thrusters & Pull-ups',
+    title: name.toUpperCase(),
+    value: score,
+    unit,
+    context,
     icon: '⏱️',
     accent: 'fire',
     date: new Date().toISOString(),
-    hashtag: 'HolyOlyFran',
-    stats: [
-      { label: 'WOD', value: 'Fran' },
-      { label: 'Tiempo', value: '3:42' },
-      { label: 'Anterior', value: '4:15' },
-      { label: 'Mejora', value: '-33s' },
-    ],
+    hashtag,
+    stats,
   };
 }
 

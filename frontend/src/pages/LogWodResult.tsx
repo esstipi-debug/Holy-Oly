@@ -128,9 +128,17 @@ const LogWodResult: React.FC = () => {
     const isPR = backendIsPR ?? localPR.isPR;
 
     if (isPR && mode === 'benchmark') {
-      // Pre-cargar celebration de tipo wod_benchmark para auto-trigger
-      localStorage.setItem('social:preferred_celebration', 'wod_fran'); // genérico — celebrations.ts ya tiene wod_fran
+      // Pre-cargar celebration de tipo wod_benchmark con el benchmark real (no hardcoded a Fran)
+      localStorage.setItem('social:preferred_celebration', 'wod_benchmark');
       localStorage.setItem('social:preferred_variant', 'stadium');
+      localStorage.setItem('social:wod_name', wodName);
+      localStorage.setItem('social:wod_score', scoreDisplay);
+      localStorage.setItem('social:wod_unit', effectiveScoreType === 'time' ? 'TIME' : effectiveScoreType === 'rounds_reps' ? 'ROUNDS' : effectiveScoreType === 'max_load' ? 'KG' : effectiveScoreType === 'calories' ? 'CAL' : 'REPS');
+      if (benchmark) localStorage.setItem('social:wod_context', benchmark.description);
+      if (localPR.previousBest?.scoreDisplay) localStorage.setItem('social:wod_previous', localPR.previousBest.scoreDisplay);
+      else localStorage.removeItem('social:wod_previous');
+      if (localPR.deltaDisplay) localStorage.setItem('social:wod_delta', localPR.deltaDisplay);
+      else localStorage.removeItem('social:wod_delta');
       setFeedback(`🔥 PR · ${localPR.deltaDisplay ?? ''} · llevándote a compartir...`);
       setTimeout(() => navigate('SOCIAL'), 1400);
     } else if (isPR) {

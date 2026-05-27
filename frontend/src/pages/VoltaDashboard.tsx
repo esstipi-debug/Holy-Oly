@@ -712,18 +712,30 @@ const VoltaDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* ALERT STRIP */}
-      <div className="scroll-x-no-bar" style={{
-        display: 'flex', gap: 6, alignItems: 'center',
-        padding: '8px 16px',
-        background: 'rgba(0,229,255,0.03)',
-        borderBottom: `1px solid ${C.line}`,
-        overflowX: 'auto',
-      }}>
-        <AlertBadge kind="critical">🔴 HRV bajo</AlertBadge>
-        <AlertBadge kind="warning">⚠ Sueño crónico</AlertBadge>
-        <AlertBadge kind="info">ⓘ Cafeína activa</AlertBadge>
-      </div>
+      {/* ALERT STRIP · solo aparece si hay alertas reales derivadas del stress/adaptation actual */}
+      {(() => {
+        const alerts: Array<{ kind: 'critical' | 'warning' | 'info'; text: string }> = [];
+        const cnsLow = stress?.cns_zone && ['red', 'critical'].includes(stress.cns_zone.toLowerCase());
+        const readinessLow = stress && stress.readiness < 40;
+        const adaptationRisk = adaptation && (adaptation.risk_zone === 'red' || adaptation.risk_zone === 'orange');
+        if (cnsLow) alerts.push({ kind: 'critical', text: '🔴 HRV bajo · CNS comprometido' });
+        if (readinessLow && !cnsLow) alerts.push({ kind: 'warning', text: '⚠ Readiness bajo · considerá ajustar carga' });
+        if (adaptationRisk) alerts.push({ kind: 'warning', text: '⚠ WOD ajustado por fatiga acumulada' });
+        if (alerts.length === 0) return null;
+        return (
+          <div className="scroll-x-no-bar" style={{
+            display: 'flex', gap: 6, alignItems: 'center',
+            padding: '8px 16px',
+            background: 'rgba(0,229,255,0.03)',
+            borderBottom: `1px solid ${C.line}`,
+            overflowX: 'auto',
+          }}>
+            {alerts.map((a, i) => (
+              <AlertBadge key={i} kind={a.kind}>{a.text}</AlertBadge>
+            ))}
+          </div>
+        );
+      })()}
 
       <div style={{ padding: '14px 16px 80px' }}>
 
@@ -946,8 +958,12 @@ const VoltaDashboard: React.FC = () => {
           />
         )}
 
-        {/* WOD DE HOY */}
-        <Sec style={{ marginBottom: 8 }}>WOD de hoy · Semana {semana} · Día {dia}</Sec>
+        {/* AJUSTES POR FATIGA · solo se muestra si hay adaptation real desde backend.
+            El WOD del día vive en VoltaWodTodayCard arriba (single source of truth).
+            Esta sección agrega ajustes derivados de adaptation.risk_zone si los hay. */}
+        {adaptation && (
+        <>
+        <Sec style={{ marginBottom: 8 }}>Ajustes según tu estado · Semana {semana} · Día {dia}</Sec>
         <div style={{
           background: C.surface,
           border: '1px solid rgba(0,229,255,0.2)',
@@ -962,8 +978,8 @@ const VoltaDashboard: React.FC = () => {
             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
           }}>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: C.text }}>AMRAP 20min</div>
-              <div style={{ fontSize: 11, color: C.cyan, marginTop: 2 }}>5 C&amp;J · 10 Pull-ups · 15 Box jumps</div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: C.text }}>Plan adaptado</div>
+              <div style={{ fontSize: 11, color: C.cyan, marginTop: 2 }}>Basado en tu fatiga acumulada</div>
             </div>
             {wodModified ? (
               <div style={{
@@ -1024,6 +1040,8 @@ const VoltaDashboard: React.FC = () => {
             </button>
           </div>
         </div>
+        </>
+        )}
 
         {/* CF INDEX DESGLOSE · clickable */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
