@@ -216,6 +216,30 @@
 /* Smooth scroll mobile */
 * { -webkit-overflow-scrolling: touch; }
 
+/* ─── PLATE BADGE & FIFA CARD ANIMATIONS ───────── */
+@keyframes plateGlowPulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 4px currentColor) brightness(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 12px currentColor) brightness(1.15);
+  }
+}
+
+@keyframes cardShimmer {
+  0%, 100% {
+    box-shadow: 0 0 30px currentColor, 0 8px 32px rgba(0,0,0,0.7);
+  }
+  50% {
+    box-shadow: 0 0 60px currentColor, 0 0 100px currentColor, 0 8px 32px rgba(0,0,0,0.7);
+  }
+}
+
+@keyframes plateRotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
 /* Reduce motion para accesibilidad */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
