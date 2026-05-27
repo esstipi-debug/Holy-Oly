@@ -302,9 +302,54 @@ git checkout mock-first-v1
 
 **Auth flow**: Login espera form-encoded (OAuth2) NO JSON · si pruebas con JSON da 422 · con form-encoded da 401 si user no existe.
 
-### Agente D · Gaps para producción
+### Agente D · Gaps para producción (App Store + prod real)
 
-(Pendiente · cierra en breve)
+**🚨 Decisión arquitectónica crítica primero · PWA vs Native**:
+
+| Path | Pros | Cons | Esfuerzo |
+|---|---|---|---|
+| **A · PWA only** (skip App Store) | 0% fee Apple · MP funciona · deploy rápido · add-to-home iOS | Sin discoverability App Store · "no es app real" para muchos | ~10h prod-ready |
+| **B · Native iOS+Android** (App Store) | Visible App Store · push native · biometrics · IAP confiable | **MP NO funciona dentro iOS** (rechazo seguro) · Apple 30% IAP · 50-65h dev + 10h Boss + esperas review | ~75h |
+
+**Si Path B · RevenueCat obligatorio**:
+- MP queda solo web/B2B coach
+- StoreKit2 + `@revenuecat/purchases-capacitor` para atletas iOS
+- $99/año Apple Dev + $25 onetime Google Play
+
+**🔴 BLOQUEANTES si Path B**:
+
+| # | Gap | Esfuerzo | Owner |
+|---|---|---|---|
+| 1 | Capacitor wrapper iOS + Android | 8-12h | Dev |
+| 2 | Apple Developer + Google Play accounts | 2h + esperas | **Boss** |
+| 3 | IAP StoreKit2 + RevenueCat | 16-20h | Dev |
+| 4 | Privacy Policy + Terms páginas | 4h | Boss redacta · Dev publica |
+| 5 | **Account deletion endpoint** (App Store guideline 5.1.1(v) mandatory desde 2022) | 4h | Dev |
+| 6 | Email verification flow (backend tablas vacías · 0 endpoints) | 6h | Dev |
+| 7 | Password reset flow | 4h | Dev |
+| 8 | App Store screenshots + metadata | 4-6h | Boss copy + Dev capturas |
+| 9 | Privacy Manifest iOS17+ (PrivacyInfo.xcprivacy) | 2h | Dev |
+
+**Total bloqueantes 🔴**: ~50-65h dev + 10h Boss + esperas Apple Review (1-7 días)
+
+**🟡 IMPORTANTES**:
+- Sentry/Crashlytics observabilidad (3h) · sin esto no detectás crashes prod
+- Tests pytest (12-16h) · `backend/tests/` solo tiene `__init__.py` · 0 coverage
+- VAPID keys generadas + env (30min) · script existe sin correr
+- MP_ACCESS_TOKEN prod (1h Boss · KYC MP)
+- Branch consolidation (6-8h) · 23 branches activas · decidir cuál ship
+- Onboarding tutorial 3 screens (6h) · App Review penaliza apps sin guía
+- Rate limit Redis (3h) · auth.py usa dict in-memory · multi-instance falla
+
+**🟢 NICE-TO-HAVE**:
+- Apple Sign-In (4h · solo si agregás OAuth social)
+- Wearable sync Apple Health/Whoop (1-2 días c/u)
+- i18n EN (8h · LATAM expansión Q2 2027)
+- Fastlane screenshots automation (4h)
+
+**Riesgo mayor**: IAP. MP + Apple = rechazo seguro. Decidir entre RevenueCat o sacar iOS de v1.
+
+**Path crítico real**: items 1→3→4→5→6→7 son secuencia obligada. Item 2 (Boss enrollment Apple Dev) puede arrancar HOY en paralelo · tarda 24-48h.
 
 ---
 
