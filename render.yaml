@@ -50,6 +50,29 @@ services:
     rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
+    branch: main
+    # ↑ Producción · sirve la versión estable de main
+
+  - type: static site
+    name: peakqual-v2
+    runtime: node
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    branch: feat/api-first-refactor
+    # ↑ Staging V2 · refactor API-first con discos + AthleteCard FIFA + Smart Training Zero Burnout
+    # Auto-deploys con cada push a feat/api-first-refactor
+
+  - type: static site
+    name: peakqual-demo
+    runtime: node
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    branch: snapshot/mock-first-2026-05-27
+    autoDeploy: false
+    # ↑ Demo mock preservado · branch snapshot · NO auto-deploy
+    # Útil para demos comerciales · onboarding · regresion testing
 
 databases:
   - name: holy-oly-postgres
