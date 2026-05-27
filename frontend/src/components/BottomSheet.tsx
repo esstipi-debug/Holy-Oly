@@ -46,8 +46,11 @@ const BottomSheet: React.FC<Props> = ({ open, onClose, title, children, noHandle
             background: 'var(--bg)',
             borderTopLeftRadius: 24, borderTopRightRadius: 24,
             borderTop: '1px solid var(--card-border)',
-            paddingBottom: 32,
-            maxHeight: '85%', overflowY: 'auto',
+            // 76px de la bottom nav del PhoneLayout + 24 buffer + safe area inset (iOS home indicator)
+            paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 24px)',
+            maxHeight: '92%', overflowY: 'auto',
+            // Sticky last button: aseguramos que el scroll interno permita ver el último elemento
+            scrollPaddingBottom: 80,
           }}
         >
           {!noHandle && (
@@ -60,7 +63,7 @@ const BottomSheet: React.FC<Props> = ({ open, onClose, title, children, noHandle
               <h2 className="type-heading-md" style={{ color: 'var(--text)' }}>{title}</h2>
             </div>
           )}
-          <div style={{ padding: '16px 20px' }}>
+          <div style={{ padding: '16px 20px 32px' }}>
             {children}
           </div>
         </motion.div>

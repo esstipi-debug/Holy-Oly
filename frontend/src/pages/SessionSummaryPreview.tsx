@@ -79,12 +79,12 @@ const SessionSummaryPreview: React.FC = () => {
         </div>
       </div>
 
-      {/* Footer CTA sticky con backdrop */}
+      {/* Footer CTA sticky con backdrop · 76px se reserva para la bottom nav del PhoneLayout */}
       <footer
         className="absolute left-0 right-0 z-30"
         style={{
-          bottom: 0,
-          padding: '14px 24px 16px',
+          bottom: 76,
+          padding: '14px 24px calc(env(safe-area-inset-bottom, 0px) + 12px)',
           background: 'linear-gradient(to top, var(--bg) 0%, var(--bg) 65%, transparent 100%)',
           backdropFilter: 'blur(8px)',
         }}

@@ -161,8 +161,9 @@ const MetricHistoryModal: React.FC<Props> = ({ metric, currentValue, history, on
             background: 'var(--bg, #0A0A14)',
             borderTopLeftRadius: 24, borderTopRightRadius: 24,
             borderTop: `1px solid ${color}55`,
-            paddingBottom: 24,
-            maxHeight: '88%', overflowY: 'auto',
+            paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 24px)',
+            maxHeight: '92%', overflowY: 'auto',
+            scrollPaddingBottom: 80,
             boxShadow: `0 -10px 40px ${color}22`,
           }}
         >
