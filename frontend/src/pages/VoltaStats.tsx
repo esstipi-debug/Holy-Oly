@@ -75,8 +75,11 @@ const VoltaStats: React.FC = () => {
         <h1 style={{ fontSize: 22, fontWeight: 900, letterSpacing: '-.02em', margin: '2px 0 0' }}>Volumen & Performance</h1>
       </div>
 
-      {/* Tab chips */}
-      <div style={{ padding: '6px 16px 14px', display: 'flex', gap: 8 }}>
+      {/* Tab chips · horizontal scrollable para que Skills sea alcanzable en mobile */}
+      <div
+        className="scroll-x-no-bar"
+        style={{ padding: '6px 16px 14px', display: 'flex', gap: 8, overflowX: 'auto', flexWrap: 'nowrap' }}
+      >
         <Chip active={tab === 'volume'}     onClick={() => setTab('volume')}     label="Volumen" />
         <Chip active={tab === 'benchmarks'} onClick={() => setTab('benchmarks')} label="Benchmarks" />
         <Chip active={tab === 'profile'}    onClick={() => setTab('profile')}    label="Perfil" />
@@ -84,7 +87,7 @@ const VoltaStats: React.FC = () => {
           onClick={() => navigate('PROGRESSION')}
           className="btn-press"
           style={{
-            marginLeft: 'auto', padding: '6px 12px', borderRadius: 20,
+            marginLeft: 'auto', flexShrink: 0, padding: '6px 12px', borderRadius: 20,
             background: 'rgba(124,92,255,0.12)', border: '1px solid rgba(124,92,255,0.35)',
             color: '#A88BFF', fontSize: 11, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit',
           }}
@@ -300,6 +303,7 @@ const Chip: React.FC<{ active: boolean; onClick: () => void; label: string }> = 
     onClick={onClick}
     className="btn-press"
     style={{
+      flexShrink: 0,
       padding: '6px 14px', borderRadius: 20,
       background: active ? 'rgba(0,229,255,0.15)' : 'transparent',
       border: `1px solid ${active ? 'rgba(0,229,255,0.45)' : 'rgba(255,255,255,0.10)'}`,

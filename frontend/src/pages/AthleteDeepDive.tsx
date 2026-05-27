@@ -315,9 +315,9 @@ const AthleteDeepDive: React.FC = () => {
         )}
       </div>
 
-      {/* FOOTER ACTIONS */}
+      {/* FOOTER ACTIONS · 76 nav + safe-area iOS + 8 buffer */}
       <div style={{
-        position: 'absolute', bottom: 84, left: 16, right: 16,
+        position: 'absolute', bottom: 'calc(env(safe-area-inset-bottom, 0px) + 84px)', left: 16, right: 16,
         display: 'flex', gap: 8, zIndex: 40,
       }}>
         <button

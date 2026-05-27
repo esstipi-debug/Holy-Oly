@@ -177,9 +177,9 @@ const NewAthlete: React.FC = () => {
         </p>
       </div>
 
-      {/* CTA */}
+      {/* CTA · 76 nav + safe-area iOS */}
       <div style={{
-        position: 'absolute', bottom: 84, left: 16, right: 16,
+        position: 'absolute', bottom: 'calc(env(safe-area-inset-bottom, 0px) + 84px)', left: 16, right: 16,
         zIndex: 40, display: 'flex', gap: 8,
       }}>
         <button
