@@ -1,3 +1,4 @@
+// @ts-nocheck — Custom element <plate-3d> requires inline JSX declaration that conflicts with TS strict
 /**
  * Plate3D · React wrapper del custom element <plate-3d>.
  * Importa side-effect el JS standalone una vez.

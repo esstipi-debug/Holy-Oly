@@ -241,13 +241,11 @@ const VoltaStats: React.FC = () => {
                 </div>
               )}
               {benchmarks?.map(b => {
-                const tier: 'rx' | 'scaled' | 'rx_plus' =
-                  b.my_best_rx === 'rx' ? 'rx' : b.my_best_rx === 'scaled' ? 'scaled' : 'rx';
-                const tierLabel = tier === 'rx_plus' ? 'RX+' : tier === 'rx' ? 'RX' : 'SC';
-                const tierBg = tier === 'rx_plus' ? 'rgba(245,197,24,0.18)'
-                  : tier === 'rx' ? 'rgba(34,197,94,0.14)'
-                  : 'rgba(86,204,242,0.14)';
-                const tierColor = tier === 'rx_plus' ? '#F5C518' : tier === 'rx' ? C.green : C.cyan;
+                const tier: 'rx' | 'scaled' =
+                  b.my_best_rx === 'scaled' ? 'scaled' : 'rx';
+                const tierLabel = tier === 'rx' ? 'RX' : 'SC';
+                const tierBg = tier === 'rx' ? 'rgba(34,197,94,0.14)' : 'rgba(86,204,242,0.14)';
+                const tierColor = tier === 'rx' ? C.green : C.cyan;
                 const hasBest = b.my_best_value != null;
                 const currentLabel = hasBest ? formatScore(b.my_best_value!, b.score_type) : '—';
                 const previousLabel = b.my_previous_value != null ? formatScore(b.my_previous_value, b.score_type) : '—';

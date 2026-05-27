@@ -53,6 +53,10 @@ import Terms from './pages/Terms';
 import HormonalSetup from './pages/HormonalSetup';
 import PlateDemo from './pages/_dev/PlateDemo';
 import DesignV2 from './pages/_dev/DesignV2';
+import AtletaHomeV2 from './pages/v2/AtletaHomeV2';
+import CheckinV2 from './pages/v2/CheckinV2';
+import CoachDashV2 from './pages/v2/CoachDashV2';
+import SkillTreeV2 from './pages/v2/SkillTreeV2';
 import type { View } from './context/NavigationContext';
 
 /**
@@ -272,6 +276,10 @@ function AppInner() {
     if (currentView === 'HORMONAL') return <HormonalSetup />;
     if (currentView === 'PLATE_DEMO') return <PlateDemo />;
     if (currentView === 'DESIGN_V2') return <DesignV2 />;
+    if (currentView === 'V2_HOME') return <AtletaHomeV2 />;
+    if (currentView === 'V2_CHECKIN') return <CheckinV2 />;
+    if (currentView === 'V2_COACH') return <CoachDashV2 />;
+    if (currentView === 'V2_SKILL_TREE') return <SkillTreeV2 />;
     if (currentView === 'LOGIN' && !isAuthenticated && !getDeepLinkProduct()) {
       return <Landing />;
     }
