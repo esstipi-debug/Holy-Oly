@@ -492,6 +492,193 @@ async def seed_knowledge_pills(x_admin_token: Optional[str] = Header(default=Non
     return {"ok": True, "inserted_this_run": inserted, "total_in_db": total}
 
 
+@router.post("/seed-pills-huberman")
+async def seed_pills_huberman(x_admin_token: Optional[str] = Header(default=None)):
+    """
+    Pobla 20 píldoras basadas en protocolos Huberman Lab.
+    Fuente: Huberman Lab Podcast (Stanford · Andrew Huberman).
+    Citation incluye episodio específico cuando aplica.
+    """
+    check_admin(x_admin_token)
+    pool = await users_repo.get_pool()
+    if pool is None:
+        raise HTTPException(503, "DB no disponible")
+
+    import json as _json
+
+    PILLS_HUBERMAN = [
+        # ── SUEÑO ──
+        ("huberman_morning_sunlight", "sleep", "info",
+         "Luz solar 10min · primeros 30-60min al despertar",
+         "10-30min de luz solar matinal sincroniza tu reloj circadiano · mejora sueño esa noche +20min.",
+         "Exposición a luz solar (100k+ lux) dentro de la primera hora despierto activa células ganglionares de retina que sincronizan núcleo supraquiasmático. Resultado: cortisol matinal saludable, melatonina temprana en la noche, sleep onset 15-20min más rápido. NO usar gafas oscuras. Días nublados: 20-30min. Ventana inteligente · no después de 9-10am.",
+         "Huberman Lab #2: Master Your Sleep & Be More Alert When Awake"),
+
+        ("huberman_evening_sunset", "sleep", "info",
+         "Luz solar atardecer · ancla circadiana",
+         "Mirá el sol bajando 5-10min · protege contra luz artificial nocturna · mejora cortisol mañana siguiente.",
+         "Ver el sol cerca del atardecer (5-10min) actúa como segunda ancla circadiana. La luz de baja longitud de onda señaliza al cerebro 'el día termina'. Protege contra disrupciones por luz artificial nocturna posterior. Bonus: mejora ánimo (serotonina + dopamina).",
+         "Huberman Lab #2 & #28"),
+
+        ("huberman_delayed_caffeine", "caffeine", "info",
+         "Cafeína retrasada · 90-120min post despertar",
+         "Tomar cafeína 90-120min después de levantarte evita el bajón del mediodía y mejora alerta sostenida.",
+         "Al despertar, adenosina (que cafeína bloquea) ya está cayendo naturalmente. Cafeína inmediata = bloqueo redundante. Si esperás 90-120min, la cafeína actúa cuando adenosina volvería a subir → curva de alerta más estable. Reduce el clearance crash de mediodía. Sin cafeína después de 14h para protegerse del sleep.",
+         "Huberman Lab #100: Caffeine"),
+
+        ("huberman_nsdr", "recovery", "info",
+         "NSDR · Non-Sleep Deep Rest 10-20min",
+         "Práctica diaria de Yoga Nidra/NSDR mejora dopamina, sleep onset y recovery cognitivo +60%.",
+         "NSDR (Yoga Nidra) es una práctica de relajación consciente sin dormirse. 10-20min eleva dopamina basal 65% (vs reposo pasivo) y mejora reset cognitivo. Útil post-entrenamiento intenso o cuando sleep fue corto. Spotify/YouTube tiene scripts gratuitos. Forma: acostado, ojos cerrados, narración guiada con body scan.",
+         "Huberman Lab #5 & #28 · Yoga Nidra protocol"),
+
+        # ── COLD/HEAT ──
+        ("huberman_cold_protocol", "recovery", "info",
+         "Cold exposure · 11min/semana total",
+         "Inmersión fría 1-3min × 2-4 sesiones por semana eleva dopamina +250% por 3+ horas · mejora resilencia.",
+         "Frío deliberado (10-15°C) en sesiones cortas (1-3min). Total semanal: 11min divididos en 2-4 inmersiones. Eleva norepinefrina (alerta) y dopamina (motivación) sostenidas 3+h. Para recovery post-WOD: hacer >6h después del entrenamiento (sino bloquea adaptaciones hipertróficas). Ducha fría 1-3min también sirve.",
+         "Huberman Lab #66: Deliberate Cold Exposure"),
+
+        ("huberman_sauna", "recovery", "info",
+         "Sauna · 4×/semana × 20min reduce mortalidad 50%",
+         "Sauna 4-7 sesiones/semana × 20min a 80°C correlaciona con -47% mortalidad cardiovascular.",
+         "Estudio finlandés 20-año: 4-7 sesiones/semana × 19-23min cada una correlaciona con -50% mortalidad cardiovascular y mejora VO2max. Eleva GH 16x post-sesión (timing recovery). Protege contra Alzheimer (-65%). Hacer >30min post-WOD pesado para no bloquear adaptaciones.",
+         "Huberman Lab #87: Sauna · Laukkanen et al. JAMA Intern Med 2015"),
+
+        # ── ENTRENAMIENTO ──
+        ("huberman_zone_2", "training", "info",
+         "Zone 2 cardio · 180-200min/semana",
+         "Zone 2 (conversación posible) 3h/semana mejora mitocondrias, base aeróbica, recovery, longevidad.",
+         "Zone 2 = 60-70% FC máx · podés mantener conversación sin jadear. Acumular 180-200min/semana mejora densidad mitocondrial, oxidación de grasas, recovery entre WODs intensos. Esencial para halterofilia · CrossFit · HYROX. Puede ser caminar inclinado, bike easy, rower easy. Separar de strength por 6+h.",
+         "Huberman Lab #102 & Iñigo San Millán · Stanford"),
+
+        ("huberman_strength_protocol", "training", "info",
+         "Strength · 3-5 reps · 3-5 series · 80-85%",
+         "Para fuerza máxima · 3-5 reps × 3-5 series × 80-85% 1RM · descansos 2-4min · 2x/semana por grupo.",
+         "Protocolo strength science-based: 3-5 reps en 3-5 series con 80-85% del 1RM y descansos largos (2-4min). Frecuencia: 2× por semana por grupo muscular. Combinable con hypertrophy alternada (8-12 reps × 3-4 series × 65-75%). Time-under-tension para hipertrofia · velocidad explosiva para fuerza.",
+         "Huberman Lab #34: Optimize Your Training · Andy Galpin"),
+
+        # ── SUPLEMENTACIÓN ──
+        ("huberman_creatine", "nutrition", "info",
+         "Creatina monohidrato · 5g/día",
+         "5g/día creatina monohidrato · mejora fuerza 8% y cognición · seguridad extensamente validada.",
+         "Suplemento más estudiado en deporte. 5g/día (sin carga necesaria) mejora fuerza máxima 5-15%, potencia anaeróbica 10-20%, masa muscular magra 1-2kg/8 semanas. Bonus cognitivo (memoria de trabajo +5%). Saturación tarda ~28 días. Tomar con comida cualquier momento. No daña riñones en personas sanas.",
+         "Huberman Lab #88 · Kreider et al. 2017 Meta-analysis"),
+
+        ("huberman_magnesium", "sleep", "info",
+         "Magnesio L-threonato 30-60min antes de dormir",
+         "200mg de magnesio L-threonate antes de dormir mejora calidad de sueño y atraviesa BHE.",
+         "Forma específica L-threonato cruza barrera hematoencefálica (otras formas no). Mejora deep sleep, reduce sleep onset, y mejora memoria. Dosis: 145-200mg de Mg elemental (revisar etiqueta). Alternativas si no tenés: glicinato 200mg + apigenina 50mg. NO mezclar con melatonina (Huberman no recomienda melatonina rutinaria).",
+         "Huberman Lab #2 & #28 · Slutsky et al. 2010 Neuron"),
+
+        ("huberman_no_melatonin", "sleep", "warning",
+         "Melatonina · evitar uso crónico",
+         "Melatonina suplementaria reduce producción endógena · efecto rebote · usar solo jetlag.",
+         "Melatonina suplementaria tiende a tener dosis 10-100× la fisiológica. Uso crónico (>1 semana) puede suprimir producción endógena · disrumpe sistema. Solo recomendado para jetlag (3-5 días máximo). Alternativas más seguras: magnesio + apigenina + glicina · sleep hygiene · light protocols.",
+         "Huberman Lab #2 & #28 · Concern over melatonin"),
+
+        # ── RESPIRACIÓN ──
+        ("huberman_physiological_sigh", "stress", "info",
+         "Physiological Sigh · 1-3 ciclos en 30 segundos",
+         "Doble inhalación nasal + exhalación larga por boca · baja stress en <1min · gratis · validado.",
+         "Patrón respiratorio que reduce stress en <60seg: doble inhalación nasal (1ra profunda, 2da topping off los alvéolos) + exhalación larga por boca. 1-3 ciclos. Activa parasimpático, reduce CO2, baja heart rate. Validado por Stanford lab. Útil pre-WOD pesado · entre rounds · si te abruma el día.",
+         "Huberman Lab #28 · Balban et al. 2023 Cell Rep Med"),
+
+        ("huberman_box_breathing", "stress", "info",
+         "Box Breathing · 4-4-4-4 · 5min/día",
+         "4 inhalo · 4 retengo · 4 exhalo · 4 retengo · activa parasimpático · entrena HRV.",
+         "Patrón cuadrado: inhalar 4seg, retener 4seg, exhalar 4seg, retener 4seg. Practicar 5min/día baseline mejora HRV crónica (mejor recovery). Pre-WOD: 1-2min para enfocar. Si stress agudo: physiological sigh (más rápido). Box breathing es para regulación basal del SN autónomo.",
+         "Huberman Lab #28 · Navy SEAL technique"),
+
+        # ── CICLO HORMONAL ──
+        ("huberman_testosterone", "hormonal", "info",
+         "Testosterona · cosas que la suben naturalmente",
+         "Sueño 7-9h · resistencia ejercicio · vitamina D · zinc · evitar alcohol · exposición frío deliberada.",
+         "Comportamientos validados que optimizan testosterona endógena: sueño 7-9h (cada hora <7 reduce T ~15%), resistencia training 3-4×/sem, vitamina D 1000-2000 IU/día si deficiente, zinc 15-30mg/día con comida, exposición al frío deliberada, evitar alcohol crónico (>1 unidad/día reduce T 6%). Cortisol crónico es el enemigo principal.",
+         "Huberman Lab #15 · Optimize testosterone & estrogen"),
+
+        ("huberman_female_hormones", "hormonal", "info",
+         "Ciclo menstrual · adaptar entrenamiento por fase",
+         "Folicular: PR + intensidad · Ovulación: pico fuerza · Lútea: -20% volumen + técnica.",
+         "Fase folicular (días 1-14): estrógeno sube · sensibilidad a insulina alta · tolerancia carga máxima alta · ventana para PRs. Ovulación (día ~14): pico testosterona · puede atentar PR. Lútea (días 15-28): progesterona alta · retención líquido · temperatura sube 0.3°C · reducir volumen 20-30% · priorizar técnica · evitar tests máximos.",
+         "Huberman Lab #58 · Stacy Sims PhD"),
+
+        # ── NUTRICIÓN ──
+        ("huberman_protein_timing", "nutrition", "info",
+         "Proteína · 1g/lb body weight · distribuida",
+         "Atletas: 1g de proteína por libra de body weight diarios · 4-5 comidas · 30-40g por comida.",
+         "Para hipertrofia + recovery: 1.6-2.2g/kg/día (= 0.7-1g/lb). Distribuir en 4-5 comidas con 30-40g por comida (saturación de mTOR). Source: whey/casein/huevos/carne tienen leucina alta (mejor signal). Pre-sleep 30-40g caseína extiende síntesis durante sueño. Vegetal: aumentar 20-25% para compensar lower digestibility.",
+         "Huberman Lab #97 · Andy Galpin protocol"),
+
+        ("huberman_omega3", "nutrition", "info",
+         "Omega-3 EPA/DHA · 2-3g/día",
+         "2-3g/día de EPA + DHA reduce inflamación · mejora mood · clave para recovery post-WOD pesado.",
+         "EPA/DHA bajos correlacionan con inflamación crónica, peor recovery, mood bajo. Dosis efectiva: 2-3g/día (sumar EPA + DHA del label). Pescado graso 2-3×/sem o suplemento certificado IFOS. NO confundir con omega-3 total · solo EPA + DHA cuentan. Tomar con comida grasa para absorción.",
+         "Huberman Lab #62 · Foundational supplements"),
+
+        # ── DOPAMINA / MOTIVACIÓN ──
+        ("huberman_dopamine_management", "mental", "info",
+         "Dopamina · no la quemes con shortcuts",
+         "Multiple shortcuts en un día (cafeína + redes + porn + apuestas) agota dopamina · entrenar se vuelve gris.",
+         "Dopamina opera en sistema 'tonic + phasic'. Múltiples picos rápidos en un día (cafeína + redes sociales + porn + apuestas + sugar) sobrecargan el sistema · baseline cae · placer normal (entrenar, comer bien) se vuelve aburrido. Soluciones: limitar shortcuts a 1-2/día, separados, alternar con esfuerzo. Pre-WOD: NO cafeína sin entrenamiento real.",
+         "Huberman Lab #39 · Controlling Dopamine"),
+
+        ("huberman_effort_reward", "mental", "info",
+         "Aprende a disfrutar el ESFUERZO, no solo recompensa",
+         "Liberar dopamina DURANTE el esfuerzo difícil entrena cerebro a buscar más esfuerzo · adicción al trabajo bueno.",
+         "Truco mental clave: en lugar de pensar 'qué bueno cuando termine', pensar 'esto es bueno PORQUE es difícil'. Liberar dopamina durante el esfuerzo (no solo post) entrena el sistema a buscar trabajo duro. Atletas de élite naturalmente lo hacen. Útil mid-WOD en zona roja, en sesiones de 5x5 finales, en zone 2 monótono.",
+         "Huberman Lab #39 · Effort-derived dopamine"),
+
+        # ── ALCOHOL ──
+        ("huberman_alcohol_zero", "alcohol", "warning",
+         "Alcohol · NO hay dosis saludable",
+         "Más de 2 unidades/semana eleva riesgo cáncer · -7 puntos cognitivo · empeora sleep dramáticamente.",
+         "Análisis 2022 (>5M personas): cualquier alcohol regular aumenta riesgo cánceres digestivos. >2 unidades/semana asociado con atrofia cerebral, -7 puntos cognitivos sostenidos, peor sleep architecture (cero deep sleep), peor recovery muscular. Para entrenar serio: 0 unidades semana antes de competencia · max 1-2/semana mantenimiento.",
+         "Huberman Lab #86 · Alcohol effects · GBD 2022 Lancet"),
+    ]
+
+    inserted = 0
+    async with pool.acquire() as conn:
+        for slug, category, severity, title, short_text, long_text, citation in PILLS_HUBERMAN:
+            try:
+                await conn.execute(
+                    """
+                    INSERT INTO knowledge_pills
+                        (slug, category, severity, title, short_text, long_text, citation,
+                         trigger_rules, related_engines)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, '{}'::jsonb, $8::jsonb)
+                    ON CONFLICT (slug) DO UPDATE
+                      SET title = EXCLUDED.title,
+                          short_text = EXCLUDED.short_text,
+                          long_text = EXCLUDED.long_text,
+                          citation = EXCLUDED.citation
+                    """,
+                    slug, category, severity, title, short_text, long_text, citation,
+                    _json.dumps([category, "huberman"]),
+                )
+                inserted += 1
+            except Exception as e:
+                print(f"[seed-pills-huberman] {slug}: {e}")
+
+        total = await conn.fetchval("SELECT COUNT(*) FROM knowledge_pills")
+        by_source = await conn.fetch(
+            """
+            SELECT
+              COUNT(*) FILTER (WHERE citation ILIKE '%Huberman%') AS huberman,
+              COUNT(*) FILTER (WHERE citation NOT ILIKE '%Huberman%') AS otros,
+              COUNT(*) AS total
+              FROM knowledge_pills
+            """
+        )
+
+    return {
+        "ok": True,
+        "inserted_this_run": inserted,
+        "total_in_db": total,
+        "breakdown": dict(by_source[0]) if by_source else {},
+    }
+
+
 @router.post("/seed-demo")
 async def run_seed_demo(
     reset: bool = False,
