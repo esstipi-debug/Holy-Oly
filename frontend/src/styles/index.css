@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @config "../../tailwind.config.js";
 
+/* Peak Qual V2 Design Tokens (Smart Training Zero Burnout) */
+@import "./v2/tokens.css";
+
 :root {
   --bg: #07070F;
   --surface: #111118;

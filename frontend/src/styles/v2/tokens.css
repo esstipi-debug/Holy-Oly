@@ -1,0 +1,68 @@
+/* ============================================================
+   PEAK QUAL · DESIGN TOKENS
+   Smart Training · Zero Burnout
+   ============================================================ */
+
+:root {
+  /* ---------- SURFACE ---------- */
+  --bg-deep:    #050510;
+  --bg:         #0A0A14;
+  --surface-1:  #12121C;
+  --surface-2:  #1A1A28;
+  --surface-3:  #232336;
+  --border-soft: rgba(255,255,255,0.06);
+  --border-hard: rgba(0,229,255,0.35);
+
+  /* ---------- ENGINE ---------- */
+  --engine-stress:    #00E5FF;   /* CNS · readiness */
+  --engine-adapt:     #A855F7;   /* adaptation */
+  --engine-macro:     #FFB300;   /* macrocycle */
+  --engine-belt:      #F5A623;   /* belt / XP */
+  --engine-streak:    #FF6B35;   /* streak */
+  --engine-oly:       #22C55E;   /* OLY index */
+  --engine-hormonal:  #EC4899;   /* ciclo */
+  --engine-pulse:     #EF4444;   /* HR zones */
+
+  /* ---------- TIER DISCS (halterofilia) ---------- */
+  --tier-0: #F8F8F8;   /* blanco */
+  --tier-1: #22C55E;   /* verde  */
+  --tier-2: #FBBF24;   /* amarillo */
+  --tier-3: #3B82F6;   /* azul */
+  --tier-4: #EF4444;   /* rojo */
+
+  /* ---------- TEXT ---------- */
+  --text-hi:  #F1F5F9;
+  --text:     #CBD5E1;
+  --text-mid: #94A3B8;
+  --text-lo:  #64748B;
+
+  /* ---------- TYPE ---------- */
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-body:    'Inter', system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', ui-monospace, monospace;
+
+  /* ---------- SPACING (4-scale) ---------- */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-6: 24px;
+  --s-8: 32px;
+
+  /* ---------- RADIUS ---------- */
+  --r-sm:   6px;
+  --r-md:  12px;
+  --r-lg:  18px;
+  --r-xl:  24px;
+  --r-full: 999px;
+
+  /* ---------- ELEVATION ---------- */
+  --glow-cyan:  0 0 24px rgba(0,229,255,0.25);
+  --glow-amber: 0 0 24px rgba(255,179,0,0.30);
+  --glow-violet: 0 0 24px rgba(168,85,247,0.30);
+  --glow-fire:  0 0 24px rgba(255,107,53,0.35);
+  --glow-green: 0 0 24px rgba(34,197,94,0.30);
+  --glow-pink:  0 0 24px rgba(236,72,153,0.30);
+  --glow-red:   0 0 24px rgba(239,68,68,0.35);
+  --shadow-card: 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04);
+}

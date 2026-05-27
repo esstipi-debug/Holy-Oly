@@ -1,0 +1,613 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AthleteCard · Peak Qual</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" />
+
+  <link rel="stylesheet" href="tokens.css" />
+
+  <style>
+    /* ========================================================== */
+    /* PAGE                                                       */
+    /* ========================================================== */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      background: var(--bg-deep);
+      background-image:
+        linear-gradient(rgba(0,229,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,229,255,0.025) 1px, transparent 1px),
+        radial-gradient(ellipse at 50% 0%, rgba(0,229,255,0.06), transparent 60%);
+      background-size: 40px 40px, 40px 40px, 100% 100%;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: var(--font-body);
+      -webkit-font-smoothing: antialiased;
+      padding: 48px 24px 80px;
+    }
+
+    .page-head {
+      max-width: 1100px;
+      margin: 0 auto 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      padding-bottom: 16px;
+      border-bottom: 1px dashed var(--border-soft);
+    }
+    .page-head h1 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 36px;
+      letter-spacing: -0.025em;
+      color: var(--text-hi);
+      line-height: 1;
+    }
+    .page-head h1 .accent { color: var(--engine-stress); }
+    .page-head .num {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      color: var(--text-lo);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .page-head .meta {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: var(--text-mid);
+      text-align: right;
+    }
+    .page-head .meta .v { color: var(--text-hi); }
+
+    /* card row */
+    .card-row {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+      padding-top: 24px;
+    }
+
+    /* ========================================================== */
+    /* CARD · 280 × 426 (1:1.52)                                  */
+    /* ========================================================== */
+    .ac-card {
+      --tier-c: #22C55E;
+      --tier-rgb: 34, 197, 94;
+      width: 280px;
+      height: 426px;
+      position: relative;
+      border-radius: 14px;
+      border: 1.5px solid var(--tier-c);
+      padding: 14px 14px 12px;
+      background:
+        radial-gradient(ellipse 90% 60% at 50% 0%,
+          color-mix(in oklab, var(--tier-c) 22%, transparent) 0%,
+          transparent 55%),
+        linear-gradient(160deg,
+          color-mix(in oklab, var(--tier-c) 22%, var(--surface-2)) 0%,
+          var(--surface-1) 45%,
+          color-mix(in oklab, var(--tier-c) 10%, var(--bg-deep)) 100%);
+      box-shadow:
+        0 0 24px rgba(var(--tier-rgb), 0.30),
+        0 24px 60px rgba(0,0,0,0.55),
+        inset 0 1px 0 rgba(255,255,255,0.06);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: transform 220ms ease, box-shadow 220ms ease;
+    }
+    .ac-card:hover {
+      transform: translateY(-4px);
+      box-shadow:
+        0 0 32px rgba(var(--tier-rgb), 0.45),
+        0 32px 70px rgba(0,0,0,0.6),
+        inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+
+    /* HUD tactical brackets in corners */
+    .ac-card::before, .ac-card::after,
+    .ac-card .br-bl, .ac-card .br-br {
+      content: "";
+      position: absolute;
+      width: 14px; height: 14px;
+      border: 1.5px solid var(--tier-c);
+      opacity: 0.45;
+      pointer-events: none;
+    }
+    .ac-card::before { top: 6px; left: 6px;  border-right: 0; border-bottom: 0; }
+    .ac-card::after  { top: 6px; right: 6px; border-left: 0;  border-bottom: 0; }
+    .ac-card .br-bl  { bottom: 6px; left: 6px;  border-right: 0; border-top: 0; }
+    .ac-card .br-br  { bottom: 6px; right: 6px; border-left: 0;  border-top: 0; }
+
+    /* ============= HEADER ============= */
+    .ac-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 2px 2px 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .ac-disc-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      min-width: 64px;
+    }
+    .ac-tier-label {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 9px;
+      letter-spacing: 0.22em;
+      color: var(--tier-c);
+      text-transform: uppercase;
+      text-shadow: 0 0 8px rgba(var(--tier-rgb), 0.4);
+    }
+    .ac-ovr-block {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      line-height: 1;
+      gap: 2px;
+    }
+    .ac-ovr {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 50px;
+      color: var(--text-hi);
+      line-height: 0.9;
+      letter-spacing: -0.04em;
+      font-variant-numeric: tabular-nums;
+      text-shadow:
+        0 0 12px rgba(var(--tier-rgb), 0.7),
+        0 0 28px rgba(var(--tier-rgb), 0.35);
+    }
+    .ac-ovr-lbl {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 10px;
+      letter-spacing: 0.32em;
+      color: var(--tier-c);
+      text-transform: uppercase;
+    }
+
+    /* ============= AVATAR ============= */
+    .ac-avatar {
+      width: 140px;
+      height: 140px;
+      margin: 14px auto 8px;
+      border-radius: 50%;
+      border: 2px solid var(--tier-c);
+      background:
+        radial-gradient(ellipse 60% 45% at 32% 28%, rgba(255,255,255,0.05), transparent 70%),
+        radial-gradient(circle at 35% 30%, #2a2a3a, var(--bg-deep) 70%);
+      box-shadow:
+        0 0 22px rgba(var(--tier-rgb), 0.45),
+        inset 0 0 30px rgba(var(--tier-rgb), 0.16),
+        inset 0 -4px 14px rgba(0,0,0,0.5);
+      display: grid;
+      place-items: center;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 46px;
+      color: var(--text-hi);
+      letter-spacing: -0.03em;
+      position: relative;
+    }
+    .ac-avatar::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background:
+        repeating-linear-gradient(45deg,
+          transparent 0 6px,
+          rgba(var(--tier-rgb), 0.05) 6px 7px);
+      pointer-events: none;
+    }
+
+    /* ============= NAME / PRODUCT ============= */
+    .ac-id {
+      text-align: center;
+      padding: 4px 0 10px;
+    }
+    .ac-name {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 21px;
+      letter-spacing: -0.02em;
+      color: var(--text-hi);
+      text-transform: uppercase;
+      line-height: 1;
+    }
+    .ac-product {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 10px;
+      letter-spacing: 0.4em;
+      color: var(--tier-c);
+      text-transform: uppercase;
+      margin-top: 6px;
+      text-shadow: 0 0 8px rgba(var(--tier-rgb), 0.4);
+    }
+
+    /* ============= STATS ============= */
+    .ac-stats {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 5px;
+      padding: 8px 2px 0;
+      border-top: 1px solid rgba(255,255,255,0.04);
+      flex: 1;
+      align-content: start;
+    }
+    .ac-stat {
+      display: grid;
+      grid-template-columns: 36px 1fr 22px;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      line-height: 1;
+    }
+    .ac-stat .k {
+      color: var(--text-mid);
+      font-weight: 700;
+      letter-spacing: 0.18em;
+    }
+    .ac-stat .bar {
+      height: 5px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 1px;
+      overflow: hidden;
+      position: relative;
+    }
+    .ac-stat .bar .fill {
+      height: 100%;
+      background: linear-gradient(90deg,
+        color-mix(in oklab, var(--c) 50%, #000) 0%,
+        var(--c) 100%);
+      border-radius: 1px;
+    }
+    .ac-stat .v {
+      color: var(--text-hi);
+      font-weight: 700;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    .ac-stat[data-glow="true"] .v {
+      color: var(--c);
+      text-shadow: 0 0 8px var(--c);
+    }
+    .ac-stat[data-glow="true"] .bar .fill {
+      box-shadow: 0 0 6px var(--c);
+    }
+    /* stat colors per spec */
+    .ac-stat.str { --c: var(--engine-pulse);    }
+    .ac-stat.cnd { --c: var(--engine-stress);   }
+    .ac-stat.mob { --c: var(--engine-adapt);    }
+    .ac-stat.rec { --c: var(--engine-oly);      }
+    .ac-stat.con { --c: var(--engine-macro);    }
+    .ac-stat.tec { --c: var(--engine-hormonal); }
+
+    /* ============= FOOTER ============= */
+    .ac-foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 8px;
+      margin-top: 6px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .ac-foot .box {
+      color: var(--text-mid);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .ac-foot .box .flag { font-size: 13px; }
+    .ac-foot .tier-w {
+      color: var(--tier-c);
+      font-weight: 700;
+      text-shadow: 0 0 6px rgba(var(--tier-rgb), 0.4);
+    }
+
+    /* ========================================================== */
+    /* HERO VARIANT · cardShimmer + diagonal sheen                */
+    /* ========================================================== */
+    .ac-card.hero {
+      border-width: 2px;
+      box-shadow:
+        0 0 44px rgba(var(--tier-rgb), 0.55),
+        0 0 90px rgba(var(--tier-rgb), 0.20),
+        0 30px 70px rgba(0,0,0,0.6),
+        inset 0 1px 0 rgba(255,255,255,0.08);
+      background:
+        radial-gradient(ellipse 100% 50% at 50% 0%,
+          color-mix(in oklab, var(--tier-c) 35%, transparent) 0%,
+          transparent 55%),
+        linear-gradient(160deg,
+          color-mix(in oklab, var(--tier-c) 32%, var(--surface-2)) 0%,
+          color-mix(in oklab, var(--tier-c) 16%, var(--surface-1)) 45%,
+          color-mix(in oklab, var(--tier-c) 18%, var(--bg-deep)) 100%);
+    }
+    .ac-card.hero::before,
+    .ac-card.hero::after,
+    .ac-card.hero .br-bl,
+    .ac-card.hero .br-br {
+      opacity: 0.7;
+      width: 18px; height: 18px;
+      border-width: 2px;
+    }
+
+    /* moving diagonal sheen across the whole card */
+    .ac-card.hero .sheen {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      border-radius: inherit;
+      pointer-events: none;
+      z-index: 4;
+    }
+    .ac-card.hero .sheen::after {
+      content: "";
+      position: absolute;
+      top: -60%; left: -40%;
+      width: 60%; height: 220%;
+      background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(255,255,255,0.0)  20%,
+        rgba(255,255,255,0.18) 48%,
+        rgba(255,255,255,0.32) 50%,
+        rgba(255,255,255,0.18) 52%,
+        rgba(255,255,255,0.0)  80%,
+        transparent 100%);
+      transform: rotate(20deg);
+      animation: cardShimmer 4.5s ease-in-out infinite;
+      mix-blend-mode: screen;
+    }
+    @keyframes cardShimmer {
+      0%   { transform: translateX(-200%) rotate(20deg); }
+      40%  { transform: translateX(280%) rotate(20deg); }
+      100% { transform: translateX(280%) rotate(20deg); }
+    }
+
+    /* subtle hero badge: small bolt at top */
+    .ac-card.hero .hero-badge {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 2px 8px 2px 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--bg-deep);
+      border: 1.5px solid var(--tier-c);
+      color: var(--tier-c);
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 9px;
+      letter-spacing: 0.25em;
+      border-radius: 999px;
+      text-transform: uppercase;
+      box-shadow: 0 0 10px rgba(var(--tier-rgb), 0.5);
+      z-index: 6;
+    }
+    .ac-card.hero .hero-badge::before {
+      content: "✦";
+      font-size: 11px;
+    }
+
+    /* card label below */
+    .ac-card-tag {
+      margin-top: 14px;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      color: var(--text-lo);
+      text-transform: uppercase;
+    }
+    .ac-card-tag .v {
+      display: block;
+      color: var(--text-mid);
+      margin-top: 2px;
+    }
+    .card-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* page footer */
+    .page-foot {
+      max-width: 1100px;
+      margin: 80px auto 0;
+      padding-top: 24px;
+      border-top: 1px dashed var(--border-soft);
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-lo);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+  <header class="page-head">
+    <div>
+      <div class="num">PKQL · CMP-009 · ATHLETE CARD</div>
+      <h1>Athlete<span class="accent">Card</span> · FIFA Ultimate</h1>
+    </div>
+    <div class="meta">
+      <div>aspect <span class="v">280 × 426 · 1:1.52</span></div>
+      <div>variants <span class="v">standard · hero (shimmer)</span></div>
+      <div>palette <span class="v">tier-driven</span></div>
+    </div>
+  </header>
+
+  <section class="card-row">
+
+    <!-- ============= LUCÍA · VOLTA · VERDE T1 · OVR 68 ============= -->
+    <div class="card-cell">
+      <article class="ac-card"
+               data-tier="1"
+               data-screen-label="01 Lucía · Verde"
+               style="--tier-c: #22C55E; --tier-rgb: 34, 197, 94;">
+        <span class="br-bl"></span><span class="br-br"></span>
+
+        <header class="ac-head">
+          <div class="ac-disc-wrap">
+            <plate-3d tier="1" size="56"></plate-3d>
+            <span class="ac-tier-label">VERDE</span>
+          </div>
+          <div class="ac-ovr-block">
+            <span class="ac-ovr">68</span>
+            <span class="ac-ovr-lbl">OVR</span>
+          </div>
+        </header>
+
+        <div class="ac-avatar">LR</div>
+
+        <div class="ac-id">
+          <div class="ac-name">Lucía Rodríguez</div>
+          <div class="ac-product">VOLTA</div>
+        </div>
+
+        <div class="ac-stats">
+          <div class="ac-stat str"><span class="k">STR</span><div class="bar"><div class="fill" style="width:66%"></div></div><span class="v">66</span></div>
+          <div class="ac-stat cnd"><span class="k">CND</span><div class="bar"><div class="fill" style="width:72%"></div></div><span class="v">72</span></div>
+          <div class="ac-stat mob"><span class="k">MOB</span><div class="bar"><div class="fill" style="width:70%"></div></div><span class="v">70</span></div>
+          <div class="ac-stat rec"><span class="k">REC</span><div class="bar"><div class="fill" style="width:65%"></div></div><span class="v">65</span></div>
+          <div class="ac-stat con"><span class="k">CON</span><div class="bar"><div class="fill" style="width:68%"></div></div><span class="v">68</span></div>
+          <div class="ac-stat tec"><span class="k">TEC</span><div class="bar"><div class="fill" style="width:67%"></div></div><span class="v">67</span></div>
+        </div>
+
+        <footer class="ac-foot">
+          <span class="box"><span class="flag">🇨🇱</span> Box Comando</span>
+          <span class="tier-w">VERDE · 10kg</span>
+        </footer>
+      </article>
+      <div class="ac-card-tag">
+        STANDARD<span class="v">OVR 68 · T1</span>
+      </div>
+    </div>
+
+    <!-- ============= MARCO · HOLY OLY · AZUL T3 · OVR 84 ============= -->
+    <div class="card-cell">
+      <article class="ac-card"
+               data-tier="3"
+               data-screen-label="02 Marco · Azul"
+               style="--tier-c: #3B82F6; --tier-rgb: 59, 130, 246;">
+        <span class="br-bl"></span><span class="br-br"></span>
+
+        <header class="ac-head">
+          <div class="ac-disc-wrap">
+            <plate-3d tier="3" size="56"></plate-3d>
+            <span class="ac-tier-label">AZUL</span>
+          </div>
+          <div class="ac-ovr-block">
+            <span class="ac-ovr">84</span>
+            <span class="ac-ovr-lbl">OVR</span>
+          </div>
+        </header>
+
+        <div class="ac-avatar">MV</div>
+
+        <div class="ac-id">
+          <div class="ac-name">Marco Vitali</div>
+          <div class="ac-product">HOLY OLY</div>
+        </div>
+
+        <div class="ac-stats">
+          <div class="ac-stat str" data-glow="true"><span class="k">STR</span><div class="bar"><div class="fill" style="width:91%"></div></div><span class="v">91</span></div>
+          <div class="ac-stat cnd"><span class="k">CND</span><div class="bar"><div class="fill" style="width:70%"></div></div><span class="v">70</span></div>
+          <div class="ac-stat mob"><span class="k">MOB</span><div class="bar"><div class="fill" style="width:75%"></div></div><span class="v">75</span></div>
+          <div class="ac-stat rec"><span class="k">REC</span><div class="bar"><div class="fill" style="width:78%"></div></div><span class="v">78</span></div>
+          <div class="ac-stat con" data-glow="true"><span class="k">CON</span><div class="bar"><div class="fill" style="width:88%"></div></div><span class="v">88</span></div>
+          <div class="ac-stat tec" data-glow="true"><span class="k">TEC</span><div class="bar"><div class="fill" style="width:92%"></div></div><span class="v">92</span></div>
+        </div>
+
+        <footer class="ac-foot">
+          <span class="box"><span class="flag">🇨🇱</span> Box Comando</span>
+          <span class="tier-w">AZUL · 20kg</span>
+        </footer>
+      </article>
+      <div class="ac-card-tag">
+        STANDARD<span class="v">OVR 84 · T3</span>
+      </div>
+    </div>
+
+    <!-- ============= FRANCO · AXON · ROJO T4 · OVR 91 · HERO ============= -->
+    <div class="card-cell">
+      <article class="ac-card hero"
+               data-tier="4"
+               data-screen-label="03 Franco · Rojo HERO"
+               style="--tier-c: #EF4444; --tier-rgb: 239, 68, 68;">
+        <span class="br-bl"></span><span class="br-br"></span>
+        <span class="hero-badge">HERO</span>
+        <span class="sheen"></span>
+
+        <header class="ac-head">
+          <div class="ac-disc-wrap">
+            <plate-3d tier="4" size="56" animate></plate-3d>
+            <span class="ac-tier-label">ROJO</span>
+          </div>
+          <div class="ac-ovr-block">
+            <span class="ac-ovr">91</span>
+            <span class="ac-ovr-lbl">OVR</span>
+          </div>
+        </header>
+
+        <div class="ac-avatar">FA</div>
+
+        <div class="ac-id">
+          <div class="ac-name">Franco Aravena</div>
+          <div class="ac-product">AXON</div>
+        </div>
+
+        <div class="ac-stats">
+          <div class="ac-stat str" data-glow="true"><span class="k">STR</span><div class="bar"><div class="fill" style="width:89%"></div></div><span class="v">89</span></div>
+          <div class="ac-stat cnd" data-glow="true"><span class="k">CND</span><div class="bar"><div class="fill" style="width:96%"></div></div><span class="v">96</span></div>
+          <div class="ac-stat mob" data-glow="true"><span class="k">MOB</span><div class="bar"><div class="fill" style="width:88%"></div></div><span class="v">88</span></div>
+          <div class="ac-stat rec" data-glow="true"><span class="k">REC</span><div class="bar"><div class="fill" style="width:92%"></div></div><span class="v">92</span></div>
+          <div class="ac-stat con" data-glow="true"><span class="k">CON</span><div class="bar"><div class="fill" style="width:90%"></div></div><span class="v">90</span></div>
+          <div class="ac-stat tec" data-glow="true"><span class="k">TEC</span><div class="bar"><div class="fill" style="width:91%"></div></div><span class="v">91</span></div>
+        </div>
+
+        <footer class="ac-foot">
+          <span class="box"><span class="flag">🇨🇱</span> Box Comando</span>
+          <span class="tier-w">ROJO · 25kg</span>
+        </footer>
+      </article>
+      <div class="ac-card-tag" style="color: var(--engine-streak)">
+        HERO ✦ SHIMMER<span class="v">OVR 91 · T4</span>
+      </div>
+    </div>
+
+  </section>
+
+  <footer class="page-foot">
+    <span>PKQL · ATHLETECARD v0.1 · CMP-009</span>
+    <span>SMART TRAINING · ZERO BURNOUT</span>
+    <span>BUILD 2026.05</span>
+  </footer>
+
+  <script src="plate-3d.js"></script>
+</body>
+</html>

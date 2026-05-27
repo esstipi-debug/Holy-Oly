@@ -1,0 +1,854 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Control de Daños · Peak Qual</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" />
+
+  <link rel="stylesheet" href="tokens.css" />
+
+  <style>
+    /* ========================================================== */
+    /* PAGE                                                       */
+    /* ========================================================== */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      background: var(--bg-deep);
+      background-image:
+        linear-gradient(rgba(0,229,255,0.022) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,229,255,0.022) 1px, transparent 1px),
+        radial-gradient(ellipse at 50% 0%, rgba(0,229,255,0.05), transparent 60%);
+      background-size: 40px 40px, 40px 40px, 100% 100%;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: var(--font-body);
+      -webkit-font-smoothing: antialiased;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    /* ========================================================== */
+    /* PHONE FRAME                                                */
+    /* ========================================================== */
+    .phone {
+      width: 390px;
+      height: 844px;
+      background: #000;
+      border-radius: 44px;
+      padding: 10px;
+      box-shadow:
+        0 24px 80px rgba(0,0,0,0.7),
+        0 0 0 1px rgba(255,255,255,0.06);
+      position: relative;
+    }
+    .phone-inner {
+      width: 100%;
+      height: 100%;
+      background:
+        radial-gradient(ellipse at 50% 0%, rgba(0,229,255,0.05), transparent 50%),
+        var(--bg);
+      border-radius: 34px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .phone-inner::before {
+      content: ""; position: absolute;
+      top: 8px; left: 50%; transform: translateX(-50%);
+      width: 110px; height: 24px;
+      background: #000;
+      border-radius: 14px;
+      z-index: 30;
+    }
+
+    .status-bar {
+      flex-shrink: 0;
+      height: 38px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 28px 0;
+      font-family: var(--font-body);
+      font-size: 13px;
+      color: var(--text-hi);
+      font-weight: 600;
+    }
+    .status-bar .right { display: flex; gap: 6px; align-items: center; font-size: 12px; }
+
+    /* ========================================================== */
+    /* HEADER                                                     */
+    /* ========================================================== */
+    .cd-header {
+      flex-shrink: 0;
+      padding: 12px 18px 14px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .cd-h-text { flex: 1; }
+    .cd-h-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      letter-spacing: 0.25em;
+      color: var(--engine-stress);
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .cd-h-eyebrow .pip {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--engine-stress);
+      box-shadow: 0 0 6px var(--engine-stress);
+    }
+    .cd-h-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 22px;
+      color: var(--text-hi);
+      letter-spacing: -0.02em;
+      line-height: 1.05;
+    }
+    .cd-h-title .accent { color: var(--engine-stress); }
+    .cd-h-sub {
+      font-family: var(--font-body);
+      font-size: 12px;
+      color: var(--text-mid);
+      margin-top: 4px;
+      letter-spacing: 0.01em;
+    }
+    .cd-h-x {
+      width: 32px; height: 32px;
+      background: var(--surface-2);
+      border: 1px solid var(--border-soft);
+      border-radius: 8px;
+      display: grid; place-items: center;
+      cursor: pointer;
+      color: var(--text-mid);
+      flex-shrink: 0;
+    }
+    .cd-h-x:hover { color: var(--text-hi); }
+
+    /* ========================================================== */
+    /* SCROLL                                                     */
+    /* ========================================================== */
+    .cd-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px 14px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      scrollbar-width: thin;
+    }
+    .cd-scroll::-webkit-scrollbar { width: 4px; }
+    .cd-scroll::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 2px; }
+
+    /* ========================================================== */
+    /* CARD base (soft, no hard brackets)                         */
+    /* ========================================================== */
+    .cd-card {
+      position: relative;
+      background: var(--surface-1);
+      border: 1px solid var(--border-soft);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .cd-card[data-tone="diag"]   { background: linear-gradient(160deg, rgba(255,179,0,0.06), var(--surface-1) 70%); border-color: rgba(255,179,0,0.18); }
+    .cd-card[data-tone="impact"] { background: linear-gradient(160deg, rgba(255,179,0,0.05), var(--surface-1) 70%); }
+    .cd-card[data-tone="plan"]   { background: linear-gradient(160deg, rgba(34,197,94,0.06), var(--surface-1) 70%); border-color: rgba(34,197,94,0.18); }
+    .cd-card[data-tone="ai"]     { background: linear-gradient(160deg, rgba(0,229,255,0.05), var(--surface-1) 70%); border-color: rgba(0,229,255,0.18); }
+
+    .cd-card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+    .cd-card-head .lbl {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      color: var(--text-lo);
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .cd-card-head .lbl .ic {
+      color: var(--lc, var(--engine-stress));
+    }
+    .cd-card-head .step {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--text-lo);
+      letter-spacing: 0.15em;
+    }
+    .cd-card-head .step .n {
+      color: var(--text-mid);
+      font-weight: 700;
+    }
+
+    /* ========================================================== */
+    /* CARD 1 · DIAGNÓSTICO                                       */
+    /* ========================================================== */
+    .cd-diag-summary {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 16px;
+      color: var(--text-hi);
+      letter-spacing: -0.015em;
+      line-height: 1.3;
+      margin-top: 2px;
+    }
+    .cd-diag-summary .hi {
+      color: var(--engine-macro);
+      font-weight: 700;
+    }
+
+    .cd-factors {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .cd-factor {
+      background: var(--bg);
+      border: 1px solid var(--border-soft);
+      border-radius: 6px;
+      padding: 8px 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
+    }
+    .cd-factor .k {
+      font-family: var(--font-mono);
+      font-size: 8.5px;
+      letter-spacing: 0.18em;
+      color: var(--text-lo);
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .cd-factor .v {
+      font-family: var(--font-mono);
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--c, var(--engine-macro));
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      margin-top: 2px;
+    }
+    .cd-factor .v .u {
+      font-size: 10px;
+      color: var(--text-mid);
+      font-weight: 500;
+      margin-left: 2px;
+    }
+    .cd-factor .sub {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--text-mid);
+      letter-spacing: 0.04em;
+    }
+    .cd-factor[data-tone="sleep"]  { --c: var(--engine-macro); }
+    .cd-factor[data-tone="rpe"]    { --c: var(--engine-macro); }
+    .cd-factor[data-tone="stress"] { --c: var(--engine-macro); }
+
+    /* ========================================================== */
+    /* CARD 2 · IMPACTO                                           */
+    /* ========================================================== */
+    .cd-impact-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-top: 2px;
+    }
+    .cd-impact {
+      background: var(--bg);
+      border: 1px solid rgba(255,179,0,0.18);
+      border-radius: 6px;
+      padding: 10px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .cd-impact .k {
+      font-family: var(--font-mono);
+      font-size: 8.5px;
+      letter-spacing: 0.18em;
+      color: var(--text-lo);
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .cd-impact .v {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 26px;
+      color: var(--engine-macro);
+      line-height: 1;
+      letter-spacing: -0.03em;
+      font-variant-numeric: tabular-nums;
+    }
+    .cd-impact .v .sym {
+      font-size: 16px;
+      color: var(--engine-macro);
+      margin-right: 2px;
+    }
+    .cd-impact .v .u {
+      font-size: 12px;
+      color: var(--text-mid);
+      font-weight: 500;
+      margin-left: 2px;
+    }
+    .cd-impact .note {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--text-mid);
+      letter-spacing: 0.05em;
+    }
+    .cd-impact-foot {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-mid);
+      letter-spacing: 0.04em;
+      padding-top: 6px;
+      border-top: 1px dashed var(--border-soft);
+      margin-top: 4px;
+    }
+    .cd-impact-foot strong {
+      color: var(--engine-macro);
+      font-weight: 700;
+    }
+
+    /* ========================================================== */
+    /* CARD 3 · PLAN                                              */
+    /* ========================================================== */
+    .cd-plan-intro {
+      font-family: var(--font-body);
+      font-size: 12.5px;
+      color: var(--text);
+      line-height: 1.4;
+      margin-top: 2px;
+    }
+    .cd-plan-intro strong { color: var(--engine-oly); font-weight: 600; }
+
+    .cd-plan-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-top: 4px;
+    }
+    .cd-plan-row {
+      display: grid;
+      grid-template-columns: 64px 1fr auto;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 8px 8px 4px;
+      background: var(--bg);
+      border: 1px solid var(--border-soft);
+      border-left: 2px solid var(--engine-oly);
+      border-radius: 4px;
+    }
+    .cd-plan-row .day {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      color: var(--engine-oly);
+      text-transform: uppercase;
+      font-weight: 700;
+      padding-left: 6px;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+    .cd-plan-row .day .date {
+      color: var(--text-mid);
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+    }
+    .cd-plan-row .session {
+      font-family: var(--font-body);
+      font-size: 12px;
+      color: var(--text);
+      letter-spacing: 0.01em;
+      line-height: 1.25;
+    }
+    .cd-plan-row .session strong {
+      color: var(--text-hi);
+      font-weight: 600;
+    }
+    .cd-plan-row .session .change {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      color: var(--engine-oly);
+      letter-spacing: 0.04em;
+      margin-top: 2px;
+    }
+    .cd-plan-row .delta {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--engine-oly);
+      letter-spacing: 0.05em;
+      font-variant-numeric: tabular-nums;
+    }
+    .cd-plan-row .delta.minus { color: var(--engine-macro); }
+
+    .cd-plan-foot {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 6px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-mid);
+      letter-spacing: 0.03em;
+    }
+    .cd-plan-foot strong { color: var(--engine-oly); font-weight: 700; }
+
+    /* ========================================================== */
+    /* CARD 4 · MENSAJE IA                                        */
+    /* ========================================================== */
+    .cd-ai-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+    .cd-ai-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background:
+        radial-gradient(ellipse 60% 45% at 32% 28%, rgba(255,255,255,0.18), transparent 70%),
+        radial-gradient(circle at 35% 30%,
+          color-mix(in oklab, var(--engine-stress) 75%, #fff),
+          color-mix(in oklab, var(--engine-stress) 50%, #000) 80%);
+      box-shadow: 0 0 14px rgba(0,229,255,0.5), inset 0 -2px 6px rgba(0,0,0,0.3);
+      display: grid; place-items: center;
+      color: #001218;
+      flex-shrink: 0;
+    }
+    .cd-ai-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+    .cd-ai-name {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--text-hi);
+      letter-spacing: -0.01em;
+    }
+    .cd-ai-name .by {
+      color: var(--text-mid);
+      font-weight: 400;
+      font-size: 10px;
+      margin-left: 4px;
+    }
+    .cd-ai-tag {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      color: var(--engine-stress);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .cd-ai-body {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-family: var(--font-body);
+      font-size: 12.5px;
+      color: var(--text);
+      line-height: 1.5;
+      letter-spacing: 0.01em;
+    }
+    .cd-ai-body p strong {
+      color: var(--text-hi);
+      font-weight: 600;
+    }
+    .cd-ai-body .quote {
+      color: var(--text-hi);
+      font-style: italic;
+      padding: 6px 0 6px 10px;
+      border-left: 2px solid var(--engine-stress);
+    }
+
+    .cd-ai-chip {
+      align-self: flex-start;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 9px;
+      background: rgba(0,229,255,0.08);
+      border: 1px solid rgba(0,229,255,0.35);
+      color: var(--engine-stress);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 200ms;
+      margin-top: 4px;
+    }
+    .cd-ai-chip:hover { background: rgba(0,229,255,0.16); }
+    .cd-ai-chip .chev { transition: transform 200ms; }
+
+    .cd-ai-why {
+      display: none;
+      padding: 10px 12px;
+      background: var(--bg);
+      border: 1px dashed rgba(0,229,255,0.25);
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: var(--text);
+      line-height: 1.55;
+      letter-spacing: 0.02em;
+      margin-top: 4px;
+    }
+    .cd-ai-why .row {
+      display: grid;
+      grid-template-columns: 14px 1fr;
+      gap: 6px;
+      align-items: baseline;
+      padding: 2px 0;
+    }
+    .cd-ai-why .row::before {
+      content: "▸";
+      color: var(--engine-stress);
+      font-size: 11px;
+    }
+    .cd-ai-why .row strong { color: var(--engine-stress); font-weight: 700; }
+    .ci-ai-card[data-open="true"] .cd-ai-why { display: block; }
+    .ci-ai-card[data-open="true"] .cd-ai-chip .chev { transform: rotate(90deg); }
+
+    /* ========================================================== */
+    /* EDUCATIONAL PILL                                           */
+    /* ========================================================== */
+    .cd-edu {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      background: rgba(0,229,255,0.05);
+      border: 1px solid rgba(0,229,255,0.20);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text);
+      letter-spacing: 0.02em;
+      line-height: 1.4;
+    }
+    .cd-edu .ic {
+      color: var(--engine-stress);
+      flex-shrink: 0;
+    }
+    .cd-edu strong { color: var(--engine-stress); font-weight: 700; }
+
+    /* ========================================================== */
+    /* FOOTER · 2 BUTTONS                                         */
+    /* ========================================================== */
+    .cd-actions {
+      flex-shrink: 0;
+      padding: 12px 14px 16px;
+      background: var(--bg-deep);
+      border-top: 1px solid rgba(255,255,255,0.04);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .btn-primary {
+      width: 100%;
+      background: linear-gradient(135deg, var(--engine-stress), color-mix(in oklab, var(--engine-stress) 55%, #000));
+      border: 1.5px solid rgba(0,229,255,0.5);
+      color: #001218;
+      padding: 13px 16px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: 0 0 24px rgba(0,229,255,0.42), inset 0 1px 0 rgba(255,255,255,0.3);
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 14.5px;
+      letter-spacing: -0.005em;
+      transition: transform 150ms, box-shadow 200ms;
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 32px rgba(0,229,255,0.6);
+    }
+    .btn-secondary {
+      width: 100%;
+      background: transparent;
+      border: 1px solid var(--border-soft);
+      color: var(--text-mid);
+      padding: 10px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 12.5px;
+      letter-spacing: 0.01em;
+      transition: all 200ms;
+    }
+    .btn-secondary:hover {
+      color: var(--text);
+      border-color: var(--text-lo);
+    }
+  </style>
+</head>
+<body>
+  <div class="phone">
+    <div class="phone-inner">
+      <div class="status-bar">
+        <span>22:18</span>
+        <div class="right">
+          <span>▮▮▮▮</span><span>5G</span><span>42</span>
+        </div>
+      </div>
+
+      <!-- ============= HEADER ============= -->
+      <header class="cd-header">
+        <div class="cd-h-text">
+          <span class="cd-h-eyebrow">
+            <span class="pip"></span> COACH IA · CONTROL DE DAÑOS
+          </span>
+          <h1 class="cd-h-title">Acompañemos <span class="accent">esto</span>.</h1>
+          <p class="cd-h-sub">Sin culpa · sin sermón. Vamos a recuperar el rumbo juntos.</p>
+        </div>
+        <button class="cd-h-x" aria-label="Cerrar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </header>
+
+      <!-- ============= SCROLL ============= -->
+      <div class="cd-scroll">
+
+        <!-- ====== CARD 1 · DIAGNÓSTICO ====== -->
+        <div class="cd-card" data-tone="diag">
+          <div class="cd-card-head">
+            <span class="lbl">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ic" style="color:var(--engine-macro)"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              DIAGNÓSTICO
+            </span>
+            <span class="step"><span class="n">01</span> / 04</span>
+          </div>
+
+          <p class="cd-diag-summary">
+            Entrenaste pesado con <span class="hi">3 banderas amarillas</span> activas a la vez. La combinación se acumuló silenciosa.
+          </p>
+
+          <div class="cd-factors">
+            <div class="cd-factor" data-tone="sleep">
+              <span class="k">SLEEP</span>
+              <span class="v">4.2<span class="u">h</span></span>
+              <span class="sub">vs base 7.4h</span>
+            </div>
+            <div class="cd-factor" data-tone="rpe">
+              <span class="k">RPE</span>
+              <span class="v">9.5</span>
+              <span class="sub">obj. 7</span>
+            </div>
+            <div class="cd-factor" data-tone="stress">
+              <span class="k">STRESS</span>
+              <span class="v">8<span class="u">/10</span></span>
+              <span class="sub">crónico 3d</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ====== CARD 2 · IMPACTO ====== -->
+        <div class="cd-card" data-tone="impact">
+          <div class="cd-card-head">
+            <span class="lbl">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ic" style="color:var(--engine-macro)"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>
+              IMPACTO REAL · 48H POST
+            </span>
+            <span class="step"><span class="n">02</span> / 04</span>
+          </div>
+
+          <div class="cd-impact-grid">
+            <div class="cd-impact">
+              <span class="k">CNS</span>
+              <span class="v"><span class="sym">↓</span>12<span class="u">%</span></span>
+              <span class="note">readiness</span>
+            </div>
+            <div class="cd-impact">
+              <span class="k">FATIGUE</span>
+              <span class="v"><span class="sym">↑</span>18</span>
+              <span class="note">acute load</span>
+            </div>
+            <div class="cd-impact">
+              <span class="k">RISK</span>
+              <span class="v"><span class="sym">↑</span>35<span class="u">%</span></span>
+              <span class="note">lesión 7d</span>
+            </div>
+          </div>
+
+          <div class="cd-impact-foot">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>Ventana de recuperación: <strong>~72h</strong> con plan modificado.</span>
+          </div>
+        </div>
+
+        <!-- ====== CARD 3 · PLAN ====== -->
+        <div class="cd-card" data-tone="plan">
+          <div class="cd-card-head">
+            <span class="lbl">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ic" style="color:var(--engine-oly)"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              PLAN DE RECUPERACIÓN · 4 SESIONES
+            </span>
+            <span class="step"><span class="n">03</span> / 04</span>
+          </div>
+
+          <p class="cd-plan-intro">
+            Bajé la pista. Mantenemos rutina, <strong>cambia la dosis</strong>.
+          </p>
+
+          <div class="cd-plan-list">
+            <div class="cd-plan-row">
+              <span class="day">
+                MAÑANA
+                <span class="date">vie · 28</span>
+              </span>
+              <span class="session">
+                <strong>Técnica · OLY</strong>
+                <span class="change">cargas 50% · sin top set</span>
+              </span>
+              <span class="delta minus">−40%</span>
+            </div>
+            <div class="cd-plan-row">
+              <span class="day">
+                PASADO
+                <span class="date">sáb · 29</span>
+              </span>
+              <span class="session">
+                <strong>Mobility + Z2</strong>
+                <span class="change">45min · zona aeróbica baja</span>
+              </span>
+              <span class="delta">REPLACE</span>
+            </div>
+            <div class="cd-plan-row">
+              <span class="day">
+                DOM
+                <span class="date">30 may</span>
+              </span>
+              <span class="session">
+                <strong>Descanso completo</strong>
+                <span class="change">forzado · sleep target ≥ 8h</span>
+              </span>
+              <span class="delta">REST</span>
+            </div>
+            <div class="cd-plan-row">
+              <span class="day">
+                LUN
+                <span class="date">31 may</span>
+              </span>
+              <span class="session">
+                <strong>WOD reentrada</strong>
+                <span class="change">Z2 + accesorios · check CNS</span>
+              </span>
+              <span class="delta minus">−15%</span>
+            </div>
+          </div>
+
+          <div class="cd-plan-foot">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>Volvés a <strong>100%</strong> el martes si check-in verde.</span>
+          </div>
+        </div>
+
+        <!-- ====== CARD 4 · MENSAJE IA ====== -->
+        <div class="cd-card ci-ai-card" data-tone="ai" id="aiCard">
+          <div class="cd-card-head">
+            <span class="lbl">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ic" style="color:var(--engine-stress)"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 10v6m11-11h-6m-10 0H1m17.5-6.5l-4.2 4.2m-6.6 6.6L3.5 20.5m0-17l4.2 4.2m6.6 6.6l4.2 4.2"/></svg>
+              MENSAJE PERSONAL
+            </span>
+            <span class="step"><span class="n">04</span> / 04</span>
+          </div>
+
+          <div class="cd-ai-head">
+            <div class="cd-ai-avatar">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
+            </div>
+            <div class="cd-ai-meta">
+              <div class="cd-ai-name">Mistral · Coach IA <span class="by">para Marco</span></div>
+              <div class="cd-ai-tag">RESPUESTA EMPÁTICA · CONTEXTO LOCAL</div>
+            </div>
+          </div>
+
+          <div class="cd-ai-body">
+            <p>
+              <strong>Marco, te leo.</strong> Anoche había stress alto, viste el WOD, y empujaste igual. Eso no te hace débil — te hace humano y competitivo. Es la decisión exacta que cualquier atleta serio toma alguna vez.
+            </p>
+            <p>
+              El cuerpo te dejó una factura chica, no una catástrofe. Tu CNS bajó 12% y tu fatiga subió, pero <strong>nada está roto</strong>. Mi trabajo no es decirte "te lo dije" — es asegurarme que no se vuelva crónico.
+            </p>
+            <p>
+              Cambié las próximas 4 sesiones. <strong>El objetivo del mes sigue intacto.</strong> Solo movemos el cómo. ¿Lo aceptamos juntos?
+            </p>
+          </div>
+
+          <button class="cd-ai-chip" onclick="document.getElementById('aiCard').dataset.open = document.getElementById('aiCard').dataset.open === 'true' ? 'false' : 'true'">
+            <span class="chev">▸</span> ¿POR QUÉ ESTE PLAN?
+          </button>
+
+          <div class="cd-ai-why">
+            <div class="row"><span><strong>Sleep 4.2h</strong> · reduce MPS y síntesis hormonal · ventana 48-72h.</span></div>
+            <div class="row"><span><strong>RPE 9.5 vs obj 7</strong> · accumulation phase no quería intensidad · estresa CNS.</span></div>
+            <div class="row"><span><strong>Stress 8/10 × 3d</strong> · cortisol cronificado · prioridad: sueño y zona 2.</span></div>
+            <div class="row"><span><strong>Modelo:</strong> framework Banister + ACWR ratio &gt; 1.5 — riesgo bajo si baja carga 4 sesiones.</span></div>
+          </div>
+        </div>
+
+        <!-- ====== EDUCATIONAL PILL ====== -->
+        <div class="cd-edu">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ic"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.74V17h8v-2.26A7 7 0 0 0 12 2z"/></svg>
+          <span>Sleep <strong>&lt;6h</strong> reduce recovery <strong>40%</strong> en 24h post · evidencia consistente n=180.</span>
+        </div>
+
+      </div>
+
+      <!-- ============= ACTIONS ============= -->
+      <div class="cd-actions">
+        <button class="btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>
+          Acepto el plan
+        </button>
+        <button class="btn-secondary">
+          Mantengo mi plan original
+        </button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

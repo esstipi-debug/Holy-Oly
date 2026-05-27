@@ -52,6 +52,7 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import Terms from './pages/Terms';
 import HormonalSetup from './pages/HormonalSetup';
 import PlateDemo from './pages/_dev/PlateDemo';
+import DesignV2 from './pages/_dev/DesignV2';
 import type { View } from './context/NavigationContext';
 
 /**
@@ -270,6 +271,7 @@ function AppInner() {
     if (currentView === 'TERMS') return <Terms />;
     if (currentView === 'HORMONAL') return <HormonalSetup />;
     if (currentView === 'PLATE_DEMO') return <PlateDemo />;
+    if (currentView === 'DESIGN_V2') return <DesignV2 />;
     if (currentView === 'LOGIN' && !isAuthenticated && !getDeepLinkProduct()) {
       return <Landing />;
     }

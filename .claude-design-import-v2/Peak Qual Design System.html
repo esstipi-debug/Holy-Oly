@@ -1,0 +1,969 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Peak Qual · Design System</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" />
+
+  <link rel="stylesheet" href="tokens.css" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="page">
+
+    <!-- ============================================================
+         COVER
+         ============================================================ -->
+    <section class="cover hud" data-screen-label="00 Cover">
+      <span class="br-bl"></span><span class="br-br"></span>
+
+      <div class="cover-grid">
+        <div>
+          <div class="brandmark">PKQL · 001 · DESIGN SYSTEM · v0.1</div>
+
+          <h1 class="brand-title">
+            <span class="pk">PEAK</span><span class="ql">QUAL</span><span class="dot"></span>
+          </h1>
+
+          <p class="tagline">
+            SMART TRAINING <span class="sep">·</span> ZERO BURNOUT
+          </p>
+
+          <div class="engine-row">
+            <div class="e" data-engine="oly">
+              <span class="code">VERTICAL 01</span>
+              <span class="name">HOLY&nbsp;OLY</span>
+              <span class="disc">Halterofilia olímpica · clean &amp; jerk · snatch</span>
+            </div>
+            <div class="e" data-engine="wod">
+              <span class="code">VERTICAL 02</span>
+              <span class="name">VOLTA</span>
+              <span class="disc">CrossFit · WOD · AMRAP · EMOM · benchmarks</span>
+            </div>
+            <div class="e" data-engine="hyrox">
+              <span class="code">VERTICAL 03</span>
+              <span class="name">AXON</span>
+              <span class="disc">HYROX · run + station pacing · race split</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="cover-meta">
+          <div class="row"><span class="k">stack</span><span class="v">dark · tactical · bento</span></div>
+          <div class="row"><span class="k">grid</span><span class="v">8 engines · 5 tiers</span></div>
+          <div class="row"><span class="k">target</span><span class="v">mobile-first · 390 × 844</span></div>
+          <div class="row"><span class="k">density</span><span class="v">HUD · brutal-light</span></div>
+          <div class="row"><span class="k">no-go</span><span class="v">glassmorphism · claymorphism</span></div>
+          <div class="row"><span class="k">aesthetic</span><span class="v">tactical cyberpunk</span></div>
+          <div class="row"><span class="k">status</span><span class="v" style="color:var(--engine-oly)">READY · BUILD</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         01 · SURFACE
+         ============================================================ -->
+    <section class="section" data-screen-label="01 Surface">
+      <div class="section-head">
+        <div>
+          <div class="num">01 · COLOR / SURFACE</div>
+          <h2>Base &amp; Surface Stack</h2>
+        </div>
+        <div class="meta">7 tokens · dark only · OKLab interpolation</div>
+      </div>
+
+      <div class="surface-stack">
+        <div class="swatch">
+          <div class="chip" style="background:#050510"></div>
+          <span class="lbl">--bg-deep</span>
+          <span class="hex">#050510</span>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background:#0A0A14"></div>
+          <span class="lbl">--bg</span>
+          <span class="hex">#0A0A14</span>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background:#12121C"></div>
+          <span class="lbl">--surface-1</span>
+          <span class="hex">#12121C</span>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background:#1A1A28"></div>
+          <span class="lbl">--surface-2</span>
+          <span class="hex">#1A1A28</span>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background:#232336"></div>
+          <span class="lbl">--surface-3</span>
+          <span class="hex">#232336</span>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background:rgba(255,255,255,0.06); background-image: linear-gradient(45deg, rgba(255,255,255,0.04) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.04) 75%), linear-gradient(45deg, rgba(255,255,255,0.04) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.04) 75%); background-size: 8px 8px; background-position: 0 0, 4px 4px;"></div>
+          <span class="lbl">--border-soft</span>
+          <span class="hex">rgba 255·.06</span>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background:rgba(0,229,255,0.35); box-shadow: inset 0 0 0 1.5px var(--engine-stress);"></div>
+          <span class="lbl">--border-hard</span>
+          <span class="hex">cyan ·.35</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         02 · ENGINES
+         ============================================================ -->
+    <section class="section" data-screen-label="02 Engines">
+      <div class="section-head">
+        <div>
+          <div class="num">02 · COLOR / ENGINES</div>
+          <h2>Eight Engines, Eight Signals</h2>
+        </div>
+        <div class="meta">1 color = 1 engine · never mix · accents only</div>
+      </div>
+
+      <div class="engine-grid">
+        <div class="engine-card hud" data-size="lg" style="--c: var(--engine-stress)">
+          <span class="br-bl"></span><span class="br-br"></span>
+          <div class="top"><span>ENG.01 · STRESS</span><span class="dot"></span></div>
+          <div>
+            <div class="name">Readiness / CNS</div>
+            <p class="role" style="margin-top:6px">Daily nervous-system load · HRV trend · day-to-train signal. Primary HUD color across the app.</p>
+          </div>
+          <div class="hex">#00E5FF · cyan-electric</div>
+          <span class="glyph">CNS</span>
+        </div>
+
+        <div class="engine-card hud" style="--c: var(--engine-adapt)">
+          <span class="br-bl"></span><span class="br-br"></span>
+          <div class="top"><span>ENG.02 · ADAPT</span><span class="dot"></span></div>
+          <div>
+            <div class="name">Adaptation</div>
+            <p class="role">Long-term gains trend</p>
+          </div>
+          <div class="hex">#A855F7</div>
+          <span class="glyph">AD</span>
+        </div>
+
+        <div class="engine-card hud" style="--c: var(--engine-macro)">
+          <span class="br-bl"></span><span class="br-br"></span>
+          <div class="top"><span>ENG.03 · MACRO</span><span class="dot"></span></div>
+          <div>
+            <div class="name">Macrocycle</div>
+            <p class="role">Block periodization</p>
+          </div>
+          <div class="hex">#FFB300</div>
+          <span class="glyph">MC</span>
+        </div>
+
+        <div class="engine-card hud" style="--c: var(--engine-belt)">
+          <span class="br-bl"></span><span class="br-br"></span>
+          <div class="top"><span>ENG.04 · BELT</span><span class="dot"></span></div>
+          <div>
+            <div class="name">Belt / XP</div>
+            <p class="role">Lifter rank · progression</p>
+          </div>
+          <div class="hex">#F5A623</div>
+          <span class="glyph">XP</span>
+        </div>
+
+        <div class="engine-card hud" style="--c: var(--engine-streak)">
+          <span class="br-bl"></span><span class="br-br"></span>
+          <div class="top"><span>ENG.05 · STREAK</span><span class="dot"></span></div>
+          <div>
+            <div class="name">Streak</div>
+            <p class="role">Consistency fire</p>
+          </div>
+          <div class="hex">#FF6B35</div>
+          <span class="glyph">STR</span>
+        </div>
+
+        <div class="engine-card hud" style="--c: var(--engine-oly)">
+          <span class="br-bl"></span><span class="br-br"></span>
+          <div class="top"><span>ENG.06 · OLY</span><span class="dot"></span></div>
+          <div>
+            <div class="name">OLY Index</div>
+            <p class="role">Snatch + C&amp;J score</p>
+          </div>
+          <div class="hex">#22C55E</div>
+          <span class="glyph">OLY</span>
+        </div>
+
+        <div class="engine-card hud" style="--c: var(--engine-hormonal)">
+          <span class="br-bl"></span><span class="br-br"></span>
+          <div class="top"><span>ENG.07 · HORM</span><span class="dot"></span></div>
+          <div>
+            <div class="name">Ciclo</div>
+            <p class="role">Hormonal phase mapping</p>
+          </div>
+          <div class="hex">#EC4899</div>
+          <span class="glyph">CYC</span>
+        </div>
+
+        <div class="engine-card hud" style="--c: var(--engine-pulse)">
+          <span class="br-bl"></span><span class="br-br"></span>
+          <div class="top"><span>ENG.08 · PULSE</span><span class="dot"></span></div>
+          <div>
+            <div class="name">HR Zones</div>
+            <p class="role">Z1–Z5 live heart rate</p>
+          </div>
+          <div class="hex">#EF4444</div>
+          <span class="glyph">HR</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         03 · TIER DISCS
+         ============================================================ -->
+    <section class="section" data-screen-label="03 Tier Discs">
+      <div class="section-head">
+        <div>
+          <div class="num">03 · COLOR / TIERS</div>
+          <h2>Tier Discs — Halterofilia Gamification</h2>
+        </div>
+        <div class="meta">IWF plate logic · T0→T4 progression · OLY belt parity</div>
+      </div>
+
+      <div class="tier-rack">
+        <div class="tier-card hud" data-tier="0" style="--c: var(--tier-0)">
+          <span class="br-bl"></span><span class="br-br"></span>
+          <span class="rank">TIER 0 · ROOKIE</span>
+          <div class="disc" data-code="T0"></div>
+          <div class="tier-row"><span class="name">Blanco</span><span class="hex">#F8F8F8</span></div>
+        </div>
+        <div class="tier-card hud" data-tier="1" style="--c: var(--tier-1)">
+          <span class="br-bl"></span><span class="br-br"></span>
+          <span class="rank">TIER 1 · NOVICE</span>
+          <div class="disc" data-code="T1"></div>
+          <div class="tier-row"><span class="name">Verde</span><span class="hex">#22C55E</span></div>
+        </div>
+        <div class="tier-card hud" data-tier="2" style="--c: var(--tier-2)">
+          <span class="br-bl"></span><span class="br-br"></span>
+          <span class="rank">TIER 2 · INTER</span>
+          <div class="disc" data-code="T2"></div>
+          <div class="tier-row"><span class="name">Amarillo</span><span class="hex">#FBBF24</span></div>
+        </div>
+        <div class="tier-card hud" data-tier="3" style="--c: var(--tier-3)">
+          <span class="br-bl"></span><span class="br-br"></span>
+          <span class="rank">TIER 3 · ADV.</span>
+          <div class="disc" data-code="T3"></div>
+          <div class="tier-row"><span class="name">Azul</span><span class="hex">#3B82F6</span></div>
+        </div>
+        <div class="tier-card hud" data-tier="4" style="--c: var(--tier-4)">
+          <span class="br-bl"></span><span class="br-br"></span>
+          <span class="rank">TIER 4 · ELITE</span>
+          <div class="disc" data-code="T4"></div>
+          <div class="tier-row"><span class="name">Rojo</span><span class="hex">#EF4444</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         04 · TEXT
+         ============================================================ -->
+    <section class="section" data-screen-label="04 Text">
+      <div class="section-head">
+        <div>
+          <div class="num">04 · COLOR / TEXT</div>
+          <h2>Text Hierarchy</h2>
+        </div>
+        <div class="meta">4 levels · slate scale · AA on bg-deep</div>
+      </div>
+
+      <div class="text-stack">
+        <div class="text-swatch">
+          <span class="sample" style="color:#F1F5F9">186.5</span>
+          <div class="role">--text-hi · numbers · PR</div>
+          <div class="meta"><span>#F1F5F9</span><span>slate-100</span></div>
+        </div>
+        <div class="text-swatch">
+          <span class="sample" style="color:#CBD5E1; font-family: var(--font-body); font-weight:600">Body</span>
+          <div class="role">--text · body copy</div>
+          <div class="meta"><span>#CBD5E1</span><span>slate-300</span></div>
+        </div>
+        <div class="text-swatch">
+          <span class="sample" style="color:#94A3B8; font-family: var(--font-mono); font-size:32px; letter-spacing:0.1em">LABEL</span>
+          <div class="role">--text-mid · labels</div>
+          <div class="meta"><span>#94A3B8</span><span>slate-400</span></div>
+        </div>
+        <div class="text-swatch">
+          <span class="sample" style="color:#64748B; font-family: var(--font-mono); font-size:22px; letter-spacing:0.15em">caption</span>
+          <div class="role">--text-lo · captions</div>
+          <div class="meta"><span>#64748B</span><span>slate-500</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         05 · TYPOGRAPHY
+         ============================================================ -->
+    <section class="section" data-screen-label="05 Typography">
+      <div class="section-head">
+        <div>
+          <div class="num">05 · TYPOGRAPHY</div>
+          <h2>Three Faces, One Voice</h2>
+        </div>
+        <div class="meta">Display · Body · Mono</div>
+      </div>
+
+      <div class="type-grid">
+        <div class="type-card hud" data-face="display">
+          <span class="br-bl"></span><span class="br-br"></span>
+          <div>
+            <span class="kicker">DISPLAY · PRIMARY</span>
+            <div class="face" style="margin-top:8px">Aa<span style="color:var(--engine-stress)">.</span></div>
+          </div>
+          <p class="sub">Reserved for numbers, OVR scores, tier callouts, and section headers. Tight tracking. Always confident, never decorative.</p>
+          <div class="meta-row">
+            <span>family</span><strong>Space Grotesk</strong>
+            <span>weights</span><strong>500 / 600 / 700</strong>
+            <span>tracking</span><strong>-0.02em → -0.04em</strong>
+          </div>
+        </div>
+
+        <div class="type-card hud" data-face="body">
+          <span class="br-bl"></span><span class="br-br"></span>
+          <div>
+            <span class="kicker">BODY · UI</span>
+            <div class="face" style="margin-top:8px">Aa</div>
+          </div>
+          <p class="sub">All readable copy: cues, descriptions, coach notes, onboarding, settings. Optimised for 12–16 px at mobile distance.</p>
+          <div class="meta-row">
+            <span>family</span><strong>Inter</strong>
+            <span>weights</span><strong>400 / 500 / 600</strong>
+            <span>tracking</span><strong>0 → 0.01em</strong>
+          </div>
+        </div>
+
+        <div class="type-card hud" data-face="mono">
+          <span class="br-bl"></span><span class="br-br"></span>
+          <div>
+            <span class="kicker">MONO · DATA</span>
+            <div class="face" style="margin-top:8px">A1<span style="color:var(--engine-stress)">.</span></div>
+          </div>
+          <p class="sub">Live metrics, OLY index, splits, timers, tags, anything tabular. Use <code style="color:var(--text-hi)">font-variant-numeric: tabular-nums</code> always.</p>
+          <div class="meta-row">
+            <span>family</span><strong>JetBrains Mono</strong>
+            <span>weights</span><strong>400 / 500 / 700</strong>
+            <span>tracking</span><strong>0.05 → 0.20em (UPPER)</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="type-scale">
+        <div class="row">
+          <span class="tag">D-XL</span><span class="size">96 / 0.92</span><span class="weight">700</span>
+          <span class="sample" style="font-size:64px; font-weight:700; letter-spacing:-0.045em">PEAK QUAL</span>
+        </div>
+        <div class="row">
+          <span class="tag">D-LG</span><span class="size">48 / 1.0</span><span class="weight">600</span>
+          <span class="sample" style="font-size:40px; font-weight:600">Smart Training</span>
+        </div>
+        <div class="row">
+          <span class="tag">D-MD</span><span class="size">28 / 1.15</span><span class="weight">600</span>
+          <span class="sample" style="font-size:24px; font-weight:600">Hoy entrenás clean &amp; jerk</span>
+        </div>
+        <div class="row">
+          <span class="tag">B-LG</span><span class="size">16 / 1.55</span><span class="weight">500</span>
+          <span class="sample body" style="font-size:16px; color: var(--text)">El sistema mide tu CNS antes de cada sesión y ajusta cargas en tiempo real para evitar el burnout.</span>
+        </div>
+        <div class="row">
+          <span class="tag">B-MD</span><span class="size">14 / 1.55</span><span class="weight">400</span>
+          <span class="sample body" style="font-size:14px; color: var(--text-mid)">El sistema mide tu CNS antes de cada sesión y ajusta cargas en tiempo real para evitar el burnout.</span>
+        </div>
+        <div class="row">
+          <span class="tag">M-NUM</span><span class="size">32 / 1.0</span><span class="weight">600</span>
+          <span class="sample mono" style="font-size:32px; color: var(--engine-stress); font-variant-numeric: tabular-nums">84.2  ·  +0.6</span>
+        </div>
+        <div class="row">
+          <span class="tag">M-LBL</span><span class="size">11 / 1.2</span><span class="weight">600</span>
+          <span class="sample mono" style="font-size:11px; color: var(--text-lo); letter-spacing:0.2em; text-transform:uppercase">READINESS · ROLLING 7D · CNS ENGINE</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         06 · SPACING
+         ============================================================ -->
+    <section class="section" data-screen-label="06 Spacing">
+      <div class="section-head">
+        <div>
+          <div class="num">06 · SPACING</div>
+          <h2>4-Point Scale</h2>
+        </div>
+        <div class="meta">6 steps · use s-3 / s-4 inside bento cards · s-6 between sections</div>
+      </div>
+
+      <div class="spacing-rail">
+        <div class="space-card">
+          <span class="token">--s-1</span>
+          <div class="bar" style="width:4px"></div>
+          <div class="row"><span class="name">x-tight</span><span class="px">4 px</span></div>
+        </div>
+        <div class="space-card">
+          <span class="token">--s-2</span>
+          <div class="bar" style="width:8px"></div>
+          <div class="row"><span class="name">tight</span><span class="px">8 px</span></div>
+        </div>
+        <div class="space-card">
+          <span class="token">--s-3</span>
+          <div class="bar" style="width:12px"></div>
+          <div class="row"><span class="name">snug</span><span class="px">12 px</span></div>
+        </div>
+        <div class="space-card">
+          <span class="token">--s-4</span>
+          <div class="bar" style="width:16px"></div>
+          <div class="row"><span class="name">base</span><span class="px">16 px</span></div>
+        </div>
+        <div class="space-card">
+          <span class="token">--s-6</span>
+          <div class="bar" style="width:24px"></div>
+          <div class="row"><span class="name">loose</span><span class="px">24 px</span></div>
+        </div>
+        <div class="space-card">
+          <span class="token">--s-8</span>
+          <div class="bar" style="width:32px"></div>
+          <div class="row"><span class="name">x-loose</span><span class="px">32 px</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         07 · RADIUS
+         ============================================================ -->
+    <section class="section" data-screen-label="07 Radius">
+      <div class="section-head">
+        <div>
+          <div class="num">07 · RADIUS</div>
+          <h2>Corner Vocabulary</h2>
+        </div>
+        <div class="meta">0 px on brutalist cards · 6/12 px on stock UI · pill for chips only</div>
+      </div>
+
+      <div class="radius-rail">
+        <div class="radius-card">
+          <div class="demo" style="border-radius: var(--r-sm)"></div>
+          <div class="row"><span class="name">--r-sm</span><span class="val">6 px</span></div>
+        </div>
+        <div class="radius-card">
+          <div class="demo" style="border-radius: var(--r-md)"></div>
+          <div class="row"><span class="name">--r-md</span><span class="val">12 px</span></div>
+        </div>
+        <div class="radius-card">
+          <div class="demo" style="border-radius: var(--r-lg)"></div>
+          <div class="row"><span class="name">--r-lg</span><span class="val">18 px</span></div>
+        </div>
+        <div class="radius-card">
+          <div class="demo" style="border-radius: var(--r-xl)"></div>
+          <div class="row"><span class="name">--r-xl</span><span class="val">24 px</span></div>
+        </div>
+        <div class="radius-card">
+          <div class="demo" style="border-radius: var(--r-full)"></div>
+          <div class="row"><span class="name">--r-full</span><span class="val">999</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         08 · ELEVATION
+         ============================================================ -->
+    <section class="section" data-screen-label="08 Elevation">
+      <div class="section-head">
+        <div>
+          <div class="num">08 · ELEVATION</div>
+          <h2>Glow as Hierarchy</h2>
+        </div>
+        <div class="meta">No drop-shadows for depth · glow signals an active engine</div>
+      </div>
+
+      <div class="elev-grid">
+        <div class="elev-card" data-glow="cyan">
+          <div class="block"></div>
+          <span class="name">--glow-cyan · readiness</span>
+        </div>
+        <div class="elev-card" data-glow="amber">
+          <div class="block"></div>
+          <span class="name">--glow-amber · macro</span>
+        </div>
+        <div class="elev-card" data-glow="violet">
+          <div class="block"></div>
+          <span class="name">--glow-violet · adapt</span>
+        </div>
+        <div class="elev-card" data-glow="fire">
+          <div class="block"></div>
+          <span class="name">--glow-fire · streak</span>
+        </div>
+        <div class="elev-card" data-glow="green">
+          <div class="block"></div>
+          <span class="name">--glow-green · oly</span>
+        </div>
+        <div class="elev-card" data-glow="card">
+          <div class="block"></div>
+          <span class="name">--shadow-card · base</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         09 · COMPONENTS
+         ============================================================ -->
+    <section class="section" data-screen-label="09 Components">
+      <div class="section-head">
+        <div>
+          <div class="num">09 · COMPONENTS</div>
+          <h2>Atomic Set</h2>
+        </div>
+        <div class="meta">buttons · badges · chips · meters · stats · HUD frames</div>
+      </div>
+
+      <div class="comp-grid">
+
+        <!-- Buttons -->
+        <div class="comp-card col-6">
+          <div class="head"><span class="name">Buttons</span><span class="id">CMP-001</span></div>
+          <div class="btn-row">
+            <button class="btn btn--primary">START SESSION</button>
+            <button class="btn btn--danger">END WOD</button>
+            <button class="btn btn--ghost">PR ATTEMPT</button>
+            <button class="btn btn--brut">LIFT IT</button>
+          </div>
+          <div class="btn-row">
+            <button class="btn" style="border:1px solid var(--border-soft); color:var(--text)">Cancel</button>
+            <button class="btn btn--primary" disabled style="opacity:.35; cursor:not-allowed">LOCKED · CNS LOW</button>
+          </div>
+          <p style="font-size:12px; color:var(--text-mid); margin-top:auto">Primary uses cyan + glow. Brutalist variant for critical PR / lift moments — offset shadow in engine color.</p>
+        </div>
+
+        <!-- Badges -->
+        <div class="comp-card col-6">
+          <div class="head"><span class="name">Badges &amp; Chips</span><span class="id">CMP-002</span></div>
+          <div class="btn-row">
+            <span class="badge" style="--c: var(--engine-stress)"><span class="pip"></span>READY</span>
+            <span class="badge" style="--c: var(--engine-pulse)"><span class="pip"></span>Z4 · 174 bpm</span>
+            <span class="badge" style="--c: var(--engine-streak)"><span class="pip"></span>STREAK 23</span>
+            <span class="badge" style="--c: var(--engine-oly)"><span class="pip"></span>OLY 286</span>
+            <span class="badge" style="--c: var(--engine-adapt)"><span class="pip"></span>ADAPTING</span>
+            <span class="badge" style="--c: var(--engine-belt)"><span class="pip"></span>BELT IV</span>
+          </div>
+          <div class="btn-row">
+            <span class="chip-sq" style="--c: var(--engine-stress)">CNS · 84</span>
+            <span class="chip-sq" style="--c: var(--engine-macro)">MACRO · WK 4/12</span>
+            <span class="chip-sq" style="--c: var(--engine-hormonal)">LUTEAL · D-19</span>
+            <span class="chip-sq" style="--c: var(--engine-pulse)">HR · 162</span>
+          </div>
+        </div>
+
+        <!-- Meters -->
+        <div class="comp-card col-6">
+          <div class="head"><span class="name">HUD Meters</span><span class="id">CMP-003</span></div>
+          <div class="meter-stack">
+            <div class="meter-row" style="--c: var(--engine-stress)">
+              <div class="label"><span>READINESS · CNS</span><span class="val">84%</span></div>
+              <div class="meter meter--lg"><div class="fill" style="width:84%"></div></div>
+            </div>
+            <div class="meter-row" style="--c: var(--engine-adapt)">
+              <div class="label"><span>ADAPTATION TREND</span><span class="val">+0.6σ</span></div>
+              <div class="meter"><div class="fill" style="width:62%"></div></div>
+            </div>
+            <div class="meter-row" style="--c: var(--engine-streak)">
+              <div class="label"><span>STREAK FUEL</span><span class="val">23 días</span></div>
+              <div class="meter"><div class="fill" style="width:78%"></div></div>
+            </div>
+            <div class="meter-row" style="--c: var(--engine-belt)">
+              <div class="label"><span>BELT IV → V</span><span class="val">412 / 600 XP</span></div>
+              <div class="meter"><div class="fill" style="width:68%"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="comp-card col-6">
+          <div class="head"><span class="name">Stat Tiles</span><span class="id">CMP-004</span></div>
+          <div class="stat-grid">
+            <div class="stat hud" style="--c: var(--engine-oly)">
+              <span class="br-bl"></span><span class="br-br"></span>
+              <span class="k">OLY IDX</span>
+              <span class="v">286</span>
+              <span class="u">snatch 128 · c&amp;j 158</span>
+            </div>
+            <div class="stat hud" style="--c: var(--engine-stress)">
+              <span class="br-bl"></span><span class="br-br"></span>
+              <span class="k">HRV 7D</span>
+              <span class="v">68<span style="font-size:14px;color:var(--text-mid)">ms</span></span>
+              <span class="u">+4.2 vs base</span>
+            </div>
+            <div class="stat hud" style="--c: var(--engine-pulse)">
+              <span class="br-bl"></span><span class="br-br"></span>
+              <span class="k">VO2 EST</span>
+              <span class="v">54.3</span>
+              <span class="u">ml/kg/min</span>
+            </div>
+            <div class="stat hud" style="--c: var(--engine-macro)">
+              <span class="br-bl"></span><span class="br-br"></span>
+              <span class="k">WK</span>
+              <span class="v">04<span style="font-size:14px;color:var(--text-mid)">/12</span></span>
+              <span class="u">accumulation block</span>
+            </div>
+            <div class="stat hud" style="--c: var(--engine-streak)">
+              <span class="br-bl"></span><span class="br-br"></span>
+              <span class="k">STREAK</span>
+              <span class="v">23</span>
+              <span class="u">próximo hito: 30</span>
+            </div>
+            <div class="stat hud" style="--c: var(--engine-hormonal)">
+              <span class="br-bl"></span><span class="br-br"></span>
+              <span class="k">FASE</span>
+              <span class="v">L19</span>
+              <span class="u">luteal · cargas −8%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- HUD bracket sample -->
+        <div class="comp-card col-6">
+          <div class="head"><span class="name">HUD Bracket Frame</span><span class="id">CMP-005</span></div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap: var(--s-3)">
+            <div class="hud" style="background: var(--bg); border:1px solid var(--border-soft); padding: var(--s-4); min-height: 140px;">
+              <span class="br-bl"></span><span class="br-br"></span>
+              <div class="eyebrow" style="color: var(--engine-stress)">TARGET ACQUIRED</div>
+              <div style="font-family: var(--font-mono); font-size: 28px; color: var(--text-hi); font-weight:600; margin-top:8px">186.5<span style="font-size:14px;color:var(--text-mid)">kg</span></div>
+              <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-mid); margin-top:4px">CLEAN &amp; JERK · 1RM x 0.92</div>
+            </div>
+            <div class="hud" style="background: var(--bg); border:1px solid var(--border-soft); padding: var(--s-4); min-height: 140px;">
+              <span class="br-bl"></span><span class="br-br"></span>
+              <div class="eyebrow" style="color: var(--engine-streak)">FUEL · LIVE</div>
+              <div style="font-family: var(--font-mono); font-size: 28px; color: var(--text-hi); font-weight:600; margin-top:8px">23 <span style="font-size:14px;color:var(--text-mid)">d</span></div>
+              <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-mid); margin-top:4px">SIN ROMPER · NEXT 30</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Brutalist critical card -->
+        <div class="comp-card col-6">
+          <div class="head"><span class="name">Brutalist · Critical Action</span><span class="id">CMP-006</span></div>
+          <div style="background: var(--text-hi); color: #000; padding: var(--s-4); box-shadow: 6px 6px 0 var(--engine-pulse); display:flex; flex-direction:column; gap: var(--s-3); border-radius: 0;">
+            <div style="font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.25em; color: #000">WARN · CNS-LOAD CRITICAL</div>
+            <div style="font-family: var(--font-display); font-size: 28px; font-weight: 700; letter-spacing: -0.02em; color:#000; line-height: 1.05;">Tu sistema nervioso no llega.<br/>Mover sesión a deload.</div>
+            <div style="display: flex; gap: var(--s-2);">
+              <button class="btn btn--brut" style="background:#000; color: var(--text-hi); box-shadow: 4px 4px 0 var(--engine-pulse)">DELOAD</button>
+              <button class="btn" style="background:transparent; color:#000; border:1.5px solid #000; border-radius:0">OVERRIDE</button>
+            </div>
+          </div>
+          <p style="font-size:12px; color:var(--text-mid); margin-top:auto">Reserved for safety prompts, PR confirms, and protocol breaks. Never more than one on screen.</p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============================================================
+         10 · APP IN CONTEXT
+         ============================================================ -->
+    <section class="section" data-screen-label="10 App in Context">
+      <div class="section-head">
+        <div>
+          <div class="num">10 · APP IN CONTEXT</div>
+          <h2>390 × 844 · Bento HUD in the wild</h2>
+        </div>
+        <div class="meta">one screen per vertical · same grammar, different engine</div>
+      </div>
+
+      <div class="phones">
+
+        <!-- ============ PHONE 01 · HOLY OLY ============ -->
+        <div class="phone">
+          <div class="status">
+            <span>06:42</span>
+            <div class="right"><span>5G</span><span>·</span><span>96%</span></div>
+          </div>
+
+          <div class="phone-body">
+            <div class="phone-head">
+              <div class="greet">
+                <span class="eyebrow" style="color: var(--engine-oly)">HOLY OLY · WK 04/12</span>
+                <h3>Hola, Vera.</h3>
+              </div>
+              <div class="avatar">VR</div>
+            </div>
+
+            <!-- Readiness ring + macro bar -->
+            <div class="bento hud" style="--c: var(--engine-stress); padding: var(--s-4)">
+              <span class="br-bl"></span><span class="br-br"></span>
+              <div class="b-label"><span>READINESS · CNS</span><span style="color: var(--engine-stress)">● ENG.01</span></div>
+              <div style="display:flex; align-items:center; gap: var(--s-3); margin-top: 4px">
+                <div class="ring" style="--val:84; --c-r: var(--engine-stress)"><div class="v">84<sub>%</sub></div></div>
+                <div style="flex:1; display:flex; flex-direction:column; gap:6px;">
+                  <div style="font-family: var(--font-display); font-size: 16px; color: var(--text-hi); font-weight:600; letter-spacing:-0.01em">Verde para snatch.</div>
+                  <div style="font-family: var(--font-mono); font-size: 10px; color: var(--text-mid); letter-spacing:0.08em">HRV 68 ms · sueño 7:42 · RPE ayer 7</div>
+                  <div class="macro-bar" style="margin-top:6px">
+                    <div class="accum"></div><div class="intens" style="opacity:.4"></div><div class="peak" style="opacity:.3"></div><div class="deload"></div>
+                  </div>
+                  <div class="legend">
+                    <span class="here">ACCUM</span><span>INTENS</span><span>PEAK</span><span>DEL.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- OLY index + Belt -->
+            <div class="phone-grid">
+              <div class="bento hud" style="--c: var(--engine-oly)">
+                <span class="br-bl"></span><span class="br-br"></span>
+                <div class="b-label"><span>OLY INDEX</span><span style="color: var(--engine-oly)">+4</span></div>
+                <div class="b-num display" style="--c: var(--engine-oly)">286</div>
+                <div class="b-foot">SN 128 · CJ 158</div>
+              </div>
+
+              <div class="bento hud" style="--c: var(--engine-belt)">
+                <span class="br-bl"></span><span class="br-br"></span>
+                <div class="b-label"><span>BELT</span><span style="color: var(--engine-belt)">IV</span></div>
+                <div style="display:flex; align-items:center; gap:8px">
+                  <div class="mini-disc" style="--c: var(--tier-3)"></div>
+                  <div class="mini-disc" style="--c: var(--tier-4)"></div>
+                </div>
+                <div class="belt-bar" style="margin-top:4px"></div>
+                <div class="b-foot">412 / 600 XP</div>
+              </div>
+            </div>
+
+            <!-- Today's session brutalist -->
+            <div class="bento" data-brut="1" style="--c: var(--engine-pulse)">
+              <div class="b-label">SESIÓN · 17:30 · BARRA</div>
+              <div style="font-family: var(--font-display); font-size: 22px; font-weight: 700; line-height: 1.05; letter-spacing: -0.02em">Snatch tech +<br/>Front squat 5×3</div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px">
+                <div style="font-family: var(--font-mono); font-size: 10px; letter-spacing:.15em; color: #444">~ 62 MIN · RPE 7</div>
+                <span style="font-family: var(--font-mono); font-size:10px; background:#000; color: var(--text-hi); padding: 4px 8px; letter-spacing:.15em">START ▸</span>
+              </div>
+            </div>
+
+            <!-- WOD-style row -->
+            <div class="bento hud">
+              <span class="br-bl"></span><span class="br-br"></span>
+              <div class="b-label"><span>WARM-UP A1 → A4</span><span>0/4</span></div>
+              <div class="wod-row">
+                <span class="reps">3×8</span>
+                <span class="mv">Snatch grip RDL<span class="sub">técnica · barra vacía</span></span>
+                <span class="load">— kg</span>
+              </div>
+              <div class="wod-row">
+                <span class="reps">5×3</span>
+                <span class="mv">Power snatch<span class="sub">build-up</span></span>
+                <span class="load">40 → 65</span>
+              </div>
+              <div class="wod-row">
+                <span class="reps">3×2</span>
+                <span class="mv">Hang snatch<span class="sub">RPE 7</span></span>
+                <span class="load">72 kg</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="nav">
+            <div class="tab on"><span class="icon"></span>HOME</div>
+            <div class="tab"><span class="icon cir"></span>OLY</div>
+            <div class="tab"><span class="icon tri"></span>WOD</div>
+            <div class="tab"><span class="icon"></span><span class="bar"></span>STATS</div>
+            <div class="tab"><span class="icon cir"></span>YOU</div>
+          </div>
+
+          <span class="phone-foot-label">SCREEN A · HOLY OLY · HOME</span>
+        </div>
+
+        <!-- ============ PHONE 02 · VOLTA ============ -->
+        <div class="phone">
+          <div class="status">
+            <span>17:08</span>
+            <div class="right"><span>5G</span><span>·</span><span>72%</span></div>
+          </div>
+
+          <div class="phone-body">
+            <div class="phone-head">
+              <div class="greet">
+                <span class="eyebrow" style="color: var(--engine-stress)">VOLTA · WOD · 21.4</span>
+                <h3>Live AMRAP</h3>
+              </div>
+              <div class="avatar" style="color: var(--engine-pulse)">●</div>
+            </div>
+
+            <!-- Big timer brutalist -->
+            <div class="bento" data-brut="1" style="--c: var(--engine-stress)">
+              <div class="b-label">AMRAP · 20 MIN</div>
+              <div style="font-family: var(--font-mono); font-weight: 700; font-size: 64px; line-height: 1; color: #000; font-variant-numeric: tabular-nums; letter-spacing: -0.03em">12:48</div>
+              <div style="display:flex; justify-content:space-between; align-items:end; margin-top: 4px">
+                <div style="font-family: var(--font-mono); font-size: 11px; color: #333; letter-spacing: .12em">RD 7 · REPS 124</div>
+                <div style="font-family: var(--font-mono); font-size: 11px; color: var(--engine-pulse); letter-spacing: .12em; font-weight:700">PACE +4%</div>
+              </div>
+            </div>
+
+            <!-- HR zones live -->
+            <div class="bento hud" style="--c: var(--engine-pulse)">
+              <span class="br-bl"></span><span class="br-br"></span>
+              <div class="b-label"><span>HR · LIVE</span><span style="color: var(--engine-pulse); font-weight:700">174 bpm</span></div>
+              <div class="hr-zones" style="margin-top:6px; margin-bottom: 18px">
+                <div class="z" data-z="Z1" style="--h: 18%; --c: #475569"></div>
+                <div class="z" data-z="Z2" style="--h: 32%; --c: #22C55E"></div>
+                <div class="z" data-z="Z3" style="--h: 56%; --c: #FBBF24"></div>
+                <div class="z" data-z="Z4" style="--h: 92%; --c: var(--engine-pulse)"></div>
+                <div class="z" data-z="Z5" style="--h: 40%; --c: #7F1D1D"></div>
+              </div>
+              <div class="b-foot" style="margin-top:4px">68% del wod en Z4 · zona objetivo</div>
+            </div>
+
+            <!-- WOD rounds -->
+            <div class="bento hud">
+              <span class="br-bl"></span><span class="br-br"></span>
+              <div class="b-label"><span>ROUND · CYCLE</span><span>RD 7</span></div>
+              <div class="wod-row">
+                <span class="reps">15</span>
+                <span class="mv">Wall ball<span class="sub">9 / 6 kg</span></span>
+                <span class="load" style="color: var(--engine-oly)">✓ 15</span>
+              </div>
+              <div class="wod-row">
+                <span class="reps">12</span>
+                <span class="mv">Toes-to-bar<span class="sub">unbroken</span></span>
+                <span class="load" style="color: var(--engine-oly)">✓ 12</span>
+              </div>
+              <div class="wod-row">
+                <span class="reps">9</span>
+                <span class="mv">Power clean<span class="sub">52.5 kg</span></span>
+                <span class="load" style="color: var(--engine-stress)">▸ 4/9</span>
+              </div>
+            </div>
+
+            <div class="phone-grid">
+              <div class="bento hud" style="--c: var(--engine-streak)">
+                <span class="br-bl"></span><span class="br-br"></span>
+                <div class="b-label"><span>STREAK</span><span style="color: var(--engine-streak)">●</span></div>
+                <div class="b-num" style="--c: var(--engine-streak)">23<span class="u">d</span></div>
+                <div class="streak-cal" style="margin-top:4px">
+                  <div class="d" data-h="1"></div><div class="d" data-h="2"></div><div class="d" data-h="3"></div>
+                  <div class="d"></div><div class="d" data-h="1"></div><div class="d" data-h="2"></div>
+                  <div class="d" data-h="3"></div><div class="d" data-h="3"></div><div class="d" data-h="2"></div>
+                  <div class="d" data-h="3"></div><div class="d" data-h="3"></div><div class="d" data-h="3"></div>
+                  <div class="d" data-h="2"></div><div class="d today" data-h="3"></div>
+                </div>
+              </div>
+
+              <div class="bento hud" style="--c: var(--engine-adapt)">
+                <span class="br-bl"></span><span class="br-br"></span>
+                <div class="b-label"><span>ADAPT</span><span style="color:var(--engine-adapt)">+0.6σ</span></div>
+                <div class="b-num display" style="--c: var(--engine-adapt); font-size: 36px">62<span class="u">/100</span></div>
+                <div class="b-foot">trend ↗ 14 días</div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="nav">
+            <div class="tab"><span class="icon"></span>HOME</div>
+            <div class="tab"><span class="icon cir"></span>OLY</div>
+            <div class="tab on"><span class="icon tri"></span>WOD</div>
+            <div class="tab"><span class="icon"></span><span class="bar"></span>STATS</div>
+            <div class="tab"><span class="icon cir"></span>YOU</div>
+          </div>
+
+          <span class="phone-foot-label">SCREEN B · VOLTA · WOD LIVE</span>
+        </div>
+
+        <!-- ============ PHONE 03 · AXON ============ -->
+        <div class="phone">
+          <div class="status">
+            <span>09:14</span>
+            <div class="right"><span>5G</span><span>·</span><span>88%</span></div>
+          </div>
+
+          <div class="phone-body">
+            <div class="phone-head">
+              <div class="greet">
+                <span class="eyebrow" style="color: var(--engine-macro)">AXON · HYROX BCN · 14d</span>
+                <h3>Race split sim</h3>
+              </div>
+              <div class="avatar" style="color: var(--engine-macro)">▲</div>
+            </div>
+
+            <!-- Goal time brutalist -->
+            <div class="bento" data-brut="1" style="--c: var(--engine-macro)">
+              <div class="b-label">GOAL · SINGLES PRO</div>
+              <div style="font-family: var(--font-mono); font-weight: 700; font-size: 56px; line-height: 1; color: #000; font-variant-numeric: tabular-nums; letter-spacing: -0.03em">01:08:24</div>
+              <div style="display:flex; justify-content:space-between; align-items:end; margin-top: 4px">
+                <div style="font-family: var(--font-mono); font-size: 11px; color: #333; letter-spacing: .12em">PROYECCIÓN MODELO</div>
+                <div style="font-family: var(--font-mono); font-size: 11px; color: var(--engine-oly); letter-spacing: .12em; font-weight:700">−02:11 vs PB</div>
+              </div>
+            </div>
+
+            <!-- Splits -->
+            <div class="bento hud" style="--c: var(--engine-stress)">
+              <span class="br-bl"></span><span class="br-br"></span>
+              <div class="b-label"><span>STATION SPLITS</span><span>8 / 8 + 8KM</span></div>
+              <div class="split-list" style="margin-top:6px">
+                <div class="row"><span class="ix">01</span><span class="nm">Run 1 km</span><span class="t">04:22</span><span class="d">·160bpm</span></div>
+                <div class="row"><span class="ix">02</span><span class="nm">SkiErg 1000 m</span><span class="t">04:08</span><span class="d">·172bpm</span></div>
+                <div class="row"><span class="ix">03</span><span class="nm">Sled push 50 m</span><span class="t">02:51</span><span class="d">·178bpm</span></div>
+                <div class="row next"><span class="ix">04</span><span class="nm">Sled pull 50 m</span><span class="t">02:44</span><span class="d">→ ahora</span></div>
+                <div class="row"><span class="ix">05</span><span class="nm">Burpee BJ 80 m</span><span class="t">04:20</span><span class="d">·target</span></div>
+                <div class="row"><span class="ix">06</span><span class="nm">Rowing 1000 m</span><span class="t">03:58</span><span class="d">·target</span></div>
+              </div>
+            </div>
+
+            <div class="phone-grid">
+              <div class="bento hud" style="--c: var(--engine-pulse)">
+                <span class="br-bl"></span><span class="br-br"></span>
+                <div class="b-label"><span>AVG HR</span><span style="color: var(--engine-pulse)">Z3.6</span></div>
+                <div class="b-num" style="--c: var(--engine-pulse)">164<span class="u">bpm</span></div>
+                <div class="b-foot">techo objetivo 174</div>
+              </div>
+
+              <div class="bento hud" style="--c: var(--engine-hormonal)">
+                <span class="br-bl"></span><span class="br-br"></span>
+                <div class="b-label"><span>FASE</span><span style="color: var(--engine-hormonal)">LUT</span></div>
+                <div class="b-num" style="--c: var(--engine-hormonal); font-size:36px">D-19</div>
+                <div class="b-foot">cargas −8% · race en folicular</div>
+              </div>
+
+              <div class="bento hud span2" style="--c: var(--engine-macro)">
+                <span class="br-bl"></span><span class="br-br"></span>
+                <div class="b-label"><span>TAPER · 14 DÍAS</span><span style="color: var(--engine-macro)">PEAK BLOCK</span></div>
+                <div class="macro-bar" style="margin-top:6px">
+                  <div class="accum" style="opacity:.35"></div>
+                  <div class="intens" style="opacity:.4"></div>
+                  <div class="peak"></div>
+                  <div class="deload"></div>
+                </div>
+                <div class="legend">
+                  <span>ACCUM</span><span>INTENS</span><span class="here" style="color: var(--engine-macro)">PEAK ←</span><span>DEL.</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="nav">
+            <div class="tab"><span class="icon"></span>HOME</div>
+            <div class="tab"><span class="icon cir"></span>OLY</div>
+            <div class="tab"><span class="icon tri"></span>WOD</div>
+            <div class="tab on"><span class="icon"></span><span class="bar"></span>STATS</div>
+            <div class="tab"><span class="icon cir"></span>YOU</div>
+          </div>
+
+          <span class="phone-foot-label">SCREEN C · AXON · RACE PLAN</span>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============================================================
+         FOOTER
+         ============================================================ -->
+    <footer class="foot">
+      <span>PKQL · DESIGN SYSTEM v0.1</span>
+      <span>SMART TRAINING · ZERO BURNOUT</span>
+      <span>BUILD 2026.05</span>
+    </footer>
+  </main>
+</body>
+</html>
