@@ -413,5 +413,98 @@ git checkout mock-first-v1
 
 ---
 
-**FIN HANDOFF V2 · Boss: copiá JS en Chrome devtools para seedear · luego confirmá login demo · próxima sesión arranca con frontend V2 conectado al backend real.**
+## 14 · Última iteración cierre · AthleteCard rediseño (commit `e13db99`)
+
+Boss observó que la AthleteCard FIFA original era confusa:
+- Códigos crípticos (STR/CND/MOB...) sin explicación
+- "AZUL · 20kg" abajo sin contexto
+- Sin progress al próximo tier
+- Sin acción contextual
+
+**Solución entregada · 2 versiones**:
+
+### `AthleteCardSimple.tsx` (Opción C · atleta)
+
+`frontend/src/components/v2/AthleteCardSimple.tsx` + `styles/v2/athlete-card-simple.css`
+
+- 6 stats con palabras + emoji (💪 Fuerza · 🫁 Resistencia · 🤸 Movilidad · 😴 Recuperación · 📅 Consistencia · 🎯 Técnica)
+- Header tier con progress bar visible (% al próximo nivel)
+- Avatar 88px con border tier
+- Insight automático calculado · top stat + bottom stat
+- CTA HOY footer ("Hoy: AMRAP 20 · Fran")
+- Tap stat expande descripción
+
+### `AthleteCardV2` ahora con `expandable` prop (Opción B · coach)
+
+`frontend/src/components/v2/AthleteCardV2.tsx` extendido:
+
+- `expandable={true}` activa tooltips
+- Tap STR/CND/MOB/REC/CON/TEC → overlay explica métrica + valor actual
+- Tap OVR → escala 0-50/50-70/70-85/85+
+- Tap disco · "AZUL 20kg" → significado IWF estándar
+- Overlay con backdrop blur · cierra al click
+
+### Demo
+
+`#cards_compare` route (View `CARDS_COMPARE`) muestra 3 secciones:
+1. Simple stand-alone
+2. FIFA con tooltips
+3. Comparativa lado a lado
+
+`pages/_dev/CardsCompareDemo.tsx`
+
+**Vivirá en**: `https://peakqual-v2.onrender.com/#cards_compare` después del deploy.
+
+---
+
+## 15 · Decisiones pendientes Boss próxima sesión
+
+| # | Decisión | Implicancia |
+|---|---|---|
+| 1 | PWA vs Native iOS+Android | Define 50-65h dev extra · MP no funciona iOS · necesita RevenueCat |
+| 2 | Pegar JS migrate+seeds Chrome devtools | Sin esto · catálogos vacíos · demo user no existe |
+| 3 | Setear env vars Render (MP · VAPID · CORS) | Pagos · push notifs · seguridad |
+| 4 | Pedir Claude Design batch v3 (14 pantallas faltantes) | Frontend V2 completo |
+| 5 | Validar AthleteCardSimple vs FIFA · cuál default? | UX coherencia atleta |
+
+---
+
+## 16 · Comandos próxima sesión · 30 segundos getting started
+
+```bash
+cd "C:\Users\Gamer\Desktop\Holy Oly 001\.claude\worktrees\compassionate-rhodes-7d48f8"
+cat HANDOFF_V2.md           # leer este archivo primero
+git checkout feat/api-first-refactor
+git pull
+cd frontend && npm install && npm run dev
+# abrir http://localhost:5173/#cards_compare → ver AthleteCard
+# abrir http://localhost:5173/#v2_home → ver Atleta Home V2
+# abrir http://localhost:5173/#v2_skill_tree → ver galaxy radial
+# abrir http://localhost:5173/#v2_coach → ver coach dashboard
+# abrir http://localhost:5173/#v2_checkin → ver lifestyle inputs
+```
+
+URLs producción:
+- Backend live: `https://holy-oly-3.onrender.com/health`
+- Frontend V2 staging: `https://peakqual-v2.onrender.com/`
+- Frontend mock legacy: `https://holy-oly-web.onrender.com/`
+
+---
+
+## 17 · 5 archivos que un agente nuevo debe leer primero
+
+1. **`HANDOFF_V2.md`** (este archivo) · 5 min · estado completo
+2. **`REFACTOR_API_FIRST.md`** · 2 min · arquitectura migración
+3. **`AUDIT_ENGINES_PENDING.md`** · 2 min · spec engines
+4. **`volta/COMPTRAIN_MASTER.md`** · referencia · NO leer todo (4006 LOC · solo grep)
+5. **`backend/src/core/volta/cycle_config.py`** · 1 min · entender bloques Volta
+
+---
+
+**FIN HANDOFF V2 · 2026-05-27 · 98 commits · listo para próxima sesión arrancar de cero.**
+
+**Boss · acción inmediata cuando vuelvas**:
+1. Pegá el JS migrate+seeds en Chrome devtools (1 min)
+2. Visitá `https://peakqual-v2.onrender.com/#cards_compare` y aprobá cuál cards usar
+3. Decidí PWA vs Native (afecta sprint siguiente)
 
