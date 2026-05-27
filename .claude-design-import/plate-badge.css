@@ -1,0 +1,261 @@
+/* ============================================================
+   PEAK QUAL · COMPONENT — PLATE BADGE
+   Disco oficial estilo Rogue Competition Bumper Plate
+   ------------------------------------------------------------
+   Usage:
+     <div class="plate-badge" data-tier="2" style="--size: 96px">
+       <div class="rim"></div>        <!-- (1) outer rubber bumper      -->
+       <div class="band"></div>       <!-- (2) black rubber separator   -->
+       <div class="hub">              <!-- (3) chrome hub               -->
+         <div class="highlight"></div><!-- (4) top-left reflection      -->
+       </div>
+       <div class="hole"></div>       <!-- (5) center bar hole          -->
+       <div class="sparkle"></div>    <!-- T4 only: ✦ destello opcional -->
+     </div>
+
+   Attrs:
+     data-tier    = 0 | 1 | 2 | 3 | 4
+     data-animate = true              (glow pulse + T4 sparkle)
+
+   Scales via --size (24/32/48/64/96/128/240). All inner layers
+   are %-based so every disc stays correct at any size.
+   ============================================================ */
+
+.plate-badge {
+  --size: 96px;
+  --tier: #22C55E;
+  --halo-min: 4px;
+  --halo-max: 12px;
+
+  position: relative;
+  width: var(--size);
+  height: var(--size);
+  flex-shrink: 0;
+  border-radius: 50%;
+  /* outer halo · color del tier */
+  filter: drop-shadow(0 0 calc(var(--size) * 0.06) var(--tier));
+}
+
+/* ---------- TIER COLOR MAPPING ---------- */
+.plate-badge[data-tier="0"] { --tier: #F8F8F8; }
+.plate-badge[data-tier="1"] { --tier: #22C55E; }
+.plate-badge[data-tier="2"] { --tier: #FBBF24; }
+.plate-badge[data-tier="3"] { --tier: #3B82F6; }
+.plate-badge[data-tier="4"] { --tier: #EF4444; }
+
+/* (1) Outer rim · colored rubber bumper, darker at edges */
+.plate-badge > .rim {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 42%,
+    color-mix(in oklab, var(--tier) 80%, #ffffff) 0%,
+    var(--tier) 32%,
+    color-mix(in oklab, var(--tier) 72%, #000000) 70%,
+    color-mix(in oklab, var(--tier) 48%, #000000) 100%);
+  box-shadow:
+    /* rim line */
+    inset 0 0 0 1px rgba(0,0,0,0.6),
+    /* top highlight */
+    inset 0 calc(var(--size) * 0.025) calc(var(--size) * 0.06) rgba(255,255,255,0.22),
+    /* bottom shadow */
+    inset 0 calc(var(--size) * -0.045) calc(var(--size) * 0.09) rgba(0,0,0,0.6);
+}
+
+/* (2) Black rubber band */
+.plate-badge > .band {
+  position: absolute;
+  inset: 22%;
+  border-radius: 50%;
+  background: #060606;
+  box-shadow:
+    inset 0 1px 2px rgba(255,255,255,0.12),
+    inset 0 -1px 2px rgba(0,0,0,0.85),
+    0 0 0 1.5px rgba(0,0,0,0.85),
+    0 0 calc(var(--size) * 0.025) rgba(0,0,0,0.7);
+}
+
+/* (3) Chrome hub · #FFF → #6E6E6E radial */
+.plate-badge > .hub {
+  position: absolute;
+  inset: 28%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 38%,
+    #ffffff 0%,
+    #f4f4f4 14%,
+    #d4d4d4 38%,
+    #9c9c9c 72%,
+    #6e6e6e 100%);
+  box-shadow:
+    /* inner bright rim */
+    inset 0 1.5px 2px rgba(255,255,255,0.85),
+    /* bottom shadow */
+    inset 0 -2.5px 4px rgba(0,0,0,0.5),
+    /* dark seam */
+    0 0 0 1px rgba(0,0,0,0.7);
+  overflow: hidden;
+}
+
+/* (4) Top-left highlight reflection on chrome */
+.plate-badge > .hub > .highlight {
+  position: absolute;
+  top: 8%;
+  left: 12%;
+  width: 60%;
+  height: 42%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 30% 28%,
+    rgba(255,255,255,0.95) 0%,
+    rgba(255,255,255,0.6)  35%,
+    rgba(255,255,255,0)    72%);
+  pointer-events: none;
+}
+
+/* (5) Bar hole · negro */
+.plate-badge > .hole {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width:  calc(var(--size) * 0.06);
+  height: calc(var(--size) * 0.06);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 30%, #181818 0%, #000 60%);
+  box-shadow:
+    inset 0 1px 1.5px rgba(0,0,0,1),
+    inset 0 -1px 1px rgba(80,80,80,0.4),
+    0 0 0 1px rgba(255,255,255,0.18);
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* T0 chrome looks better w/ slightly cooler rim variant (white rubber blends) */
+.plate-badge[data-tier="0"] > .rim {
+  background: radial-gradient(circle at 50% 42%,
+    #ffffff 0%,
+    #f4f4f4 32%,
+    #d4d4d4 70%,
+    #9a9a9a 100%);
+}
+
+/* ============================================================
+   ANIMATION · plateGlowPulse
+   ============================================================ */
+@keyframes plateGlowPulse {
+  0%, 100% {
+    filter:
+      drop-shadow(0 0 var(--halo-min) var(--tier))
+      drop-shadow(0 0 calc(var(--halo-min) * 1.4)
+        color-mix(in oklab, var(--tier) 70%, transparent));
+  }
+  50% {
+    filter:
+      drop-shadow(0 0 var(--halo-max) var(--tier))
+      drop-shadow(0 0 calc(var(--halo-max) * 1.5)
+        color-mix(in oklab, var(--tier) 65%, transparent));
+  }
+}
+
+.plate-badge[data-animate="true"] {
+  animation: plateGlowPulse 2.4s ease-in-out infinite;
+}
+
+/* ============================================================
+   T4 SPARKLE · destello sobre el hub plateado
+   ============================================================ */
+.plate-badge > .sparkle {
+  position: absolute;
+  top: 38%;
+  left: 58%;
+  width: 14%;
+  height: 14%;
+  pointer-events: none;
+  z-index: 4;
+  opacity: 0;
+  transform-origin: center;
+  background:
+    /* center bright dot */
+    radial-gradient(circle at 50% 50%,
+      #ffffff 0%, #ffffff 18%,
+      rgba(255,255,255,0.55) 32%,
+      rgba(255,255,255,0)    62%),
+    /* horizontal ray */
+    linear-gradient(90deg,
+      transparent 44%, rgba(255,255,255,0.95) 49%,
+      #ffffff 50%, rgba(255,255,255,0.95) 51%, transparent 56%),
+    /* vertical ray */
+    linear-gradient(0deg,
+      transparent 44%, rgba(255,255,255,0.95) 49%,
+      #ffffff 50%, rgba(255,255,255,0.95) 51%, transparent 56%);
+  filter: blur(0.4px);
+}
+
+@keyframes plateSparkleA {
+  0%, 60%, 100% { opacity: 0; transform: scale(0.4) rotate(0deg); }
+  72%           { opacity: 1; transform: scale(1.15) rotate(45deg); }
+  82%           { opacity: 0.6; transform: scale(0.9) rotate(60deg); }
+}
+
+.plate-badge[data-animate="true"][data-tier="4"] > .sparkle {
+  animation: plateSparkleA 2.4s ease-in-out infinite;
+}
+
+/* second tiny twinkle in the opposite corner */
+.plate-badge[data-animate="true"][data-tier="4"] > .hub::after {
+  content: "";
+  position: absolute;
+  top: 18%;
+  right: 18%;
+  width: 8%;
+  height: 8%;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 0%, #fff 30%,
+    rgba(255,255,255,0.4) 50%, transparent 75%);
+  filter: blur(0.5px);
+  animation: plateSparkleA 2.4s ease-in-out infinite;
+  animation-delay: 1.2s;
+}
+
+/* ============================================================
+   SMALL-SIZE GUARDS
+   ============================================================ */
+.plate-badge[style*="--size: 24"] > .hole,
+.plate-badge[style*="--size: 32"] > .hole {
+  display: none;
+}
+
+/* ============================================================
+   PRESENTATION HELPERS (showcase only)
+   ============================================================ */
+.plate-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 12px;
+}
+.plate-cell .plate-meta {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  text-align: center;
+}
+.plate-cell .plate-meta .rank {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  color: var(--text-lo);
+  text-transform: uppercase;
+}
+.plate-cell .plate-meta .name {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-hi);
+}
+.plate-cell .plate-meta .kg {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--c, var(--text-mid));
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+}

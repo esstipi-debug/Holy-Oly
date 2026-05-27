@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PlateStack · Peak Qual</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" />
+
+  <link rel="stylesheet" href="tokens.css" />
+  <link rel="stylesheet" href="styles.css" />
+
+  <style>
+    /* Page-only styles for the showcase */
+    .ps-page { max-width: 1200px; margin: 0 auto; padding: 48px 32px 96px; }
+
+    .ps-hero {
+      position: relative;
+      border: 1px solid var(--border-soft);
+      background:
+        radial-gradient(ellipse at 50% 0%, rgba(0,229,255,0.06), transparent 55%),
+        linear-gradient(180deg, var(--surface-1), var(--bg));
+      padding: 40px 36px 48px;
+      overflow: hidden;
+    }
+    .ps-hero::before, .ps-hero::after,
+    .ps-hero .br-bl, .ps-hero .br-br { width: 28px; height: 28px; border-width: 2px; }
+
+    .ps-hero-head {
+      display: flex; justify-content: space-between; align-items: end;
+      gap: 24px;
+      margin-bottom: 32px;
+      padding-bottom: 12px;
+      border-bottom: 1px dashed var(--border-soft);
+    }
+    .ps-hero h1 {
+      font-family: var(--font-display);
+      font-weight: 700; font-size: 52px;
+      letter-spacing: -0.035em;
+      color: var(--text-hi);
+      line-height: 0.95;
+      margin-top: 6px;
+    }
+    .ps-hero h1 .accent { color: var(--engine-streak); }
+    .ps-hero .num {
+      font-family: var(--font-mono); font-size: 11px;
+      color: var(--text-lo); letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .ps-hero .sub {
+      margin-top: 10px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-mid);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .ps-meta {
+      display: grid; gap: 6px;
+      font-family: var(--font-mono); font-size: 11px;
+      color: var(--text-mid);
+      min-width: 280px;
+    }
+    .ps-meta .row {
+      display: flex; justify-content: space-between; gap: 24px;
+      border-bottom: 1px dashed var(--border-soft);
+      padding-bottom: 4px;
+      letter-spacing: 0.06em;
+    }
+    .ps-meta .k { color: var(--text-lo); text-transform: uppercase; }
+    .ps-meta .v { color: var(--text-hi); }
+
+    /* Section heads */
+    .ps-section { margin-top: 56px; }
+    .ps-section-head {
+      display: flex; align-items: baseline; justify-content: space-between;
+      padding-bottom: 12px;
+      margin-bottom: 24px;
+      border-bottom: 1px dashed var(--border-soft);
+    }
+    .ps-section-head .num {
+      font-family: var(--font-mono); font-size: 11px;
+      color: var(--text-lo); letter-spacing: 0.15em;
+    }
+    .ps-section-head h2 {
+      font-family: var(--font-display); font-size: 22px;
+      font-weight: 600; color: var(--text-hi);
+      letter-spacing: -0.02em; text-transform: uppercase;
+      margin-top: 4px;
+    }
+    .ps-section-head .meta {
+      font-family: var(--font-mono); font-size: 11px;
+      color: var(--text-lo); letter-spacing: 0.1em;
+    }
+
+    /* Row use-case grid */
+    .ps-rows {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .ps-row-card {
+      position: relative;
+      background: var(--surface-1);
+      border: 1px solid var(--border-soft);
+      padding: 24px 20px 20px;
+      border-left: 3px solid var(--lc, var(--engine-stress));
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-height: 200px;
+    }
+    .ps-row-card .br-tl, .ps-row-card .br-tr {
+      position: absolute;
+      width: 12px; height: 4px;
+      background: var(--lc);
+      top: 0;
+      opacity: 0.8;
+    }
+    .ps-row-card .br-tl { left: 0; }
+    .ps-row-card .br-tr { right: 0; }
+    .ps-row-card .ps-row-eyebrow {
+      display: flex; justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      color: var(--text-lo);
+      text-transform: uppercase;
+    }
+    .ps-row-card .ps-row-eyebrow .tone {
+      color: var(--lc);
+      font-weight: 700;
+    }
+    .ps-row-card .ps-stack-host {
+      flex: 1;
+      display: flex;
+      align-items: flex-end;
+      min-height: 80px;
+    }
+    .ps-row-card .ps-row-desc {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-mid);
+      letter-spacing: 0.04em;
+      line-height: 1.4;
+      padding-top: 10px;
+      border-top: 1px dashed var(--border-soft);
+    }
+
+    /* Column progression: 4 weeks */
+    .ps-columns {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      background:
+        linear-gradient(180deg, var(--surface-1), var(--bg) 80%);
+      border: 1px solid var(--border-soft);
+      padding: 40px 24px 28px;
+      align-items: end;
+    }
+    .ps-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      position: relative;
+    }
+    .ps-col-head {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      color: var(--text-lo);
+      text-transform: uppercase;
+      font-weight: 700;
+      text-align: center;
+    }
+    .ps-col-head .wk {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-hi);
+      letter-spacing: -0.02em;
+      margin-bottom: 2px;
+      white-space: nowrap;
+    }
+    .ps-col-head {
+      min-width: 80px;
+    }
+    .ps-col-stack {
+      min-height: 280px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .ps-col-arrow {
+      position: absolute;
+      right: -14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--engine-stress);
+      font-family: var(--font-mono);
+      font-size: 18px;
+      opacity: 0.5;
+    }
+    .ps-col:last-child .ps-col-arrow { display: none; }
+
+    /* Replay button */
+    .ps-replay {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      background: rgba(0,229,255,0.1);
+      border: 1px solid var(--border-hard);
+      color: var(--engine-stress);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      border-radius: 0;
+      cursor: pointer;
+      transition: all 200ms;
+    }
+    .ps-replay:hover {
+      background: rgba(0,229,255,0.2);
+      box-shadow: 0 0 16px rgba(0,229,255,0.4);
+    }
+
+    /* Comparison block */
+    .ps-compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .ps-comp-card {
+      background: var(--surface-1);
+      border: 1px solid var(--border-soft);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-height: 180px;
+      position: relative;
+    }
+    .ps-comp-card .lbl {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      color: var(--text-lo);
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .ps-comp-card .lbl.you   { color: var(--engine-stress); }
+    .ps-comp-card .lbl.cohort{ color: var(--engine-adapt); }
+    .ps-comp-card .delta {
+      margin-top: auto;
+      padding-top: 10px;
+      border-top: 1px dashed var(--border-soft);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-mid);
+      letter-spacing: 0.04em;
+    }
+    .ps-comp-card .delta strong { color: var(--engine-oly); font-weight: 700; }
+
+    /* Footer */
+    .ps-foot {
+      margin-top: 80px;
+      padding-top: 24px;
+      border-top: 1px dashed var(--border-soft);
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-lo);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 900px) {
+      .ps-rows { grid-template-columns: 1fr; }
+      .ps-columns { grid-template-columns: repeat(2, 1fr); }
+      .ps-compare { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="ps-page">
+
+    <!-- ============================================================
+         HERO
+         ============================================================ -->
+    <section class="ps-hero hud" data-screen-label="01 Hero">
+      <span class="br-bl"></span><span class="br-br"></span>
+
+      <div class="ps-hero-head">
+        <div>
+          <div class="num">PKQL · CMP-008 · LOAD AGGREGATOR</div>
+          <h1>Plate<span class="accent">Stack</span></h1>
+          <div class="sub">Acumulación visual · sesión · semana · cohort</div>
+        </div>
+        <div class="ps-meta">
+          <div class="row"><span class="k">orientations</span><span class="v">row · column</span></div>
+          <div class="row"><span class="k">overlap</span><span class="v">row 18% · col 80%</span></div>
+          <div class="row"><span class="k">stagger</span><span class="v">80 ms cascade</span></div>
+          <div class="row"><span class="k">animate-in</span><span class="v">rollIn · dropIn</span></div>
+          <div class="row"><span class="k">weight kg</span><span class="v">T1·10 T2·15 T3·20 T4·25</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         ROW USE CASES
+         ============================================================ -->
+    <section class="ps-section" data-screen-label="02 Row use cases">
+      <div class="ps-section-head">
+        <div>
+          <div class="num">02 · ROW · TONELAJE SESIÓN</div>
+          <h2>Light → Medium → Heavy</h2>
+        </div>
+        <button class="ps-replay" id="replayRows">↻ REPLAY CASCADE</button>
+      </div>
+
+      <div class="ps-rows">
+        <div class="ps-row-card" style="--lc: var(--engine-oly)">
+          <span class="br-tl"></span><span class="br-tr"></span>
+          <div class="ps-row-eyebrow">
+            <span>SESIÓN A · WARM-UP</span><span class="tone">LIGHT</span>
+          </div>
+          <div class="ps-stack-host">
+            <plate-stack class="row-stack"
+                         tiers="1,1"
+                         size="68"
+                         orientation="row"
+                         label="2 plates"
+                         weight
+                         animate-in></plate-stack>
+          </div>
+          <div class="ps-row-desc">
+            Técnica · barra + 2 verdes · zona Z2 · ningún PR esperado.
+          </div>
+        </div>
+
+        <div class="ps-row-card" style="--lc: var(--engine-macro)">
+          <span class="br-tl"></span><span class="br-tr"></span>
+          <div class="ps-row-eyebrow">
+            <span>SESIÓN B · ACCESORIOS</span><span class="tone">MEDIUM</span>
+          </div>
+          <div class="ps-stack-host">
+            <plate-stack class="row-stack"
+                         tiers="1,1,2,3"
+                         size="68"
+                         orientation="row"
+                         label="4 plates"
+                         weight
+                         animate-in></plate-stack>
+          </div>
+          <div class="ps-row-desc">
+            Fuerza submáxima · 4 discos mixtos · RPE objetivo 7-8.
+          </div>
+        </div>
+
+        <div class="ps-row-card" style="--lc: var(--engine-pulse)">
+          <span class="br-tl"></span><span class="br-tr"></span>
+          <div class="ps-row-eyebrow">
+            <span>SESIÓN C · TOP SET</span><span class="tone">HEAVY</span>
+          </div>
+          <div class="ps-stack-host">
+            <plate-stack class="row-stack"
+                         tiers="1,2,3,4,4"
+                         size="68"
+                         orientation="row"
+                         label="5 plates · PR"
+                         weight
+                         animate-in></plate-stack>
+          </div>
+          <div class="ps-row-desc">
+            Cargas máximas · 2 rojos al frente · CNS check obligado.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         COLUMN PROGRESSION
+         ============================================================ -->
+    <section class="ps-section" data-screen-label="03 Progression">
+      <div class="ps-section-head">
+        <div>
+          <div class="num">03 · COLUMN · PROGRESIÓN MACROCICLO</div>
+          <h2>Sem 1 → Sem 12</h2>
+        </div>
+        <button class="ps-replay" id="replayCols">↻ REPLAY DROP-IN</button>
+      </div>
+
+      <div class="ps-columns">
+        <div class="ps-col">
+          <div class="ps-col-head">
+            <span class="wk">Sem 1</span>
+            BASE
+          </div>
+          <div class="ps-col-stack">
+            <plate-stack class="col-stack"
+                         tiers="1,1"
+                         size="58"
+                         orientation="column"
+                         label="20kg"
+                         weight
+                         animate-in></plate-stack>
+          </div>
+          <span class="ps-col-arrow">→</span>
+        </div>
+
+        <div class="ps-col">
+          <div class="ps-col-head">
+            <span class="wk">Sem 4</span>
+            ACCUM
+          </div>
+          <div class="ps-col-stack">
+            <plate-stack class="col-stack"
+                         tiers="1,1,2"
+                         size="58"
+                         orientation="column"
+                         weight
+                         animate-in></plate-stack>
+          </div>
+          <span class="ps-col-arrow">→</span>
+        </div>
+
+        <div class="ps-col">
+          <div class="ps-col-head">
+            <span class="wk">Sem 8</span>
+            INTENS
+          </div>
+          <div class="ps-col-stack">
+            <plate-stack class="col-stack"
+                         tiers="1,2,2,3"
+                         size="58"
+                         orientation="column"
+                         weight
+                         animate-in></plate-stack>
+          </div>
+          <span class="ps-col-arrow">→</span>
+        </div>
+
+        <div class="ps-col">
+          <div class="ps-col-head">
+            <span class="wk">Sem 12</span>
+            <span style="color:var(--engine-pulse)">PEAK</span>
+          </div>
+          <div class="ps-col-stack">
+            <plate-stack class="col-stack"
+                         tiers="1,2,3,4,4"
+                         size="58"
+                         orientation="column"
+                         weight
+                         animate-in></plate-stack>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         COHORT COMPARE
+         ============================================================ -->
+    <section class="ps-section" data-screen-label="04 Cohort compare">
+      <div class="ps-section-head">
+        <div>
+          <div class="num">04 · ROW · ATLETA vs COHORT</div>
+          <h2>Tu pila esta semana</h2>
+        </div>
+        <div class="meta">comparativa instantánea</div>
+      </div>
+
+      <div class="ps-compare">
+        <div class="ps-comp-card">
+          <span class="lbl you">● TÚ · MARCO</span>
+          <plate-stack tiers="1,2,2,3,3,4"
+                       size="60"
+                       orientation="row"
+                       weight
+                       animate-in></plate-stack>
+          <div class="delta">
+            6 sesiones · 105kg semana · <strong>+18% vs prom</strong>
+          </div>
+        </div>
+
+        <div class="ps-comp-card">
+          <span class="lbl cohort">○ COHORT (Box Comando · 12 atletas)</span>
+          <plate-stack tiers="1,1,2,2,3"
+                       size="60"
+                       orientation="row"
+                       weight></plate-stack>
+          <div class="delta">
+            Promedio · 5 sesiones · 70kg semana
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         FOOTER
+         ============================================================ -->
+    <footer class="ps-foot">
+      <span>PKQL · PLATESTACK v0.1 · CMP-008</span>
+      <span>SMART TRAINING · ZERO BURNOUT</span>
+      <span>BUILD 2026.05</span>
+    </footer>
+  </main>
+
+  <script src="plate-3d.js"></script>
+  <script src="plate-stack.js"></script>
+
+  <script>
+    // Replay buttons re-trigger the cascade animation
+    document.getElementById('replayRows').addEventListener('click', () => {
+      document.querySelectorAll('.row-stack').forEach(s => s.replay && s.replay());
+    });
+    document.getElementById('replayCols').addEventListener('click', () => {
+      document.querySelectorAll('.col-stack').forEach(s => s.replay && s.replay());
+    });
+  </script>
+</body>
+</html>

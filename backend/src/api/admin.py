@@ -43,6 +43,8 @@ MIGRATION_FILES = [
     "018_athlete_macro_assignments.sql",
     "019_smart_coach_alerts.sql",
     "020_lifestyle_inputs.sql",
+    "022_volta_mayhem_scaling.sql",
+    "023_volta_recommendations.sql",
 ]
 
 
@@ -490,6 +492,120 @@ async def seed_knowledge_pills(x_admin_token: Optional[str] = Header(default=Non
         total = await conn.fetchval("SELECT COUNT(*) FROM knowledge_pills")
 
     return {"ok": True, "inserted_this_run": inserted, "total_in_db": total}
+
+
+@router.post("/seed-volta-mayhem")
+async def seed_volta_mayhem(x_admin_token: Optional[str] = Header(default=None)):
+    """Pobla volta_movements (catálogo) + mayhem_scaling_rules + cardio_conversions."""
+    check_admin(x_admin_token)
+    pool = await users_repo.get_pool()
+    if pool is None:
+        raise HTTPException(503, "DB no disponible")
+
+    import json as _json
+    from ..core.volta.mayhem_scaling import (
+        MAYHEM_SCALING_CATALOG, CARDIO_CONVERSIONS,
+    )
+
+    # Catálogo movimientos · derivado del catálogo Mayhem + complemento manual
+    MOVEMENTS = [
+        # Olympic
+        ("snatch_bodyweight", "Snatch @ Bodyweight", "olympic", 4, "BW", "BW", "x BW", True, 3),
+        ("squat_snatch", "Squat Snatch", "olympic", 4, "135", "95", "lb", False, 2),
+        ("power_snatch", "Power Snatch", "olympic", 4, "135", "95", "lb", False, 1),
+        ("clean_jerk", "Clean & Jerk", "olympic", 4, "185", "125", "lb", False, 2),
+        # Gymnastics
+        ("ring_muscle_up", "Ring Muscle-Up", "gymnastics", 6, "1", "1", "rep", True, 3),
+        ("bar_muscle_up", "Bar Muscle-Up", "gymnastics", 6, "1", "1", "rep", True, 2),
+        ("handstand_pushup", "Handstand Push-Up (HSPU)", "gymnastics", 6, "1", "1", "rep", True, 2),
+        ("parallette_hspu", "Parallette HSPU", "gymnastics", 6, "1", "1", "rep", False, 3),
+        ("handstand_walk", "Handstand Walk", "gymnastics", 6, "100ft", "100ft", "ft", True, 3),
+        ("pistol_squat", "Pistol Squat", "gymnastics", 6, "1", "1", "rep", True, 2),
+        ("pull_up", "Pull-Up (Kipping)", "gymnastics", 6, "10", "10", "rep", False, 1),
+        ("toes_to_bar", "Toes-to-Bar", "gymnastics", 6, "10", "10", "rep", False, 1),
+        ("ghd_situp", "GHD Sit-Up", "gymnastics", 6, "10", "10", "rep", False, 1),
+        ("rope_climb", "Rope Climb", "gymnastics", 6, "1", "1", "rep", False, 1),
+        ("legless_rope_climb", "Legless Rope Climb", "gymnastics", 6, "1", "1", "rep", True, 3),
+        ("pegboard", "Pegboard", "gymnastics", 6, "1", "1", "rep", True, 3),
+        # Engine / cardio
+        ("run", "Run", "engine", 1, "any", "any", "m", False, 0),
+        ("row", "Row", "engine", 1, "any", "any", "m/cal", False, 0),
+        ("bike_erg", "Bike Erg", "engine", 1, "any", "any", "m/cal", False, 0),
+        ("ski_erg", "Ski Erg", "engine", 1, "any", "any", "m/cal", False, 0),
+        ("assault_bike", "Assault Bike", "engine", 1, "any", "any", "cal", False, 0),
+        ("echo_bike", "Echo Bike", "engine", 1, "any", "any", "cal", False, 0),
+        # Odd objects
+        ("sled_push", "Sled Push", "odd_object", 4, "190", "145", "lb", False, 1),
+        ("sled_pull", "Sled Pull", "odd_object", 4, "190", "145", "lb", False, 1),
+        ("sandbag_clean", "Sandbag Clean", "odd_object", 3, "150", "100", "lb", False, 1),
+        ("sandbag_squat", "Sandbag Squat", "odd_object", 3, "150", "100", "lb", False, 1),
+        ("shuttle_run", "Shuttle Run", "engine", 5, "10", "10", "rep", False, 0),
+        ("heavy_double_unders", "Heavy Double-Unders", "monostructural", 5, "50", "50", "rep", False, 1),
+    ]
+
+    inserted_m = 0
+    inserted_s = 0
+    inserted_c = 0
+
+    async with pool.acquire() as conn:
+        for slug, name, cat, dom, rxm, rxf, unit, key, tier in MOVEMENTS:
+            try:
+                await conn.execute(
+                    """
+                    INSERT INTO volta_movements
+                        (slug, name, category, domain, rx_load_male, rx_load_female,
+                         rx_unit, skill_keystone, tier_required)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                    ON CONFLICT (slug) DO UPDATE
+                      SET name = EXCLUDED.name,
+                          tier_required = EXCLUDED.tier_required,
+                          skill_keystone = EXCLUDED.skill_keystone
+                    """,
+                    slug, name, cat, dom, rxm, rxf, unit, key, tier,
+                )
+                inserted_m += 1
+            except Exception as e:
+                print(f"[seed-volta-mayhem] movement {slug}: {e}")
+
+        for rule in MAYHEM_SCALING_CATALOG:
+            try:
+                await conn.execute(
+                    """
+                    INSERT INTO mayhem_scaling_rules
+                        (movement_slug, rx_qty, sub_options, sub_for_load, sub_for_skill)
+                    VALUES ($1, $2, $3::jsonb, TRUE, TRUE)
+                    ON CONFLICT (movement_slug) DO UPDATE
+                      SET sub_options = EXCLUDED.sub_options,
+                          rx_qty = EXCLUDED.rx_qty
+                    """,
+                    rule["movement_slug"], rule["rx_qty"],
+                    _json.dumps(rule["sub_options"]),
+                )
+                inserted_s += 1
+            except Exception as e:
+                print(f"[seed-volta-mayhem] scaling {rule['movement_slug']}: {e}")
+
+        for conv in CARDIO_CONVERSIONS:
+            try:
+                await conn.execute(
+                    """
+                    INSERT INTO cardio_conversions
+                        (from_modality, to_modality, from_qty_m, to_qty_m)
+                    VALUES ($1, $2, $3, $4)
+                    ON CONFLICT (from_modality, to_modality, from_qty_m, gender) DO NOTHING
+                    """,
+                    conv["from"], conv["to"], conv["from_m"], conv["to_m"],
+                )
+                inserted_c += 1
+            except Exception as e:
+                print(f"[seed-volta-mayhem] conv {conv}: {e}")
+
+    return {
+        "ok": True,
+        "movements_inserted": inserted_m,
+        "scaling_rules_inserted": inserted_s,
+        "cardio_conversions_inserted": inserted_c,
+    }
 
 
 @router.post("/seed-pills-huberman")

@@ -1,0 +1,867 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PlateBadge · Peak Qual</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" />
+
+  <link rel="stylesheet" href="tokens.css" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="plate-badge.css" />
+
+  <style>
+    /* ===== Page-only styles ===== */
+    .pb-page { max-width: 1280px; margin: 0 auto; padding: 48px 32px 96px; }
+
+    .pb-hero {
+      position: relative;
+      border: 1px solid var(--border-soft);
+      background:
+        radial-gradient(ellipse at 50% 0%, rgba(0,229,255,0.06), transparent 55%),
+        linear-gradient(180deg, var(--surface-1), var(--bg));
+      padding: 48px 40px 56px;
+      overflow: hidden;
+    }
+    .pb-hero::before, .pb-hero::after,
+    .pb-hero .br-bl, .pb-hero .br-br { width: 28px; height: 28px; border-width: 2px; }
+
+    .pb-hero-head {
+      display: flex; justify-content: space-between; align-items: end;
+      gap: var(--s-6);
+      margin-bottom: var(--s-8);
+      padding-bottom: var(--s-3);
+      border-bottom: 1px dashed var(--border-soft);
+    }
+    .pb-hero-head .left .num {
+      font-family: var(--font-mono); font-size: 11px;
+      color: var(--text-lo); letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .pb-hero-head .left h1 {
+      font-family: var(--font-display);
+      font-weight: 700; font-size: 56px;
+      letter-spacing: -0.035em;
+      color: var(--text-hi);
+      line-height: 0.95;
+      margin-top: 6px;
+    }
+    .pb-hero-head .left h1 .accent { color: var(--engine-stress); }
+    .pb-hero-head .left .sub {
+      margin-top: 10px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-mid);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .pb-hero-head .right {
+      display: grid; gap: 8px;
+      font-family: var(--font-mono); font-size: 11px;
+      color: var(--text-mid); letter-spacing: 0.08em;
+    }
+    .pb-hero-head .right .row {
+      display: flex; justify-content: space-between; gap: var(--s-6);
+      border-bottom: 1px dashed var(--border-soft);
+      padding-bottom: 4px; min-width: 280px;
+    }
+    .pb-hero-head .right .k { color: var(--text-lo); text-transform: uppercase; }
+    .pb-hero-head .right .v { color: var(--text-hi); }
+
+    /* 5-tier row */
+    .tier-row-5 {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: var(--s-3);
+    }
+    .tier-row-5 .plate-cell {
+      border: 1px solid var(--border-soft);
+      background: var(--surface-1);
+      position: relative;
+      min-height: 220px;
+      justify-content: center;
+    }
+    .tier-row-5 .plate-cell::before,
+    .tier-row-5 .plate-cell::after {
+      content: ""; position: absolute;
+      width: 12px; height: 12px;
+      border: 1.5px solid var(--c, var(--border-hard));
+      opacity: 0.5;
+    }
+    .tier-row-5 .plate-cell::before { top: 8px; left: 8px; border-right: 0; border-bottom: 0; }
+    .tier-row-5 .plate-cell::after  { top: 8px; right: 8px; border-left: 0; border-bottom: 0; }
+    .tier-row-5 .plate-cell[data-c="0"] { --c: #F8F8F8; }
+    .tier-row-5 .plate-cell[data-c="1"] { --c: #22C55E; }
+    .tier-row-5 .plate-cell[data-c="2"] { --c: #FBBF24; }
+    .tier-row-5 .plate-cell[data-c="3"] { --c: #3B82F6; }
+    .tier-row-5 .plate-cell[data-c="4"] { --c: #EF4444; }
+
+    /* SECTION HEAD shared style w/ DS */
+    .pb-section { margin-top: 64px; }
+    .pb-section-head {
+      display: flex; align-items: baseline; justify-content: space-between;
+      gap: var(--s-4); padding-bottom: var(--s-3);
+      margin-bottom: var(--s-6);
+      border-bottom: 1px dashed var(--border-soft);
+    }
+    .pb-section-head .num {
+      font-family: var(--font-mono); font-size: 11px;
+      color: var(--text-lo); letter-spacing: 0.15em;
+    }
+    .pb-section-head h2 {
+      font-family: var(--font-display); font-size: 22px;
+      font-weight: 600; color: var(--text-hi);
+      letter-spacing: -0.02em; text-transform: uppercase;
+    }
+    .pb-section-head .meta {
+      font-family: var(--font-mono); font-size: 11px;
+      color: var(--text-lo); letter-spacing: 0.1em;
+    }
+
+    /* ===== Size scale strip ===== */
+    .size-strip {
+      border: 1px solid var(--border-soft);
+      background: var(--surface-1);
+      padding: 32px 24px;
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      align-items: end;
+      gap: var(--s-3);
+      position: relative;
+      min-height: 320px;
+    }
+    .size-strip .size-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .size-strip .label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-mid);
+      letter-spacing: 0.1em;
+    }
+    .size-strip .label .px {
+      color: var(--text-hi);
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+    .size-strip .label .role { color: var(--text-lo); display: block; font-size: 9px; margin-top: 2px; letter-spacing: 0.15em; text-transform: uppercase; text-align: center; }
+
+    /* ===== Anatomy ===== */
+    .anatomy {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: var(--s-6);
+      border: 1px solid var(--border-soft);
+      background: var(--surface-1);
+      padding: 40px;
+      position: relative;
+      min-height: 480px;
+    }
+    .anatomy-disc {
+      position: relative;
+      display: grid;
+      place-items: center;
+    }
+    .anatomy-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+    }
+    .anatomy-legend {
+      display: grid;
+      gap: var(--s-3);
+      align-content: center;
+    }
+    .anatomy-legend .item {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: var(--s-3);
+      padding: 10px 12px;
+      border: 1px solid var(--border-soft);
+      background: var(--bg);
+      align-items: center;
+    }
+    .anatomy-legend .item .ix {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--engine-stress);
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+    .anatomy-legend .item .name {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--text-hi);
+      letter-spacing: -0.01em;
+    }
+    .anatomy-legend .item .desc {
+      font-size: 12px; color: var(--text-mid);
+      line-height: 1.4;
+      margin-top: 2px;
+    }
+    .anatomy-legend .item .desc code {
+      font-family: var(--font-mono);
+      color: var(--engine-stress);
+      font-size: 11px;
+    }
+
+    /* ===== Animation playground ===== */
+    .anim-frame {
+      border: 1px solid var(--border-soft);
+      background:
+        linear-gradient(180deg, var(--surface-1), var(--bg));
+      padding: 40px 24px;
+      position: relative;
+    }
+    .anim-controls {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 28px;
+      gap: var(--s-3);
+    }
+    .anim-controls .desc {
+      font-family: var(--font-mono); font-size: 11px;
+      color: var(--text-mid); letter-spacing: 0.08em;
+    }
+    .anim-controls .desc strong { color: var(--text-hi); font-weight: 500; }
+
+    .toggle {
+      display: inline-flex; align-items: center; gap: var(--s-2);
+      padding: 10px 16px;
+      border: 1px solid var(--engine-stress);
+      background: rgba(0,229,255,0.08);
+      color: var(--engine-stress);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 0;
+      transition: all 160ms ease;
+    }
+    .toggle:hover { background: rgba(0,229,255,0.15); }
+    .toggle .pip {
+      width: 8px; height: 8px; border-radius: 999px;
+      background: var(--engine-stress);
+      box-shadow: 0 0 8px var(--engine-stress);
+    }
+    .toggle[data-on="false"] {
+      border-color: var(--text-lo);
+      color: var(--text-lo);
+      background: transparent;
+    }
+    .toggle[data-on="false"] .pip { background: var(--text-lo); box-shadow: none; }
+
+    /* ===== Ceremony ===== */
+    .ceremony {
+      position: relative;
+      border: 1px solid var(--border-soft);
+      background:
+        radial-gradient(ellipse at 50% 50%, rgba(239,68,68,0.18), transparent 55%),
+        radial-gradient(ellipse at 50% 0%,  rgba(239,68,68,0.08), transparent 60%),
+        var(--bg-deep);
+      padding: 80px 40px;
+      display: grid;
+      place-items: center;
+      gap: var(--s-6);
+      overflow: hidden;
+      min-height: 480px;
+    }
+    .ceremony::before, .ceremony::after,
+    .ceremony .br-bl, .ceremony .br-br {
+      width: 32px; height: 32px; border-width: 2px;
+      border-color: rgba(239,68,68,0.5);
+    }
+
+    .ceremony .stamp {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.32em;
+      color: rgba(239,68,68,0.85);
+      text-transform: uppercase;
+    }
+    .ceremony .title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 72px;
+      letter-spacing: -0.04em;
+      color: var(--text-hi);
+      text-align: center;
+      line-height: 0.95;
+      text-shadow: 0 0 32px rgba(239,68,68,0.4);
+    }
+    .ceremony .title .pop {
+      color: var(--tier-4);
+    }
+    .ceremony .ker {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text-mid);
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+    }
+    .ceremony .ker .div {
+      color: var(--tier-4); margin: 0 14px;
+    }
+    .ceremony .scanline {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background-image: repeating-linear-gradient(
+        0deg,
+        transparent 0 3px,
+        rgba(255,255,255,0.015) 3px 4px
+      );
+    }
+
+    /* Spec table */
+    .spec-table {
+      width: 100%;
+      border: 1px solid var(--border-soft);
+      background: var(--surface-1);
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text);
+    }
+    .spec-table th, .spec-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px dashed var(--border-soft);
+    }
+    .spec-table th {
+      font-size: 10px; letter-spacing: 0.15em;
+      color: var(--text-lo); text-transform: uppercase;
+      font-weight: 500;
+      background: var(--bg);
+    }
+    .spec-table td.num { font-variant-numeric: tabular-nums; color: var(--text-hi); }
+    .spec-table .swatch-inline {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border-radius: 999px;
+      vertical-align: middle;
+      margin-right: 8px;
+      border: 1px solid rgba(0,0,0,0.4);
+    }
+    .spec-table tr:hover td { background: rgba(0,229,255,0.03); }
+
+    /* Footer */
+    .pb-foot {
+      margin-top: 80px;
+      padding-top: var(--s-6);
+      border-top: 1px dashed var(--border-soft);
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-lo);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 980px) {
+      .tier-row-5 { grid-template-columns: repeat(3, 1fr); }
+      .size-strip { grid-template-columns: repeat(4, 1fr); }
+      .anatomy    { grid-template-columns: 1fr; }
+      .ceremony .title { font-size: 48px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="pb-page">
+
+    <!-- ============================================================
+         HERO + 5 TIERS @ 96
+         ============================================================ -->
+    <section class="pb-hero hud" data-screen-label="01 PlateBadge Tiers">
+      <span class="br-bl"></span><span class="br-br"></span>
+
+      <div class="pb-hero-head">
+        <div class="left">
+          <div class="num">PKQL · CMP-007 · PROGRESSION SYSTEM</div>
+          <h1>Plate<span class="accent">Badge</span></h1>
+          <div class="sub">Rogue Competition Bumper · 5 tiers · 7 sizes · pulse + sparkle</div>
+        </div>
+        <div class="right">
+          <div class="row"><span class="k">layers</span><span class="v">5 concéntricas</span></div>
+          <div class="row"><span class="k">render</span><span class="v">CSS puro · zero img</span></div>
+          <div class="row"><span class="k">scaling</span><span class="v">%-based · 24 → 240</span></div>
+          <div class="row"><span class="k">attrs</span><span class="v">data-tier · data-animate</span></div>
+        </div>
+      </div>
+
+      <div class="tier-row-5">
+        <div class="plate-cell" data-c="0">
+          <div class="plate-badge" data-tier="0" style="--size: 96px">
+            <div class="rim"></div>
+            <div class="band"></div>
+            <div class="hub"><div class="highlight"></div></div>
+            <div class="hole"></div>
+          </div>
+          <div class="plate-meta" style="--c: var(--tier-0)">
+            <span class="rank">TIER 0</span>
+            <span class="name">STARTER</span>
+            <span class="kg">0 kg · #F8F8F8</span>
+          </div>
+        </div>
+
+        <div class="plate-cell" data-c="1">
+          <div class="plate-badge" data-tier="1" style="--size: 96px">
+            <div class="rim"></div>
+            <div class="band"></div>
+            <div class="hub"><div class="highlight"></div></div>
+            <div class="hole"></div>
+          </div>
+          <div class="plate-meta" style="--c: var(--tier-1)">
+            <span class="rank">TIER 1</span>
+            <span class="name">INICIANTE</span>
+            <span class="kg">10 kg · #22C55E</span>
+          </div>
+        </div>
+
+        <div class="plate-cell" data-c="2">
+          <div class="plate-badge" data-tier="2" style="--size: 96px">
+            <div class="rim"></div>
+            <div class="band"></div>
+            <div class="hub"><div class="highlight"></div></div>
+            <div class="hole"></div>
+          </div>
+          <div class="plate-meta" style="--c: var(--tier-2)">
+            <span class="rank">TIER 2</span>
+            <span class="name">INTERMEDIO</span>
+            <span class="kg">15 kg · #FBBF24</span>
+          </div>
+        </div>
+
+        <div class="plate-cell" data-c="3">
+          <div class="plate-badge" data-tier="3" style="--size: 96px">
+            <div class="rim"></div>
+            <div class="band"></div>
+            <div class="hub"><div class="highlight"></div></div>
+            <div class="hole"></div>
+          </div>
+          <div class="plate-meta" style="--c: var(--tier-3)">
+            <span class="rank">TIER 3</span>
+            <span class="name">AVANZADO</span>
+            <span class="kg">20 kg · #3B82F6</span>
+          </div>
+        </div>
+
+        <div class="plate-cell" data-c="4">
+          <div class="plate-badge" data-tier="4" style="--size: 96px">
+            <div class="rim"></div>
+            <div class="band"></div>
+            <div class="hub"><div class="highlight"></div></div>
+            <div class="hole"></div>
+          </div>
+          <div class="plate-meta" style="--c: var(--tier-4)">
+            <span class="rank">TIER 4</span>
+            <span class="name">ÉLITE</span>
+            <span class="kg">25 kg · #EF4444</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SIZE SCALE
+         ============================================================ -->
+    <section class="pb-section" data-screen-label="02 Size Scale">
+      <div class="pb-section-head">
+        <div>
+          <div class="num">02 · SIZE SCALE</div>
+          <h2>24 → 240 px</h2>
+        </div>
+        <div class="meta">all layers %-scaled · hole hidden under 48px</div>
+      </div>
+
+      <div class="size-strip">
+        <div class="size-cell">
+          <div class="plate-badge" data-tier="2" style="--size: 24px">
+            <div class="rim"></div>
+            <div class="band"></div>
+            <div class="hub"><div class="highlight"></div></div>
+            <div class="hole"></div>
+          </div>
+          <span class="label"><span class="px">24</span><span class="role">icon</span></span>
+        </div>
+        <div class="size-cell">
+          <div class="plate-badge" data-tier="2" style="--size: 32px">
+            <div class="rim"></div>
+            <div class="band"></div>
+            <div class="hub"><div class="highlight"></div></div>
+            <div class="hole"></div>
+          </div>
+          <span class="label"><span class="px">32</span><span class="role">inline</span></span>
+        </div>
+        <div class="size-cell">
+          <div class="plate-badge" data-tier="2" style="--size: 48px">
+            <div class="rim"></div>
+            <div class="band"></div>
+            <div class="hub"><div class="highlight"></div></div>
+            <div class="hole"></div>
+          </div>
+          <span class="label"><span class="px">48</span><span class="role">list row</span></span>
+        </div>
+        <div class="size-cell">
+          <div class="plate-badge" data-tier="2" style="--size: 64px">
+            <div class="rim"></div>
+            <div class="band"></div>
+            <div class="hub"><div class="highlight"></div></div>
+            <div class="hole"></div>
+          </div>
+          <span class="label"><span class="px">64</span><span class="role">card</span></span>
+        </div>
+        <div class="size-cell">
+          <div class="plate-badge" data-tier="2" style="--size: 96px">
+            <div class="rim"></div>
+            <div class="band"></div>
+            <div class="hub"><div class="highlight"></div></div>
+            <div class="hole"></div>
+          </div>
+          <span class="label"><span class="px">96</span><span class="role">default</span></span>
+        </div>
+        <div class="size-cell">
+          <div class="plate-badge" data-tier="2" style="--size: 128px">
+            <div class="rim"></div>
+            <div class="band"></div>
+            <div class="hub"><div class="highlight"></div></div>
+            <div class="hole"></div>
+          </div>
+          <span class="label"><span class="px">128</span><span class="role">hero card</span></span>
+        </div>
+        <div class="size-cell">
+          <div class="plate-badge" data-tier="2" style="--size: 240px">
+            <div class="rim"></div>
+            <div class="band"></div>
+            <div class="hub"><div class="highlight"></div></div>
+            <div class="hole"></div>
+          </div>
+          <span class="label"><span class="px">240</span><span class="role">ceremony</span></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         ANATOMY · 5 capas concéntricas
+         ============================================================ -->
+    <section class="pb-section" data-screen-label="03 Anatomy">
+      <div class="pb-section-head">
+        <div>
+          <div class="num">03 · ANATOMY</div>
+          <h2>Five concentric layers</h2>
+        </div>
+        <div class="meta">CSS gradients + 2 pseudo-elements + 1 child node</div>
+      </div>
+
+      <div class="anatomy">
+        <div class="anatomy-disc">
+          <div class="plate-badge" data-tier="3" style="--size: 320px">
+            <div class="rim"></div>
+            <div class="band"></div>
+            <div class="hub"><div class="highlight"></div></div>
+            <div class="hole"></div>
+          </div>
+
+          <!-- Callout lines as SVG overlay -->
+          <svg class="anatomy-svg" viewBox="0 0 600 480" preserveAspectRatio="none">
+            <defs>
+              <pattern id="dash" patternUnits="userSpaceOnUse" width="6" height="1">
+                <line x1="0" y1="0" x2="3" y2="0" stroke="#00E5FF" stroke-width="1" opacity="0.55"/>
+              </pattern>
+            </defs>
+            <!-- callout 1: outer ring -->
+            <g stroke="#00E5FF" stroke-width="1" opacity="0.55" fill="none">
+              <line x1="138" y1="100" x2="74"  y2="60"  stroke-dasharray="3 3"/>
+              <circle cx="138" cy="100" r="3" fill="#00E5FF"/>
+              <!-- 2: black rubber band -->
+              <line x1="194" y1="160" x2="60"  y2="200" stroke-dasharray="3 3"/>
+              <circle cx="194" cy="160" r="3" fill="#00E5FF"/>
+              <!-- 3: chrome hub -->
+              <line x1="300" y1="240" x2="540" y2="180" stroke-dasharray="3 3"/>
+              <circle cx="300" cy="240" r="3" fill="#00E5FF"/>
+              <!-- 4: highlight -->
+              <line x1="262" y1="208" x2="540" y2="120" stroke-dasharray="3 3"/>
+              <circle cx="262" cy="208" r="3" fill="#00E5FF"/>
+              <!-- 5: hole -->
+              <line x1="300" y1="240" x2="540" y2="380" stroke-dasharray="3 3"/>
+              <circle cx="300" cy="240" r="2" fill="#00E5FF"/>
+            </g>
+            <g font-family="JetBrains Mono, monospace" font-size="10" fill="#94A3B8" letter-spacing="1.5">
+              <text x="40" y="55"  fill="#F1F5F9">01 · OUTER RING</text>
+              <text x="40" y="68"  font-size="9" fill="#64748B">colored rubber · radial</text>
+            </g>
+          </svg>
+        </div>
+
+        <div class="anatomy-legend">
+          <div class="item">
+            <span class="ix">01</span>
+            <div>
+              <div class="name">Outer ring · rubber</div>
+              <div class="desc">Radial gradient from <code>var(--tier)</code> · darker at edges · top highlight + bottom shadow via <code>inset box-shadow</code>.</div>
+            </div>
+          </div>
+          <div class="item">
+            <span class="ix">02</span>
+            <div>
+              <div class="name">Black rubber band</div>
+              <div class="desc">Pseudo-element <code>::before</code> · <code>inset: 27%</code> · separates colored rubber from chrome hub.</div>
+            </div>
+          </div>
+          <div class="item">
+            <span class="ix">03</span>
+            <div>
+              <div class="name">Chrome hub</div>
+              <div class="desc"><code>::after</code> radial <code>#FFF → #6E6E6E</code> · subtle metallic gradient · inset 33%.</div>
+            </div>
+          </div>
+          <div class="item">
+            <span class="ix">04</span>
+            <div>
+              <div class="name">Top-left highlight</div>
+              <div class="desc">Layered radial inside <code>::after</code> · ellipse at 32% 26% · simula reflejo de luz fotográfica.</div>
+            </div>
+          </div>
+          <div class="item">
+            <span class="ix">05</span>
+            <div>
+              <div class="name">Bar hole · 5px ref</div>
+              <div class="desc">Child <code>.hole</code> · <code>5.2% of --size</code> · auto-oculto bajo 48px (anti-blur).</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         ANIMATION PLAYGROUND
+         ============================================================ -->
+    <section class="pb-section" data-screen-label="04 Animation">
+      <div class="pb-section-head">
+        <div>
+          <div class="num">04 · ANIMATION</div>
+          <h2>plateGlowPulse · T4 sparkle</h2>
+        </div>
+        <div class="meta">data-animate="true" · 2.4s cycle · halo 4px ↔ 12px</div>
+      </div>
+
+      <div class="anim-frame">
+        <div class="anim-controls">
+          <div class="desc">
+            <strong>plateGlowPulse</strong> 2.4s · halo expansión 4 → 12 px ·
+            <strong style="color: var(--tier-4)">T4</strong> añade twinkle en hub
+          </div>
+          <button class="toggle" id="animToggle" data-on="true">
+            <span class="pip"></span><span id="animLabel">ANIM · ON</span>
+          </button>
+        </div>
+
+        <div class="tier-row-5" style="border:0; background: transparent">
+          <div class="plate-cell" data-c="0" style="background: var(--bg); border: 1px solid var(--border-soft);">
+            <div class="plate-badge anim-target" data-tier="0" data-animate="true" style="--size: 96px">
+              <div class="rim"></div>
+              <div class="band"></div>
+              <div class="hub"><div class="highlight"></div></div>
+              <div class="hole"></div>
+            </div>
+            <div class="plate-meta" style="--c: var(--tier-0)">
+              <span class="rank">T0 · STARTER</span>
+              <span class="kg">pulse only</span>
+            </div>
+          </div>
+          <div class="plate-cell" data-c="1" style="background: var(--bg); border: 1px solid var(--border-soft);">
+            <div class="plate-badge anim-target" data-tier="1" data-animate="true" style="--size: 96px">
+              <div class="rim"></div>
+              <div class="band"></div>
+              <div class="hub"><div class="highlight"></div></div>
+              <div class="hole"></div>
+            </div>
+            <div class="plate-meta" style="--c: var(--tier-1)">
+              <span class="rank">T1 · INICIANTE</span>
+              <span class="kg">pulse only</span>
+            </div>
+          </div>
+          <div class="plate-cell" data-c="2" style="background: var(--bg); border: 1px solid var(--border-soft);">
+            <div class="plate-badge anim-target" data-tier="2" data-animate="true" style="--size: 96px">
+              <div class="rim"></div>
+              <div class="band"></div>
+              <div class="hub"><div class="highlight"></div></div>
+              <div class="hole"></div>
+            </div>
+            <div class="plate-meta" style="--c: var(--tier-2)">
+              <span class="rank">T2 · INTERMEDIO</span>
+              <span class="kg">pulse only</span>
+            </div>
+          </div>
+          <div class="plate-cell" data-c="3" style="background: var(--bg); border: 1px solid var(--border-soft);">
+            <div class="plate-badge anim-target" data-tier="3" data-animate="true" style="--size: 96px">
+              <div class="rim"></div>
+              <div class="band"></div>
+              <div class="hub"><div class="highlight"></div></div>
+              <div class="hole"></div>
+            </div>
+            <div class="plate-meta" style="--c: var(--tier-3)">
+              <span class="rank">T3 · AVANZADO</span>
+              <span class="kg">pulse only</span>
+            </div>
+          </div>
+          <div class="plate-cell" data-c="4" style="background: var(--bg); border: 1px solid var(--border-soft);">
+            <div class="plate-badge anim-target" data-tier="4" data-animate="true" style="--size: 96px">
+              <div class="rim"></div>
+              <div class="band"></div>
+              <div class="hub"><div class="highlight"></div></div>
+              <div class="hole"></div>
+              <div class="sparkle"></div>
+            </div>
+            <div class="plate-meta" style="--c: var(--tier-4)">
+              <span class="rank">T4 · ÉLITE</span>
+              <span class="kg">pulse + ✦ sparkle</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SPEC TABLE
+         ============================================================ -->
+    <section class="pb-section" data-screen-label="05 Spec">
+      <div class="pb-section-head">
+        <div>
+          <div class="num">05 · SPECIFICATION</div>
+          <h2>Tier table</h2>
+        </div>
+        <div class="meta">5 tiers · OLY weight standards mirror</div>
+      </div>
+
+      <table class="spec-table">
+        <thead>
+          <tr>
+            <th style="width:80px">Tier</th>
+            <th>Rank</th>
+            <th>Color</th>
+            <th>Hex</th>
+            <th>OLY kg ref</th>
+            <th>Unlock</th>
+            <th>Sparkle</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="num">T0</td>
+            <td>STARTER</td>
+            <td><span class="swatch-inline" style="background:#F8F8F8"></span>Blanco</td>
+            <td class="num">#F8F8F8</td>
+            <td class="num">0</td>
+            <td>onboarding</td>
+            <td style="color: var(--text-lo)">—</td>
+          </tr>
+          <tr>
+            <td class="num">T1</td>
+            <td>INICIANTE</td>
+            <td><span class="swatch-inline" style="background:#22C55E"></span>Verde</td>
+            <td class="num">#22C55E</td>
+            <td class="num">10</td>
+            <td>1ª sesión completada</td>
+            <td style="color: var(--text-lo)">—</td>
+          </tr>
+          <tr>
+            <td class="num">T2</td>
+            <td>INTERMEDIO</td>
+            <td><span class="swatch-inline" style="background:#FBBF24"></span>Amarillo</td>
+            <td class="num">#FBBF24</td>
+            <td class="num">15</td>
+            <td>OLY ≥ 100 · 30 días</td>
+            <td style="color: var(--text-lo)">—</td>
+          </tr>
+          <tr>
+            <td class="num">T3</td>
+            <td>AVANZADO</td>
+            <td><span class="swatch-inline" style="background:#3B82F6"></span>Azul</td>
+            <td class="num">#3B82F6</td>
+            <td class="num">20</td>
+            <td>OLY ≥ 200 · macro ×2</td>
+            <td style="color: var(--text-lo)">—</td>
+          </tr>
+          <tr>
+            <td class="num" style="color: var(--tier-4)">T4</td>
+            <td style="color: var(--tier-4); font-weight: 600">ÉLITE</td>
+            <td><span class="swatch-inline" style="background:#EF4444"></span>Rojo</td>
+            <td class="num" style="color: var(--tier-4)">#EF4444</td>
+            <td class="num">25</td>
+            <td>OLY ≥ 300 · podium</td>
+            <td style="color: var(--tier-4)">✦ ENABLED</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ============================================================
+         CEREMONY · T4 unlocked moment
+         ============================================================ -->
+    <section class="pb-section" data-screen-label="06 Ceremony">
+      <div class="pb-section-head">
+        <div>
+          <div class="num">06 · CEREMONY</div>
+          <h2>Tier-up · 240 fullscreen</h2>
+        </div>
+        <div class="meta">disparado por nuevo PR · animate=true · zero chrome</div>
+      </div>
+
+      <div class="ceremony hud">
+        <span class="br-bl"></span><span class="br-br"></span>
+        <span class="scanline"></span>
+
+        <div class="stamp">TIER 04 · UNLOCKED</div>
+
+        <div class="plate-badge" data-tier="4" data-animate="true" style="--size: 240px; --halo-min: 8px; --halo-max: 24px">
+            <div class="rim"></div>
+            <div class="band"></div>
+            <div class="hub"><div class="highlight"></div></div>
+            <div class="hole"></div>
+            <div class="sparkle"></div>
+          </div>
+
+        <h3 class="title"><span class="pop">ÉLITE</span></h3>
+        <div class="ker">
+          25 KG <span class="div">·</span> OLY 300+ <span class="div">·</span> ROJO COMPETITION
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         FOOTER
+         ============================================================ -->
+    <footer class="pb-foot">
+      <span>PKQL · PLATEBADGE v0.1 · CMP-007</span>
+      <span>SMART TRAINING · ZERO BURNOUT</span>
+      <span>BUILD 2026.05</span>
+    </footer>
+  </main>
+
+  <script>
+    // Anim toggle
+    const toggle = document.getElementById('animToggle');
+    const label  = document.getElementById('animLabel');
+    const targets = document.querySelectorAll('.anim-target');
+    toggle.addEventListener('click', () => {
+      const on = toggle.dataset.on === 'true';
+      const next = !on;
+      toggle.dataset.on = next;
+      label.textContent = next ? 'ANIM · ON' : 'ANIM · OFF';
+      targets.forEach(el => el.setAttribute('data-animate', next));
+    });
+  </script>
+</body>
+</html>

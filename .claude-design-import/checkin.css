@@ -1,0 +1,636 @@
+/* ============================================================
+   PEAK QUAL · DAILY CHECK-IN
+   Mobile 390×844 · bento + tactical HUD
+   ============================================================ */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  font-family: var(--font-body);
+  background: var(--bg-deep);
+  background-image:
+    linear-gradient(rgba(0,229,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,255,0.025) 1px, transparent 1px),
+    radial-gradient(ellipse at 50% 0%, rgba(0,229,255,0.05), transparent 60%);
+  background-size: 40px 40px, 40px 40px, 100% 100%;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+.phone {
+  width: 390px;
+  height: 844px;
+  background: #000;
+  border-radius: 44px;
+  padding: 10px;
+  box-shadow:
+    0 24px 80px rgba(0,0,0,0.7),
+    0 0 0 1px rgba(255,255,255,0.06);
+  position: relative;
+}
+.phone-inner {
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+  border-radius: 34px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.phone-inner::before {
+  content: ""; position: absolute;
+  top: 8px; left: 50%; transform: translateX(-50%);
+  width: 110px; height: 24px;
+  background: #000;
+  border-radius: 14px;
+  z-index: 30;
+}
+
+.status-bar {
+  flex-shrink: 0;
+  height: 38px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 28px 0;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-hi);
+  font-weight: 600;
+}
+.status-bar .right { display: flex; gap: 6px; align-items: center; font-size: 12px; }
+
+/* ============================================================
+   HEADER 56px
+   ============================================================ */
+.ci-header {
+  flex-shrink: 0;
+  height: 56px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-soft);
+  z-index: 5;
+}
+.ci-h-left {
+  display: flex; flex-direction: column; gap: 1px;
+}
+.ci-h-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--text-hi);
+  letter-spacing: -0.015em;
+  line-height: 1.1;
+}
+.ci-h-date {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-lo);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.ci-h-x {
+  width: 32px; height: 32px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-soft);
+  border-radius: 6px;
+  display: grid; place-items: center;
+  cursor: pointer;
+  color: var(--text-mid);
+  transition: all 200ms;
+}
+.ci-h-x:hover { color: var(--text-hi); border-color: var(--engine-pulse); }
+
+/* ============================================================
+   SCROLL AREA
+   ============================================================ */
+.ci-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-3) transparent;
+}
+.ci-scroll::-webkit-scrollbar { width: 4px; }
+.ci-scroll::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 2px; }
+
+/* ============================================================
+   CRITICAL BANNER (>3 crit)
+   ============================================================ */
+.ci-crit-banner {
+  position: relative;
+  background: rgba(239,68,68,0.1);
+  border: 1.5px solid rgba(239,68,68,0.5);
+  border-radius: 6px;
+  padding: 10px 12px 10px 14px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  animation: critPulse 1.6s ease-in-out infinite;
+}
+@keyframes critPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+  50%      { box-shadow: 0 0 16px 2px rgba(239,68,68,0.5); }
+}
+.ci-crit-banner .br {
+  position: absolute; top: 0;
+  width: 14px; height: 4px;
+  background: var(--engine-pulse);
+}
+.ci-crit-banner .br-tl { left: 0; }
+.ci-crit-banner .br-tr { right: 0; }
+.ci-crit-banner .icon { color: var(--engine-pulse); flex-shrink: 0; }
+.ci-crit-banner .text {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-hi);
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+.ci-crit-banner .text .small {
+  display: block;
+  color: var(--text-mid);
+  font-weight: 400;
+  font-size: 10px;
+  margin-top: 2px;
+  text-transform: none;
+}
+
+/* ============================================================
+   CARD base
+   ============================================================ */
+.ci-card {
+  position: relative;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-left: 3px solid var(--ci-c, var(--border-soft));
+  border-radius: 6px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color 200ms, background 200ms;
+}
+.ci-card[data-st="ok"]   { --ci-c: var(--engine-oly);   }
+.ci-card[data-st="warn"] { --ci-c: var(--engine-macro); }
+.ci-card[data-st="crit"] { --ci-c: var(--engine-pulse); }
+.ci-card[data-st="crit"] { background: linear-gradient(90deg, rgba(239,68,68,0.06), var(--surface-1) 30%); }
+
+.ci-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  color: var(--text-lo);
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.ci-card-head .lbl { display: flex; align-items: center; gap: 5px; }
+.ci-card-head .req {
+  color: var(--engine-pulse);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+}
+.ci-card-head .val {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ci-c, var(--text-mid));
+  letter-spacing: 0.08em;
+}
+
+/* ============================================================
+   PILL (educational nudge)
+   ============================================================ */
+.ci-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background: color-mix(in oklab, var(--p-c, var(--engine-stress)) 8%, transparent);
+  border: 1px solid color-mix(in oklab, var(--p-c, var(--engine-stress)) 35%, transparent);
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text);
+  letter-spacing: 0.02em;
+  line-height: 1.3;
+  cursor: default;
+}
+.ci-pill[data-kind="warn"] { --p-c: var(--engine-macro); }
+.ci-pill[data-kind="crit"] { --p-c: var(--engine-pulse); }
+.ci-pill .ic {
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.ci-pill .txt strong { color: var(--p-c, var(--engine-stress)); font-weight: 700; }
+
+/* ============================================================
+   SLIDER (custom)
+   ============================================================ */
+.ci-slider {
+  position: relative;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  touch-action: none;
+}
+.ci-slider .track {
+  width: 100%;
+  height: 4px;
+  background: var(--surface-3);
+  border-radius: 2px;
+  position: relative;
+}
+.ci-slider .fill {
+  position: absolute;
+  left: 0; top: 0;
+  height: 100%;
+  background: var(--s-c, var(--engine-stress));
+  border-radius: 2px;
+  box-shadow: 0 0 8px var(--s-c, var(--engine-stress));
+}
+.ci-slider .thumb {
+  position: absolute;
+  top: 50%;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--s-c, var(--engine-stress));
+  border: 2px solid var(--bg);
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 12px var(--s-c, var(--engine-stress));
+  pointer-events: none;
+}
+.ci-slider .ticks {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+.ci-slider .tick {
+  position: absolute;
+  width: 1px; height: 8px;
+  background: var(--surface-3);
+  transform: translateX(-50%);
+}
+
+.ci-slider-row {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-lo);
+  letter-spacing: 0.1em;
+  margin-top: 2px;
+}
+
+.ci-display {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.ci-display .big {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 28px;
+  color: var(--text-hi);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.ci-display .big.warn { color: var(--engine-macro); }
+.ci-display .big.crit { color: var(--engine-pulse); }
+.ci-display .sub {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-mid);
+  letter-spacing: 0.05em;
+}
+
+/* ============================================================
+   CAFEÍNA · time input
+   ============================================================ */
+.ci-caff-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  align-items: center;
+}
+.ci-time-input {
+  background: var(--surface-2);
+  border: 1px solid var(--border-soft);
+  color: var(--text-hi);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 6px 8px;
+  border-radius: 4px;
+  width: 100%;
+  letter-spacing: 0.04em;
+  color-scheme: dark;
+}
+.ci-time-input:focus { border-color: var(--engine-stress); outline: 0; }
+
+/* ============================================================
+   ALCOHOL · 3 buttons
+   ============================================================ */
+.ci-alc-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.ci-alc-btn {
+  background: var(--surface-2);
+  border: 1.5px solid var(--border-soft);
+  border-radius: 6px;
+  padding: 8px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  cursor: pointer;
+  transition: all 200ms;
+  color: var(--text-mid);
+}
+.ci-alc-btn .em { font-size: 18px; line-height: 1; }
+.ci-alc-btn .lbl {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  margin-top: 2px;
+}
+.ci-alc-btn:hover { border-color: var(--text-mid); }
+.ci-alc-btn[data-active="true"][data-tone="ok"] {
+  border-color: var(--engine-oly);
+  background: color-mix(in oklab, var(--engine-oly) 12%, var(--surface-2));
+  color: var(--engine-oly);
+  box-shadow: 0 0 12px rgba(34,197,94,0.3);
+}
+.ci-alc-btn[data-active="true"][data-tone="warn"] {
+  border-color: var(--engine-macro);
+  background: color-mix(in oklab, var(--engine-macro) 12%, var(--surface-2));
+  color: var(--engine-macro);
+  box-shadow: 0 0 12px rgba(255,179,0,0.3);
+}
+.ci-alc-btn[data-active="true"][data-tone="crit"] {
+  border-color: var(--engine-pulse);
+  background: color-mix(in oklab, var(--engine-pulse) 14%, var(--surface-2));
+  color: var(--engine-pulse);
+  box-shadow: 0 0 12px rgba(239,68,68,0.35);
+}
+
+/* ============================================================
+   STRESS · slider + emoji
+   ============================================================ */
+.ci-stress-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ci-stress-emoji {
+  font-size: 28px;
+  width: 36px;
+  text-align: center;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 6px rgba(0,229,255,0.3));
+}
+
+/* ============================================================
+   PAIN · body map
+   ============================================================ */
+.ci-pain {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+.ci-pain-svg {
+  width: 80px;
+  flex-shrink: 0;
+}
+.ci-pain-svg .silhouette {
+  fill: var(--surface-3);
+  stroke: var(--border-soft);
+  stroke-width: 0.5;
+}
+.ci-pain-svg .zone {
+  fill: rgba(100,116,139,0.4);
+  stroke: var(--text-mid);
+  stroke-width: 0.5;
+  cursor: pointer;
+  transition: fill 200ms, stroke 200ms;
+}
+.ci-pain-svg .zone:hover { stroke: var(--engine-stress); }
+.ci-pain-svg .zone[data-active="true"] { stroke: var(--engine-stress); stroke-width: 1.5; }
+.ci-pain-svg .zone[data-pain="warn"] { fill: var(--engine-macro); }
+.ci-pain-svg .zone[data-pain="crit"] { fill: var(--engine-pulse); filter: drop-shadow(0 0 4px var(--engine-pulse)); }
+
+.ci-pain-chips {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  align-content: start;
+}
+.ci-pain-chip {
+  background: var(--surface-2);
+  border: 1px solid var(--border-soft);
+  border-radius: 4px;
+  padding: 5px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: all 200ms;
+  font-family: var(--font-mono);
+}
+.ci-pain-chip[data-active="true"] {
+  border-color: var(--engine-stress);
+  background: color-mix(in oklab, var(--engine-stress) 8%, var(--surface-2));
+}
+.ci-pain-chip .name {
+  font-size: 10px;
+  color: var(--text);
+  letter-spacing: 0.05em;
+}
+.ci-pain-chip .val {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-mid);
+  font-variant-numeric: tabular-nums;
+}
+.ci-pain-chip[data-pain="warn"] { border-color: var(--engine-macro); }
+.ci-pain-chip[data-pain="warn"] .val { color: var(--engine-macro); }
+.ci-pain-chip[data-pain="crit"] {
+  border-color: var(--engine-pulse);
+  background: color-mix(in oklab, var(--engine-pulse) 10%, var(--surface-2));
+}
+.ci-pain-chip[data-pain="crit"] .val { color: var(--engine-pulse); }
+
+.ci-pain-expand {
+  margin-top: 8px;
+  padding: 8px 4px 4px;
+  border-top: 1px dashed var(--border-soft);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ci-pain-expand .name {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--engine-stress);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  min-width: 70px;
+}
+.ci-pain-expand .slider-wrap {
+  flex: 1;
+}
+.ci-pain-expand .val-display {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+  min-width: 24px;
+  text-align: right;
+}
+
+/* ============================================================
+   FUMAR
+   ============================================================ */
+.ci-smoke {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.ci-toggle {
+  display: inline-flex;
+  background: var(--surface-2);
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  padding: 2px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+.ci-toggle button {
+  background: transparent;
+  border: 0;
+  color: var(--text-mid);
+  padding: 4px 10px;
+  cursor: pointer;
+  border-radius: 999px;
+  transition: all 200ms;
+}
+.ci-toggle button[data-active="true"] {
+  background: var(--engine-pulse);
+  color: #000;
+}
+.ci-toggle button[data-active="true"][data-tone="ok"] {
+  background: var(--engine-oly);
+}
+.ci-cigs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-soft);
+  border-radius: 4px;
+  padding: 3px;
+}
+.ci-cigs button {
+  width: 22px; height: 22px;
+  background: var(--surface-3);
+  border: 0;
+  color: var(--text-hi);
+  border-radius: 3px;
+  cursor: pointer;
+  font-weight: 700;
+}
+.ci-cigs button:hover { background: var(--engine-pulse); color: #000; }
+.ci-cigs .n {
+  width: 24px; text-align: center;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--text-hi);
+}
+
+/* ============================================================
+   FOOTER + SUBMIT
+   ============================================================ */
+.ci-tagline {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-lo);
+  letter-spacing: 0.1em;
+  padding: 6px;
+  font-style: italic;
+}
+
+.ci-submit-bar {
+  flex-shrink: 0;
+  padding: 10px 12px 14px;
+  background: var(--bg-deep);
+  border-top: 1px solid var(--border-soft);
+}
+.ci-submit {
+  width: 100%;
+  background: linear-gradient(135deg, var(--engine-stress), color-mix(in oklab, var(--engine-stress) 55%, #000));
+  border: 1.5px solid rgba(0,229,255,0.5);
+  color: #001218;
+  padding: 12px 16px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  box-shadow: 0 0 24px rgba(0,229,255,0.4), inset 0 1px 0 rgba(255,255,255,0.3);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  transition: transform 150ms, box-shadow 200ms, opacity 200ms;
+  overflow: hidden;
+  position: relative;
+}
+.ci-submit:hover:not(:disabled) {
+  transform: scale(0.99);
+  box-shadow: 0 0 36px rgba(0,229,255,0.6), inset 0 1px 0 rgba(255,255,255,0.4);
+}
+.ci-submit:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  filter: grayscale(0.6);
+  box-shadow: none;
+}
+.ci-submit .xp {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0,19,26,0.25);
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+}
