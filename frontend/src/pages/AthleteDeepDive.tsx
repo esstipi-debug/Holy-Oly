@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNav } from '../context/NavigationContext';
+import { useProduct } from '../context/ProductContext';
 import { useAthlete } from '../context/AthleteContext';
 import AthleteTrainingView from '../components/AthleteTrainingView';
 import DeviationsCard from '../components/DeviationsCard';
@@ -8,6 +9,7 @@ import { useAthleteStress, fallbackReadiness } from '../hooks/useAthleteStress';
 
 const AthleteDeepDive: React.FC = () => {
   const { navigate } = useNav();
+  const { product } = useProduct();
   const { selectedAthlete, athlete: currentAthlete } = useAthlete();
   const a = selectedAthlete ?? currentAthlete;
   const { stress: athleteStress, loading: stressLoading } = useAthleteStress(a);
@@ -28,15 +30,15 @@ const AthleteDeepDive: React.FC = () => {
   if (!a) {
     return (
       <div style={{ background: 'var(--bg)', minHeight: '100%', padding: 40, color: 'var(--text-secondary)', textAlign: 'center' }}>
-        <p style={{ fontSize: 13 }}>Seleccioná un atleta desde el Command Center.</p>
+        <p style={{ fontSize: 13 }}>Seleccioná un atleta desde el panel de coach.</p>
         <button
-          onClick={() => navigate('COACH_DASH')}
+          onClick={() => navigate(product === 'volta' ? 'VOLTA_COACH' : 'COACH_DASH')}
           style={{
             marginTop: 14, padding: '10px 18px', borderRadius: 12,
             background: 'var(--primary)', color: 'var(--bg)',
             border: 'none', fontSize: 12, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit',
           }}
-        >Ir al Command Center →</button>
+        >Ir al panel de coach →</button>
       </div>
     );
   }
