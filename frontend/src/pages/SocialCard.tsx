@@ -5,6 +5,7 @@ import { buildCelebrationCatalog } from '../data/celebrations';
 import MinimalistCard from '../components/social/MinimalistCard';
 import StadiumCard from '../components/social/StadiumCard';
 import StatSheetCard from '../components/social/StatSheetCard';
+import '../styles/v2/social-card.css';
 
 /**
  * Social Card — pantalla full-screen optimizada para screenshot.
@@ -12,10 +13,12 @@ import StatSheetCard from '../components/social/StatSheetCard';
  * Diseño viral: el atleta toma screenshot y lo comparte en sus redes.
  * El screenshot ES el share — por eso no hay botones share/save sobre la card.
  *
- * Esta iteración (Fase 3.5):
- * - Catálogo de "logros celebrables" (PR, racha, tier-up, benchmark, etc).
- * - 3 estilos visuales rotativos: Minimalist · Stadium · Stat Sheet.
- * - Selector arriba (◀ Estilo ▶ + ◀ Logro ▶) con persistencia en localStorage.
+ * Estilo V2 dark "Macrociclos" · scoped bajo `.soc-root` · acento ámbar
+ * (--engine-macro) entendido (solo en hover/active de los controles). Se
+ * monta dentro de PhoneLayout. SOLO se restiló el chrome de la página: chip
+ * galería, los dos Pager (Estilo / Logro) y la fila ocultar/restaurar. Las
+ * cards compartibles (Minimalist · Stadium · Stat Sheet) NO se tocan y su
+ * contenedor queda neutro (CERO overlays) para un screenshot limpio.
  *
  * Pendiente próxima iteración:
  * - 2 estilos más (Trophy, Progress before/after)
@@ -109,19 +112,19 @@ const SocialCard: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-holy-bg">
+    <div className="soc-root anim-fade-in">
       {/* Galería link · chip discreto arriba */}
-      <div className="px-4 pt-2 flex justify-end z-20 shrink-0">
+      <div className="soc-gallery-row">
         <button
           onClick={() => navigate('SOCIAL_GALLERY')}
-          className="text-[10px] font-black uppercase tracking-wider text-holy-text-secondary hover:text-holy-primary active:scale-95 transition bg-white/[0.04] border border-white/10 rounded-full px-3 py-1"
+          className="soc-gallery-chip btn-press"
         >
           Ver galería completa →
         </button>
       </div>
 
-      {/* Selector chips — fuera del área de screenshot */}
-      <div className="px-4 pt-3 pb-1 flex gap-2 bg-holy-bg/95 backdrop-blur z-20 shrink-0">
+      {/* Selector pagers — fuera del área de screenshot */}
+      <div className="soc-pagers">
         <Pager
           label="Estilo"
           value={variant.label}
@@ -137,10 +140,10 @@ const SocialCard: React.FC = () => {
       </div>
 
       {/* Hide / Restore row · acción discreta */}
-      <div className="px-4 pb-2 flex items-center justify-between text-[10px] z-20 shrink-0">
+      <div className="soc-actions">
         <button
           onClick={hideCurrent}
-          className="text-holy-text-secondary hover:text-red-300 font-bold tracking-wider uppercase active:scale-95 transition"
+          className="soc-action hide btn-press"
           aria-label="Ocultar este logro"
         >
           ✕ Ocultar este logro
@@ -148,7 +151,7 @@ const SocialCard: React.FC = () => {
         {hidden.size > 0 && (
           <button
             onClick={restoreAll}
-            className="text-holy-text-secondary hover:text-holy-primary font-bold tracking-wider uppercase active:scale-95 transition"
+            className="soc-action restore btn-press"
           >
             ↺ Restaurar ({hidden.size})
           </button>
@@ -156,7 +159,7 @@ const SocialCard: React.FC = () => {
       </div>
 
       {/* Área shareable · CERO overlays para screenshot limpio del atleta */}
-      <div ref={cardRef} className="flex-1 flex flex-col">
+      <div ref={cardRef} className="soc-stage">
         {variant.id === 'minimalist' && (
           <MinimalistCard celebration={celebration} athleteName={name} club={club} />
         )}
@@ -179,21 +182,21 @@ interface PagerProps {
 }
 
 const Pager: React.FC<PagerProps> = ({ label, value, onPrev, onNext }) => (
-  <div className="flex-1 flex items-center justify-between bg-white/[0.04] border border-white/10 rounded-full px-2 py-1.5">
+  <div className="soc-pager">
     <button
       onClick={onPrev}
-      className="w-7 h-7 flex items-center justify-center text-holy-text-secondary hover:text-holy-text text-sm rounded-full active:scale-90 transition"
+      className="soc-pager-btn btn-press"
       aria-label={`${label} anterior`}
     >
       ◀
     </button>
-    <div className="text-center leading-none">
-      <p className="text-holy-text-secondary text-[8px] font-black uppercase tracking-widest">{label}</p>
-      <p className="text-holy-text text-[11px] font-black uppercase tracking-tight mt-0.5">{value}</p>
+    <div className="soc-pager-text">
+      <p className="soc-pager-label">{label}</p>
+      <p className="soc-pager-value">{value}</p>
     </div>
     <button
       onClick={onNext}
-      className="w-7 h-7 flex items-center justify-center text-holy-text-secondary hover:text-holy-text text-sm rounded-full active:scale-90 transition"
+      className="soc-pager-btn btn-press"
       aria-label={`${label} siguiente`}
     >
       ▶

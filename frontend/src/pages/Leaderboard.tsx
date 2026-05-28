@@ -2,26 +2,32 @@ import React, { useMemo, useState } from 'react';
 import { useNav } from '../context/NavigationContext';
 import { useAthlete } from '../context/AthleteContext';
 import { useProduct } from '../context/ProductContext';
+import '../styles/v2/leaderboard.css';
 
 /**
  * Leaderboard · ranking del club/box para HO y VOL.
+ * Estilo V2 dark "Macrociclos" · scoped bajo `.lb-root`. Acento
+ * product-aware via data-accent: ámbar (--engine-macro, HO) o
+ * cyan/stress (--engine-stress, Volta). Se monta dentro de
+ * PhoneLayout. Lógica intacta: ranking, filtros, branching por
+ * producto y navegación se preservan; solo cambia la presentación.
+ * Mirror de los idiomas del leaderboard de OlyIndex.
  *
  * Resuelve el feedback de audit: el "Top 23%" del OLY/CF Index estaba aislado
  * sin comparación social. Esta pantalla muestra el ranking real con:
  *  - Podio top 3 con coronas
  *  - Lista top 10 con tendencia
- *  - Usuario logueado destacado (borde dorado/cyan)
+ *  - Usuario logueado destacado (borde acento)
  *  - Si está fuera del top 10, fila separada con "subí X para entrar"
  *  - Filtro temporal (semana/mes/all-time) y tabs de métrica por producto
  *  - CTA compartir → SOCIAL con celebration leaderboard
  */
 
-const C = {
-  bg: '#07070F', surface: '#0F0F1C', surface2: '#161626', line: '#1E1E32',
-  text: '#EAEAF5', muted: '#94A3B8', dim: '#52527A',
-  gold: '#F5C518', goldDim: '#B8860B',
-  cyan: '#00E5FF', cyanDim: '#00B8CC',
-  green: '#22C55E', red: '#FF3D00', amber: '#FFB300',
+// Medallas/rangos · hex alineados a tokens V2, aplicados via `--c` inline
+const RANK_C: Record<number, string> = {
+  1: '#FFB300', // oro
+  2: '#94A3B8', // plata
+  3: '#FF6B35', // bronce
 };
 
 type Period = 'week' | 'month' | 'all';
@@ -139,9 +145,6 @@ const Leaderboard: React.FC = () => {
   const { product } = useProduct();
 
   const isVolta = product === 'volta';
-  const accent = isVolta ? C.cyan : C.gold;
-  const accentDim = isVolta ? C.cyanDim : C.goldDim;
-  const accentRgba = isVolta ? '0,229,255' : '245,197,24';
 
   const metrics = isVolta ? VOL_METRICS : HO_METRICS;
   const [metricIdx, setMetricIdx] = useState(0);
@@ -192,83 +195,53 @@ const Leaderboard: React.FC = () => {
   };
 
   return (
-    <div className="anim-fade-in" style={{ background: C.bg, minHeight: '100%', color: C.text, paddingBottom: 110 }}>
+    <div className="lb-root anim-fade-in" data-accent={isVolta ? 'volta' : 'ho'}>
+      <div className="lb-scroll">
 
-      {/* Header */}
-      <div style={{ padding: '14px 16px 8px' }}>
-        <p style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.12em', color: accent, textTransform: 'uppercase', margin: 0 }}>
-          {isVolta ? 'Ranking del box' : 'Ranking del club'}
-        </p>
-        <h1 style={{ fontSize: 22, fontWeight: 900, letterSpacing: '-.02em', margin: '2px 0 0' }}>
-          Top 10 atletas
-        </h1>
-      </div>
+        {/* Header */}
+        <div className="lb-head">
+          <p className="lb-eyebrow">{isVolta ? 'Ranking del box' : 'Ranking del club'}</p>
+          <h1 className="lb-title">Top 10 atletas</h1>
+        </div>
 
-      {/* Period filter */}
-      <div style={{ padding: '6px 16px 10px', display: 'flex', gap: 8 }}>
-        {([
-          { id: 'week', label: 'Esta semana' },
-          { id: 'month', label: 'Este mes' },
-          { id: 'all', label: 'Todo el tiempo' },
-        ] as Array<{ id: Period; label: string }>).map(p => (
-          <button
-            key={p.id}
-            onClick={() => setPeriod(p.id)}
-            className="btn-press"
-            style={{
-              flex: 1, padding: '7px 0', borderRadius: 12,
-              background: period === p.id ? `rgba(${accentRgba},0.14)` : 'transparent',
-              border: `1px solid ${period === p.id ? `rgba(${accentRgba},0.45)` : 'rgba(255,255,255,0.10)'}`,
-              color: period === p.id ? accent : C.muted,
-              fontSize: 10, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit',
-              letterSpacing: '.04em', textTransform: 'uppercase',
-            }}
-          >{p.label}</button>
-        ))}
-      </div>
+        {/* Period filter */}
+        <div className="lb-period">
+          {([
+            { id: 'week', label: 'Esta semana' },
+            { id: 'month', label: 'Este mes' },
+            { id: 'all', label: 'Todo el tiempo' },
+          ] as Array<{ id: Period; label: string }>).map(p => (
+            <button
+              key={p.id}
+              onClick={() => setPeriod(p.id)}
+              className="lb-period-btn btn-press"
+              data-active={period === p.id}
+            >{p.label}</button>
+          ))}
+        </div>
 
-      {/* Metric tabs */}
-      <div
-        className="scroll-x-no-bar"
-        style={{ padding: '6px 16px 14px', display: 'flex', gap: 8, overflowX: 'auto' }}
-      >
-        {metrics.map((m, i) => (
-          <button
-            key={m.id}
-            onClick={() => setMetricIdx(i)}
-            className="btn-press"
-            style={{
-              flexShrink: 0, padding: '6px 14px', borderRadius: 20,
-              background: metricIdx === i ? `rgba(${accentRgba},0.15)` : 'transparent',
-              border: `1px solid ${metricIdx === i ? `rgba(${accentRgba},0.45)` : 'rgba(255,255,255,0.10)'}`,
-              color: metricIdx === i ? accent : C.muted,
-              fontSize: 11, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit',
-              letterSpacing: '.04em', textTransform: 'uppercase',
-            }}
-          >{m.label}</button>
-        ))}
-      </div>
+        {/* Metric tabs */}
+        <div className="lb-metrics scroll-x-no-bar">
+          {metrics.map((m, i) => (
+            <button
+              key={m.id}
+              onClick={() => setMetricIdx(i)}
+              className="lb-metric-chip btn-press"
+              data-active={metricIdx === i}
+            >{m.label}</button>
+          ))}
+        </div>
 
-      {/* Podio top 3 */}
-      <div style={{ padding: '0 16px 12px' }}>
+        {/* Podio top 3 */}
         <Podium
           top3={rows.slice(0, 3)}
           metric={metric}
-          accent={accent}
-          accentRgba={accentRgba}
           myId={myRow.id}
         />
-      </div>
 
-      {/* Top 10 list */}
-      <div style={{ padding: '0 16px' }}>
-        <p style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.1em', color: C.muted, textTransform: 'uppercase', margin: '6px 0 8px' }}>
-          Top 10 · {metric.label}
-        </p>
-        <div style={{
-          background: C.surface, border: `1px solid ${C.line}`,
-          borderRadius: 18, padding: 6,
-        }}>
+        {/* Top 10 list */}
+        <p className="lb-list-label">Top 10 · {metric.label}</p>
+        <div className="lb-list">
           {top10.map((r, i) => (
             <Row
               key={r.id}
@@ -277,8 +250,6 @@ const Leaderboard: React.FC = () => {
               value={metric.format(r.value)}
               trend={r.trend}
               isMe={r.id === myRow.id}
-              accent={accent}
-              accentRgba={accentRgba}
               last={i === top10.length - 1}
             />
           ))}
@@ -286,52 +257,29 @@ const Leaderboard: React.FC = () => {
 
         {/* Si user fuera del top 10 → mostrar su posición */}
         {!userInTop10 && (
-          <div style={{
-            marginTop: 12,
-            background: `linear-gradient(135deg, rgba(${accentRgba},0.10), rgba(${accentRgba},0.02))`,
-            border: `1px solid rgba(${accentRgba},0.45)`,
-            borderRadius: 18, padding: 6,
-            boxShadow: `0 0 24px rgba(${accentRgba},0.10)`,
-          }}>
+          <div className="lb-me-card">
             <Row
               rank={myRow.rank}
               name={myRow.name}
               value={metric.format(myRow.value)}
               trend={myRow.trend}
               isMe
-              accent={accent}
-              accentRgba={accentRgba}
               last
             />
-            <div style={{
-              padding: '8px 12px 4px',
-              fontSize: 11, color: accentDim, fontWeight: 700, textAlign: 'center',
-            }}>
-              Tu posición: <strong style={{ color: accent }}>#{myRow.rank}</strong> · subí{' '}
-              <strong style={{ color: accent }}>{gapToTop10}</strong>{' '}
+            <div className="lb-me-hint">
+              Tu posición: <strong>#{myRow.rank}</strong> · subí{' '}
+              <strong>{gapToTop10}</strong>{' '}
               {gapToTop10 === 1 ? 'puesto' : 'puestos'} para entrar al top 10
             </div>
           </div>
         )}
 
         {/* CTA compartir */}
-        <button
-          onClick={handleShare}
-          className="btn-press"
-          style={{
-            width: '100%', marginTop: 16, padding: '14px 0',
-            background: `linear-gradient(135deg, ${accent}, ${accentDim})`,
-            color: '#07070F', fontSize: 14, fontWeight: 900,
-            border: 'none', borderRadius: 14,
-            cursor: 'pointer', fontFamily: 'inherit',
-            letterSpacing: '.04em', textTransform: 'uppercase',
-            boxShadow: `0 4px 24px rgba(${accentRgba},0.30)`,
-          }}
-        >
+        <button onClick={handleShare} className="lb-share btn-press">
           Compartir tu posición →
         </button>
 
-        <p style={{ fontSize: 10, color: C.dim, textAlign: 'center', marginTop: 10 }}>
+        <p className="lb-footnote">
           Los rankings se actualizan diariamente · {isVolta ? 'box' : 'club'} {athlete?.club ?? '—'}
         </p>
       </div>
@@ -344,82 +292,37 @@ const Leaderboard: React.FC = () => {
 interface PodiumProps {
   top3: Array<{ id: string; name: string; rank: number; value: number; trend: Trend }>;
   metric: MetricSpec;
-  accent: string;
-  accentRgba: string;
   myId: string;
 }
 
-const PODIUM_HEIGHTS: Record<number, number> = { 1: 86, 2: 66, 3: 50 };
 const PODIUM_MEDALS: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' };
-const PODIUM_GLOW: Record<number, string> = {
-  1: 'rgba(245,197,24,0.45)',
-  2: 'rgba(192,192,192,0.40)',
-  3: 'rgba(205,127,50,0.40)',
-};
-const PODIUM_RING: Record<number, string> = {
-  1: '#F5C518', 2: '#C0C0C0', 3: '#CD7F32',
-};
 
-const Podium: React.FC<PodiumProps> = ({ top3, metric, accent, accentRgba, myId }) => {
+const Podium: React.FC<PodiumProps> = ({ top3, metric, myId }) => {
   // Orden visual: 2 · 1 · 3
   const order = [top3[1], top3[0], top3[2]].filter(Boolean);
 
   return (
-    <div style={{
-      display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', alignItems: 'flex-end',
-      gap: 8, padding: '14px 4px 6px',
-      background: `linear-gradient(180deg, rgba(${accentRgba},0.04) 0%, transparent 80%)`,
-      borderRadius: 18,
-    }}>
+    <div className="lb-podium">
       {order.map(p => {
         if (!p) return <div key="empty" />;
         const isMe = p.id === myId;
-        const height = PODIUM_HEIGHTS[p.rank] ?? 50;
-        const ring = PODIUM_RING[p.rank] ?? accent;
-        const glow = PODIUM_GLOW[p.rank] ?? `rgba(${accentRgba},0.30)`;
+        const c = RANK_C[p.rank];
         const medal = PODIUM_MEDALS[p.rank] ?? '';
         const initial = p.name.charAt(0).toUpperCase();
         return (
-          <div key={p.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+          <div key={p.id} className="lb-pod-col" data-me={isMe} style={{ '--c': c } as React.CSSProperties}>
             {/* Avatar + medalla */}
-            <div style={{ position: 'relative' }}>
-              <div style={{
-                width: 50, height: 50, borderRadius: '50%',
-                background: `${ring}22`,
-                border: `2px solid ${ring}`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 18, fontWeight: 900, color: ring,
-                boxShadow: `0 0 18px ${glow}`,
-              }}>{initial}</div>
-              <div style={{
-                position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)',
-                fontSize: 20,
-              }}>{medal}</div>
+            <div className="lb-pod-avatar-wrap">
+              <div className="lb-pod-avatar">{initial}</div>
+              <div className="lb-pod-medal">{medal}</div>
             </div>
             {/* Nombre */}
-            <p style={{
-              fontSize: 10, fontWeight: 800, color: isMe ? accent : '#EAEAF5',
-              margin: 0, textAlign: 'center', maxWidth: 90,
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-            }}>{p.name.split(' ')[0]}</p>
+            <p className="lb-pod-name">{p.name.split(' ')[0]}</p>
             {/* Valor */}
-            <p style={{
-              fontSize: 13, fontWeight: 900, color: ring, margin: 0,
-              fontStyle: 'italic', fontVariantNumeric: 'tabular-nums',
-            }}>{metric.format(p.value)}</p>
+            <p className="lb-pod-value">{metric.format(p.value)}</p>
             {/* Bloque del podio */}
-            <div style={{
-              width: '100%', height,
-              background: `linear-gradient(180deg, ${ring}22 0%, ${ring}05 100%)`,
-              border: `1px solid ${ring}55`,
-              borderRadius: '10px 10px 0 0',
-              display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
-              paddingTop: 6,
-            }}>
-              <span style={{
-                fontSize: 16, fontWeight: 900, color: ring,
-                fontStyle: 'italic',
-              }}>#{p.rank}</span>
+            <div className="lb-pod-block" data-rank={p.rank}>
+              <span className="lb-pod-rank">#{p.rank}</span>
             </div>
           </div>
         );
@@ -436,67 +339,37 @@ interface RowProps {
   value: string;
   trend: Trend;
   isMe: boolean;
-  accent: string;
-  accentRgba: string;
   last: boolean;
 }
 
-const TREND_GLYPH: Record<Trend, { sym: string; color: string }> = {
-  up: { sym: '▲', color: C.green },
-  down: { sym: '▼', color: C.red },
-  flat: { sym: '→', color: C.dim },
+const TREND_GLYPH: Record<Trend, { sym: string; color?: string }> = {
+  up: { sym: '▲', color: '#22C55E' },
+  down: { sym: '▼', color: '#EF4444' },
+  flat: { sym: '→' },
 };
 
-const Row: React.FC<RowProps> = ({ rank, name, value, trend, isMe, accent, accentRgba, last }) => {
+const Row: React.FC<RowProps> = ({ rank, name, value, trend, isMe, last }) => {
   const initial = name.charAt(0).toUpperCase();
   const tg = TREND_GLYPH[trend];
   const isPodium = rank <= 3;
   return (
-    <div style={{
-      display: 'flex', alignItems: 'center', gap: 10,
-      padding: '10px 10px',
-      borderBottom: last ? 'none' : `1px solid ${C.line}`,
-      background: isMe ? `rgba(${accentRgba},0.10)` : 'transparent',
-      border: isMe ? `1px solid rgba(${accentRgba},0.50)` : '1px solid transparent',
-      borderRadius: 12,
-      margin: 2,
-    }}>
+    <div className="lb-row" data-me={isMe} data-divider={!last && !isMe}>
       {/* Rank */}
-      <div style={{
-        width: 28, textAlign: 'center',
-        fontSize: 14, fontWeight: 900,
-        color: isMe ? accent : isPodium ? accent : C.muted,
-        fontStyle: 'italic', fontVariantNumeric: 'tabular-nums',
-      }}>
+      <div className="lb-rank" data-top={isPodium} data-medal={isPodium}>
         {isPodium ? PODIUM_MEDALS[rank] : `#${rank}`}
       </div>
       {/* Avatar */}
-      <div style={{
-        width: 32, height: 32, borderRadius: '50%',
-        background: isMe ? `rgba(${accentRgba},0.20)` : 'rgba(255,255,255,0.06)',
-        border: `1px solid ${isMe ? accent : 'rgba(255,255,255,0.10)'}`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: 12, fontWeight: 900, color: isMe ? accent : C.text,
-      }}>{initial}</div>
+      <div className="lb-avatar">{initial}</div>
       {/* Name */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{
-          fontSize: 13, fontWeight: isMe ? 900 : 700,
-          color: isMe ? accent : C.text,
-          margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-        }}>{name}{isMe && <span style={{ fontSize: 9, marginLeft: 6, color: accent, fontWeight: 800 }}>· TÚ</span>}</p>
+      <div className="lb-name-wrap">
+        <p className="lb-name">{name}{isMe && <span className="lb-name-me">· Tú</span>}</p>
       </div>
       {/* Trend */}
-      <span style={{ fontSize: 12, color: tg.color, fontWeight: 900, width: 14, textAlign: 'center' }}>
+      <span className="lb-trend" style={tg.color ? ({ '--c': tg.color } as React.CSSProperties) : undefined}>
         {tg.sym}
       </span>
       {/* Value */}
-      <div style={{
-        minWidth: 60, textAlign: 'right',
-        fontSize: 14, fontWeight: 900,
-        color: isMe ? accent : C.text,
-        fontStyle: 'italic', fontVariantNumeric: 'tabular-nums',
-      }}>{value}</div>
+      <div className="lb-value">{value}</div>
     </div>
   );
 };

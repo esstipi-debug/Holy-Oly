@@ -1,0 +1,166 @@
+/* ============================================================
+   PEAK QUAL · SOCIAL CARD · estilos V2
+   ------------------------------------------------------------
+   Pantalla full-screen optimizada para screenshot viral. ESTE
+   archivo SOLO estiliza el "chrome" de la página (chip galería,
+   pagers Estilo/Logro, fila ocultar/restaurar y el fondo/layout).
+   La obra compartible la dibujan <MinimalistCard>/<StadiumCard>/
+   <StatSheetCard> y NO se tocan: su contenedor queda neutro, sin
+   borde ni fondo, para que el screenshot del atleta salga limpio.
+
+   Se monta dentro de PhoneLayout (chrome + bottom nav) → no
+   dibuja chrome de teléfono propio. Acento ámbar entendido
+   (--engine-macro), visible solo en hover/active de los controles.
+
+   SCOPING · todo vive bajo `.soc-root`. Hereda tokens.css.
+   ============================================================ */
+
+.soc-root,
+.soc-root *,
+.soc-root *::before,
+.soc-root *::after { box-sizing: border-box; }
+
+.soc-root {
+  font-family: var(--font-body);
+  background: var(--bg);
+  height: 100%;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  --soc-accent: var(--engine-macro);
+}
+.soc-root p,
+.soc-root button { margin: 0; }
+.soc-root button {
+  padding: 0;
+  background: none;
+  border: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* ---------- Gallery chip · discreto, alineado a la derecha ---------- */
+.soc-gallery-row {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 16px 0;
+}
+.soc-gallery-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: var(--r-full);
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  color: var(--text-mid);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: color 180ms, border-color 180ms, background 180ms;
+}
+.soc-gallery-chip:hover {
+  color: var(--soc-accent);
+  border-color: color-mix(in oklab, var(--soc-accent) 45%, transparent);
+  background: color-mix(in oklab, var(--soc-accent) 8%, transparent);
+}
+
+/* ---------- Pager row (Estilo / Logro) ---------- */
+.soc-pagers {
+  flex-shrink: 0;
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px 4px;
+}
+.soc-pager {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 6px;
+  border-radius: var(--r-full);
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  transition: border-color 180ms;
+}
+.soc-pager:hover { border-color: color-mix(in oklab, var(--soc-accent) 30%, transparent); }
+.soc-pager-btn {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-full);
+  color: var(--text-mid);
+  font-size: 12px;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: color 150ms, background 150ms;
+}
+.soc-pager-btn:hover {
+  color: var(--soc-accent);
+  background: color-mix(in oklab, var(--soc-accent) 12%, transparent);
+}
+.soc-pager-text {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  line-height: 1.1;
+}
+.soc-pager-label {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-lo);
+}
+.soc-pager-value {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: var(--text-hi);
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- Hide / Restore row ---------- */
+.soc-actions {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 16px 8px;
+}
+.soc-action {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-lo);
+  transition: color 150ms;
+}
+.soc-action.hide:hover { color: var(--engine-pulse); }
+.soc-action.restore:hover { color: var(--soc-accent); }
+
+/* ---------- Shareable area · contenedor NEUTRO ----------
+   CERO overlays (sin borde, sin fondo, sin sombra): el screenshot
+   del atleta debe salir limpio. La card hija rellena este espacio. */
+.soc-stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}

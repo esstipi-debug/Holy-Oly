@@ -1,0 +1,359 @@
+/* ============================================================
+   PEAK QUAL · LEADERBOARD (ranking del club/box) · estilos V2
+   ------------------------------------------------------------
+   Ranking social del club (HO) o box (Volta): podio top 3,
+   lista top 10 con tendencia, usuario logueado destacado y
+   fila separada si está fuera del top 10. Filtro temporal
+   (semana/mes/all) + tabs de métrica por producto + CTA
+   compartir → SOCIAL. Se monta dentro de PhoneLayout
+   (chrome + bottom nav) → no dibuja chrome propio.
+
+   Acento product-aware via data-accent: ámbar (--engine-macro,
+   HO) o cyan/stress (--engine-stress, Volta). Mirror de los
+   idiomas del leaderboard de OlyIndex (rank chips, avatares,
+   filas) y del scaffold de HoStats (root/scroll/header/tabs).
+
+   SCOPING · todo vive bajo `.lb-root`. Hereda tokens.css.
+   Colores dinámicos por elemento (medallas/rangos) via `--c`.
+   ============================================================ */
+
+.lb-root,
+.lb-root *,
+.lb-root *::before,
+.lb-root *::after { box-sizing: border-box; }
+
+.lb-root {
+  font-family: var(--font-body);
+  background: var(--bg);
+  height: 100%;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  /* acento del root · ámbar (HO) o cyan (Volta) via data-accent */
+  --lb-accent: var(--engine-macro);
+}
+.lb-root[data-accent="ho"]    { --lb-accent: var(--engine-macro); }
+.lb-root[data-accent="volta"] { --lb-accent: var(--engine-stress); }
+
+.lb-root h1,
+.lb-root p,
+.lb-root button { margin: 0; }
+.lb-root button { padding: 0; }
+
+.lb-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-3) transparent;
+}
+.lb-scroll::-webkit-scrollbar { width: 4px; }
+.lb-scroll::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 2px; }
+
+/* ---------- Header ---------- */
+.lb-head { display: flex; flex-direction: column; gap: 2px; }
+.lb-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--lb-accent);
+}
+.lb-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  color: var(--text-hi);
+}
+
+/* ---------- Period filter (segmented) ---------- */
+.lb-period { display: flex; gap: 8px; }
+.lb-period-btn {
+  flex: 1;
+  padding: 7px 0;
+  border-radius: var(--r-md);
+  background: transparent;
+  border: 1px solid var(--border-soft);
+  color: var(--text-mid);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 180ms, color 180ms, border-color 180ms;
+}
+.lb-period-btn:hover { color: var(--text-hi); border-color: var(--lb-accent); }
+.lb-period-btn[data-active="true"] {
+  background: color-mix(in oklab, var(--lb-accent) 14%, transparent);
+  border-color: color-mix(in oklab, var(--lb-accent) 45%, transparent);
+  color: var(--lb-accent);
+}
+
+/* ---------- Metric tabs (scroll-x) ---------- */
+.lb-metrics {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+.lb-metric-chip {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border-radius: var(--r-full);
+  background: transparent;
+  border: 1px solid var(--border-soft);
+  color: var(--text-mid);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 180ms, color 180ms, border-color 180ms;
+}
+.lb-metric-chip:hover { color: var(--text-hi); border-color: var(--lb-accent); }
+.lb-metric-chip[data-active="true"] {
+  background: color-mix(in oklab, var(--lb-accent) 15%, transparent);
+  border-color: color-mix(in oklab, var(--lb-accent) 45%, transparent);
+  color: var(--lb-accent);
+}
+
+/* ============================================================
+   Podio top 3 · orden visual 2 · 1 · 3
+   ============================================================ */
+.lb-podium {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 14px 6px 6px;
+  background: linear-gradient(180deg, color-mix(in oklab, var(--lb-accent) 5%, transparent) 0%, transparent 80%);
+  border-radius: var(--r-lg);
+}
+.lb-pod-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.lb-pod-avatar-wrap { position: relative; }
+.lb-pod-avatar {
+  width: 50px; height: 50px;
+  border-radius: var(--r-full);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--c, var(--lb-accent));
+  background: color-mix(in oklab, var(--c, var(--lb-accent)) 14%, transparent);
+  border: 2px solid var(--c, var(--lb-accent));
+  box-shadow: 0 0 18px color-mix(in oklab, var(--c, var(--lb-accent)) 45%, transparent);
+}
+.lb-pod-medal {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 20px;
+  line-height: 1;
+}
+.lb-pod-name {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-hi);
+  text-align: center;
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lb-pod-col[data-me="true"] .lb-pod-name { color: var(--lb-accent); }
+.lb-pod-value {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--c, var(--lb-accent));
+  font-variant-numeric: tabular-nums;
+}
+.lb-pod-block {
+  width: 100%;
+  background: linear-gradient(180deg, color-mix(in oklab, var(--c, var(--lb-accent)) 14%, transparent) 0%, color-mix(in oklab, var(--c, var(--lb-accent)) 2%, transparent) 100%);
+  border: 1px solid color-mix(in oklab, var(--c, var(--lb-accent)) 35%, transparent);
+  border-radius: 10px 10px 0 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 6px;
+}
+.lb-pod-block[data-rank="1"] { height: 86px; }
+.lb-pod-block[data-rank="2"] { height: 66px; }
+.lb-pod-block[data-rank="3"] { height: 50px; }
+.lb-pod-rank {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--c, var(--lb-accent));
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================
+   Top 10 list
+   ============================================================ */
+.lb-list-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  padding: 0 2px;
+}
+.lb-list {
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-lg);
+  padding: 6px;
+  box-shadow: var(--shadow-card);
+}
+
+/* ---------- Row ---------- */
+.lb-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: var(--r-md);
+  border: 1px solid transparent;
+  background: transparent;
+}
+.lb-row[data-divider="true"] { border-bottom: 1px solid var(--border-soft); border-radius: 0; }
+.lb-row[data-me="true"] {
+  background: color-mix(in oklab, var(--lb-accent) 9%, var(--surface-1));
+  border: 1px solid color-mix(in oklab, var(--lb-accent) 45%, transparent);
+  border-radius: var(--r-md);
+}
+.lb-rank {
+  width: 28px;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-mid);
+  font-variant-numeric: tabular-nums;
+}
+.lb-rank[data-medal="true"] { font-family: var(--font-body); }
+.lb-rank[data-top="true"] { color: var(--lb-accent); }
+.lb-row[data-me="true"] .lb-rank { color: var(--lb-accent); }
+.lb-avatar {
+  flex-shrink: 0;
+  width: 32px; height: 32px;
+  border-radius: var(--r-full);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text);
+  background: color-mix(in oklab, var(--text-hi) 6%, transparent);
+  border: 1px solid var(--border-soft);
+}
+.lb-row[data-me="true"] .lb-avatar {
+  color: var(--lb-accent);
+  background: color-mix(in oklab, var(--lb-accent) 20%, transparent);
+  border-color: color-mix(in oklab, var(--lb-accent) 60%, transparent);
+}
+.lb-name-wrap { flex: 1; min-width: 0; }
+.lb-name {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-hi);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lb-row[data-me="true"] .lb-name { color: var(--lb-accent); font-weight: 800; }
+.lb-name-me {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--lb-accent);
+  margin-left: 6px;
+}
+.lb-trend {
+  width: 14px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--c, var(--text-lo));
+}
+.lb-value {
+  min-width: 60px;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-hi);
+  font-variant-numeric: tabular-nums;
+}
+.lb-row[data-me="true"] .lb-value { color: var(--lb-accent); }
+
+/* ---------- Out-of-top-10 callout ---------- */
+.lb-me-card {
+  margin-top: 12px;
+  background: linear-gradient(135deg, color-mix(in oklab, var(--lb-accent) 10%, transparent), color-mix(in oklab, var(--lb-accent) 2%, transparent));
+  border: 1px solid color-mix(in oklab, var(--lb-accent) 45%, transparent);
+  border-radius: var(--r-lg);
+  padding: 6px;
+  box-shadow: 0 0 24px -6px color-mix(in oklab, var(--lb-accent) 40%, transparent);
+}
+.lb-me-hint {
+  padding: 8px 12px 4px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: color-mix(in oklab, var(--lb-accent) 70%, var(--text-mid));
+  text-align: center;
+}
+.lb-me-hint strong { color: var(--lb-accent); font-weight: 800; }
+
+/* ---------- CTA compartir ---------- */
+.lb-share {
+  width: 100%;
+  margin-top: 16px;
+  padding: 14px 0;
+  background: linear-gradient(135deg, var(--lb-accent), color-mix(in oklab, var(--lb-accent) 60%, #000));
+  color: var(--bg-deep);
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: none;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  box-shadow: 0 4px 24px -4px color-mix(in oklab, var(--lb-accent) 50%, transparent);
+  transition: transform 150ms, box-shadow 180ms;
+}
+.lb-share:hover { transform: translateY(-1px); box-shadow: 0 6px 28px -4px color-mix(in oklab, var(--lb-accent) 60%, transparent); }
+
+.lb-footnote {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+  color: var(--text-lo);
+  text-align: center;
+  margin-top: 10px;
+}
