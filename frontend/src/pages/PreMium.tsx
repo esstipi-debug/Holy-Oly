@@ -3,9 +3,16 @@ import { useNav } from '../context/NavigationContext';
 import { useAuth } from '../context/AuthContext';
 import { useRole } from '../context/RoleContext';
 import { api } from '../lib/api';
+import '../styles/v2/premium.css';
 
 /**
  * Premium · pantalla de planes con MP Subscriptions.
+ * Estilo V2 dark "Macrociclos" · scoped bajo `.prem-root` · acento oro
+ * (--engine-belt, identidad premium/XP). Se monta dentro de PhoneLayout
+ * (chrome + bottom nav) → no dibuja chrome propio. Lógica intacta: fetch
+ * de planes, filtro por audiencia, toggle período, intent de pago y
+ * redirección a MP se preservan; solo cambia la presentación. El color de
+ * acento varía por audiencia (coach oro · atleta violeta) vía `--c` inline.
  *
  * Flow:
  *   1. Fetch /v1/payments/plans → 4 planes con precios reales
@@ -126,56 +133,40 @@ const PreMium: React.FC = () => {
     ? Math.round((1 - yearly.amount / (monthly.amount * 12)) * 100)
     : null;
 
+  // Acento dinámico por audiencia: coach oro (XP/belt) · atleta violeta (adapt).
   const accentColor = audience === 'coach' ? '#F5C518' : '#7C5CFF';
-  const accentBg = audience === 'coach' ? 'rgba(245,197,24,0.12)' : 'rgba(124,92,255,0.12)';
-  const accentBorder = audience === 'coach' ? 'rgba(245,197,24,0.45)' : 'rgba(124,92,255,0.45)';
 
   return (
-    <div className="flex flex-col min-h-full bg-holy-bg text-holy-text">
-      {/* Header */}
-      <header className="px-6 pt-8 pb-2 text-center relative">
-        <button
-          onClick={back}
-          className="absolute left-4 top-7 text-holy-text-secondary text-xl"
-          aria-label="Volver"
-        >←</button>
-        <p className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: accentColor }}>
-          PLAN PRO · {audience === 'coach' ? 'COACH' : 'ATLETA'}
-        </p>
-        <h1 className="text-2xl font-black mt-1">Suscribite a Holy Oly</h1>
-        {trialDays != null && trialDays > 0 && (
-          <p className="text-[11px] mt-2 px-3 py-1 inline-block rounded-full"
-            style={{ background: accentBg, color: accentColor, border: `1px solid ${accentBorder}` }}>
-            🎁 {trialDays} días restantes de trial · suscribite y los conservás
-          </p>
-        )}
-      </header>
+    <div className="prem-root anim-fade-in" style={{ '--c': accentColor } as React.CSSProperties}>
+      <div className="prem-scroll">
+        {/* Header */}
+        <div className="prem-head">
+          <button className="prem-back btn-press" onClick={back} aria-label="Volver">←</button>
+          <p className="prem-eyebrow">Plan Pro · {audience === 'coach' ? 'Coach' : 'Atleta'}</p>
+          <h1 className="prem-title">Suscribite a Holy Oly</h1>
+          {trialDays != null && trialDays > 0 && (
+            <p className="prem-trial">
+              🎁 {trialDays} días restantes de trial · suscribite y los conservás
+            </p>
+          )}
+        </div>
 
-      <div className="flex-1 px-4 pb-6 overflow-y-auto">
         {/* Toggle Mensual / Anual */}
-        <div className="mt-6 mb-5 flex justify-center">
-          <div className="inline-flex rounded-full p-1" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+        <div className="prem-toggle-wrap">
+          <div className="prem-toggle">
             <button
+              className="prem-toggle-btn btn-press"
+              data-active={period === 'monthly'}
               onClick={() => setPeriod('monthly')}
-              className="px-4 py-1.5 text-[11px] font-black tracking-wider uppercase rounded-full transition"
-              style={{
-                background: period === 'monthly' ? accentColor : 'transparent',
-                color: period === 'monthly' ? '#07070F' : 'var(--text-secondary, #94A3B8)',
-              }}
             >Mensual</button>
             <button
+              className="prem-toggle-btn btn-press"
+              data-active={period === 'yearly'}
               onClick={() => setPeriod('yearly')}
-              className="px-4 py-1.5 text-[11px] font-black tracking-wider uppercase rounded-full transition relative"
-              style={{
-                background: period === 'yearly' ? accentColor : 'transparent',
-                color: period === 'yearly' ? '#07070F' : 'var(--text-secondary, #94A3B8)',
-              }}
             >
               Anual
               {yearlyDiscountPct != null && yearlyDiscountPct > 0 && (
-                <span className="absolute -top-2 -right-2 text-[9px] font-black px-1.5 py-0.5 rounded-full bg-green-500 text-black">
-                  -{yearlyDiscountPct}%
-                </span>
+                <span className="prem-toggle-badge">-{yearlyDiscountPct}%</span>
               )}
             </button>
           </div>
@@ -183,50 +174,36 @@ const PreMium: React.FC = () => {
 
         {/* Hero Plan Card */}
         {active && (
-          <div
-            className="rounded-3xl p-6 mb-5 text-center relative overflow-hidden"
-            style={{
-              background: `linear-gradient(135deg, ${accentBg} 0%, rgba(255,255,255,0.02) 100%)`,
-              border: `1px solid ${accentBorder}`,
-              boxShadow: `0 0 32px ${accentBg}`,
-            }}
-          >
-            <p className="text-[10px] font-black uppercase tracking-[0.15em]" style={{ color: accentColor }}>
-              {active.label}
-            </p>
-            <div className="flex items-baseline justify-center gap-1 mt-2">
-              <span className="text-5xl font-black italic tracking-tighter">{formatCLP(active.amount)}</span>
-              <span className="text-sm font-bold text-holy-text-secondary">
-                {period === 'monthly' ? '/ mes' : '/ año'}
-              </span>
+          <div className="prem-hero">
+            <p className="prem-hero-label">{active.label}</p>
+            <div className="prem-hero-row">
+              <span className="prem-hero-price">{formatCLP(active.amount)}</span>
+              <span className="prem-hero-period">{period === 'monthly' ? '/ mes' : '/ año'}</span>
             </div>
             {period === 'yearly' && monthly && (
-              <p className="text-[11px] text-holy-text-secondary mt-1">
+              <p className="prem-hero-equiv">
                 Equivale a {formatCLP(Math.round(active.amount / 12))} / mes
               </p>
             )}
-            <p className="text-[10px] mt-3 opacity-70">
+            <p className="prem-hero-fine">
               Renovación automática · cancelás cuando quieras
             </p>
           </div>
         )}
 
         {!plans && !error && (
-          <p className="text-center text-holy-text-secondary text-sm py-10">Cargando planes...</p>
+          <p className="prem-loading">Cargando planes...</p>
         )}
 
         {/* Features */}
         {active && (
-          <div className="rounded-2xl mb-5"
-            style={{ background: '#0F0F1C', border: '1px solid #1E1E32' }}>
-            <p className="px-4 pt-3 pb-2 text-[10px] font-black uppercase tracking-widest text-holy-text-secondary">
-              Incluye:
-            </p>
-            <div className="px-4 pb-3 flex flex-col gap-2">
+          <div className="prem-features">
+            <p className="prem-features-title">Incluye:</p>
+            <div className="prem-features-list">
               {FEATURES_BY_AUDIENCE[audience].map((f) => (
-                <div key={f.label} className="flex items-center gap-2">
-                  <span style={{ color: accentColor }}>✓</span>
-                  <span className="text-[12px] text-holy-text">{f.label}</span>
+                <div key={f.label} className="prem-feature">
+                  <span className="prem-feature-check">✓</span>
+                  <span className="prem-feature-label">{f.label}</span>
                 </div>
               ))}
             </div>
@@ -234,24 +211,16 @@ const PreMium: React.FC = () => {
         )}
 
         {error && (
-          <div className="rounded-xl p-3 mb-4 text-center text-[12px] font-bold"
-            style={{ background: 'rgba(239,68,68,0.12)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.3)' }}>
-            {error}
-          </div>
+          <div className="prem-error">{error}</div>
         )}
       </div>
 
       {/* CTA */}
-      <footer className="px-6 pb-8 space-y-3">
+      <footer className="prem-cta">
         <button
+          className="prem-cta-btn btn-press"
           onClick={handleSubscribe}
           disabled={!active || loading != null}
-          className="w-full py-4 rounded-2xl font-black text-sm tracking-wider uppercase active:scale-95 transition disabled:opacity-50"
-          style={{
-            background: `linear-gradient(135deg, ${accentColor}, ${audience === 'coach' ? '#D4A800' : '#5B3FE8'})`,
-            color: '#07070F',
-            boxShadow: `0 10px 32px ${accentBg}`,
-          }}
         >
           {loading
             ? 'Conectando con MercadoPago...'
@@ -259,7 +228,7 @@ const PreMium: React.FC = () => {
               ? `Suscribirme — ${formatCLP(active.amount)}${period === 'monthly' ? '/mes' : '/año'}`
               : 'Cargando...'}
         </button>
-        <p className="text-center text-[10px] text-holy-text-secondary">
+        <p className="prem-cta-fine">
           🔒 Cobro seguro vía MercadoPago · podés cancelar en cualquier momento
         </p>
       </footer>

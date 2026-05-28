@@ -1,0 +1,297 @@
+/* ============================================================
+   PEAK QUAL · PREMIUM (Planes / Suscripción) · estilos V2
+   ------------------------------------------------------------
+   Paywall / upsell con MP Subscriptions. Se monta dentro de
+   PhoneLayout (chrome + bottom nav) → no dibuja chrome propio.
+   Identidad premium/XP · acento oro (--engine-belt). El color
+   efectivo varía por audiencia (coach oro · atleta violeta) y
+   llega por `--c` inline en `.prem-root`; cuando no se setea,
+   cae a `--prem-accent`.
+
+   SCOPING · todo vive bajo `.prem-root`. Hereda tokens.css.
+   ============================================================ */
+
+.prem-root,
+.prem-root *,
+.prem-root *::before,
+.prem-root *::after { box-sizing: border-box; }
+
+.prem-root {
+  font-family: var(--font-body);
+  background: var(--bg);
+  height: 100%;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  --prem-accent: var(--engine-belt);
+  /* color efectivo: el inline `--c` por audiencia, o el acento base */
+  --c: var(--prem-accent);
+}
+.prem-root h1,
+.prem-root p,
+.prem-root button { margin: 0; }
+.prem-root button { padding: 0; }
+
+.prem-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-3) transparent;
+}
+.prem-scroll::-webkit-scrollbar { width: 4px; }
+.prem-scroll::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 2px; }
+
+/* ---------- Header ---------- */
+.prem-head {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 3px;
+  padding: 6px 0 2px;
+}
+.prem-back {
+  position: absolute;
+  left: -4px;
+  top: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-full);
+  background: var(--surface-2);
+  border: 1px solid var(--border-soft);
+  color: var(--text-mid);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: color 180ms, border-color 180ms, background 180ms;
+}
+.prem-back:hover {
+  color: var(--text-hi);
+  border-color: color-mix(in oklab, var(--c) 45%, transparent);
+}
+.prem-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--c);
+}
+.prem-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 24px;
+  letter-spacing: -0.02em;
+  color: var(--text-hi);
+}
+.prem-trial {
+  margin-top: 4px;
+  padding: 5px 12px;
+  border-radius: var(--r-full);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--c);
+  background: color-mix(in oklab, var(--c) 12%, transparent);
+  border: 1px solid color-mix(in oklab, var(--c) 45%, transparent);
+}
+
+/* ---------- Toggle Mensual / Anual ---------- */
+.prem-toggle-wrap { display: flex; justify-content: center; }
+.prem-toggle {
+  display: inline-flex;
+  padding: 4px;
+  border-radius: var(--r-full);
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+}
+.prem-toggle-btn {
+  position: relative;
+  padding: 7px 18px;
+  border-radius: var(--r-full);
+  background: transparent;
+  border: none;
+  color: var(--text-mid);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 180ms, color 180ms;
+}
+.prem-toggle-btn:hover { color: var(--text-hi); }
+.prem-toggle-btn[data-active="true"] {
+  background: var(--c);
+  color: var(--bg-deep);
+}
+.prem-toggle-badge {
+  position: absolute;
+  top: -7px;
+  right: -8px;
+  padding: 1.5px 6px;
+  border-radius: var(--r-full);
+  background: var(--engine-oly);
+  color: var(--bg-deep);
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+/* ---------- Hero Plan Card ---------- */
+.prem-hero {
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  padding: 22px 18px;
+  border-radius: var(--r-xl);
+  background: linear-gradient(135deg, color-mix(in oklab, var(--c) 16%, transparent), color-mix(in oklab, var(--c) 3%, transparent));
+  border: 1px solid color-mix(in oklab, var(--c) 42%, transparent);
+  box-shadow: 0 0 36px -8px color-mix(in oklab, var(--c) 45%, transparent), var(--shadow-card);
+}
+.prem-hero-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--c);
+}
+.prem-hero-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+.prem-hero-price {
+  font-family: var(--font-display);
+  font-size: 46px;
+  font-weight: 700;
+  font-style: italic;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--text-hi);
+  font-variant-numeric: tabular-nums;
+}
+.prem-hero-period {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-mid);
+}
+.prem-hero-equiv {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-mid);
+  margin-top: 4px;
+}
+.prem-hero-fine {
+  font-size: 10px;
+  color: var(--text-lo);
+  margin-top: 12px;
+}
+
+/* ---------- Loading ---------- */
+.prem-loading {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-mid);
+  padding: 32px 0;
+}
+
+/* ---------- Features ---------- */
+.prem-features {
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-lg);
+  padding: 14px;
+  box-shadow: var(--shadow-card);
+}
+.prem-features-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+}
+.prem-features-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+.prem-feature { display: flex; align-items: center; gap: 10px; }
+.prem-feature-check {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border-radius: var(--r-full);
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--c);
+  background: color-mix(in oklab, var(--c) 14%, transparent);
+  border: 1px solid color-mix(in oklab, var(--c) 38%, transparent);
+}
+.prem-feature-label { font-size: 12.5px; color: var(--text); }
+
+/* ---------- Error ---------- */
+.prem-error {
+  text-align: center;
+  padding: 12px;
+  border-radius: var(--r-md);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--engine-pulse);
+  background: color-mix(in oklab, var(--engine-pulse) 12%, transparent);
+  border: 1px solid color-mix(in oklab, var(--engine-pulse) 32%, transparent);
+}
+
+/* ---------- CTA footer ---------- */
+.prem-cta {
+  padding: 12px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.prem-cta-btn {
+  width: 100%;
+  padding: 16px;
+  border-radius: var(--r-lg);
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--bg-deep);
+  background: linear-gradient(135deg, var(--c), color-mix(in oklab, var(--c) 70%, var(--bg-deep)));
+  box-shadow: 0 10px 32px -10px color-mix(in oklab, var(--c) 65%, transparent);
+  transition: filter 150ms, box-shadow 180ms;
+}
+.prem-cta-btn:hover:not(:disabled) {
+  filter: brightness(1.06);
+  box-shadow: 0 12px 36px -8px color-mix(in oklab, var(--c) 70%, transparent);
+}
+.prem-cta-btn:disabled { opacity: 0.5; cursor: default; }
+.prem-cta-fine {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-mid);
+}

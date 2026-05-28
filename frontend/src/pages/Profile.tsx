@@ -7,6 +7,16 @@ import { useNav } from '../context/NavigationContext';
 import { useProduct } from '../context/ProductContext';
 import { useRole } from '../context/RoleContext';
 import { unlockedCount, totalCount, type AthleteState } from '../data/achievements';
+import '../styles/v2/profile.css';
+
+/**
+ * Profile · perfil del atleta/coach.
+ * Estilo V2 dark "Macrociclos" · scoped bajo `.prof-root` · acento
+ * product-aware (ámbar HO · cyan Volta) via data-accent. Se monta dentro
+ * de PhoneLayout (chrome + bottom nav) → no dibuja chrome propio. Lógica
+ * intacta: toda la data, toggles (units/notifications + localStorage),
+ * navegación, logout, export/delete GDPR; solo cambia la presentación.
+ */
 
 const API_URL = import.meta.env.VITE_API_URL ?? (import.meta.env.DEV ? '' : 'https://holy-oly-3.onrender.com');
 
@@ -74,88 +84,66 @@ const Profile: React.FC = () => {
   const firstName = athlete?.name.split(' ')[0] ?? 'Atleta';
   const lastInitial = athlete?.name.split(' ')[1]?.[0] ?? '';
   const subscription = athlete?.subscription?.toUpperCase() ?? 'PRO';
+  const accent = product === 'volta' ? 'volta' : 'ho';
 
   if (showThemes) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--bg)' }}>
-        <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--card-border)', display: 'flex', alignItems: 'center', gap: 14 }}>
-          <button
-            onClick={() => setShowThemes(false)}
-            style={{ background: 'var(--surface)', border: '1px solid var(--card-border)', borderRadius: 10, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: 16 }}
-          >←</button>
-          <h2 style={{ color: 'var(--text)', fontSize: 17, fontWeight: 900 }}>Temas</h2>
+      <div className="prof-themes">
+        <div className="prof-themes-head">
+          <button className="prof-back btn-press" onClick={() => setShowThemes(false)}>←</button>
+          <h2 className="prof-themes-title">Temas</h2>
         </div>
-        <div style={{ flex: 1, overflowY: 'auto' }}>
+        <div className="prof-themes-body">
           <ThemeGallery />
         </div>
       </div>
     );
   }
 
+  const stats = isCoach
+    ? [
+        { icon: '👥', label: 'Atletas', sub: `${rosterCount} en el roster`, onClick: () => navigate(product === 'volta' ? 'VOLTA_COACH' : 'COACH_DASH') },
+        { icon: '🔥', label: 'Activos esta semana', sub: `${activeAthletes} de ${rosterCount}`, onClick: () => navigate(product === 'volta' ? 'VOLTA_COACH' : 'COACH_DASH') },
+      ]
+    : [
+        { icon: '🏆', label: 'Logros', sub: `${unlocked}/${total} Desbloqueados`, onClick: () => navigate('SOCIAL') },
+        { icon: '💳', label: 'Pagos',  sub: 'PRO Expira en 12d', onClick: () => navigate('PREMIUM') },
+      ];
+
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100%', paddingBottom: 80 }}>
-      <div style={{ padding: '32px 20px 20px' }}>
+    <div className="prof-root anim-fade-in" data-accent={accent}>
+      <div className="prof-scroll">
 
         {/* Avatar + name */}
-        <div style={{ textAlign: 'center', marginBottom: 28 }}>
-          <div style={{
-            width: 84, height: 84, borderRadius: 26,
-            background: 'linear-gradient(135deg,var(--primary),#3B82F6)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 32, fontWeight: 900, color: 'var(--bg)',
-            margin: '0 auto 14px', boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-          }}>
-            {firstName[0]}{lastInitial}
-          </div>
-          <h1 style={{ color: 'var(--text)', fontSize: 22, fontWeight: 900, letterSpacing: '-.02em' }}>{athlete?.name ?? (isCoach ? 'Coach' : 'Atleta')}</h1>
-          <p style={{ color: 'var(--primary)', fontSize: 10, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', marginTop: 4 }}>
+        <div className="prof-head">
+          <div className="prof-avatar">{firstName[0]}{lastInitial}</div>
+          <h1 className="prof-name">{athlete?.name ?? (isCoach ? 'Coach' : 'Atleta')}</h1>
+          <p className="prof-sub">
             {isCoach ? `${product === 'volta' ? 'VOLTA' : 'HOLY OLY'} · Coach` : `Suscripción: HOLY ${subscription}`}
           </p>
         </div>
 
         {/* Stats grid · diferente por rol */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
-          {(isCoach
-            ? [
-                { icon: '👥', label: 'Atletas', sub: `${rosterCount} en el roster`, onClick: () => navigate(product === 'volta' ? 'VOLTA_COACH' : 'COACH_DASH') },
-                { icon: '🔥', label: 'Activos esta semana', sub: `${activeAthletes} de ${rosterCount}`, onClick: () => navigate(product === 'volta' ? 'VOLTA_COACH' : 'COACH_DASH') },
-              ]
-            : [
-                { icon: '🏆', label: 'Logros', sub: `${unlocked}/${total} Desbloqueados`, onClick: () => navigate('SOCIAL') },
-                { icon: '💳', label: 'Pagos',  sub: 'PRO Expira en 12d', onClick: () => navigate('PREMIUM') },
-              ]
-          ).map((item) => (
-            <div
-              key={item.label}
-              onClick={item.onClick}
-              style={{
-                background: 'var(--surface)',
-                border: '1px solid var(--card-border)',
-                borderRadius: 18,
-                padding: '18px 14px',
-                textAlign: 'center',
-                cursor: 'pointer',
-              }}
-            >
-              <span style={{ fontSize: 26, display: 'block', marginBottom: 6 }}>{item.icon}</span>
-              <p style={{ color: 'var(--text)', fontSize: 12, fontWeight: 700 }}>{item.label}</p>
-              <p style={{ color: 'var(--text-secondary)', fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.04em', marginTop: 2 }}>{item.sub}</p>
+        <div className="prof-stats">
+          {stats.map((item) => (
+            <div key={item.label} className="prof-stat btn-press" onClick={item.onClick}>
+              <span className="prof-stat-icon">{item.icon}</span>
+              <p className="prof-stat-label">{item.label}</p>
+              <p className="prof-stat-sub">{item.sub}</p>
             </div>
           ))}
         </div>
 
         {/* Achievements · solo atleta */}
         {!isCoach && (
-          <div style={{ marginBottom: 24 }}>
+          <div className="prof-achievements">
             <AchievementsGrid product={product} state={athleteState} />
           </div>
         )}
 
         {/* Settings */}
-        <p style={{ color: 'var(--text-secondary)', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em', marginBottom: 10, paddingLeft: 4 }}>
-          Configuración
-        </p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 28 }}>
+        <p className="prof-sec-label">Configuración</p>
+        <div className="prof-list">
           {SETTINGS.map((item) => {
             const isUnits = item.id === 'units';
             const isNotif = item.id === 'notifications';
@@ -174,47 +162,23 @@ const Profile: React.FC = () => {
               else if (isNotif) toggleNotifications();
             };
             return (
-              <div
-                key={item.id}
-                onClick={handleClick}
-                style={{
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                  padding: '14px 16px',
-                  background: 'var(--surface)',
-                  border: '1px solid var(--card-border)',
-                  borderRadius: 16,
-                  cursor: 'pointer',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <span style={{ fontSize: 18 }}>{item.icon}</span>
-                  <p style={{ color: 'var(--text)', fontSize: 13, fontWeight: 600 }}>{item.label}</p>
+              <div key={item.id} className="prof-row btn-press" onClick={handleClick}>
+                <div className="prof-row-left">
+                  <span className="prof-row-icon">{item.icon}</span>
+                  <p className="prof-row-label">{item.label}</p>
                 </div>
                 {isUnits ? (
-                  <div style={{ display: 'flex', gap: 2, padding: 3, background: 'var(--bg)', border: '1px solid var(--card-border)', borderRadius: 999 }}>
+                  <div className="prof-seg">
                     {(['kg', 'lbs'] as const).map(u => (
-                      <span key={u} style={{
-                        padding: '4px 12px', borderRadius: 999,
-                        background: units === u ? 'var(--primary)' : 'transparent',
-                        color: units === u ? 'var(--primary-text)' : 'var(--text-secondary)',
-                        fontSize: 10, fontWeight: 800, textTransform: 'uppercase',
-                      }}>{u}</span>
+                      <span key={u} className="prof-seg-opt" data-on={units === u}>{u}</span>
                     ))}
                   </div>
                 ) : isNotif ? (
-                  <div style={{
-                    width: 36, height: 20, borderRadius: 999,
-                    background: notifications ? 'var(--primary)' : 'var(--card-border)',
-                    position: 'relative', transition: 'background .2s ease',
-                  }}>
-                    <div style={{
-                      position: 'absolute', top: 2, left: notifications ? 18 : 2,
-                      width: 16, height: 16, borderRadius: '50%',
-                      background: '#fff', transition: 'left .2s ease',
-                    }} />
+                  <div className="prof-switch" data-on={notifications}>
+                    <div className="prof-switch-knob" />
                   </div>
                 ) : (
-                  <span style={{ color: 'var(--text-secondary)', fontSize: 14 }}>→</span>
+                  <span className="prof-row-arrow">→</span>
                 )}
               </div>
             );
@@ -223,128 +187,85 @@ const Profile: React.FC = () => {
 
         {/* Panels inline para coach/equipment */}
         {openPanel === 'coach' && (
-          <div style={{ background: 'var(--surface)', border: '1px solid var(--card-border)', borderRadius: 16, padding: 16, marginBottom: 16 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <p style={{ color: 'var(--text)', fontSize: 13, fontWeight: 800 }}>🕴️ Tu entrenador</p>
-              <button onClick={() => setOpenPanel(null)} style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', fontSize: 16, cursor: 'pointer' }}>✕</button>
+          <div className="prof-panel">
+            <div className="prof-panel-head">
+              <p className="prof-panel-title">🕴️ Tu entrenador</p>
+              <button className="prof-panel-close" onClick={() => setOpenPanel(null)}>✕</button>
             </div>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 11, marginBottom: 4 }}>Sebastián Torres</p>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 10, marginBottom: 8 }}>Club Halterofilia Buenos Aires · 14 años de experiencia</p>
-            <p style={{ color: 'var(--primary)', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.06em' }}>Especialización: Escuela Rusa / Búlgara híbrida</p>
+            <p className="prof-panel-line">Sebastián Torres</p>
+            <p className="prof-panel-line">Club Halterofilia Buenos Aires · 14 años de experiencia</p>
+            <p className="prof-panel-accent">Especialización: Escuela Rusa / Búlgara híbrida</p>
           </div>
         )}
         {openPanel === 'equipment' && (
-          <div style={{ background: 'var(--surface)', border: '1px solid var(--card-border)', borderRadius: 16, padding: 16, marginBottom: 16 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <p style={{ color: 'var(--text)', fontSize: 13, fontWeight: 800 }}>🏋️ Equipo disponible</p>
-              <button onClick={() => setOpenPanel(null)} style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', fontSize: 16, cursor: 'pointer' }}>✕</button>
+          <div className="prof-panel">
+            <div className="prof-panel-head">
+              <p className="prof-panel-title">🏋️ Equipo disponible</p>
+              <button className="prof-panel-close" onClick={() => setOpenPanel(null)}>✕</button>
             </div>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 11, lineHeight: 1.6 }}>
+            <p className="prof-panel-line">
               Inventario gestionado por tu coach. Si necesitás equipo específico, mandá mensaje desde el chat con WISE.
             </p>
           </div>
         )}
         {openPanel === 'box' && (
-          <div style={{ background: 'var(--surface)', border: '1px solid var(--card-border)', borderRadius: 16, padding: 16, marginBottom: 16 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <p style={{ color: 'var(--text)', fontSize: 13, fontWeight: 800 }}>🏛️ Mi Box / Club</p>
-              <button onClick={() => setOpenPanel(null)} style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', fontSize: 16, cursor: 'pointer' }}>✕</button>
+          <div className="prof-panel">
+            <div className="prof-panel-head">
+              <p className="prof-panel-title">🏛️ Mi Box / Club</p>
+              <button className="prof-panel-close" onClick={() => setOpenPanel(null)}>✕</button>
             </div>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 11, marginBottom: 4 }}>
+            <p className="prof-panel-line">
               {product === 'volta' ? 'CrossFit Box · 28 atletas' : 'Club Halterofilia · 18 atletas'}
             </p>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 10 }}>
+            <p className="prof-panel-line">
               Configuración del box, capacidad por clase, horarios y branding desde el dashboard web.
             </p>
           </div>
         )}
 
         {/* Logout */}
-        <button
-          onClick={() => { logout(); navigate('LOGIN'); }}
-          style={{
-            width: '100%',
-            background: 'rgba(239,68,68,0.08)',
-            border: '1px solid rgba(239,68,68,0.2)',
-            borderRadius: 16,
-            padding: '14px 0',
-            color: '#f87171',
-            fontSize: 13,
-            fontWeight: 700,
-            cursor: 'pointer',
-            letterSpacing: '.04em',
-          }}
-        >
-          CERRAR SESIÓN
+        <button className="prof-logout btn-press" onClick={() => { logout(); navigate('LOGIN'); }}>
+          Cerrar sesión
         </button>
 
         {/* Ciclo hormonal · opcional opt-in · solo atleta */}
         {!isCoach && (
           <>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em', marginTop: 32, marginBottom: 10, paddingLeft: 4 }}>
-              Salud · opcional
-            </p>
-            <button
-              onClick={() => navigate('HORMONAL')}
-              style={{
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                padding: '14px 16px', width: '100%',
-                background: 'var(--surface)', border: '1px solid var(--card-border)', borderRadius: 16,
-                cursor: 'pointer', textAlign: 'left', marginBottom: 8,
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <span style={{ fontSize: 18 }}>🌙</span>
+            <p className="prof-sec-label">Salud · opcional</p>
+            <button className="prof-row btn-press" onClick={() => navigate('HORMONAL')}>
+              <div className="prof-row-left">
+                <span className="prof-row-icon">🌙</span>
                 <div>
-                  <p style={{ color: 'var(--text)', fontSize: 13, fontWeight: 600 }}>Ciclo hormonal</p>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: 10, marginTop: 2 }}>
-                    Adapta entrenamiento al ciclo · opt-in
-                  </p>
+                  <p className="prof-row-label">Ciclo hormonal</p>
+                  <p className="prof-row-desc">Adapta entrenamiento al ciclo · opt-in</p>
                 </div>
               </div>
-              <span style={{ color: 'var(--text-secondary)', fontSize: 14 }}>→</span>
+              <span className="prof-row-arrow">→</span>
             </button>
           </>
         )}
 
         {/* Legal & datos · sección requerida app stores (GDPR/Apple/Google) */}
-        <p style={{ color: 'var(--text-secondary)', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em', marginTop: 32, marginBottom: 10, paddingLeft: 4 }}>
-          Privacidad y datos
-        </p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <button
-            onClick={() => navigate('PRIVACY')}
-            style={{
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              padding: '14px 16px', width: '100%',
-              background: 'var(--surface)', border: '1px solid var(--card-border)', borderRadius: 16,
-              cursor: 'pointer', textAlign: 'left',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <span style={{ fontSize: 18 }}>📄</span>
-              <p style={{ color: 'var(--text)', fontSize: 13, fontWeight: 600 }}>Política de Privacidad</p>
+        <p className="prof-sec-label">Privacidad y datos</p>
+        <div className="prof-list">
+          <button className="prof-row btn-press" onClick={() => navigate('PRIVACY')}>
+            <div className="prof-row-left">
+              <span className="prof-row-icon">📄</span>
+              <p className="prof-row-label">Política de Privacidad</p>
             </div>
-            <span style={{ color: 'var(--text-secondary)', fontSize: 14 }}>→</span>
+            <span className="prof-row-arrow">→</span>
+          </button>
+
+          <button className="prof-row btn-press" onClick={() => navigate('TERMS')}>
+            <div className="prof-row-left">
+              <span className="prof-row-icon">📜</span>
+              <p className="prof-row-label">Términos y Condiciones</p>
+            </div>
+            <span className="prof-row-arrow">→</span>
           </button>
 
           <button
-            onClick={() => navigate('TERMS')}
-            style={{
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              padding: '14px 16px', width: '100%',
-              background: 'var(--surface)', border: '1px solid var(--card-border)', borderRadius: 16,
-              cursor: 'pointer', textAlign: 'left',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <span style={{ fontSize: 18 }}>📜</span>
-              <p style={{ color: 'var(--text)', fontSize: 13, fontWeight: 600 }}>Términos y Condiciones</p>
-            </div>
-            <span style={{ color: 'var(--text-secondary)', fontSize: 14 }}>→</span>
-          </button>
-
-          <button
+            className="prof-row btn-press"
             onClick={async () => {
               try {
                 const token = localStorage.getItem('token');
@@ -365,24 +286,19 @@ const Profile: React.FC = () => {
                 alert('No se pudo exportar. Probá de nuevo.');
               }
             }}
-            style={{
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              padding: '14px 16px', width: '100%',
-              background: 'var(--surface)', border: '1px solid var(--card-border)', borderRadius: 16,
-              cursor: 'pointer', textAlign: 'left',
-            }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <span style={{ fontSize: 18 }}>⬇️</span>
+            <div className="prof-row-left">
+              <span className="prof-row-icon">⬇️</span>
               <div>
-                <p style={{ color: 'var(--text)', fontSize: 13, fontWeight: 600 }}>Exportar mis datos</p>
-                <p style={{ color: 'var(--text-secondary)', fontSize: 10, marginTop: 2 }}>JSON descargable · GDPR</p>
+                <p className="prof-row-label">Exportar mis datos</p>
+                <p className="prof-row-desc">JSON descargable · GDPR</p>
               </div>
             </div>
-            <span style={{ color: 'var(--text-secondary)', fontSize: 14 }}>→</span>
+            <span className="prof-row-arrow">→</span>
           </button>
 
           <button
+            className="prof-row danger btn-press"
             onClick={async () => {
               const confirm1 = window.confirm(
                 '¿Eliminar tu cuenta?\n\nSe borrarán PERMANENTEMENTE:\n· Tu perfil y credenciales\n· Todas tus sesiones y resultados\n· Tu historial de bienestar\n· Todos los datos asociados\n\nEsta acción NO se puede deshacer.'
@@ -407,30 +323,19 @@ const Profile: React.FC = () => {
                 alert('No se pudo eliminar. Contactá hola@peakqual.app');
               }
             }}
-            style={{
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              padding: '14px 16px', width: '100%',
-              background: 'rgba(239,68,68,0.05)',
-              border: '1px solid rgba(239,68,68,0.2)',
-              borderRadius: 16,
-              cursor: 'pointer', textAlign: 'left',
-              marginTop: 4,
-            }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <span style={{ fontSize: 18 }}>🗑️</span>
+            <div className="prof-row-left">
+              <span className="prof-row-icon">🗑️</span>
               <div>
-                <p style={{ color: '#f87171', fontSize: 13, fontWeight: 700 }}>Eliminar cuenta</p>
-                <p style={{ color: 'rgba(239,68,68,0.6)', fontSize: 10, marginTop: 2 }}>Permanente · irreversible</p>
+                <p className="prof-row-label">Eliminar cuenta</p>
+                <p className="prof-row-desc">Permanente · irreversible</p>
               </div>
             </div>
-            <span style={{ color: '#f87171', fontSize: 14 }}>→</span>
+            <span className="prof-row-arrow">→</span>
           </button>
         </div>
 
-        <p style={{ color: 'var(--text-secondary)', fontSize: 9, textAlign: 'center', marginTop: 24, opacity: 0.5 }}>
-          Peak Qual SpA · hola@peakqual.app
-        </p>
+        <p className="prof-foot">Peak Qual SpA · hola@peakqual.app</p>
 
       </div>
     </div>

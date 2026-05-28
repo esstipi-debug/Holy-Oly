@@ -1,0 +1,366 @@
+/* ============================================================
+   PEAK QUAL · PROFILE (Perfil) · estilos V2
+   ------------------------------------------------------------
+   Pantalla de perfil del atleta/coach · avatar, stats, ajustes,
+   paneles inline, logout, salud opcional y privacidad/datos.
+   Se monta DENTRO de PhoneLayout (chrome + bottom nav) → este
+   archivo NO dibuja chrome de teléfono ni resets globales.
+
+   Acento product-aware via `data-accent` en el root:
+   ho → ámbar (--engine-macro) · volta → cyan (--engine-stress).
+
+   SCOPING · todo vive bajo `.prof-root`. Hereda tokens.css.
+   Colores dinámicos por elemento via `--c` inline.
+   ============================================================ */
+
+.prof-root,
+.prof-root *,
+.prof-root *::before,
+.prof-root *::after { box-sizing: border-box; }
+
+.prof-root {
+  font-family: var(--font-body);
+  background: var(--bg);
+  height: 100%;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  /* acento del root · ámbar (HO) por defecto · cyan (Volta) via data-accent */
+  --prof-accent: var(--engine-macro);
+}
+.prof-root[data-accent="ho"]    { --prof-accent: var(--engine-macro); }
+.prof-root[data-accent="volta"] { --prof-accent: var(--engine-stress); }
+
+.prof-root h1,
+.prof-root h2,
+.prof-root p { margin: 0; }
+.prof-root button { margin: 0; padding: 0; }
+
+.prof-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-3) transparent;
+}
+.prof-scroll::-webkit-scrollbar { width: 4px; }
+.prof-scroll::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 2px; }
+
+/* ---------- Themes sub-view (back header) ---------- */
+.prof-themes {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--bg);
+  font-family: var(--font-body);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+.prof-themes-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.prof-back {
+  width: 32px; height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--border-soft);
+  color: var(--text-mid);
+  font-size: 16px;
+  cursor: pointer;
+  transition: border-color 180ms, color 180ms;
+}
+.prof-back:hover { color: var(--text-hi); border-color: var(--prof-accent); }
+.prof-themes-title {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-hi);
+}
+.prof-themes-body { flex: 1; overflow-y: auto; }
+
+/* ---------- Header · avatar + name ---------- */
+.prof-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+  padding: 14px 0 6px;
+}
+.prof-avatar {
+  width: 84px; height: 84px;
+  border-radius: var(--r-lg);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--bg);
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, var(--prof-accent), color-mix(in oklab, var(--prof-accent) 55%, #3B82F6));
+  box-shadow: 0 0 32px -6px color-mix(in oklab, var(--prof-accent) 55%, transparent);
+}
+.prof-name {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-hi);
+}
+.prof-sub {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--prof-accent);
+}
+
+/* ---------- Stats grid ---------- */
+.prof-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.prof-stat {
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-lg);
+  padding: 16px 14px;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+  transition: border-color 180ms, transform 150ms, background 180ms;
+}
+.prof-stat:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in oklab, var(--prof-accent) 45%, transparent);
+}
+.prof-stat-icon { font-size: 24px; display: block; margin-bottom: 6px; line-height: 1; }
+.prof-stat-label {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-hi);
+}
+.prof-stat-sub {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  margin-top: 3px;
+}
+
+/* ---------- Achievements wrapper ---------- */
+.prof-achievements { margin-top: 2px; }
+
+/* ---------- Section label ---------- */
+.prof-sec-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  padding-left: 4px;
+  margin-top: 8px;
+}
+.prof-sec-label.danger { color: color-mix(in oklab, var(--engine-pulse) 80%, var(--text-mid)); }
+
+/* ---------- List (settings / legal) ---------- */
+.prof-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ---------- Row ---------- */
+.prof-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  padding: 13px 14px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  color: var(--text);
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+  font-family: inherit;
+  transition: border-color 180ms, transform 150ms, background 180ms;
+}
+.prof-row:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in oklab, var(--prof-accent) 40%, transparent);
+}
+.prof-row-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.prof-row-icon { font-size: 18px; line-height: 1; flex-shrink: 0; }
+.prof-row-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-hi);
+}
+.prof-row-desc {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.02em;
+  color: var(--text-mid);
+  margin-top: 2px;
+}
+.prof-row-arrow {
+  flex-shrink: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-lo);
+  transition: color 150ms;
+}
+.prof-row:hover .prof-row-arrow { color: var(--prof-accent); }
+
+/* ---------- Units segmented toggle ---------- */
+.prof-seg {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--bg);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-full);
+  flex-shrink: 0;
+}
+.prof-seg-opt {
+  padding: 4px 12px;
+  border-radius: var(--r-full);
+  background: transparent;
+  color: var(--text-mid);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: background 180ms, color 180ms;
+}
+.prof-seg-opt[data-on="true"] {
+  background: color-mix(in oklab, var(--prof-accent) 20%, transparent);
+  color: var(--prof-accent);
+}
+
+/* ---------- Notifications switch ---------- */
+.prof-switch {
+  position: relative;
+  width: 36px; height: 20px;
+  border-radius: var(--r-full);
+  background: var(--surface-3);
+  transition: background 200ms ease;
+  flex-shrink: 0;
+}
+.prof-switch[data-on="true"] {
+  background: color-mix(in oklab, var(--prof-accent) 75%, transparent);
+}
+.prof-switch-knob {
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--text-hi);
+  transition: left 200ms ease;
+}
+.prof-switch[data-on="true"] .prof-switch-knob { left: 18px; }
+
+/* ---------- Inline panel ---------- */
+.prof-panel {
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  padding: 14px;
+  box-shadow: var(--shadow-card);
+}
+.prof-panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.prof-panel-title {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-hi);
+}
+.prof-panel-close {
+  background: transparent;
+  border: none;
+  color: var(--text-mid);
+  font-size: 15px;
+  cursor: pointer;
+  transition: color 150ms;
+}
+.prof-panel-close:hover { color: var(--text-hi); }
+.prof-panel-line { font-size: 11px; line-height: 1.55; color: var(--text-mid); margin-bottom: 4px; }
+.prof-panel-line:last-child { margin-bottom: 0; }
+.prof-panel-accent {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--prof-accent);
+}
+
+/* ---------- Logout / destructive ---------- */
+.prof-logout {
+  width: 100%;
+  padding: 14px 0;
+  border-radius: var(--r-md);
+  background: color-mix(in oklab, var(--engine-pulse) 8%, transparent);
+  border: 1px solid color-mix(in oklab, var(--engine-pulse) 22%, transparent);
+  color: color-mix(in oklab, var(--engine-pulse) 70%, var(--text-hi));
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 180ms, border-color 180ms;
+}
+.prof-logout:hover {
+  background: color-mix(in oklab, var(--engine-pulse) 14%, transparent);
+  border-color: color-mix(in oklab, var(--engine-pulse) 40%, transparent);
+}
+
+/* Danger variant of a row (delete account) */
+.prof-row.danger {
+  background: color-mix(in oklab, var(--engine-pulse) 5%, transparent);
+  border-color: color-mix(in oklab, var(--engine-pulse) 22%, transparent);
+}
+.prof-row.danger:hover { border-color: color-mix(in oklab, var(--engine-pulse) 40%, transparent); }
+.prof-row.danger .prof-row-label { color: color-mix(in oklab, var(--engine-pulse) 70%, var(--text-hi)); }
+.prof-row.danger .prof-row-desc { color: color-mix(in oklab, var(--engine-pulse) 55%, var(--text-mid)); }
+.prof-row.danger .prof-row-arrow { color: color-mix(in oklab, var(--engine-pulse) 70%, var(--text-hi)); }
+
+/* ---------- Footer ---------- */
+.prof-foot {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  text-align: center;
+  color: var(--text-lo);
+  margin-top: 12px;
+  opacity: 0.7;
+}

@@ -1,0 +1,239 @@
+/* ============================================================
+   PEAK QUAL · BELT CEREMONY · estilos V2
+   ------------------------------------------------------------
+   Pantalla atleta · ceremonia FULLSCREEN de subida de cinturón
+   (loop viral · screenshot-worthy). Pantalla inmersiva full-bleed:
+   backdrop con glow radial + grid (tokens), partículas que orbitan/
+   explotan, disco/medalla central grande con halo, título grande
+   y CTAs (Continuar / Compartir). Se monta dentro de PhoneLayout
+   (el bottom nav queda por debajo · NO lo dibujamos acá).
+
+   Acento base = ÁMBAR (--engine-belt · cinturón/XP). PERO la
+   ceremonia es sobre UN cinturón concreto: el color del disco,
+   anillos, glow y título se conducen con `--c` / `--c-glow`
+   inline desde la lógica (belt.color / belt.glow · intactos).
+   Toda la MOCIÓN dependiente de `phase` (enter/reveal/celebrate)
+   se queda inline byte-for-byte; sólo el chrome estático y los
+   keyframes viven acá.
+
+   SCOPING · todo vive bajo `.belt-root`. Hereda tokens.css.
+   ============================================================ */
+
+.belt-root,
+.belt-root *,
+.belt-root *::before,
+.belt-root *::after { box-sizing: border-box; }
+
+.belt-root {
+  position: relative;
+  height: 100%;
+  min-height: 100%;
+  overflow: hidden;
+  font-family: var(--font-body);
+  background: var(--bg-deep);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  /* Acento base ámbar · el cinturón concreto llega por --c / --c-glow inline */
+  --belt-accent: var(--engine-belt);
+}
+.belt-root h1,
+.belt-root h2,
+.belt-root p { margin: 0; }
+.belt-root button { margin: 0; padding: 0; }
+
+/* ---------- Backdrop (tokens · sin imagen externa) ---------- */
+/* Glow radial tintado con el color del cinturón (--c) + grid sutil. */
+.belt-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 40%, color-mix(in oklab, var(--c, var(--belt-accent)) 22%, transparent) 0%, transparent 60%),
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px),
+    radial-gradient(circle at 50% 40%, var(--bg) 0%, var(--bg-deep) 60%, #000 100%);
+  background-size: 100% 100%, 38px 38px, 38px 38px, 100% 100%;
+}
+
+/* ---------- Partículas (orbitan / explotan) ---------- */
+/* Capa contenedora · el posicionamiento/motion por partícula llega inline. */
+.belt-particles {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+.belt-particle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border-radius: 50%;
+}
+
+/* ---------- Eyebrow ---------- */
+.belt-eyebrow {
+  position: relative;
+  z-index: 2;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--belt-accent);
+}
+
+/* ---------- Halo + cinturón ---------- */
+.belt-disc {
+  position: relative;
+  z-index: 2;
+  margin-top: 24px;
+  margin-bottom: 12px;
+  width: 240px;
+  height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* Anillo de glow exterior · color del cinturón */
+.belt-halo {
+  position: absolute;
+  inset: -40px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--c-glow, var(--glow-amber)) 0%, transparent 65%);
+  filter: blur(10px);
+}
+/* Anillo interior · borde + glow del cinturón */
+.belt-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 3px solid var(--c, var(--belt-accent));
+  box-shadow: 0 0 60px var(--c-glow, var(--glow-amber)), inset 0 0 30px var(--c-glow, var(--glow-amber));
+}
+/* Hexágono / "medalla" central · degradado del color del cinturón */
+.belt-medal {
+  position: relative;
+  z-index: 3;
+  width: 168px;
+  height: 168px;
+  background: linear-gradient(
+    160deg,
+    var(--c, var(--belt-accent)) 0%,
+    color-mix(in oklab, var(--c, var(--belt-accent)) 80%, transparent) 60%,
+    color-mix(in oklab, var(--c, var(--belt-accent)) 53%, transparent) 100%
+  );
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 18px 50px var(--c-glow, var(--glow-amber));
+}
+.belt-medal-emoji { font-size: 42px; line-height: 1; }
+.belt-medal-name {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  margin-top: 2px;
+  /* color (contraste) llega inline desde la lógica del cinturón */
+}
+
+/* ---------- Tier transition · prev → new ---------- */
+.belt-transition {
+  position: relative;
+  z-index: 2;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--text-mid);
+  margin-bottom: 6px;
+}
+.belt-transition .arrow { color: var(--c, var(--belt-accent)); }
+
+/* ---------- Títulos ---------- */
+.belt-name-line {
+  position: relative;
+  z-index: 2;
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: var(--text-hi);
+  text-align: center;
+}
+.belt-name-belt {
+  position: relative;
+  z-index: 2;
+  font-family: var(--font-display);
+  font-size: 34px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: var(--c, var(--belt-accent));
+  text-shadow: 0 0 24px var(--c-glow, var(--glow-amber));
+  margin: 4px 0 8px;
+}
+.belt-tagline {
+  position: relative;
+  z-index: 2;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-mid);
+  text-align: center;
+  max-width: 280px;
+  margin-bottom: 28px;
+}
+.belt-tagline strong { color: var(--text-hi); }
+
+/* ---------- CTAs ---------- */
+.belt-ctas {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  max-width: 360px;
+}
+.belt-btn {
+  padding: 12px 0;
+  border-radius: var(--r-md);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.belt-btn-secondary {
+  flex: 1;
+  background: rgba(255,255,255,0.08);
+  color: var(--text-hi);
+  border: 1px solid rgba(255,255,255,0.18);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+.belt-btn-primary {
+  flex: 2;
+  /* fondo (degradado del cinturón) · color de texto (contraste) · shadow:
+     llegan inline desde la lógica para conservar el color exacto del belt */
+  border: none;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+}
+
+/* ---------- Keyframes (antes inline) ---------- */
+@keyframes beltHaloPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.08); }
+}
+
+/* Reduce motion · accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  .belt-halo { animation: none !important; }
+}
