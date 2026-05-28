@@ -1,0 +1,302 @@
+/* ============================================================
+   PEAK QUAL · SESSION HISTORY LIST · estilos V2
+   ------------------------------------------------------------
+   Listado cronológico DESC de las sesiones recientes de un
+   atleta (detalle por sesión · tap = expande). Se monta DENTRO
+   de AthleteTrainingView (coach scope), que ya aporta el marco
+   del teléfono, la status bar y la bottom nav. Este archivo NO
+   dibuja chrome de teléfono ni resets globales.
+
+   SCOPING · todo vive bajo `.shl-root`. Hereda tokens de
+   tokens.css. Filas tipo block-card (mirror de session-summary).
+   ============================================================ */
+
+.shl-root,
+.shl-root *,
+.shl-root *::before,
+.shl-root *::after { box-sizing: border-box; }
+
+.shl-root {
+  position: relative;
+  font-family: var(--font-body);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  /* acento del root · cyan (Volta) o ámbar (HO) via data-accent */
+  --shl-accent: var(--engine-stress);
+}
+.shl-root[data-accent="ho"]    { --shl-accent: var(--engine-macro); }
+.shl-root[data-accent="volta"] { --shl-accent: var(--engine-stress); }
+
+/* Reset de márgenes/padding sólo dentro del root */
+.shl-root p,
+.shl-root button { margin: 0; }
+.shl-root button { padding: 0; }
+
+/* ---------- Header ---------- */
+.shl-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0 2px 10px;
+}
+.shl-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-lo);
+}
+.shl-eyebrow .pip {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--shl-accent);
+  box-shadow: 0 0 8px var(--shl-accent);
+}
+.shl-meta {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--text-lo);
+  white-space: nowrap;
+}
+
+/* ---------- Filter chips ---------- */
+.shl-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 2px 10px;
+}
+.shl-chip {
+  padding: 5px 12px;
+  border-radius: var(--r-full);
+  background: transparent;
+  border: 1px solid var(--border-soft);
+  color: var(--text-mid);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 180ms, color 180ms, border-color 180ms;
+}
+.shl-chip:hover {
+  color: var(--text-hi);
+  border-color: var(--shl-accent);
+}
+.shl-chip[data-active="true"] {
+  background: color-mix(in oklab, var(--shl-accent) 14%, transparent);
+  border-color: color-mix(in oklab, var(--shl-accent) 55%, transparent);
+  color: var(--shl-accent);
+}
+
+/* ---------- Empty state ---------- */
+.shl-empty {
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  padding: 18px;
+  text-align: center;
+  box-shadow: var(--shadow-card);
+}
+.shl-empty p {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--text-mid);
+}
+
+/* ---------- List ---------- */
+.shl-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ---------- Row · block-card (mirror session-summary) ---------- */
+.shl-row {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+  text-align: left;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  padding: 11px 13px 11px 16px;
+  color: var(--text);
+  cursor: pointer;
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  font-family: inherit;
+  transition: border-color 180ms, background 180ms, transform 150ms;
+}
+.shl-row:hover { transform: translateY(-1px); }
+/* Barra de acento lateral · color por tipo de sesión */
+.shl-row::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+  background: var(--row-c, var(--shl-accent));
+  box-shadow: 0 0 10px -1px var(--row-c, var(--shl-accent));
+}
+.shl-row[data-open="true"] {
+  gap: 10px;
+  border-color: color-mix(in oklab, var(--shl-accent) 55%, transparent);
+  background: color-mix(in oklab, var(--shl-accent) 6%, var(--surface-1));
+}
+
+/* ---------- Row · top line ---------- */
+.shl-row-top {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+.shl-row-icon {
+  flex-shrink: 0;
+  width: 34px; height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-sm);
+  font-size: 16px;
+  line-height: 0;
+  background: color-mix(in oklab, var(--row-c, var(--shl-accent)) 12%, transparent);
+  border: 1px solid color-mix(in oklab, var(--row-c, var(--shl-accent)) 30%, transparent);
+}
+/* Cuando el icono es un disco PlateBadge, sin caja de fondo */
+.shl-row-disc {
+  flex-shrink: 0;
+  width: 34px;
+  display: grid;
+  place-items: center;
+  line-height: 0;
+}
+
+.shl-row-main { flex: 1; min-width: 0; }
+.shl-row-titleline {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.shl-row-date {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: -0.01em;
+  color: var(--text-hi);
+}
+.shl-row-kind {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--row-c, var(--shl-accent));
+}
+.shl-row-summary {
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--text-mid);
+  margin-top: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.shl-row[data-open="true"] .shl-row-summary { white-space: normal; }
+
+/* ---------- RPE chip ---------- */
+.shl-rpe {
+  flex-shrink: 0;
+  padding: 3px 8px;
+  border-radius: var(--r-sm);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  background: var(--rpe-bg);
+  color: var(--rpe-fg);
+  border: 1px solid var(--rpe-bd);
+}
+.shl-rpe[data-level="high"] {
+  --rpe-bg: rgba(239,68,68,0.15);
+  --rpe-fg: var(--engine-pulse);
+  --rpe-bd: rgba(239,68,68,0.35);
+}
+.shl-rpe[data-level="mid"] {
+  --rpe-bg: rgba(245,166,35,0.15);
+  --rpe-fg: var(--engine-belt);
+  --rpe-bd: rgba(245,166,35,0.35);
+}
+.shl-rpe[data-level="low"] {
+  --rpe-bg: rgba(34,197,94,0.15);
+  --rpe-fg: var(--engine-oly);
+  --rpe-bd: rgba(34,197,94,0.35);
+}
+
+/* ---------- Caret ---------- */
+.shl-caret {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--text-lo);
+  transform: rotate(0deg);
+  transition: transform 150ms ease, color 150ms;
+}
+.shl-row[data-open="true"] .shl-caret {
+  transform: rotate(90deg);
+  color: var(--shl-accent);
+}
+
+/* ---------- Expanded detail ---------- */
+.shl-detail {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-sm);
+  padding: 10px;
+}
+.shl-detail-cell-full { grid-column: 1 / -1; }
+.shl-detail-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-lo);
+  margin: 0 0 2px;
+}
+.shl-detail-value {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-hi);
+  font-variant-numeric: tabular-nums;
+}
+.shl-note-quote {
+  font-size: 11px;
+  font-style: italic;
+  line-height: 1.45;
+  color: var(--text);
+}
+.shl-scale {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--text-mid);
+}
+.shl-scale strong {
+  color: var(--shl-accent);
+  font-weight: 700;
+}

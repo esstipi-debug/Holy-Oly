@@ -1,0 +1,397 @@
+/* ============================================================
+   PEAK QUAL · COACH · EVALUACIÓN DE DESTREZA (V2 dark)
+   El coach pone un veredicto de destreza (1-5 estrellas) sobre
+   cada movimiento del skill tree. Porta el look canónico de
+   coach-dash / assign-macro al panel. Todo scopeado bajo
+   .sep-root · sin resets globales, sin chrome de teléfono (lo
+   provee el layout padre AthleteTrainingView).
+   ============================================================ */
+
+.sep-root {
+  font-family: var(--font-body);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+.sep-root *,
+.sep-root *::before,
+.sep-root *::after { box-sizing: border-box; }
+
+/* ============================================================
+   HEAD · eyebrow + contador evaluados
+   ============================================================ */
+.sep-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.sep-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-lo);
+}
+.sep-count {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 4px 9px;
+  border-radius: var(--r-full);
+  color: var(--engine-belt);
+  background: color-mix(in oklab, var(--engine-belt) 14%, transparent);
+  border: 1px solid color-mix(in oklab, var(--engine-belt) 45%, transparent);
+  font-variant-numeric: tabular-nums;
+}
+.sep-count .pip {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--engine-belt);
+  box-shadow: 0 0 6px var(--engine-belt);
+}
+
+/* ============================================================
+   PANEL CARD · contenedor de filtros + lista
+   ============================================================ */
+.sep-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-lg);
+  padding: 14px;
+}
+
+/* ============================================================
+   SUBJECT TABS
+   ============================================================ */
+.sep-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.sep-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 11px;
+  border-radius: var(--r-full);
+  background: transparent;
+  color: var(--text-mid);
+  border: 1px solid var(--border-soft);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 180ms, background 180ms, border-color 180ms;
+}
+.sep-tab:hover { color: var(--text-hi); }
+/* tab "Todos" activo · neutro alto-contraste */
+.sep-tab[data-active="true"][data-kind="all"] {
+  background: var(--text-hi);
+  color: var(--bg-deep);
+  border-color: var(--text-hi);
+}
+/* tabs subject activos · pintados con el color del subject (--sc) */
+.sep-tab[data-active="true"][data-kind="subject"] {
+  background: color-mix(in oklab, var(--sc) 18%, transparent);
+  color: var(--sc);
+  border-color: color-mix(in oklab, var(--sc) 50%, transparent);
+  box-shadow: 0 0 10px color-mix(in oklab, var(--sc) 30%, transparent);
+}
+
+/* ============================================================
+   CONTROLS · búsqueda + toggle sin-evaluar
+   ============================================================ */
+.sep-controls {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.sep-search {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  color: var(--text-hi);
+  font-family: var(--font-body);
+  font-size: 11px;
+  outline: none;
+  transition: border-color 180ms, box-shadow 180ms;
+}
+.sep-search::placeholder { color: var(--text-lo); }
+.sep-search:focus {
+  border-color: var(--border-hard);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--engine-stress) 18%, transparent);
+}
+.sep-toggle {
+  flex-shrink: 0;
+  white-space: nowrap;
+  padding: 7px 11px;
+  border-radius: var(--r-md);
+  background: transparent;
+  color: var(--text-mid);
+  border: 1px solid var(--border-soft);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 180ms, background 180ms, border-color 180ms;
+}
+.sep-toggle:hover { color: var(--text-hi); }
+.sep-toggle[data-active="true"] {
+  background: color-mix(in oklab, var(--engine-adapt) 16%, transparent);
+  color: var(--engine-adapt);
+  border-color: color-mix(in oklab, var(--engine-adapt) 50%, transparent);
+  box-shadow: 0 0 8px color-mix(in oklab, var(--engine-adapt) 28%, transparent);
+}
+
+/* ============================================================
+   STATE LINES · loading / error / empty
+   ============================================================ */
+.sep-state {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--text-mid);
+  padding: 6px 2px;
+}
+.sep-state[data-tone="error"] { color: var(--engine-pulse); }
+.sep-state[data-tone="empty"] {
+  text-align: center;
+  padding: 18px 12px;
+}
+
+/* ============================================================
+   ROW LIST
+   ============================================================ */
+.sep-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sep-row {
+  position: relative;
+  background: var(--bg);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  padding: 11px 13px;
+  transition: border-color 200ms, box-shadow 200ms;
+}
+/* fila ya evaluada · acento ámbar (belt) sutil */
+.sep-row[data-evaluated="true"] {
+  border-color: color-mix(in oklab, var(--engine-belt) 38%, transparent);
+}
+.sep-row[data-evaluated="true"]::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 14px;
+  width: 18px; height: 3px;
+  border-radius: 0 0 2px 2px;
+  background: var(--engine-belt);
+  box-shadow: 0 0 6px var(--engine-belt);
+}
+
+/* row head · nombre + tier chip */
+.sep-row-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.sep-row-name {
+  flex: 1;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: -0.01em;
+  color: var(--text-hi);
+  line-height: 1.15;
+}
+.sep-tier-chip {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 2px 7px;
+  border-radius: var(--r-sm);
+  color: var(--sc, var(--text-mid));
+  background: color-mix(in oklab, var(--sc, var(--text-mid)) 18%, transparent);
+}
+.sep-row-desc {
+  font-family: var(--font-body);
+  font-size: 10.5px;
+  line-height: 1.45;
+  color: var(--text-mid);
+  margin-bottom: 8px;
+}
+
+/* ============================================================
+   STARS + LEVEL READOUT
+   ============================================================ */
+.sep-stars {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-bottom: 8px;
+}
+.sep-star {
+  padding: 2px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 17px;
+  line-height: 1;
+  color: var(--surface-3);
+  transition: color 140ms, transform 120ms;
+}
+.sep-star:hover { transform: scale(1.12); }
+.sep-star[data-filled="true"] {
+  color: var(--engine-belt);
+  text-shadow: 0 0 8px color-mix(in oklab, var(--engine-belt) 55%, transparent);
+}
+.sep-level {
+  margin-left: 7px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-lo);
+  font-variant-numeric: tabular-nums;
+}
+.sep-level[data-set="true"] { color: var(--engine-belt); }
+
+/* meta · última evaluación */
+.sep-meta {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.03em;
+  color: var(--text-lo);
+  margin-bottom: 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================
+   NOTE TEXTAREA
+   ============================================================ */
+.sep-note {
+  width: 100%;
+  padding: 8px 10px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  color: var(--text-hi);
+  font-family: var(--font-body);
+  font-size: 11px;
+  line-height: 1.4;
+  outline: none;
+  resize: vertical;
+  transition: border-color 180ms, box-shadow 180ms;
+}
+.sep-note::placeholder { color: var(--text-lo); }
+.sep-note:focus {
+  border-color: var(--border-hard);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--engine-stress) 16%, transparent);
+}
+
+/* ============================================================
+   SAVE ROW + BUTTON
+   ============================================================ */
+.sep-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+.sep-save {
+  padding: 8px 16px;
+  border-radius: var(--r-md);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 180ms, box-shadow 180ms, color 180ms, border-color 180ms;
+}
+/* dirty / nuevo · CTA dorado lleno */
+.sep-save[data-state="ready"] {
+  background: linear-gradient(135deg,
+    color-mix(in oklab, var(--engine-belt) 92%, #fff),
+    var(--engine-belt));
+  color: var(--bg-deep);
+  box-shadow: 0 0 16px color-mix(in oklab, var(--engine-belt) 38%, transparent);
+}
+.sep-save[data-state="ready"]:hover {
+  box-shadow: 0 0 22px color-mix(in oklab, var(--engine-belt) 55%, transparent);
+}
+/* guardado · sin cambios · estado fantasma */
+.sep-save[data-state="saved"] {
+  background: transparent;
+  color: var(--text-lo);
+  border-color: var(--border-soft);
+  cursor: default;
+}
+/* guardando · busy */
+.sep-save[data-state="saving"] {
+  background: color-mix(in oklab, var(--engine-belt) 30%, transparent);
+  color: var(--bg-deep);
+  cursor: wait;
+  opacity: 0.7;
+}
+
+/* ============================================================
+   PAGINATION
+   ============================================================ */
+.sep-pager {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+.sep-pager-btn {
+  padding: 7px 13px;
+  border-radius: var(--r-md);
+  background: transparent;
+  color: var(--text-mid);
+  border: 1px solid var(--border-soft);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 180ms, border-color 180ms, background 180ms;
+}
+.sep-pager-btn:hover:not(:disabled) {
+  color: var(--text-hi);
+  border-color: var(--border-hard);
+}
+.sep-pager-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.sep-pager-info {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-lo);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}

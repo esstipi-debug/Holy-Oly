@@ -1,0 +1,431 @@
+/* ============================================================
+   PEAK QUAL · COACH · FOCOS TÉCNICOS · SKILL TREE (V2 dark)
+   Porta el look canónico del cluster de coach (.msa-root /
+   .am-root) al asignador de foco técnico. Todo scopeado bajo
+   .sfa-root · sin resets globales, sin chrome de teléfono (lo
+   provee el layout padre AthleteTrainingView). Tokens only.
+   ============================================================ */
+
+.sfa-root {
+  font-family: var(--font-body);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+.sfa-root *,
+.sfa-root *::before,
+.sfa-root *::after { box-sizing: border-box; }
+
+/* ============================================================
+   HEAD · eyebrow + contador activos
+   ============================================================ */
+.sfa-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.sfa-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-lo);
+}
+.sfa-count {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: var(--r-full);
+  background: color-mix(in oklab, var(--engine-belt) 14%, transparent);
+  color: var(--engine-belt);
+  border: 1px solid color-mix(in oklab, var(--engine-belt) 45%, transparent);
+  box-shadow: 0 0 8px color-mix(in oklab, var(--engine-belt) 25%, transparent);
+}
+.sfa-count .pip {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--engine-belt);
+  box-shadow: 0 0 6px var(--engine-belt);
+}
+
+/* ============================================================
+   FORM CARD
+   ============================================================ */
+.sfa-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-lg);
+  padding: 14px;
+  margin-bottom: 14px;
+}
+
+/* ============================================================
+   SUBJECT TABS
+   ============================================================ */
+.sfa-subjects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.sfa-subject {
+  padding: 6px 11px;
+  border-radius: var(--r-full);
+  background: var(--surface-2);
+  border: 1px solid var(--border-soft);
+  color: var(--text-mid);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  transition: border-color 160ms, background 160ms, color 160ms;
+}
+.sfa-subject:hover { color: var(--text-hi); }
+.sfa-subject[data-active="true"] {
+  border-color: color-mix(in oklab, var(--sc, var(--engine-stress)) 60%, transparent);
+  background: color-mix(in oklab, var(--sc, var(--engine-stress)) 16%, var(--surface-2));
+  color: var(--sc, var(--engine-stress));
+  box-shadow: 0 0 8px color-mix(in oklab, var(--sc, var(--engine-stress)) 28%, transparent);
+}
+/* "Todos" usa el blanco-texto neutro como acento */
+.sfa-subject.sfa-subject-all[data-active="true"] {
+  border-color: var(--text-mid);
+  background: color-mix(in oklab, var(--text-hi) 14%, var(--surface-2));
+  color: var(--text-hi);
+  box-shadow: none;
+}
+
+/* ============================================================
+   MOVEMENT LIST · scrollable
+   ============================================================ */
+.sfa-list {
+  max-height: 200px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding-right: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-3) transparent;
+}
+.sfa-list::-webkit-scrollbar { width: 5px; }
+.sfa-list::-webkit-scrollbar-thumb {
+  background: var(--surface-3);
+  border-radius: var(--r-full);
+}
+.sfa-list::-webkit-scrollbar-track { background: transparent; }
+
+.sfa-mv {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 10px;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--border-soft);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: border-color 160ms, background 160ms, transform 120ms;
+}
+.sfa-mv:hover:not(:disabled) {
+  border-color: color-mix(in oklab, var(--mc, var(--engine-stress)) 45%, transparent);
+  transform: translateX(2px);
+}
+.sfa-mv[data-selected="true"] {
+  border-color: color-mix(in oklab, var(--mc, var(--engine-stress)) 65%, transparent);
+  background: color-mix(in oklab, var(--mc, var(--engine-stress)) 15%, var(--surface-2));
+  box-shadow: 0 0 10px color-mix(in oklab, var(--mc, var(--engine-stress)) 22%, transparent);
+}
+.sfa-mv:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+/* disco tier (PlateBadge) representando el tier del movimiento */
+.sfa-mv-disc {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.sfa-mv-name {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-hi);
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+.sfa-mv-tier {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 2px 6px;
+  border-radius: var(--r-sm);
+  color: var(--mc, var(--engine-stress));
+  background: color-mix(in oklab, var(--mc, var(--engine-stress)) 18%, transparent);
+}
+.sfa-mv-flag {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--engine-belt);
+}
+.sfa-mv-flag .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--engine-belt);
+  box-shadow: 0 0 6px var(--engine-belt);
+}
+
+/* ============================================================
+   NOTE EDITOR (aparece al seleccionar un movimiento)
+   ============================================================ */
+.sfa-note {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border-soft);
+}
+.sfa-note-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-lo);
+  margin-bottom: 7px;
+}
+.sfa-note-label strong {
+  color: var(--text-hi);
+  font-weight: 800;
+}
+.sfa-textarea {
+  width: 100%;
+  padding: 9px 11px;
+  border-radius: var(--r-sm);
+  background: var(--bg);
+  border: 1px solid var(--border-soft);
+  color: var(--text-hi);
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.45;
+  resize: vertical;
+  min-height: 52px;
+  outline: none;
+  transition: border-color 160ms, box-shadow 160ms;
+}
+.sfa-textarea:focus {
+  border-color: color-mix(in oklab, var(--engine-stress) 55%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--engine-stress) 18%, transparent);
+}
+.sfa-charcount {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-lo);
+  margin-top: 5px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
+/* ============================================================
+   ACTIONS (cancelar / asignar)
+   ============================================================ */
+.sfa-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+.sfa-btn-cancel {
+  flex: 1;
+  padding: 11px 0;
+  border-radius: var(--r-md);
+  background: transparent;
+  color: var(--text-mid);
+  border: 1px solid var(--border-soft);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  transition: color 160ms, border-color 160ms, background 160ms;
+}
+.sfa-btn-cancel:hover {
+  color: var(--text-hi);
+  border-color: var(--border-hard);
+}
+.sfa-btn-assign {
+  flex: 2;
+  padding: 11px 0;
+  border-radius: var(--r-md);
+  background: var(--engine-belt);
+  color: #1A1205;
+  border: none;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 160ms, box-shadow 160ms, background 160ms;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.4), var(--glow-amber);
+}
+.sfa-btn-assign:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 26px color-mix(in oklab, var(--engine-belt) 45%, transparent);
+}
+.sfa-btn-assign:disabled {
+  background: var(--surface-2);
+  color: var(--text-lo);
+  cursor: wait;
+  box-shadow: none;
+}
+
+/* ============================================================
+   SECTION HEAD (Activos / Recién dominados)
+   ============================================================ */
+.sfa-section-head {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-lo);
+  margin-bottom: 8px;
+}
+.sfa-section-head.sfa-mt { margin-top: 14px; }
+
+/* ============================================================
+   STATE LINES (loading / error)
+   ============================================================ */
+.sfa-state {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--text-mid);
+  padding: 4px 2px;
+}
+.sfa-state[data-kind="error"] { color: var(--engine-pulse); }
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+.sfa-empty {
+  background: var(--surface-1);
+  border: 1px dashed var(--border-soft);
+  border-radius: var(--r-md);
+  padding: 16px 14px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-lo);
+  letter-spacing: 0.04em;
+  line-height: 1.5;
+}
+
+/* ============================================================
+   ACTIVE FOCUS LIST
+   ============================================================ */
+.sfa-active-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sfa-active {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-left: 3px solid var(--engine-belt);
+  box-shadow: 0 0 12px color-mix(in oklab, var(--engine-belt) 14%, transparent);
+}
+.sfa-active-disc {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.sfa-active-body { flex: 1; min-width: 0; }
+.sfa-active-title {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-hi);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sfa-active-note {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-mid);
+  margin-top: 3px;
+  line-height: 1.4;
+}
+.sfa-active-del {
+  flex-shrink: 0;
+  padding: 6px 11px;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--engine-pulse);
+  border: 1px solid color-mix(in oklab, var(--engine-pulse) 35%, transparent);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 160ms, border-color 160ms;
+}
+.sfa-active-del:hover {
+  background: color-mix(in oklab, var(--engine-pulse) 14%, transparent);
+  border-color: color-mix(in oklab, var(--engine-pulse) 55%, transparent);
+}
+
+/* ============================================================
+   DOMINATED CHIPS
+   ============================================================ */
+.sfa-dominated {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.sfa-dom-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: var(--r-full);
+  background: color-mix(in oklab, var(--engine-oly) 12%, transparent);
+  color: var(--engine-oly);
+  border: 1px solid color-mix(in oklab, var(--engine-oly) 38%, transparent);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
