@@ -22,19 +22,19 @@ UNA sola identidad visual: el estilo **V2 dark "Macrociclos"** (FIFA/Strava, ace
 - **Skill-tree (PROGRESSION):** guard product-aware (en HO muestra estado neutral, no el árbol CrossFit).
 - ~7 pantallas legacy borradas (Login, Register, Landing, Onboarding, VoltaDashboard, AtletaHome, CommandCenter).
 
-## 🚧 EN VUELO / SIN COMMITEAR (terminar primero)
-**Cluster AthleteTrainingView ola B** (en `src/components/`):
-- `SkillEvaluationPanel.tsx` + `skill-evaluation.css` → restyle hecho, compila limpio.
-- `SkillFocusAssign.tsx` + `skill-focus.css` → restyle hecho, compila limpio.
-- `SessionHistoryList.tsx` + `session-history.css` → **A MEDIO TERMINAR**. El CSS V2 está completo (clases `.shl-root`, `.shl-row`, `.shl-row-icon`, `.shl-row-disc`, `.shl-row-main`, `.shl-row-date/kind/summary`, `.shl-rpe[data-level="high|mid|low"]`, `.shl-caret`), pero el **JSX NO fue convertido** a esas clases (sigue con estilos inline + tokens legacy). Errores de build:
-  - `rpeChipStyle` (línea ~221) ya no existe → renombrado a `rpeLevel` (devuelve 'high'|'mid'|'low'|null). El chip RPE (~268-278) usa `rpe.bg/.fg/.bd` (objeto viejo) → cambiar a `<span className="shl-rpe" data-level={rpeLevel(...)}>`.
-  - `PlateBadge` + `tierFromSession` importados/declarados sin usar → wirear el disco (`tierFromSession(s)` → `<PlateBadge tier={tier} size={32}>` en `.shl-row-disc`).
-  - **Pasos:** agregar `className="shl-root"` al root, convertir el JSX de la fila a las clases `.shl-*`, fix del chip + disco, `npm run build` verde, commitear los 3 archivos de la ola B → con eso **coach HO 100% V2**.
+## ✅ COMPLETADO sesión 2026-05-28 (commiteado + pusheado a `feat/api-first-refactor`)
+Todo buildea verde (`npm run build`, tsc -b) y está en `origin` → Render redeploya `peakqual-v2`.
+- **Wave B coach** (`afc9cdb`): SkillEvaluationPanel, SkillFocusAssign, **SessionHistoryList** (JSX convertido a `.shl-*`, disco PlateBadge por tier, chip RPE `data-level`). Cluster AthleteTrainingView **100% V2**.
+- **Stats atleta** (`7132ffd` + `b4d94a2`): SessionSchedule (`.ssch-*`), PulseHub (`.plh-*`), KnowledgePills (`.kp-*`), HoStats (`.hst-*`), OlyIndex (`.oly-*`), PerformanceDeepDive (`.pdd-*`). Las 6 en V2.
+- **Social + perfil** (`f8e3226` + `1776d1d` + `6664538`): Leaderboard (`.lb-*`, product-aware), SocialCardsGallery (`.scg-*`), SocialCard (`.soc-*`, solo chrome — las cards virales `components/social/*Card` NO se tocaron), Profile (`.prof-*`), PreMium (`.prem-*`), BeltCeremony (`.belt-*`, immersive), HormonalSetup (`.horm-*`), BaselineAssessment (`.base-*`) + LogTestSheet (inline-token-swap). Las 8 en V2.
+
+> Patrón usado: cada pantalla scopea bajo una clase root `.xxx-root`, hereda `tokens.css`, se monta en PhoneLayout (sin chrome propio), colores dinámicos via `--c` inline. Las big stats usan `<Chart>`/`<Heatmap365>` con colores hex alineados a tokens. `BottomSheet` es `position:fixed` pero **renderiza inline** (no portal) → el contenido hereda el accent del root de página.
 
 ## ⏳ FALTA PARA HO 100%
-- **Stats atleta:** HoStats, OlyIndex, PerformanceDeepDive, SessionSchedule, PulseHub, KnowledgePills.
-- **Social + perfil/ajustes:** Leaderboard, SocialCard, SocialCardsGallery, Profile, HormonalSetup, PreMium, BeltCeremony, BaselineAssessment.
-- **Demo HO** (ver Gotchas).
+- **Demo HO** (ver Gotchas) — **el item bloqueante ahora**. Todas las pantallas HO de atleta migradas NO se pueden ver en el preview de Render porque el usuario demo es de Volta y no hay demo HO. Crear atleta (+coach) demo Holy Oly + entrada desbloquea QA end-to-end real.
+- **QA visual** de lo migrado una vez exista el demo HO (sólo se verificó `npm run build` verde, no click-through en browser por el gap del demo).
+- (Opcional) Help/support bot in-app (extender WISE) — **decisión Boss 2026-05-28: dejarlo anotado**, foco en HO.
+- (Opcional) Unificar disco a PlateBadge en CoachDashV2 (hoy usa `<plate-3d>` vía @ts-nocheck).
 
 ## 🟦 VOLTA (estado, fuera de foco actual)
 - En V2: VoltaDashboardV3 (home), flujo WOD VoltaPreWod/VoltaWarmup/VoltaActiveWod.
@@ -60,12 +60,12 @@ UNA sola identidad visual: el estilo **V2 dark "Macrociclos"** (FIFA/Strava, ace
 - **NO hay link desplegado** de esta rama. Render sirve `main` (viejo). Para link compartible: deploy de preview en Render (necesita dashboard del Boss) o merge a main (NO recomendado hasta cerrar HO).
 
 ## ▶️ PRÓXIMOS PASOS (orden sugerido)
-1. **Terminar Wave B**: convertir el JSX de `SessionHistoryList.tsx` a sus clases `.shl-*` (CSS ya hecho) + wirear disco + fix chip → `npm run build` verde → commit los 3 archivos ola B.
-2. **Stats atleta** a V2 (olas de ≤3): HoStats, OlyIndex, PerformanceDeepDive, Schedule, Pulse, Pills.
-3. **Social + perfil** a V2: Leaderboard, SocialCard/Gallery, Profile, Hormonal, Premium, Belt, Baseline.
-4. **Demo HO**: atleta/coach demo Holy Oly + entrada, para QA end-to-end real.
-5. (Opcional) **Help/support bot** in-app (extender WISE) — destrabar problemas de usuarios.
-6. (Opcional) Unificar disco a PlateBadge en CoachDashV2.
+1. **Demo HO**: crear atleta/coach demo Holy Oly (seed/usuario mock + entrada) para QA end-to-end real. Es lo que falta para poder VER en Render todo lo migrado (gotcha #3). Claves localStorage: `user`, `token`, `demoMode`, `product:current`, `role:current`.
+2. **QA visual** de las 17 pantallas migradas (Wave B + 6 Stats + 8 Social/perfil) una vez exista el demo HO.
+3. **Volta** (fuera de foco hasta cerrar HO): VoltaWodSummary, VoltaStats, VoltaCoachDash, VoltaCoachWod, VoltaCoachTools, LogWodResult.
+4. (Opcional) Help/support bot (WISE) · unificar disco PlateBadge en CoachDashV2.
+
+> Pantallas HO de atleta/coach: **migración a V2 COMPLETA** salvo Demo HO.
 
 ## 📌 Decisiones del Boss (vigentes)
 - Estrategia: **migrar + borrar por pantalla** (no borrar todo, no partir de cero).
