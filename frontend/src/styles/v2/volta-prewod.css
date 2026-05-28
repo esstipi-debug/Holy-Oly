@@ -1,0 +1,539 @@
+/* ============================================================
+   PEAK QUAL · VOLTA PRE-WOD · READINESS CHECK
+   Restyle V2 del legacy src/pages/VoltaPreWod.tsx
+   Estilo: FIFA Modo Leyenda + Tactical HUD · cyan dominante
+   (hermano de volta-dashboard.css · .vd-root)
+   Scoped a .vpw-root · usa tokens de styles/v2/tokens.css
+   ============================================================ */
+
+.vpw-root {
+  font-family: var(--font-body);
+  background: var(--bg-deep);
+  color: var(--text);
+  min-height: 100%;
+  width: 100%;
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  /* la nav (76px) la reserva PhoneLayout · sumamos respiro extra */
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 24px);
+}
+.vpw-root *,
+.vpw-root *::before,
+.vpw-root *::after { box-sizing: border-box; }
+
+/* ============================================================
+   SECTION HEAD (reusable · idéntico tono a .vd-sec-head)
+   ============================================================ */
+.vpw-sec-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0 2px;
+  margin-top: 2px;
+}
+.vpw-sec-head h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-hi);
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  margin: 0;
+}
+.vpw-sec-head .meta {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: var(--text-lo);
+  text-transform: uppercase;
+}
+
+/* ============================================================
+   HEADER · titular del check
+   ============================================================ */
+.vpw-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 2px 2px 12px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.vpw-header-mark {
+  flex-shrink: 0;
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in oklab, var(--engine-stress) 14%, transparent);
+  border: 1px solid color-mix(in oklab, var(--engine-stress) 45%, transparent);
+  color: var(--engine-stress);
+  box-shadow: 0 0 12px rgba(0,229,255,0.25);
+}
+.vpw-header-meta { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.vpw-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  color: var(--engine-stress);
+  text-transform: uppercase;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  text-shadow: 0 0 8px rgba(0,229,255,0.5);
+}
+.vpw-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 22px;
+  color: var(--text-hi);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin: 0;
+}
+.vpw-subtitle {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  color: var(--text-mid);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* ============================================================
+   SHARE CTA · pill cyan secundaria
+   ============================================================ */
+.vpw-share {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 11px 14px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in oklab, var(--engine-stress) 40%, transparent);
+  background:
+    linear-gradient(135deg,
+      color-mix(in oklab, var(--engine-stress) 18%, var(--surface-1)) 0%,
+      var(--surface-1) 90%);
+  color: var(--engine-stress);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 12.5px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: transform 150ms, box-shadow 200ms, border-color 200ms;
+  text-transform: uppercase;
+}
+.vpw-share:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in oklab, var(--engine-stress) 60%, transparent);
+  box-shadow: 0 0 18px rgba(0,229,255,0.28);
+}
+.vpw-share:active { transform: translateY(0); }
+.vpw-share .arrow { font-style: italic; font-size: 15px; }
+
+/* ============================================================
+   ESTADO · 3 métricas (HRV / Readiness / V-Form)
+   ============================================================ */
+.vpw-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.vpw-metric {
+  position: relative;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-top: 2px solid var(--m-color, var(--text-mid));
+  border-radius: 10px;
+  padding: 12px 8px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  overflow: hidden;
+}
+.vpw-metric::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 40px;
+  background: radial-gradient(ellipse 70% 100% at 50% 0%,
+    color-mix(in oklab, var(--m-color, var(--text-mid)) 14%, transparent),
+    transparent 70%);
+  pointer-events: none;
+}
+.vpw-metric-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  color: var(--text-mid);
+  text-transform: uppercase;
+  font-weight: 800;
+  position: relative;
+  z-index: 1;
+}
+.vpw-metric-value {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 22px;
+  color: var(--m-color, var(--text-hi));
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  position: relative;
+  z-index: 1;
+}
+.vpw-metric-value.is-text { font-size: 15px; letter-spacing: 0; }
+.vpw-metric-sub {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.06em;
+  color: var(--text-lo);
+  text-transform: uppercase;
+  position: relative;
+  z-index: 1;
+}
+.vpw-metric-badge {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.08em;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  position: relative;
+  z-index: 1;
+}
+.vpw-metric-badge.warning {
+  background: color-mix(in oklab, var(--engine-macro) 14%, transparent);
+  color: var(--engine-macro);
+  border: 1px solid color-mix(in oklab, var(--engine-macro) 30%, transparent);
+}
+.vpw-metric-badge.critical {
+  background: color-mix(in oklab, var(--engine-pulse) 14%, transparent);
+  color: var(--engine-pulse);
+  border: 1px solid color-mix(in oklab, var(--engine-pulse) 30%, transparent);
+}
+
+/* ============================================================
+   RECOMENDACIÓN PRINCIPAL · Session Adaptation Engine
+   Card tonal según zona de riesgo (--reco-color)
+   ============================================================ */
+.vpw-reco {
+  position: relative;
+  border-radius: 12px;
+  padding: 14px;
+  border: 1px solid color-mix(in oklab, var(--reco-color, var(--engine-oly)) 35%, transparent);
+  border-left: 3px solid var(--reco-color, var(--engine-oly));
+  background:
+    linear-gradient(160deg,
+      color-mix(in oklab, var(--reco-color, var(--engine-oly)) 12%, var(--surface-2)) 0%,
+      var(--surface-1) 85%);
+  box-shadow: 0 0 18px color-mix(in oklab, var(--reco-color, var(--engine-oly)) 16%, transparent);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: hidden;
+}
+.vpw-reco::after {
+  content: "";
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 55%;
+  background: radial-gradient(circle at 100% 30%,
+    color-mix(in oklab, var(--reco-color, var(--engine-oly)) 14%, transparent),
+    transparent 70%);
+  pointer-events: none;
+}
+.vpw-reco-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--reco-color, var(--engine-oly));
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  position: relative;
+  z-index: 1;
+}
+.vpw-reco-desc {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text);
+  line-height: 1.5;
+  position: relative;
+  z-index: 1;
+}
+.vpw-reco-plan {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 2px;
+  position: relative;
+  z-index: 1;
+}
+.vpw-reco-ex {
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  color: var(--text);
+  line-height: 1.35;
+}
+.vpw-reco-ex .ex-name { color: var(--text-hi); font-weight: 600; }
+.vpw-reco-ex .ex-scheme {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.vpw-reco-ex .ex-scheme.degraded { color: var(--engine-macro); }
+.vpw-reco-ex .ex-scheme.kept     { color: var(--engine-oly); }
+.vpw-reco-ex .ex-reason { color: var(--text-lo); font-size: 10px; }
+.vpw-reco-note {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  color: var(--text-lo);
+  font-style: italic;
+  position: relative;
+  z-index: 1;
+}
+.vpw-reco-risk {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--text-mid);
+  position: relative;
+  z-index: 1;
+}
+.vpw-reco-risk b {
+  color: var(--text-hi);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================
+   CARD genérica (mood · cafeína)
+   ============================================================ */
+.vpw-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  padding: 14px;
+}
+.vpw-card.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+}
+
+/* MOOD */
+.vpw-mood-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.vpw-mood-row + .vpw-mood-row { margin-top: 12px; }
+.vpw-mood-label {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-hi);
+  font-weight: 500;
+}
+.vpw-mood-opts { display: flex; gap: 6px; }
+.vpw-emoji {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border-soft);
+  transition: transform 140ms, border-color 160ms, background 160ms;
+}
+.vpw-emoji:hover { transform: translateY(-1px); }
+.vpw-emoji.active {
+  background: color-mix(in oklab, var(--e-tint, var(--engine-stress)) 16%, transparent);
+  border: 2px solid var(--e-tint, var(--engine-stress));
+}
+
+/* CAFEÍNA */
+.vpw-caf-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.vpw-caf-icon { font-size: 20px; line-height: 1; flex-shrink: 0; }
+.vpw-caf-main {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-hi);
+}
+.vpw-caf-sub {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+  color: var(--text-mid);
+  margin-top: 1px;
+}
+.vpw-caf-add {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--engine-stress);
+  background: transparent;
+  border: 1px solid color-mix(in oklab, var(--engine-stress) 30%, transparent);
+  border-radius: 6px;
+  padding: 6px 9px;
+  cursor: pointer;
+  transition: all 160ms;
+}
+.vpw-caf-add:hover {
+  background: color-mix(in oklab, var(--engine-stress) 12%, transparent);
+  border-color: color-mix(in oklab, var(--engine-stress) 50%, transparent);
+}
+
+/* ============================================================
+   WISE SCORE · incentivo (verde OLY)
+   ============================================================ */
+.vpw-wise {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in oklab, var(--engine-oly) 30%, transparent);
+  background:
+    linear-gradient(160deg,
+      color-mix(in oklab, var(--engine-oly) 10%, var(--surface-2)) 0%,
+      var(--surface-1) 88%);
+  box-shadow: 0 0 16px color-mix(in oklab, var(--engine-oly) 14%, transparent);
+}
+.vpw-wise-ring {
+  flex-shrink: 0;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  border: 2.5px solid var(--engine-oly);
+  background: radial-gradient(circle, color-mix(in oklab, var(--engine-oly) 18%, transparent), transparent 70%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 12px color-mix(in oklab, var(--engine-oly) 30%, transparent);
+}
+.vpw-wise-num {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--engine-oly);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.vpw-wise-tag {
+  font-family: var(--font-mono);
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: color-mix(in oklab, var(--engine-oly) 70%, transparent);
+}
+.vpw-wise-body { flex: 1; min-width: 0; }
+.vpw-wise-headline {
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  font-weight: 800;
+  color: var(--engine-oly);
+  line-height: 1.3;
+}
+.vpw-wise-headline .pts { font-size: 13px; }
+.vpw-wise-meta {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+  color: var(--text-mid);
+  margin-top: 3px;
+}
+
+/* ============================================================
+   CTAs
+   ============================================================ */
+.vpw-ctas { display: flex; flex-direction: column; gap: 8px; }
+.vpw-cta {
+  width: 100%;
+  border-radius: 12px;
+  font-family: var(--font-display);
+  cursor: pointer;
+  transition: transform 150ms, box-shadow 200ms, border-color 200ms, background 200ms;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.vpw-cta.primary {
+  padding: 14px;
+  background: var(--engine-stress);
+  color: #001218;
+  border: 0;
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  box-shadow: 0 0 22px rgba(0,229,255,0.4), 0 4px 14px rgba(0,0,0,0.45);
+}
+.vpw-cta.primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 30px rgba(0,229,255,0.55), 0 6px 18px rgba(0,0,0,0.55);
+}
+.vpw-cta.primary:active { transform: translateY(0); }
+.vpw-cta.secondary {
+  padding: 12px;
+  background: var(--surface-2);
+  color: var(--text-hi);
+  border: 1px solid var(--border-soft);
+  font-weight: 700;
+  font-size: 13px;
+}
+.vpw-cta.secondary:hover {
+  border-color: var(--text-lo);
+  background: var(--surface-3);
+}
+.vpw-cta.ghost {
+  padding: 12px;
+  background: transparent;
+  color: var(--text-mid);
+  border: 1px solid var(--border-soft);
+  font-weight: 600;
+  font-size: 12px;
+}
+.vpw-cta.ghost:hover { color: var(--text-hi); border-color: var(--text-lo); }
+
+/* ============================================================
+   SAFE AREA (iOS) · top respeta el notch cuando hace falta
+   ============================================================ */
+@supports (padding: max(0px)) {
+  .vpw-root {
+    padding-bottom: max(24px, calc(env(safe-area-inset-bottom) + 24px));
+  }
+}
+
+/* ============================================================
+   ACCESSIBILITY · reduce-motion
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .vpw-root *,
+  .vpw-root *::before,
+  .vpw-root *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
