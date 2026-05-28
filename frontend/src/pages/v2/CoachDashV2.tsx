@@ -100,26 +100,33 @@ function ovrToTier(ovr: number): '0' | '1' | '2' | '3' | '4' {
   return '0';
 }
 
-/** 6 FIFA-style sub-stats derived from real session/strength signals. */
-function deriveStats(a: AthleteProfile, readiness: number) {
+/** 6 métricas de engine / "cómo está HOY el atleta": readiness, sueño, CNS,
+ *  recuperación, ánimo y carga. Derivadas del engine Banister + el check-in
+ *  de HOY (última sesión) en vez de ratings de habilidad estáticos — así el
+ *  coach ve el estado del día, no un OVR fijo. */
+function deriveStats(a: AthleteProfile, engine, readiness: number) {
   const sessions = a.sessions_last_7;
   const done = sessions.filter(s => s.completed);
+  const last = sessions.at(-1);
   const avg = (sel: (s: typeof sessions[number]) => number, fb: number) =>
     done.length ? done.reduce((s, x) => s + sel(x), 0) / done.length : fb;
 
-  const bw = Math.max(40, a.maxes.body_weight || 70);
-  const total = (a.maxes.snatch || 0) + (a.maxes.clean || 0) + (a.maxes.jerk || 0);
-  const STR = clamp(((a.maxes.back_squat || 0) / bw / 2.5) * 100 * 0.6 + a.prior_fitness * 0.5);
-  const PWR = clamp((total / bw / 6) * 100);                 // explosive total / bw
-  const TEC = clamp(((a.maxes.snatch || 0) / Math.max(1, a.maxes.clean || 1)) * 120); // snatch:clean ratio = technique proxy
-  const avgLoad = avg(s => s.load, 3000);
-  const CND = clamp((avgLoad / 6500) * 100 * 0.7 + a.prior_fitness * 0.4); // conditioning ~ training load tolerance
-  const sleep = avg(s => s.sleep_hours, 7);
-  const soreness = avg(s => s.soreness, 4);
-  const REC = clamp(readiness * 7 + (sleep / 9) * 30 + (10 - soreness) * 1.5); // recovery
-  const motivation = avg(s => s.motivation, 7);
-  const MEN = clamp(motivation * 9 + readiness * 1.5);       // mental
-  return { STR, CND, TEC, PWR, REC, MEN };
+  // Señales del check-in de HOY (última sesión) con fallback al promedio reciente.
+  const sleep      = last?.sleep_hours ?? avg(s => s.sleep_hours, 7);
+  const soreness   = last?.soreness    ?? avg(s => s.soreness, 4);
+  const motivation = last?.motivation  ?? avg(s => s.motivation, 7);
+  const fitness    = engine?.fitness ?? a.prior_fitness;
+  const fatigue    = engine?.fatigue ?? a.prior_fatigue;
+  const cns        = engine?.cns_score;
+
+  return {
+    RDY: clamp(readiness * 10),                              // readiness (engine Banister)
+    SUE: clamp((sleep / 8) * 100),                           // pts por sueño · anoche vs 8h
+    CNS: clamp(cns != null ? cns : readiness * 10),          // frescura del SNC (engine)
+    REC: clamp(((10 - soreness) / 9) * 100),                 // recuperación · inverso soreness
+    MOT: clamp(motivation * 10),                             // ánimo / motivación
+    CRG: clamp(100 - (fatigue / Math.max(fitness, 1)) * 60), // carga · frescura fitness:fatiga
+  };
 }
 
 /** Human-readable note from real signals (injury > stale check-in > readiness). */
@@ -442,7 +449,7 @@ function CoachDashV2() {
       ovr,
       status,
       note: deriveNote(a, status, readiness, cnsZone),
-      stats: deriveStats(a, readiness),
+      stats: deriveStats(a, engine, readiness),
     };
   }), [allAthletes, stressByAthlete]);
 
@@ -486,7 +493,6 @@ function CoachDashV2() {
   const coachName = user?.name ? `Coach ${user.name.split(' ')[0]}` : 'Coach';
 
   const openDetail = (id: string) => { selectAthlete(id); navigate('ATHLETE_DETAIL'); };
-  const openAssignFor = (id: string) => { selectAthlete(id); navigate('ASSIGN_MACRO'); };
 
   return (
     <div className="coach-frame">
@@ -505,7 +511,9 @@ function CoachDashV2() {
           <h3 style={{color:'var(--engine-pulse)'}}>Alertas</h3>
           <span className="meta">acción inmediata</span>
         </div>
-        <AlertsBanner alerts={alerts} onResolve={openAssignFor}/>
+        {/* RESOLVER → ventana de entrenamiento del atleta (AthleteDeepDive incluye
+            AthleteTrainingView, donde el coach aprueba/modifica el ajuste reportado). */}
+        <AlertsBanner alerts={alerts} onResolve={openDetail}/>
       </div>
 
       <div className="cd-section">

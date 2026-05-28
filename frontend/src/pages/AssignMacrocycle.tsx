@@ -332,6 +332,14 @@ const AssignMacrocycle: React.FC = () => {
   const selectedMacro = selected ? macrosForProduct.find(m => m.id === selected) : null;
   const selectedWeeks = selectedMacro ? parseWeeks(selectedMacro.duration) : 0;
 
+  // Abrir el detalle completo del macrociclo (filosofía · mesos · chart por semana).
+  // HolyOlyDetailV2 lo lee desde sessionStorage['ho:selectedMacroId'] (mismo contrato
+  // que el catálogo). Sólo HO: no hay detail view para Volta.
+  const openMacroDetail = (id: string) => {
+    try { sessionStorage.setItem('ho:selectedMacroId', id); } catch { /* ignore */ }
+    navigate('HO_MACRO_DETAIL');
+  };
+
   // Confirmar macro → abrir Week Picker (el coach elige desde qué semana arranca).
   const handleConfirm = () => {
     if (!selected) return;
@@ -582,6 +590,29 @@ const AssignMacrocycle: React.FC = () => {
 
                     {active && macro.bestFor && (
                       <p className="am-card-best">💡 {macro.bestFor}</p>
+                    )}
+                    {/* Acceso al detalle completo del macro (filosofía · mesos · chart).
+                        Span (no button) para no anidar botones dentro de la card-button. */}
+                    {product === 'holy-oly' && (
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        className="am-card-detail"
+                        onClick={(e) => { e.stopPropagation(); openMacroDetail(macro.id); }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.stopPropagation(); e.preventDefault(); openMacroDetail(macro.id);
+                          }
+                        }}
+                        style={{
+                          display: 'block', marginTop: 8, textAlign: 'center',
+                          padding: '9px 12px', borderRadius: 8, cursor: 'pointer',
+                          background: 'color-mix(in oklab, var(--cc) 12%, transparent)',
+                          border: '1px solid color-mix(in oklab, var(--cc) 45%, transparent)',
+                          color: 'var(--cc)', fontFamily: 'var(--font-mono)',
+                          fontSize: 11, fontWeight: 800, letterSpacing: '.04em',
+                        }}
+                      >Ver detalle del macrociclo →</span>
                     )}
                   </div>
                 </button>
