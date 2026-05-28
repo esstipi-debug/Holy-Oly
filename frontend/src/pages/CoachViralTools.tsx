@@ -4,6 +4,8 @@ import { useAthlete } from '../context/AthleteContext';
 import { useProduct } from '../context/ProductContext';
 import { athletes as mockAthletes } from '../data/athletes';
 import type { AthleteProfile } from '../data/athletes';
+import { PlateBadge, type PlateTier } from '../components/PlateBadge';
+import '../styles/v2/coach-viral.css';
 
 /**
  * Coach Viral Tools — generador de contenido viral para coaches.
@@ -63,25 +65,28 @@ interface ColorScheme {
   onAccent: string;
 }
 
+// Card color schemes · resolve against tokens.css (:root) — no hardcoded hex.
+// HO = amber/red (engine-belt) · Volta = cyan (engine-stress). The card sub-
+// components consume these as inline-style values, so CSS var() strings work.
 const HO_SCHEME: ColorScheme = {
-  accent: '#F5C518',
-  accentDim: 'rgba(245,197,24,0.18)',
-  bg: '#07070F',
-  surface: '#0F0F1C',
-  line: '#1E1E32',
-  text: '#EAEAF5',
-  muted: '#7B7B9F',
+  accent: 'var(--engine-belt)',
+  accentDim: 'color-mix(in oklab, var(--engine-belt) 16%, transparent)',
+  bg: 'var(--bg-deep)',
+  surface: 'var(--surface-1)',
+  line: 'var(--border-soft)',
+  text: 'var(--text-hi)',
+  muted: 'var(--text-lo)',
   onAccent: '#1A1500',
 };
 
 const VOL_SCHEME: ColorScheme = {
-  accent: '#00E5FF',
-  accentDim: 'rgba(0,229,255,0.18)',
-  bg: '#07070F',
-  surface: '#0F0F1C',
-  line: '#1E1E32',
-  text: '#EAEAF5',
-  muted: '#52527A',
+  accent: 'var(--engine-stress)',
+  accentDim: 'color-mix(in oklab, var(--engine-stress) 16%, transparent)',
+  bg: 'var(--bg-deep)',
+  surface: 'var(--surface-1)',
+  line: 'var(--border-soft)',
+  text: 'var(--text-hi)',
+  muted: 'var(--text-lo)',
   onAccent: '#001A1F',
 };
 
@@ -89,6 +94,26 @@ const MONTHS_ES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio
 
 function fmt(n: number): string {
   return n.toLocaleString('es-AR');
+}
+
+// Tier de disco para "Atleta del mes" · derivado de PR (kg) + streak (señales reales).
+// Mapea a la escala oficial de discos (white→red) sin inventar datos nuevos.
+function deriveTier(prValue: number, streak: number): PlateTier {
+  const score = prValue + streak * 4; // streak pondera la constancia
+  if (score >= 180) return 'red';
+  if (score >= 140) return 'blue';
+  if (score >= 100) return 'yellow';
+  if (score >= 60) return 'green';
+  return 'white';
+}
+
+// Tier del top-mover (recap) · derivado de prior_fitness (señal real del engine).
+function fitnessToTier(fitness: number): PlateTier {
+  if (fitness >= 70) return 'red';
+  if (fitness >= 60) return 'blue';
+  if (fitness >= 50) return 'yellow';
+  if (fitness >= 40) return 'green';
+  return 'white';
 }
 
 const CoachViralTools: React.FC = () => {
@@ -184,58 +209,58 @@ const CoachViralTools: React.FC = () => {
     return { prValue, prLabel, completed, planned, streak };
   }, [athlete, product]);
 
-  // Tab styles
-  const tabBtn = (active: boolean) => ({
-    flex: 1,
-    padding: '10px 8px',
-    borderRadius: 12,
-    background: active ? C.accent : C.surface,
-    color: active ? C.onAccent : C.text,
-    border: `1px solid ${active ? C.accent : C.line}`,
-    fontSize: 11,
-    fontWeight: 800,
-    cursor: 'pointer',
-    fontFamily: 'inherit',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-  });
+  // Tier del disco para el atleta del mes · derivado de PR + streak (señales reales).
+  const athleteTier: PlateTier = useMemo(
+    () => deriveTier(atletaStats?.prValue ?? 0, atletaStats?.streak ?? 0),
+    [atletaStats],
+  );
+
+  // Tier del top-mover (recap) · derivado de prior_fitness (señal real).
+  const topMoverTier: PlateTier = useMemo(
+    () => fitnessToTier(recap.topMover?.prior_fitness ?? 0),
+    [recap.topMover],
+  );
+
+  // Accent product-aware vía CSS vars sobre el root (HO amber/red · Volta cyan).
+  const rootVars = product === 'volta'
+    ? {
+        '--cvt-accent': 'var(--engine-stress)',
+        '--cvt-accent-2': 'var(--engine-stress)',
+        '--cvt-accent-dim': 'color-mix(in oklab, var(--engine-stress) 16%, transparent)',
+        '--cvt-glow': 'var(--glow-cyan)',
+        '--cvt-on-accent': '#001A1F',
+      } as React.CSSProperties
+    : {
+        '--cvt-accent': 'var(--engine-belt)',
+        '--cvt-accent-2': 'var(--engine-streak)',
+        '--cvt-accent-dim': 'color-mix(in oklab, var(--engine-belt) 16%, transparent)',
+        '--cvt-glow': 'var(--glow-amber)',
+        '--cvt-on-accent': '#1A1500',
+      } as React.CSSProperties;
 
   return (
-    <div style={{ background: C.bg, minHeight: '100%', paddingBottom: 110, color: C.text }}>
+    <div className="cvt-root" style={rootVars}>
       {/* HEADER */}
-      <div style={{ padding: '36px 20px 8px' }}>
+      <div className="cvt-header">
         <button
           onClick={() => navigate(product === 'volta' ? 'VOLTA_COACH' : 'COACH_DASH')}
-          className="btn-press"
-          style={{
-            background: 'transparent', border: 'none', color: C.muted,
-            fontSize: 11, fontWeight: 700, cursor: 'pointer',
-            fontFamily: 'inherit', padding: 0, marginBottom: 8,
-          }}
+          className="btn-press cvt-back"
         >← Volver</button>
-        <p style={{ fontSize: 10, color: C.muted, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase' }}>
-          Coach · Contenido Viral
-        </p>
-        <h1 style={{ fontSize: 22, fontWeight: 900, color: C.text, marginTop: 4, letterSpacing: '-.02em' }}>
-          Generador de cards
-        </h1>
-        <p style={{ fontSize: 11, color: C.muted, marginTop: 6, lineHeight: 1.4 }}>
-          Screenshot directo. La imagen ES el share.
-        </p>
+        <p className="cvt-eyebrow">Coach · Contenido Viral</p>
+        <h1 className="cvt-title">Generador de cards</h1>
+        <p className="cvt-sub">Screenshot directo. La imagen ES el share.</p>
       </div>
 
       {/* TEMPLATE TABS */}
-      <div style={{ display: 'flex', gap: 6, padding: '12px 16px 8px' }}>
+      <div className="cvt-tabs">
         {TEMPLATES.map(t => (
           <button
             key={t.id}
             onClick={() => setTemplate(t.id)}
-            className="btn-press"
-            style={tabBtn(template === t.id)}
+            className="btn-press cvt-tab"
+            data-active={template === t.id}
           >
-            <span>{t.icon}</span>
+            <span className="ic">{t.icon}</span>
             <span>{t.label}</span>
           </button>
         ))}
@@ -243,46 +268,25 @@ const CoachViralTools: React.FC = () => {
 
       {/* ATLETA SELECTOR (solo template A) */}
       {template === 'atleta-mes' && athlete && (
-        <div style={{ padding: '4px 16px 8px' }}>
-          <button
-            onClick={cycleAthlete}
-            className="btn-press"
-            style={{
-              width: '100%', padding: '10px 14px', borderRadius: 12,
-              background: C.surface, color: C.text,
-              border: `1px solid ${C.line}`,
-              fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-            }}
-          >
-            <span style={{ color: C.muted, fontSize: 10, letterSpacing: '.08em', textTransform: 'uppercase', fontWeight: 700 }}>
-              Atleta
-            </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div className="cvt-selector">
+          <button onClick={cycleAthlete} className="btn-press cvt-select-btn">
+            <span className="cvt-select-k">Atleta</span>
+            <span className="cvt-select-v">
               <span>{athlete.name}</span>
-              <span style={{ color: C.accent }}>↻</span>
+              <span className="cyc">↻</span>
             </span>
           </button>
         </div>
       )}
 
       {/* CARD PREVIEW · 9:16 portrait */}
-      <div style={{
-        display: 'flex', justifyContent: 'center', alignItems: 'center',
-        padding: '12px 16px',
-      }}>
-        <div style={{
-          width: CARD_W, maxWidth: '100%', height: CARD_H,
-          borderRadius: 20, overflow: 'hidden',
-          border: `1px solid ${C.line}`,
-          background: C.bg,
-          boxShadow: `0 20px 60px rgba(0,0,0,0.5)`,
-          position: 'relative',
-        }}>
+      <div className="cvt-stage">
+        <div className="cvt-card" style={{ width: CARD_W, height: CARD_H }}>
           {template === 'atleta-mes' && athlete && atletaStats && (
             <AtletaDelMes
               athlete={athlete}
               stats={atletaStats}
+              tier={athleteTier}
               tag={MOTIVATIONAL_TAGS[tagIdx]}
               monthName={monthName}
               boxName={boxName}
@@ -293,6 +297,7 @@ const CoachViralTools: React.FC = () => {
           {template === 'recap-semanal' && (
             <RecapSemanal
               recap={recap}
+              topMoverTier={topMoverTier}
               boxName={boxName}
               scheme={C}
               product={product}
@@ -310,44 +315,21 @@ const CoachViralTools: React.FC = () => {
       </div>
 
       {/* CONTROLES DE TEMPLATE */}
-      <div style={{ padding: '6px 16px 12px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div className="cvt-controls">
         {template === 'atleta-mes' && (
-          <button
-            onClick={cycleTag}
-            className="btn-press"
-            style={{
-              width: '100%', padding: '10px 0', borderRadius: 12,
-              background: 'transparent', color: C.accent,
-              border: `1px solid ${C.accent}55`,
-              fontSize: 11, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase',
-              cursor: 'pointer', fontFamily: 'inherit',
-            }}
-          >Cambiar frase ↻</button>
+          <button onClick={cycleTag} className="btn-press cvt-btn-ghost">
+            Cambiar frase ↻
+          </button>
         )}
         {template === 'motivacional' && (
-          <button
-            onClick={cycleQuote}
-            className="btn-press"
-            style={{
-              width: '100%', padding: '10px 0', borderRadius: 12,
-              background: 'transparent', color: C.accent,
-              border: `1px solid ${C.accent}55`,
-              fontSize: 11, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase',
-              cursor: 'pointer', fontFamily: 'inherit',
-            }}
-          >Cambiar cita ({quoteIdx + 1}/{QUOTES.length}) ↻</button>
+          <button onClick={cycleQuote} className="btn-press cvt-btn-ghost">
+            Cambiar cita ({quoteIdx + 1}/{QUOTES.length}) ↻
+          </button>
         )}
-        <button
-          onClick={cycleTemplate}
-          className="btn-press"
-          style={{
-            width: '100%', padding: '12px 0', borderRadius: 14,
-            background: C.accent, color: C.onAccent, border: 'none',
-            fontSize: 12, fontWeight: 900, letterSpacing: '.04em', textTransform: 'uppercase',
-            cursor: 'pointer', fontFamily: 'inherit',
-          }}
-        >Cambiar template →</button>
-        <p style={{ fontSize: 10, color: C.muted, textAlign: 'center', marginTop: 4 }}>
+        <button onClick={cycleTemplate} className="btn-press cvt-btn-primary">
+          Cambiar template →
+        </button>
+        <p className="cvt-hint">
           Tomá screenshot nativo (volumen + power) para compartir.
         </p>
       </div>
@@ -362,6 +344,7 @@ const CoachViralTools: React.FC = () => {
 interface AtletaDelMesProps {
   athlete: AthleteProfile;
   stats: { prValue: number; prLabel: string; completed: number; planned: number; streak: number };
+  tier: PlateTier;
   tag: string;
   monthName: string;
   boxName: string;
@@ -369,7 +352,7 @@ interface AtletaDelMesProps {
   product: 'holy-oly' | 'volta';
 }
 
-const AtletaDelMes: React.FC<AtletaDelMesProps> = ({ athlete, stats, tag, monthName, boxName, scheme: C, product }) => {
+const AtletaDelMes: React.FC<AtletaDelMesProps> = ({ athlete, stats, tier, tag, monthName, boxName, scheme: C, product }) => {
   const initial = athlete.name.charAt(0).toUpperCase();
   const firstName = athlete.name.split(' ')[0];
   const lastName = athlete.name.split(' ').slice(1).join(' ');
@@ -378,42 +361,34 @@ const AtletaDelMes: React.FC<AtletaDelMesProps> = ({ athlete, stats, tag, monthN
     <div style={{
       width: '100%', height: '100%',
       background: `radial-gradient(circle at 50% 25%, ${C.accentDim} 0%, ${C.bg} 65%)`,
-      padding: '32px 24px 28px',
+      padding: '30px 24px 26px',
       display: 'flex', flexDirection: 'column',
       position: 'relative',
     }}>
       {/* Eyebrow */}
-      <p style={{
-        fontSize: 9, color: C.accent, fontWeight: 900,
-        letterSpacing: '.24em', textTransform: 'uppercase', textAlign: 'center',
-      }}>
+      <p className="cvt-c-eyebrow" style={{ fontSize: 9, letterSpacing: '.24em' }}>
         Atleta del mes · {monthName}
       </p>
 
       {/* Avatar ring */}
-      <div style={{
-        margin: '20px auto 14px',
-        width: 140, height: 140, borderRadius: '50%',
-        background: `radial-gradient(circle, ${C.surface} 0%, ${C.bg} 100%)`,
-        border: `3px solid ${C.accent}`,
-        boxShadow: `0 0 40px ${C.accentDim}`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-      }}>
-        <span style={{
-          fontSize: 60, fontWeight: 900, color: C.accent,
-          fontStyle: 'italic', letterSpacing: '-.04em',
-        }}>{initial}</span>
+      <div className="cvt-avatar" style={{ margin: '16px auto 10px', width: 132, height: 132 }}>
+        <span style={{ fontSize: 56, fontStyle: 'italic' }}>{initial}</span>
+      </div>
+
+      {/* Tier disc · discos halterofilia · clasifica al atleta del mes */}
+      <div className="cvt-plate" style={{ marginBottom: 8 }}>
+        <PlateBadge tier={tier} size={44} showLabel />
       </div>
 
       {/* Name */}
       <div style={{ textAlign: 'center', marginBottom: 4 }}>
         <p style={{
-          fontSize: 26, fontWeight: 900, color: C.text,
+          fontSize: 24, fontWeight: 900, color: C.text,
           fontStyle: 'italic', letterSpacing: '-.02em', lineHeight: 1,
         }}>{firstName}</p>
         {lastName && (
           <p style={{
-            fontSize: 18, fontWeight: 700, color: C.text,
+            fontSize: 17, fontWeight: 700, color: C.text,
             fontStyle: 'italic', letterSpacing: '-.01em', lineHeight: 1, marginTop: 4,
             opacity: 0.85,
           }}>{lastName}</p>
@@ -426,42 +401,23 @@ const AtletaDelMes: React.FC<AtletaDelMesProps> = ({ athlete, stats, tag, monthN
 
       {/* Stats grid */}
       <div style={{
-        marginTop: 18,
+        marginTop: 14,
         display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6,
       }}>
-        <Stat label="PR" value={`${stats.prValue}kg`} sub={stats.prLabel} scheme={C} />
-        <Stat label="Asist" value={`${stats.completed}/${stats.planned || 7}`} sub="sesiones" scheme={C} />
-        <Stat label="Streak" value={`${stats.streak}d`} sub="seguidos" scheme={C} />
+        <Stat label="PR" value={`${stats.prValue}kg`} sub={stats.prLabel} />
+        <Stat label="Asist" value={`${stats.completed}/${stats.planned || 7}`} sub="sesiones" />
+        <Stat label="Streak" value={`${stats.streak}d`} sub="seguidos" />
       </div>
 
       {/* Tag motivacional */}
-      <div style={{
-        margin: '18px 0 0',
-        padding: '10px 12px',
-        background: C.accentDim,
-        border: `1px solid ${C.accent}55`,
-        borderRadius: 12,
-        textAlign: 'center',
-      }}>
-        <p style={{
-          fontSize: 13, color: C.accent, fontWeight: 800,
-          fontStyle: 'italic', letterSpacing: '-.01em',
-        }}>“{tag}”</p>
+      <div className="cvt-tagpill" style={{ margin: '16px 0 0', padding: '10px 12px' }}>
+        <p style={{ fontSize: 13, letterSpacing: '-.01em' }}>“{tag}”</p>
       </div>
 
       {/* Branding inferior */}
-      <div style={{
-        marginTop: 'auto', paddingTop: 16,
-        textAlign: 'center', borderTop: `1px solid ${C.line}`,
-      }}>
-        <p style={{
-          fontSize: 9, color: C.muted, fontWeight: 800,
-          letterSpacing: '.2em', textTransform: 'uppercase',
-        }}>{boxName}</p>
-        <p style={{
-          fontSize: 10, color: C.accent, fontWeight: 900,
-          letterSpacing: '.12em', marginTop: 4,
-        }}>#{product === 'volta' ? 'SimBox' : 'HolyOly'}</p>
+      <div className="cvt-c-brandbox" style={{ marginTop: 'auto', paddingTop: 14 }}>
+        <p className="cvt-c-brandname" style={{ fontSize: 9 }}>{boxName}</p>
+        <p className="cvt-c-hashtag" style={{ fontSize: 10 }}>#{product === 'volta' ? 'SimBox' : 'HolyOly'}</p>
       </div>
     </div>
   );
@@ -479,26 +435,24 @@ interface RecapSemanalProps {
     topMover: AthleteProfile | undefined;
     top3: { athlete: AthleteProfile; tonelaje: number }[];
   };
+  topMoverTier: PlateTier;
   boxName: string;
   scheme: ColorScheme;
   product: 'holy-oly' | 'volta';
 }
 
-const RecapSemanal: React.FC<RecapSemanalProps> = ({ recap, boxName, scheme: C, product }) => {
+const RecapSemanal: React.FC<RecapSemanalProps> = ({ recap, topMoverTier, boxName, scheme: C, product }) => {
   const topMoverName = recap.topMover?.name.split(' ')[0] || '—';
 
   return (
     <div style={{
       width: '100%', height: '100%',
       background: `radial-gradient(circle at 50% 0%, ${C.accentDim} 0%, ${C.bg} 70%)`,
-      padding: '32px 22px 24px',
+      padding: '30px 22px 22px',
       display: 'flex', flexDirection: 'column',
     }}>
       {/* Eyebrow */}
-      <p style={{
-        fontSize: 9, color: C.accent, fontWeight: 900,
-        letterSpacing: '.24em', textTransform: 'uppercase', textAlign: 'center',
-      }}>
+      <p className="cvt-c-eyebrow" style={{ fontSize: 9, letterSpacing: '.24em' }}>
         Esta semana en el box
       </p>
       <p style={{
@@ -511,65 +465,33 @@ const RecapSemanal: React.FC<RecapSemanalProps> = ({ recap, boxName, scheme: C, 
 
       {/* KPIs 2×2 */}
       <div style={{
-        marginTop: 18,
+        marginTop: 16,
         display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8,
       }}>
-        <KpiCard label="Sesiones" value={String(recap.sessions)} sub="totales" scheme={C} />
-        <KpiCard label="Volumen" value={`${(recap.volumeKg / 1000).toFixed(1)}k`} sub="kg movidos" scheme={C} />
-        <KpiCard label={product === 'volta' ? 'WODs Rx' : 'Sesiones Rx'} value={String(recap.rxCount)} sub="completos" scheme={C} />
-        <KpiCard label="Top mover" value={topMoverName} sub="↑ fitness" scheme={C} small />
+        <KpiCard label="Sesiones" value={String(recap.sessions)} sub="totales" />
+        <KpiCard label="Volumen" value={`${(recap.volumeKg / 1000).toFixed(1)}k`} sub="kg movidos" />
+        <KpiCard label={product === 'volta' ? 'WODs Rx' : 'Sesiones Rx'} value={String(recap.rxCount)} sub="completos" />
+        <KpiCard label="Top mover" value={topMoverName} sub="↑ fitness" small badge={topMoverTier} />
       </div>
 
       {/* TOP 3 */}
-      <div style={{ marginTop: 16 }}>
-        <p style={{
-          fontSize: 9, color: C.muted, fontWeight: 800,
-          letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 8,
-        }}>
-          Top 3 · tonelaje
-        </p>
+      <div style={{ marginTop: 14 }}>
+        <p className="cvt-rank-lbl">Top 3 · tonelaje</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {recap.top3.map((entry, i) => (
-            <div key={entry.athlete.id} style={{
-              display: 'flex', alignItems: 'center', gap: 10,
-              padding: '8px 10px',
-              background: C.surface,
-              border: `1px solid ${C.line}`,
-              borderRadius: 10,
-              borderLeft: i === 0 ? `3px solid ${C.accent}` : `1px solid ${C.line}`,
-            }}>
-              <span style={{
-                width: 18, height: 18, borderRadius: 6,
-                background: i === 0 ? C.accent : C.line,
-                color: i === 0 ? C.onAccent : C.text,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 10, fontWeight: 900,
-              }}>{i + 1}</span>
-              <p style={{ flex: 1, fontSize: 12, fontWeight: 700, color: C.text }}>
-                {entry.athlete.name}
-              </p>
-              <p style={{
-                fontSize: 11, fontWeight: 900, color: C.accent,
-                fontVariantNumeric: 'tabular-nums',
-              }}>{fmt(entry.tonelaje)}</p>
+            <div key={entry.athlete.id} className="cvt-rank-row" data-lead={i === 0}>
+              <span className="cvt-rank-pos">{i + 1}</span>
+              <p className="cvt-rank-name">{entry.athlete.name}</p>
+              <p className="cvt-rank-val">{fmt(entry.tonelaje)}</p>
             </div>
           ))}
         </div>
       </div>
 
       {/* Branding inferior */}
-      <div style={{
-        marginTop: 'auto', paddingTop: 14,
-        textAlign: 'center', borderTop: `1px solid ${C.line}`,
-      }}>
-        <p style={{
-          fontSize: 9, color: C.muted, fontWeight: 800,
-          letterSpacing: '.2em', textTransform: 'uppercase',
-        }}>{boxName}</p>
-        <p style={{
-          fontSize: 10, color: C.accent, fontWeight: 900,
-          letterSpacing: '.12em', marginTop: 4,
-        }}>#{product === 'volta' ? 'SimBox' : 'HolyOly'}</p>
+      <div className="cvt-c-brandbox" style={{ marginTop: 'auto', paddingTop: 12 }}>
+        <p className="cvt-c-brandname" style={{ fontSize: 9 }}>{boxName}</p>
+        <p className="cvt-c-hashtag" style={{ fontSize: 10 }}>#{product === 'volta' ? 'SimBox' : 'HolyOly'}</p>
       </div>
     </div>
   );
@@ -596,10 +518,7 @@ const Motivacional: React.FC<MotivacionalProps> = ({ quote, boxName, scheme: C, 
       position: 'relative',
     }}>
       {/* Eyebrow */}
-      <p style={{
-        fontSize: 9, color: C.accent, fontWeight: 900,
-        letterSpacing: '.28em', textTransform: 'uppercase', textAlign: 'center',
-      }}>
+      <p className="cvt-c-eyebrow" style={{ fontSize: 9, letterSpacing: '.28em' }}>
         Frase de la semana
       </p>
 
@@ -634,17 +553,9 @@ const Motivacional: React.FC<MotivacionalProps> = ({ quote, boxName, scheme: C, 
       </p>
 
       {/* Branding */}
-      <div style={{
-        textAlign: 'center', borderTop: `1px solid ${C.line}`, paddingTop: 14,
-      }}>
-        <p style={{
-          fontSize: 9, color: C.muted, fontWeight: 800,
-          letterSpacing: '.2em', textTransform: 'uppercase',
-        }}>{boxName}</p>
-        <p style={{
-          fontSize: 10, color: C.accent, fontWeight: 900,
-          letterSpacing: '.12em', marginTop: 4,
-        }}>#{product === 'volta' ? 'SimBox' : 'HolyOly'}</p>
+      <div className="cvt-c-brandbox" style={{ paddingTop: 14 }}>
+        <p className="cvt-c-brandname" style={{ fontSize: 9 }}>{boxName}</p>
+        <p className="cvt-c-hashtag" style={{ fontSize: 10 }}>#{product === 'volta' ? 'SimBox' : 'HolyOly'}</p>
       </div>
     </div>
   );
@@ -654,49 +565,25 @@ const Motivacional: React.FC<MotivacionalProps> = ({ quote, boxName, scheme: C, 
 // SHARED MICRO-COMPONENTS
 // ════════════════════════════════════════════════════════════════════════════
 
-const Stat: React.FC<{ label: string; value: string; sub: string; scheme: ColorScheme }> = ({ label, value, sub, scheme: C }) => (
-  <div style={{
-    padding: '10px 6px',
-    background: C.surface,
-    border: `1px solid ${C.line}`,
-    borderRadius: 10,
-    textAlign: 'center',
-  }}>
-    <p style={{
-      fontSize: 8, color: C.muted, fontWeight: 800,
-      letterSpacing: '.14em', textTransform: 'uppercase',
-    }}>{label}</p>
-    <p style={{
-      fontSize: 18, fontWeight: 900, color: C.accent,
-      fontVariantNumeric: 'tabular-nums', lineHeight: 1.1, marginTop: 4,
-    }}>{value}</p>
-    <p style={{
-      fontSize: 8, color: C.muted, fontWeight: 600,
-      marginTop: 2,
-    }}>{sub}</p>
+// Mini stat tile (template A) · styled via .cvt-stat (tokens).
+const Stat: React.FC<{ label: string; value: string; sub: string }> = ({ label, value, sub }) => (
+  <div className="cvt-stat">
+    <p className="k">{label}</p>
+    <p className="v">{value}</p>
+    <p className="s">{sub}</p>
   </div>
 );
 
-const KpiCard: React.FC<{ label: string; value: string; sub: string; scheme: ColorScheme; small?: boolean }> = ({ label, value, sub, scheme: C, small }) => (
-  <div style={{
-    padding: '12px 12px',
-    background: C.surface,
-    border: `1px solid ${C.line}`,
-    borderRadius: 12,
-  }}>
-    <p style={{
-      fontSize: 9, color: C.muted, fontWeight: 800,
-      letterSpacing: '.14em', textTransform: 'uppercase',
-    }}>{label}</p>
-    <p style={{
-      fontSize: small ? 18 : 26, fontWeight: 900, color: C.accent,
-      fontVariantNumeric: 'tabular-nums', lineHeight: 1, marginTop: 6,
-      letterSpacing: '-.02em',
-    }}>{value}</p>
-    <p style={{
-      fontSize: 9, color: C.muted, fontWeight: 700,
-      marginTop: 4,
-    }}>{sub}</p>
+// KPI tile (template B) · styled via .cvt-kpi (tokens). `badge` renders a tier
+// disc (PlateBadge) inside the tile — used for the "Top mover" highlight.
+const KpiCard: React.FC<{ label: string; value: string; sub: string; small?: boolean; badge?: PlateTier }> = ({ label, value, sub, small, badge }) => (
+  <div className="cvt-kpi">
+    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 6 }}>
+      <p className="k">{label}</p>
+      {badge && <PlateBadge tier={badge} size={26} />}
+    </div>
+    <p className="v" style={{ fontSize: small ? 18 : 26 }}>{value}</p>
+    <p className="s">{sub}</p>
   </div>
 );
 

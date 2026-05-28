@@ -1,0 +1,404 @@
+/* ============================================================
+   PEAK QUAL · COACH VIRAL TOOLS · V2 (dark)
+   Generador de cards virales 9:16 para coaches.
+   Renders as plain content INSIDE PhoneLayout (frame / status-bar /
+   bottom-nav are provided by the layout — no device chrome here).
+   ALL rules scoped under .cvt-root so nothing leaks globally.
+   Product-aware accent: HO = amber/red · Volta = cyan, driven by
+   the --cvt-accent / --cvt-accent-dim / --cvt-glow custom props set
+   on the root in TSX. No hardcoded colors — everything via tokens.
+   ============================================================ */
+
+.cvt-root {
+  /* product accent defaults (Holy Oly · amber). Overridden inline for Volta. */
+  --cvt-accent:     var(--engine-belt);
+  --cvt-accent-2:   var(--engine-streak);
+  --cvt-accent-dim: rgba(245, 166, 35, 0.16);
+  --cvt-glow:       var(--glow-amber);
+  --cvt-on-accent:  #1A1500;
+
+  min-height: 100%;
+  font-family: var(--font-body);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  padding-bottom: 110px;
+  background-image:
+    radial-gradient(ellipse at 50% 0%,
+      color-mix(in oklab, var(--cvt-accent) 8%, transparent), transparent 55%);
+}
+.cvt-root * { box-sizing: border-box; }
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+.cvt-header {
+  padding: 36px 20px 8px;
+}
+.cvt-back {
+  background: transparent;
+  border: none;
+  color: var(--text-mid);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 10px;
+  transition: color 160ms;
+}
+.cvt-back:hover { color: var(--text-hi); }
+.cvt-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--cvt-accent);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.cvt-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-hi);
+  margin-top: 6px;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+.cvt-sub {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-mid);
+  margin-top: 8px;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+}
+
+/* ============================================================
+   TEMPLATE TABS
+   ============================================================ */
+.cvt-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 16px 16px 8px;
+}
+.cvt-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 8px;
+  border-radius: var(--r-md);
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  color: var(--text-mid);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background 180ms, border-color 180ms, color 180ms, transform 120ms;
+}
+.cvt-tab:hover { transform: translateY(-1px); border-color: var(--border-hard); }
+.cvt-tab[data-active="true"] {
+  background: color-mix(in oklab, var(--cvt-accent) 14%, var(--surface-1));
+  border-color: var(--cvt-accent);
+  color: var(--cvt-accent);
+  box-shadow: 0 0 16px color-mix(in oklab, var(--cvt-accent) 30%, transparent);
+}
+.cvt-tab .ic { font-size: 13px; line-height: 1; }
+
+/* ============================================================
+   ATHLETE SELECTOR (template A)
+   ============================================================ */
+.cvt-selector {
+  padding: 4px 16px 8px;
+}
+.cvt-select-btn {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 11px 14px;
+  border-radius: var(--r-md);
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  color: var(--text-hi);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 180ms, background 180ms;
+}
+.cvt-select-btn:hover { border-color: var(--cvt-accent); }
+.cvt-select-k {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-lo);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.cvt-select-v {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cvt-select-v .cyc { color: var(--cvt-accent); }
+
+/* ============================================================
+   CARD PREVIEW · 9:16 portrait shell
+   ============================================================ */
+.cvt-stage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 16px;
+}
+.cvt-card {
+  max-width: 100%;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  border: 1px solid var(--border-soft);
+  background: var(--bg-deep);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
+  position: relative;
+}
+
+/* inner card surfaces — share visual language with V2 stat cards */
+.cvt-c-eyebrow {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--cvt-accent);
+}
+.cvt-c-brandbox {
+  text-align: center;
+  border-top: 1px solid var(--border-soft);
+}
+.cvt-c-brandname {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--text-lo);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.cvt-c-hashtag {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--cvt-accent);
+  letter-spacing: 0.12em;
+  margin-top: 4px;
+}
+
+/* avatar ring (template A) */
+.cvt-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--surface-2) 0%, var(--bg-deep) 100%);
+  border: 3px solid var(--cvt-accent);
+  box-shadow: var(--cvt-glow);
+}
+.cvt-avatar span {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--cvt-accent);
+  letter-spacing: -0.04em;
+}
+
+/* tag / quote pill */
+.cvt-tagpill {
+  background: var(--cvt-accent-dim);
+  border: 1px solid color-mix(in oklab, var(--cvt-accent) 45%, transparent);
+  border-radius: var(--r-md);
+  text-align: center;
+}
+.cvt-tagpill p {
+  color: var(--cvt-accent);
+  font-style: italic;
+  font-weight: 700;
+}
+
+/* mini stat tile (template A) */
+.cvt-stat {
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-sm);
+  text-align: center;
+  padding: 10px 6px;
+}
+.cvt-stat .k {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--text-lo);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.cvt-stat .v {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--cvt-accent);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  margin-top: 4px;
+}
+.cvt-stat .s {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--text-lo);
+  margin-top: 2px;
+}
+
+/* KPI tile (template B) */
+.cvt-kpi {
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  padding: 12px;
+}
+.cvt-kpi .k {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-lo);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.cvt-kpi .v {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--cvt-accent);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  margin-top: 6px;
+  letter-spacing: -0.02em;
+}
+.cvt-kpi .s {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-lo);
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+/* top-3 rows (template B) */
+.cvt-rank-lbl {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-lo);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.cvt-rank-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-sm);
+}
+.cvt-rank-row[data-lead="true"] {
+  border-left: 3px solid var(--cvt-accent);
+}
+.cvt-rank-pos {
+  width: 18px;
+  height: 18px;
+  border-radius: var(--r-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  background: var(--surface-3);
+  color: var(--text);
+}
+.cvt-rank-row[data-lead="true"] .cvt-rank-pos {
+  background: var(--cvt-accent);
+  color: var(--cvt-on-accent);
+}
+.cvt-rank-name {
+  flex: 1;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-hi);
+}
+.cvt-rank-val {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--cvt-accent);
+  font-variant-numeric: tabular-nums;
+}
+
+/* hero plate badge slot (PlateBadge sits here on collective/PR cards) */
+.cvt-plate {
+  display: flex;
+  justify-content: center;
+}
+
+/* ============================================================
+   TEMPLATE CONTROLS
+   ============================================================ */
+.cvt-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 6px 16px 12px;
+}
+.cvt-btn-ghost {
+  width: 100%;
+  padding: 10px 0;
+  border-radius: var(--r-md);
+  background: transparent;
+  color: var(--cvt-accent);
+  border: 1px solid color-mix(in oklab, var(--cvt-accent) 40%, transparent);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 180ms, border-color 180ms;
+}
+.cvt-btn-ghost:hover {
+  background: var(--cvt-accent-dim);
+  border-color: var(--cvt-accent);
+}
+.cvt-btn-primary {
+  width: 100%;
+  padding: 13px 0;
+  border-radius: var(--r-md);
+  background: linear-gradient(135deg,
+    var(--cvt-accent),
+    color-mix(in oklab, var(--cvt-accent) 60%, #000));
+  color: var(--cvt-on-accent);
+  border: 1px solid color-mix(in oklab, var(--cvt-accent) 70%, transparent);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: var(--cvt-glow);
+  transition: transform 120ms, box-shadow 180ms;
+}
+.cvt-btn-primary:hover { transform: translateY(-1px); }
+.cvt-hint {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-lo);
+  text-align: center;
+  margin-top: 4px;
+  letter-spacing: 0.02em;
+}
