@@ -32,6 +32,11 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     setToasts(prev => [...prev, { id, message, variant, duration }]);
   }, []);
 
+  // Cerrar una notificación manualmente (botón X o swipe).
+  const dismiss = useCallback((id: number) => {
+    setToasts(prev => prev.filter(x => x.id !== id));
+  }, []);
+
   useEffect(() => {
     if (toasts.length === 0) return;
     const timers = toasts.map(t => setTimeout(() => {
@@ -51,32 +56,61 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         }}
       >
         <AnimatePresence>
-          {toasts.map(t => (
+          {toasts.map(t => {
+            const dark = t.variant !== 'info';
+            return (
             <motion.div
               key={t.id}
+              layout
               initial={{ opacity: 0, y: 20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.18 } }}
               transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.7}
+              whileDrag={{ cursor: 'grabbing' }}
+              onDragEnd={(_e, info) => {
+                // Swipe (deslizar) para borrar · umbral por distancia o velocidad
+                if (Math.abs(info.offset.x) > 80 || Math.abs(info.velocity.x) > 500) dismiss(t.id);
+              }}
+              role="status"
               style={{
                 pointerEvents: 'auto',
+                display: 'flex', alignItems: 'center', gap: 10,
+                cursor: 'grab', touchAction: 'pan-y',
                 background: t.variant === 'success' ? 'rgba(34,197,94,0.95)'
                           : t.variant === 'error'   ? 'rgba(239,68,68,0.95)'
                           : t.variant === 'warning' ? 'rgba(245,158,11,0.95)'
                           : 'rgba(15,15,28,0.95)',
-                color: t.variant === 'info' ? 'var(--text)' : '#07070F',
+                color: dark ? '#07070F' : 'var(--text)',
                 border: '1px solid rgba(255,255,255,0.1)',
                 backdropFilter: 'blur(12px)',
-                padding: '10px 18px',
+                padding: '10px 10px 10px 18px',
                 borderRadius: 14,
                 fontSize: 12, fontWeight: 700,
                 boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
-                maxWidth: '85%',
+                maxWidth: '90%',
               }}
             >
-              {t.message}
+              <span style={{ flex: 1 }}>{t.message}</span>
+              <button
+                onClick={() => dismiss(t.id)}
+                onPointerDownCapture={(e) => e.stopPropagation()}
+                aria-label="Cerrar notificación"
+                style={{
+                  flexShrink: 0,
+                  width: 22, height: 22,
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  borderRadius: 999, border: 'none',
+                  background: dark ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.12)',
+                  color: 'inherit',
+                  fontSize: 15, lineHeight: 1, fontWeight: 800,
+                  cursor: 'pointer',
+                }}
+              >×</button>
             </motion.div>
-          ))}
+          );})}
         </AnimatePresence>
       </div>
     </ToastContext.Provider>
