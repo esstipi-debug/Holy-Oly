@@ -3,10 +3,9 @@ import { createRoot } from 'react-dom/client'
 import './styles/index.css'
 import App from './App.tsx'
 
-// API URL · debe matchear lib/api.ts para que auto-demo logueé al backend correcto.
-const API_URL =
-  import.meta.env.VITE_API_URL ??
-  (import.meta.env.DEV ? '' : 'https://holy-oly-3.onrender.com');
+// API URL para auto-demo login · usa siempre el backend prod para evitar
+// problemas de proxy en dev (lib/api.ts maneja otra estrategia para runtime).
+const AUTH_API = import.meta.env.VITE_API_URL ?? 'https://holy-oly-3.onrender.com';
 
 // Deep-link bootstrap · debe correr antes del render para que los providers
 // (ProductContext, etc.) lean el localStorage ya con el valor forzado por URL.
@@ -40,7 +39,7 @@ async function autoDemoLogin(): Promise<boolean> {
     const body = new URLSearchParams();
     body.set('username', 'demo@holyoly.com');
     body.set('password', 'demo1234');
-    const res = await fetch(`${API_URL}/v1/auth/login`, {
+    const res = await fetch(`${AUTH_API}/v1/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: body.toString(),

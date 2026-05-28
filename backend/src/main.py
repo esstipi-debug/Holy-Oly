@@ -144,7 +144,9 @@ app = FastAPI(
 _REQUIRED_ORIGINS = [
     "https://holy-oly.onrender.com",
     "https://holy-oly-3.onrender.com",
+    "https://peakqual-v2.onrender.com",  # staging V2 (frontend Claude Design)
     "http://localhost:5173",
+    "http://localhost:5174",  # vite fallback cuando 5173 ocupado
     "http://localhost:3000",
 ]
 _extra_origins = [o.strip() for o in os.getenv("CORS_ORIGINS", "").split(",") if o.strip()]

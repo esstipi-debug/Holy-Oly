@@ -1,6 +1,6 @@
-// En dev usamos paths relativos para pasar por el proxy de Vite (evita CORS).
-// En prod, definí VITE_API_URL apuntando al backend (ej. https://holy-oly-3.onrender.com).
-const API_URL = import.meta.env.VITE_API_URL ?? (import.meta.env.DEV ? '' : 'https://holy-oly-3.onrender.com');
+// API URL · siempre backend real holy-oly-3 (CORS abierto en backend).
+// Override con VITE_API_URL si querés apuntar a otra instancia.
+const API_URL = import.meta.env.VITE_API_URL ?? 'https://holy-oly-3.onrender.com';
 
 export type AuthUser = {
   id: string;

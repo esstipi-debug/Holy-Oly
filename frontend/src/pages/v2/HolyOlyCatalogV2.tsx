@@ -1,19 +1,62 @@
 /**
  * HolyOlyCatalogV2 · Catálogo Macrociclos Holy Oly · 23 planes filtrables.
  *
- * Portado de claude_design_drops/2026-05-27_pkql_v2/holy-oly-catalog.jsx
- * Cambios:
- *  - jsx → tsx con tipos
- *  - useNav para navegar a HO_MACRO_DETAIL al tap card
- *  - scope CSS bajo .hc-root (sin reset global)
- *  - sin frame .phone (la app ya es mobile-first)
+ * Conexión backend: GET /v1/macrocycles (requiere token JWT).
+ * Si backend responde OK · usa data real. Si falla · fallback al mock estático
+ * con metadata enriquecida (tagline, bestFor, etc. que el backend no devuelve).
+ *
+ * Mapping backend → UI: id, name, school → family, weeks → dur, sessions_per_week
+ * → freq, difficulty → int. Volumen/recovery/reps/tagline/bestFor enriquecidos
+ * desde el lookup local METADATA (clave por id backend).
  */
-import { useState, useMemo, type CSSProperties, type ReactElement } from 'react';
+import { useState, useMemo, useEffect, type CSSProperties, type ReactElement } from 'react';
 import { useNav } from '../../context/NavigationContext';
+import { api } from '../../lib/api';
 import '../../styles/v2/holy-oly-catalog.css';
 
 // ============================================================
-// Mock data · 23 macrocycles
+// API contract · GET /v1/macrocycles
+// ============================================================
+interface ApiProgram {
+  id: string;
+  name: string;
+  school: string;
+  weeks: number;
+  focus: string;
+  difficulty: number;
+  sessions_per_week: number;
+}
+interface ApiResponse { programs: ApiProgram[] }
+
+const SCHOOL_TO_FAMILY: Record<string, string> = {
+  'Bulgarian': 'bulgaro',
+  'Russian':   'ruso',
+  'Cuban':     'cubano',
+  'Korean':    'coreano',
+  'Chinese':   'chino',
+  'Polish':    'polaco',
+  'Ukrainian': 'ucraniano',
+  'Colombian': 'colombiano',
+  'Hybrid':    'hibrido',
+  'USA':       'usa',
+  'American':  'usa',
+};
+
+// Metadata enriquecida que el backend no devuelve · indexada por id backend.
+// Si el backend agrega un id desconocido · se renderiza con valores por defecto.
+const METADATA: Record<string, { vol: number; rec: number; reps: string; tagline: string; bestFor: string }> = {
+  // RUSO
+  russian_classic:  { vol: 5, rec: 2, reps: '500-650', tagline: 'Variabilidad · waviness · GPP',           bestFor: 'Atletas pacientes con fundamentos sólidos · ciclo largo' },
+  russian_speed:    { vol: 4, rec: 3, reps: '380-480', tagline: 'Strength-speed · velocidad de la barra',  bestFor: 'Intermedio · objetivo 8 semanas pre-meet' },
+  russian_chains:   { vol: 5, rec: 2, reps: '620-780', tagline: 'Heavy chains · variable resistance',      bestFor: 'Avanzado · trabajo accommodating resistance' },
+  // BÚLGARO
+  bulgarian_hf:        { vol: 3, rec: 1, reps: '180-240', tagline: 'High Frequency · daily max',             bestFor: 'Avanzado · SNC adaptado · sin lesiones recientes' },
+  bulgarian_heavy:     { vol: 4, rec: 1, reps: '240-320', tagline: 'Bulgarian Heavy · 12 semanas brutales',  bestFor: 'Avanzado · capacidad de recuperación élite' },
+  bulgarian_strength:  { vol: 3, rec: 2, reps: '160-220', tagline: 'Strength block · 6 semanas focalizadas', bestFor: 'Intermedio · primer ciclo búlgaro' },
+};
+
+// ============================================================
+// Mock data · 23 macrocycles (FALLBACK si backend offline)
 // API: GET /v1/macrocycles?product=holy-oly
 // ============================================================
 
@@ -33,7 +76,9 @@ interface Macro {
   doneCount?: number;
 }
 
-const MACROCYCLES: Macro[] = [
+// Fallback estático si el backend no responde (offline · sin token · 5xx).
+// La app priorizá GET /v1/macrocycles en runtime.
+const FALLBACK_MACROCYCLES: Macro[] = [
   // RUSO (4)
   { id:'ruso-clasico-16',  name:'Ruso Clásico',         family:'ruso',     dur:16, freq:5, int:4, vol:5, rec:2, reps:'500-650', tagline:'Variabilidad · waviness · GPP', bestFor:'Atletas pacientes que valoran fundamentos sólidos · ciclo largo' },
   { id:'ruso-12s',         name:'Ruso 12 sem',          family:'ruso',     dur:12, freq:4, int:4, vol:4, rec:3, reps:'380-480', tagline:'Versión condensada · base ondulada', bestFor:'Intermedio · objetivo 3-4 meses pre-meet' },
@@ -203,7 +248,7 @@ function MacroCard({ m, view, onTap }: { m: Macro; view: 'grid' | 'list'; onTap:
   );
 }
 
-function Recommended({ ids, onTap }: { ids: string[]; onTap: (id: string) => void }) {
+function Recommended({ ids, programs, onTap }: { ids: string[]; programs: Macro[]; onTap: (id: string) => void }) {
   if (!ids.length) return null;
   return (
     <div>
@@ -213,7 +258,7 @@ function Recommended({ ids, onTap }: { ids: string[]; onTap: (id: string) => voi
       </div>
       <div className="hc-reco">
         {ids.map(id => {
-          const m = MACROCYCLES.find(x => x.id === id);
+          const m = programs.find(x => x.id === id);
           if (!m) return null;
           const c = FAMILY_COLOR[m.family];
           return (
@@ -275,6 +320,28 @@ function EducativoFooter() {
 }
 
 // ============================================================
+// Mapper · ApiProgram (backend) → Macro (UI)
+// Enriquece con METADATA local si existe · sino usa defaults razonables.
+// ============================================================
+function apiToMacro(p: ApiProgram): Macro {
+  const meta = METADATA[p.id];
+  const family = SCHOOL_TO_FAMILY[p.school] ?? p.school.toLowerCase();
+  return {
+    id: p.id,
+    name: p.name,
+    family,
+    dur: p.weeks,
+    freq: p.sessions_per_week,
+    int: p.difficulty,
+    vol: meta?.vol ?? Math.min(5, Math.max(1, Math.round(p.weeks / 4))),
+    rec: meta?.rec ?? Math.max(1, 5 - p.difficulty),
+    reps: meta?.reps ?? `${p.weeks * 30}-${p.weeks * 40}`,
+    tagline: meta?.tagline ?? `${p.school} · ${p.focus.toLowerCase()}`,
+    bestFor: meta?.bestFor ?? `Dificultad ${p.difficulty}/5 · ${p.sessions_per_week}d/sem`,
+  };
+}
+
+// ============================================================
 // Main
 // ============================================================
 export default function HolyOlyCatalogV2() {
@@ -282,6 +349,32 @@ export default function HolyOlyCatalogV2() {
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [activeFamilies, setActive] = useState<string[]>([]);
   const [query, setQuery] = useState('');
+  const [programs, setPrograms] = useState<Macro[]>(FALLBACK_MACROCYCLES);
+  const [loading, setLoading] = useState(true);
+  const [source, setSource] = useState<'backend' | 'fallback'>('fallback');
+
+  // Fetch real de macrocyclos desde el backend al mount.
+  // GET /v1/macrocycles requiere token JWT · api.get lo agrega automático.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await api.get<ApiResponse>('/v1/macrocycles');
+        if (cancelled) return;
+        const list = (res?.programs ?? []).map(apiToMacro);
+        if (list.length > 0) {
+          setPrograms(list);
+          setSource('backend');
+        }
+      } catch {
+        // Sin token / offline / 5xx → usar FALLBACK (init state)
+        if (!cancelled) setSource('fallback');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const toggleFamily = (id: string) => {
     if (id === 'all') return setActive([]);
@@ -289,7 +382,7 @@ export default function HolyOlyCatalogV2() {
   };
 
   const filtered = useMemo(() => {
-    return MACROCYCLES.filter(m => {
+    return programs.filter(m => {
       if (activeFamilies.length > 0 && !activeFamilies.includes(m.family)) return false;
       if (query) {
         const q = query.toLowerCase();
@@ -300,7 +393,7 @@ export default function HolyOlyCatalogV2() {
       }
       return true;
     });
-  }, [activeFamilies, query]);
+  }, [activeFamilies, query, programs]);
 
   const openDetail = (id: string) => {
     try { sessionStorage.setItem('ho:selectedMacroId', id); } catch { /* ignore */ }
@@ -317,7 +410,7 @@ export default function HolyOlyCatalogV2() {
               aria-label="Volver"
               style={{ background:'transparent', border:'none', color:'var(--text-mid)', fontSize:18, cursor:'pointer', marginRight:8 }}>‹</button>
             Macrociclos
-            <span className="sub">HALTEROFILIA · {MACROCYCLES.length} planes</span>
+            <span className="sub">HALTEROFILIA · {programs.length} planes{loading ? ' · cargando...' : (source === 'backend' ? ' · live' : ' · offline')}</span>
           </div>
           <div className="hc-view-toggle">
             <button data-active={view === 'grid'} onClick={() => setView('grid')} aria-label="Vista grid">
@@ -337,7 +430,7 @@ export default function HolyOlyCatalogV2() {
               onChange={(e) => setQuery(e.target.value)}/>
           </div>
           <div className="hc-counter">
-            <strong>{filtered.length}</strong> / {MACROCYCLES.length}
+            <strong>{filtered.length}</strong> / {programs.length}
           </div>
         </div>
         <FilterChips families={FAMILIES} active={activeFamilies} toggle={toggleFamily}/>
@@ -345,7 +438,7 @@ export default function HolyOlyCatalogV2() {
 
       <div className="hc-scroll">
         {activeFamilies.length === 0 && !query && view === 'grid' && (
-          <Recommended ids={RECOMMENDED} onTap={openDetail}/>
+          <Recommended ids={RECOMMENDED} programs={programs} onTap={openDetail}/>
         )}
 
         <div>
