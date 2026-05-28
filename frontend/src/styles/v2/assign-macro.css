@@ -1,0 +1,555 @@
+/* ============================================================
+   PEAK QUAL · COACH · ASIGNAR MACROCICLO (V2 dark)
+   Portado del look canónico de HolyOlyCatalogV2 (.hc-root).
+   Todo scopeado bajo .am-root · sin resets globales.
+   ============================================================ */
+
+.am-root {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100%;
+  width: 100%;
+  padding-bottom: 170px;
+}
+.am-root *,
+.am-root *::before,
+.am-root *::after { box-sizing: border-box; }
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+.am-header {
+  padding: 52px 20px 16px;
+}
+.am-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--text-hi);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.am-sub {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-lo);
+  letter-spacing: 0.2em;
+  margin-top: 6px;
+  text-transform: uppercase;
+}
+
+/* ============================================================
+   SELECTED ATHLETE CARD
+   ============================================================ */
+.am-section { padding: 0 20px 16px; }
+
+.am-athlete {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: var(--r-lg);
+  background: color-mix(in oklab, var(--engine-stress) 7%, var(--surface-1));
+  border: 1px solid color-mix(in oklab, var(--engine-stress) 30%, transparent);
+}
+.am-athlete-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 800;
+  color: #04121A;
+  background: linear-gradient(135deg, var(--engine-stress), #0070FF);
+  box-shadow: var(--glow-cyan);
+}
+.am-athlete-meta { flex: 1; min-width: 0; }
+.am-athlete-name {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-hi);
+  letter-spacing: -0.01em;
+}
+.am-athlete-macro {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-mid);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-top: 3px;
+}
+.am-athlete-macro strong { color: var(--engine-stress); font-weight: 700; }
+
+/* ============================================================
+   WISE SUGGESTIONS PANEL
+   ============================================================ */
+.am-wise {
+  border-radius: var(--r-lg);
+  padding: 14px;
+  background: linear-gradient(135deg,
+    color-mix(in oklab, var(--engine-macro) 12%, transparent),
+    color-mix(in oklab, var(--engine-pulse) 7%, transparent));
+  border: 1px solid color-mix(in oklab, var(--engine-macro) 32%, transparent);
+}
+.am-wise-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.am-wise-glyph { font-size: 16px; color: var(--engine-belt); }
+.am-wise-title {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-hi);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.am-wise-level {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: var(--r-sm);
+  background: color-mix(in oklab, var(--engine-macro) 18%, transparent);
+  color: var(--engine-macro);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.am-wise-empty {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-mid);
+  line-height: 1.4;
+}
+.am-wise-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.am-sug {
+  text-align: left;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-left: 3px solid var(--cc, var(--engine-macro));
+  border-radius: var(--r-md);
+  padding: 10px 12px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 180ms, background 180ms;
+}
+.am-sug[data-selected="true"] {
+  border-color: var(--cc, var(--engine-macro));
+  background: color-mix(in oklab, var(--cc, var(--engine-macro)) 9%, var(--surface-1));
+}
+.am-sug-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.am-sug-main { flex: 1; min-width: 0; }
+.am-sug-name-row { display: flex; align-items: center; gap: 6px; }
+.am-sug-check { color: var(--cc, var(--engine-macro)); font-size: 11px; font-weight: 800; }
+.am-sug-name {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-hi);
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.am-sug-reason {
+  font-family: var(--font-body);
+  font-size: 10px;
+  color: var(--text-mid);
+  margin-top: 3px;
+  line-height: 1.4;
+}
+.am-sug-score {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 800;
+  padding: 4px 8px;
+  border-radius: var(--r-sm);
+  background: color-mix(in oklab, var(--cc, var(--engine-macro)) 22%, transparent);
+  color: var(--cc, var(--engine-macro));
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+.am-sug-detail {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed color-mix(in oklab, var(--cc, var(--engine-macro)) 38%, transparent);
+}
+.am-sug-tags {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--text-mid);
+  letter-spacing: 0.04em;
+}
+.am-sug-tags strong { color: var(--text-hi); font-weight: 700; }
+.am-sug-assign {
+  margin-top: 10px;
+  width: 100%;
+  padding: 9px 0;
+  border-radius: var(--r-md);
+  background: var(--cc, var(--engine-macro));
+  color: #04121A;
+  border: none;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.am-wise-rationale {
+  font-family: var(--font-body);
+  font-size: 10px;
+  color: var(--text-mid);
+  margin-top: 10px;
+  font-style: italic;
+  line-height: 1.45;
+}
+.am-wise-rationale .pre { color: var(--engine-belt); font-weight: 700; font-style: normal; }
+.am-wise-disclaimer {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  color: var(--text-lo);
+  letter-spacing: 0.05em;
+  margin-top: 8px;
+  line-height: 1.45;
+}
+.am-wise-toggle {
+  margin-top: 12px;
+  width: 100%;
+  padding: 8px 0;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--text-mid);
+  border: 1px dashed var(--border-soft);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.am-wise-toggle:hover { color: var(--text-hi); }
+
+/* ============================================================
+   FILTER CHIPS (escuela / foco)
+   ============================================================ */
+.am-filter-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-lo);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.am-chips {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+.am-chip {
+  flex-shrink: 0;
+  min-height: 36px;
+  padding: 6px 12px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-full);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  cursor: pointer;
+  transition: all 200ms;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.am-chip:hover { color: var(--text-hi); }
+.am-chip[data-active="true"] {
+  border-color: var(--cc, var(--engine-stress));
+  background: color-mix(in oklab, var(--cc, var(--engine-stress)) 14%, var(--surface-1));
+  color: var(--cc, var(--engine-stress));
+  box-shadow: 0 0 8px color-mix(in oklab, var(--cc, var(--engine-stress)) 30%, transparent);
+}
+/* "TODOS" chip → neutro, no acento de escuela */
+.am-chip[data-all="true"] { color: var(--text); border-color: var(--text-lo); }
+.am-chip[data-all="true"][data-active="true"] {
+  background: var(--surface-3);
+  color: var(--text-hi);
+  border-color: var(--text-hi);
+  box-shadow: none;
+}
+.am-chip--focus[data-active="true"] {
+  border-color: var(--engine-stress);
+  background: color-mix(in oklab, var(--engine-stress) 14%, var(--surface-1));
+  color: var(--engine-stress);
+}
+
+/* ============================================================
+   PROGRAM LIST · cards estilo catálogo
+   ============================================================ */
+.am-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.am-card {
+  position: relative;
+  width: 100%;
+  text-align: left;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  cursor: pointer;
+  font-family: inherit;
+  transition: transform 180ms, border-color 200ms, box-shadow 200ms;
+}
+.am-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--cc);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5), 0 0 16px color-mix(in oklab, var(--cc) 25%, transparent);
+}
+.am-card[data-active="true"] {
+  border-color: var(--cc);
+  box-shadow: 0 0 16px color-mix(in oklab, var(--cc) 28%, transparent);
+}
+.am-card-banner {
+  height: 36px;
+  background: linear-gradient(135deg, var(--cc), color-mix(in oklab, var(--cc) 55%, #000));
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 14px;
+  position: relative;
+  overflow: hidden;
+}
+.am-card-banner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(45deg,
+    transparent 0 8px,
+    rgba(255,255,255,0.06) 8px 9px);
+}
+.am-card-banner .fam {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  color: rgba(0,0,0,0.78);
+  font-weight: 800;
+  text-transform: uppercase;
+  z-index: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.am-card-banner .meta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  color: rgba(0,0,0,0.85);
+  font-weight: 700;
+  z-index: 1;
+  white-space: nowrap;
+}
+.am-card-body {
+  padding: 12px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.am-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.am-card-head { flex: 1; min-width: 0; }
+.am-card-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--text-hi);
+  letter-spacing: -0.015em;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+.am-card[data-active="true"] .am-card-name { color: var(--cc); }
+.am-card-desc {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-mid);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+/* disco tier (PlateBadge) + radio agrupados a la derecha */
+.am-card-aside {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.am-card-radio {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-soft);
+  display: grid;
+  place-items: center;
+}
+.am-card[data-active="true"] .am-card-radio { border-color: var(--cc); }
+.am-card-radio .dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--cc);
+}
+.am-card-pills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.am-pill {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--text-mid);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.am-pill--focus {
+  background: color-mix(in oklab, var(--cc) 16%, transparent);
+  color: var(--cc);
+}
+
+/* stat bars (intensidad / volumen) */
+.am-card-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border-soft);
+}
+.am-bar {
+  display: grid;
+  grid-template-columns: 66px 1fr 24px;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--text-lo);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.am-bar .segs { display: flex; gap: 2px; }
+.am-bar .segs .seg {
+  flex: 1;
+  height: 6px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 1px;
+}
+.am-bar .segs .seg.on {
+  background: var(--bc, var(--engine-stress));
+  box-shadow: 0 0 3px var(--bc);
+}
+.am-bar .v {
+  font-weight: 700;
+  color: var(--text-hi);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.am-bar[data-k="int"] { --bc: var(--engine-pulse); }
+.am-bar[data-k="vol"] { --bc: var(--engine-stress); }
+
+.am-card-best {
+  font-family: var(--font-body);
+  font-size: 10px;
+  color: var(--cc);
+  font-style: italic;
+  line-height: 1.4;
+  padding-top: 10px;
+  border-top: 1px dashed color-mix(in oklab, var(--cc) 38%, transparent);
+}
+
+/* ============================================================
+   STATUS LINE (count)
+   ============================================================ */
+.am-count {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--text-lo);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.am-count strong { color: var(--text-hi); }
+
+/* ============================================================
+   CONFIRM BAR (sticky)
+   ============================================================ */
+.am-confirm-bar {
+  position: absolute;
+  bottom: 76px;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  padding: 14px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(to top, var(--bg) 0%, var(--bg) 60%, transparent 100%);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.am-confirm {
+  width: 100%;
+  padding: 15px 0;
+  border-radius: var(--r-md);
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 200ms;
+  background: var(--engine-stress);
+  color: #04121A;
+  border: none;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.4), var(--glow-cyan);
+}
+.am-confirm:disabled {
+  background: var(--surface-1);
+  color: var(--text-lo);
+  border: 1px solid var(--border-soft);
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.7;
+}

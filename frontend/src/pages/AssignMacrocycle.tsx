@@ -1,28 +1,38 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, type CSSProperties } from 'react';
 import { useNav } from '../context/NavigationContext';
 import { useAthlete } from '../context/AthleteContext';
 import { useProduct } from '../context/ProductContext';
 import { MACROCYCLES, type Macrocycle } from '../data/macrocycles';
+import { PlateBadge, type PlateTier } from '../components/PlateBadge';
 import {
   tryFetchMacrocycles,
   trySuggestMacrosFor,
   type RemoteMacrocycle,
   type MacroSuggestResponse,
 } from '../lib/macrocycleApi';
+import '../styles/v2/assign-macro.css';
 
-const Bars: React.FC<{ value: number; color: string }> = ({ value, color }) => (
-  <div style={{ display: 'flex', gap: 2, marginTop: 4 }}>
-    {[1, 2, 3, 4, 5].map(i => (
-      <div
-        key={i}
-        style={{
-          width: 12, height: 4, borderRadius: 2,
-          background: i <= value ? color : 'var(--card-border)',
-        }}
-      />
-    ))}
+// Barras 1-5 estilo catálogo V2 (.am-bar). k = 'int' | 'vol' colorea el fill.
+const SegBars: React.FC<{ label: string; value: number; k: 'int' | 'vol' }> = ({ label, value, k }) => (
+  <div className="am-bar" data-k={k}>
+    <span>{label}</span>
+    <div className="segs">
+      {[1, 2, 3, 4, 5].map(i => (
+        <span key={i} className={`seg ${i <= value ? 'on' : ''}`} />
+      ))}
+    </div>
+    <span className="v">{value}/5</span>
   </div>
 );
+
+// Mapea intensidad 1-5 → tier de disco halterofilia (blanco→rojo).
+function intensityTier(intensity: number): PlateTier {
+  if (intensity <= 1) return 'white';
+  if (intensity === 2) return 'green';
+  if (intensity === 3) return 'yellow';
+  if (intensity === 4) return 'blue';
+  return 'red';
+}
 
 // Shape común UI (super-set entre Macrocycle local y RemoteMacrocycle).
 type UIMacro = {
@@ -165,151 +175,102 @@ const AssignMacrocycle: React.FC = () => {
   const initials = target ? target.name.split(' ').slice(0, 2).map(n => n[0]).join('') : '';
   const selectedMacro = selected ? macrosForProduct.find(m => m.id === selected) : null;
 
+  // Mostrar filtros + listado completo cuando: no hay panel WISE (no holy-oly / sin atleta)
+  // o el coach pidió "ver todos".
+  const showCatalog = showFullList || product !== 'holy-oly' || !target;
+
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100%', paddingBottom: 170 }}>
+    <div className="am-root">
 
       {/* HEADER */}
-      <div style={{ padding: '52px 20px 20px' }}>
-        <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text)', letterSpacing: '-.02em' }}>
-          Asignar Macrociclo
-        </h1>
-        <p style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', marginTop: 4 }}>
+      <header className="am-header">
+        <h1 className="am-title">Asignar Macrociclo</h1>
+        <span className="am-sub">
           {loading
             ? 'Cargando programas…'
             : `${macrosForProduct.length} sistemas · ${source === 'api' ? 'engine real' : 'local fallback'}`}
-        </p>
-      </div>
+        </span>
+      </header>
 
       {/* SELECTED ATHLETE */}
       {target && (
-        <div style={{ padding: '0 20px 16px' }}>
-          <div style={{
-            background: 'rgba(6,182,212,0.06)',
-            border: '1px solid rgba(6,182,212,0.25)',
-            borderRadius: 16, padding: 14,
-            display: 'flex', alignItems: 'center', gap: 12,
-          }}>
-            <div style={{
-              width: 42, height: 42, borderRadius: 14,
-              background: 'linear-gradient(135deg, #06B6D4, #0070FF)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 13, fontWeight: 900, color: '#fff',
-            }}>{initials}</div>
-            <div style={{ flex: 1 }}>
-              <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{target.name}</p>
-              <p style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase', marginTop: 2 }}>
-                Macro actual: {target.macrocycle.program_name}
+        <div className="am-section">
+          <div className="am-athlete">
+            <div className="am-athlete-avatar">{initials}</div>
+            <div className="am-athlete-meta">
+              <p className="am-athlete-name">{target.name}</p>
+              <p className="am-athlete-macro">
+                Macro actual: <strong>{target.macrocycle.program_name}</strong>
               </p>
             </div>
           </div>
         </div>
       )}
 
-      {/* RECOMMENDATIONS PANEL · top-3 */}
+      {/* RECOMMENDATIONS PANEL · top-3 (WISE) */}
       {product === 'holy-oly' && target && (
-        <div style={{ padding: '0 20px 16px' }}>
-          <div style={{
-            background: 'linear-gradient(135deg, rgba(245,158,11,0.10), rgba(239,68,68,0.06))',
-            border: '1px solid rgba(245,158,11,0.30)',
-            borderRadius: 16, padding: 14,
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-              <span style={{ fontSize: 16, color: '#F5C518' }}>✦</span>
-              <p style={{ fontSize: 12, fontWeight: 800, color: 'var(--text)', letterSpacing: '.04em', textTransform: 'uppercase' }}>
-                WISE sugiere para {target.name.split(' ')[0]}
-              </p>
+        <div className="am-section">
+          <div className="am-wise">
+            <div className="am-wise-head">
+              <span className="am-wise-glyph">✦</span>
+              <p className="am-wise-title">WISE sugiere para {target.name.split(' ')[0]}</p>
               {suggestions?.athlete_level && (
-                <span style={{
-                  marginLeft: 'auto',
-                  fontSize: 9, fontWeight: 700, padding: '3px 7px', borderRadius: 6,
-                  background: 'rgba(245,158,11,0.18)', color: '#F59E0B',
-                  letterSpacing: '.06em', textTransform: 'uppercase',
-                }}>{suggestions.athlete_level}</span>
+                <span className="am-wise-level">{suggestions.athlete_level}</span>
               )}
             </div>
 
             {suggestionsLoading && (
-              <p style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
-                Analizando perfil…
-              </p>
+              <p className="am-wise-empty">Analizando perfil…</p>
             )}
 
             {!suggestionsLoading && (!suggestions || suggestions.suggestions.length === 0) && (
-              <p style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
+              <p className="am-wise-empty">
                 Sin sugerencias disponibles · explorá el listado completo abajo.
               </p>
             )}
 
             {!suggestionsLoading && suggestions && suggestions.suggestions.length > 0 && (
               <>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div className="am-wise-list">
                   {suggestions.suggestions.map((sug) => {
                     const isExpanded = expandedSuggestion === sug.macro_id;
                     const isSelected = selected === sug.macro_id;
                     const matching = macrosForProduct.find(m => m.id === sug.macro_id);
-                    const accent = matching?.color ?? '#F59E0B';
+                    const accent = matching?.color ?? 'var(--engine-macro)';
                     return (
                       <button
                         key={sug.macro_id}
+                        className="am-sug"
+                        data-selected={isSelected}
+                        style={{ ['--cc' as string]: accent } as CSSProperties}
                         onClick={() => setExpandedSuggestion(isExpanded ? null : sug.macro_id)}
-                        style={{
-                          textAlign: 'left',
-                          background: isSelected ? `${accent}15` : 'var(--surface)',
-                          border: `1px solid ${isSelected ? accent : 'var(--card-border)'}`,
-                          borderLeft: `3px solid ${accent}`,
-                          borderRadius: 12, padding: '10px 12px',
-                          cursor: 'pointer', fontFamily: 'inherit',
-                          transition: 'all .15s ease',
-                        }}
                       >
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                              <span style={{ color: accent, fontSize: 11, fontWeight: 800 }}>✓</span>
-                              <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                {sug.macro_name}
-                              </p>
+                        <div className="am-sug-row">
+                          <div className="am-sug-main">
+                            <div className="am-sug-name-row">
+                              <span className="am-sug-check">✓</span>
+                              <p className="am-sug-name">{sug.macro_name}</p>
                             </div>
-                            <p style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 3, lineHeight: 1.4 }}>
-                              {sug.reasoning}
-                            </p>
+                            <p className="am-sug-reason">{sug.reasoning}</p>
                           </div>
-                          <div style={{
-                            flexShrink: 0,
-                            fontSize: 10, fontWeight: 800,
-                            padding: '4px 8px', borderRadius: 8,
-                            background: `${accent}22`, color: accent,
-                            letterSpacing: '.04em',
-                          }}>
-                            {Math.round(sug.score * 100)}
-                          </div>
+                          <div className="am-sug-score">{Math.round(sug.score * 100)}</div>
                         </div>
 
                         {isExpanded && (
-                          <div style={{
-                            marginTop: 10, paddingTop: 10,
-                            borderTop: `1px dashed ${accent}55`,
-                          }}>
-                            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', fontSize: 10, color: 'var(--text-secondary)' }}>
-                              <span><strong style={{ color: 'var(--text)' }}>{sug.duration_weeks}</strong> sem</span>
-                              <span><strong style={{ color: 'var(--text)' }}>{sug.sessions_per_week}</strong>d/sem</span>
+                          <div className="am-sug-detail">
+                            <div className="am-sug-tags">
+                              <span><strong>{sug.duration_weeks}</strong> sem</span>
+                              <span><strong>{sug.sessions_per_week}</strong>d/sem</span>
                               <span>{sug.school}</span>
                               <span>{sug.focus}</span>
                               <span>Difficulty {sug.difficulty}/5</span>
                             </div>
                             <button
+                              className="am-sug-assign"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setSelected(sug.macro_id);
                                 setShowFullList(false);
-                              }}
-                              style={{
-                                marginTop: 10, width: '100%',
-                                padding: '9px 0', borderRadius: 10,
-                                background: accent, color: '#fff',
-                                border: 'none', fontFamily: 'inherit',
-                                fontSize: 11, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase',
-                                cursor: 'pointer',
                               }}
                             >
                               Asignar este macro
@@ -322,35 +283,18 @@ const AssignMacrocycle: React.FC = () => {
                 </div>
 
                 {suggestions.rationale && (
-                  <p style={{
-                    fontSize: 10, color: 'var(--text-secondary)',
-                    marginTop: 10, fontStyle: 'italic', lineHeight: 1.4,
-                  }}>
-                    <span style={{ color: '#F5C518', fontWeight: 700 }}>✦ WISE: </span>
+                  <p className="am-wise-rationale">
+                    <span className="pre">✦ WISE: </span>
                     {suggestions.rationale}
                   </p>
                 )}
-                <p style={{
-                  fontSize: 9, color: 'var(--text-secondary)',
-                  marginTop: 8, opacity: 0.7, lineHeight: 1.4,
-                }}>
+                <p className="am-wise-disclaimer">
                   Son sugerencias del sistema · vos decidís el macrociclo final.
                 </p>
               </>
             )}
 
-            <button
-              onClick={() => setShowFullList(v => !v)}
-              style={{
-                marginTop: 12, width: '100%',
-                padding: '8px 0', borderRadius: 8,
-                background: 'transparent',
-                color: 'var(--text-secondary)',
-                border: '1px dashed var(--card-border)',
-                fontSize: 10, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase',
-                cursor: 'pointer', fontFamily: 'inherit',
-              }}
-            >
+            <button className="am-wise-toggle" onClick={() => setShowFullList(v => !v)}>
               {showFullList ? 'Ocultar listado' : `Ver todos (${macrosForProduct.length})`}
             </button>
           </div>
@@ -358,189 +302,100 @@ const AssignMacrocycle: React.FC = () => {
       )}
 
       {/* FAMILY FILTER (escuelas) */}
-      {(showFullList || product !== 'holy-oly' || !target) && (
-      <div style={{ padding: '0 20px 8px' }}>
-        <p style={{ fontSize: 9, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 6 }}>
-          Escuela
-        </p>
-        <div
-          className="scroll-x-no-bar"
-          style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 4 }}
-        >
-          {(['TODOS', ...familiesForProduct] as FamilyFilter[]).map(f => {
-            const active = familyFilter === f;
-            return (
+      {showCatalog && (
+        <div className="am-section" style={{ paddingBottom: 8 }}>
+          <p className="am-filter-label">Escuela</p>
+          <div className="am-chips scroll-x-no-bar">
+            {(['TODOS', ...familiesForProduct] as FamilyFilter[]).map(f => (
               <button
                 key={f}
+                className="am-chip"
+                data-all={f === 'TODOS'}
+                data-active={familyFilter === f}
                 onClick={() => setFamilyFilter(f)}
-                style={{
-                  flexShrink: 0,
-                  padding: '7px 13px', borderRadius: 999,
-                  background: active ? 'var(--text)' : 'var(--surface)',
-                  color: active ? 'var(--bg)' : 'var(--text-secondary)',
-                  border: `1px solid ${active ? 'var(--text)' : 'var(--card-border)'}`,
-                  fontSize: 11, fontWeight: 700, letterSpacing: '.04em',
-                  textTransform: 'uppercase',
-                  cursor: 'pointer', fontFamily: 'inherit',
-                }}
               >{f}</button>
-            );
-          })}
+            ))}
+          </div>
         </div>
-      </div>
       )}
 
       {/* FOCUS FILTER (sólo si la API devolvió focus) */}
-      {(showFullList || product !== 'holy-oly' || !target) && focusesForProduct.length > 0 && (
-        <div style={{ padding: '0 20px 16px' }}>
-          <p style={{ fontSize: 9, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 6 }}>
-            Foco
-          </p>
-          <div
-            className="scroll-x-no-bar"
-            style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 4 }}
-          >
-            {(['TODOS', ...focusesForProduct] as FocusFilter[]).map(f => {
-              const active = focusFilter === f;
+      {showCatalog && focusesForProduct.length > 0 && (
+        <div className="am-section">
+          <p className="am-filter-label">Foco</p>
+          <div className="am-chips scroll-x-no-bar">
+            {(['TODOS', ...focusesForProduct] as FocusFilter[]).map(f => (
+              <button
+                key={f}
+                className="am-chip am-chip--focus"
+                data-all={f === 'TODOS'}
+                data-active={focusFilter === f}
+                onClick={() => setFocusFilter(f)}
+              >{f}</button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* PROGRAM LIST */}
+      {showCatalog && (
+        <div className="am-section" style={{ paddingBottom: 20 }}>
+          <p className="am-count"><strong>{filtered.length}</strong> disponibles</p>
+          <div className="am-list">
+            {filtered.map((macro) => {
+              const active = selected === macro.id;
               return (
                 <button
-                  key={f}
-                  onClick={() => setFocusFilter(f)}
-                  style={{
-                    flexShrink: 0,
-                    padding: '6px 11px', borderRadius: 999,
-                    background: active ? '#06B6D4' : 'var(--surface)',
-                    color: active ? '#fff' : 'var(--text-secondary)',
-                    border: `1px solid ${active ? '#06B6D4' : 'var(--card-border)'}`,
-                    fontSize: 10, fontWeight: 700, letterSpacing: '.04em',
-                    textTransform: 'uppercase',
-                    cursor: 'pointer', fontFamily: 'inherit',
-                  }}
-                >{f}</button>
+                  key={macro.id}
+                  className="am-card"
+                  data-active={active}
+                  style={{ ['--cc' as string]: macro.color } as CSSProperties}
+                  onClick={() => setSelected(macro.id)}
+                >
+                  <div className="am-card-banner">
+                    <span className="fam">{macro.family}</span>
+                    <span className="meta">{macro.duration} · {macro.frequency}</span>
+                  </div>
+                  <div className="am-card-body">
+                    <div className="am-card-top">
+                      <div className="am-card-head">
+                        <p className="am-card-name">{macro.name}</p>
+                        <p className="am-card-desc">{macro.desc}</p>
+                        <div className="am-card-pills">
+                          <span className="am-pill">{macro.frequency}</span>
+                          <span className="am-pill">{macro.duration}</span>
+                          {macro.focus && (
+                            <span className="am-pill am-pill--focus">{macro.focus}</span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="am-card-aside">
+                        <PlateBadge tier={intensityTier(macro.intensity)} size={40} />
+                        <div className="am-card-radio">
+                          {active && <span className="dot" />}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="am-card-bars">
+                      <SegBars label="Intensidad" value={macro.intensity} k="int" />
+                      <SegBars label="Volumen" value={macro.volume} k="vol" />
+                    </div>
+
+                    {active && macro.bestFor && (
+                      <p className="am-card-best">💡 {macro.bestFor}</p>
+                    )}
+                  </div>
+                </button>
               );
             })}
           </div>
         </div>
       )}
 
-      {/* SCHOOLS */}
-      {(showFullList || product !== 'holy-oly' || !target) && (
-      <div style={{ padding: '0 20px 20px' }}>
-        <p style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 10 }}>
-          {filtered.length} disponibles
-        </p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {filtered.map((macro) => {
-            const active = selected === macro.id;
-            return (
-              <button
-                key={macro.id}
-                onClick={() => setSelected(macro.id)}
-                style={{
-                  textAlign: 'left',
-                  background: active ? `${macro.color}10` : 'var(--surface)',
-                  border: `1px solid ${active ? macro.color : 'var(--card-border)'}`,
-                  borderLeft: `4px solid ${macro.color}`,
-                  borderRadius: 16, padding: 14,
-                  cursor: 'pointer', fontFamily: 'inherit',
-                  transition: 'all .15s ease',
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div style={{ flex: 1, paddingRight: 12 }}>
-                    <p style={{ fontSize: 15, fontWeight: 700, color: active ? macro.color : 'var(--text)' }}>
-                      {macro.name}
-                    </p>
-                    <p style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 4, lineHeight: 1.4 }}>
-                      {macro.desc}
-                    </p>
-                    <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
-                      <span style={{
-                        fontSize: 9, fontWeight: 700, padding: '3px 7px', borderRadius: 6,
-                        background: 'var(--surface2)', color: 'var(--text-secondary)',
-                        letterSpacing: '.04em', textTransform: 'uppercase',
-                      }}>{macro.frequency}</span>
-                      <span style={{
-                        fontSize: 9, fontWeight: 700, padding: '3px 7px', borderRadius: 6,
-                        background: 'var(--surface2)', color: 'var(--text-secondary)',
-                        letterSpacing: '.04em', textTransform: 'uppercase',
-                      }}>{macro.duration}</span>
-                      {macro.focus && (
-                        <span style={{
-                          fontSize: 9, fontWeight: 700, padding: '3px 7px', borderRadius: 6,
-                          background: `${macro.color}1a`, color: macro.color,
-                          letterSpacing: '.04em', textTransform: 'uppercase',
-                        }}>{macro.focus}</span>
-                      )}
-                    </div>
-                  </div>
-                  <div style={{
-                    width: 22, height: 22, borderRadius: '50%',
-                    border: `1.5px solid ${active ? macro.color : 'var(--card-border)'}`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    flexShrink: 0, marginTop: 2,
-                  }}>
-                    {active && (
-                      <div style={{ width: 10, height: 10, borderRadius: '50%', background: macro.color }} />
-                    )}
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', gap: 18, marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--card-border)' }}>
-                  <div>
-                    <p style={{ fontSize: 8, fontWeight: 800, color: 'var(--text-secondary)', letterSpacing: '.08em', textTransform: 'uppercase' }}>
-                      Intensidad
-                    </p>
-                    <Bars value={macro.intensity} color="#EF4444" />
-                  </div>
-                  <div>
-                    <p style={{ fontSize: 8, fontWeight: 800, color: 'var(--text-secondary)', letterSpacing: '.08em', textTransform: 'uppercase' }}>
-                      Volumen
-                    </p>
-                    <Bars value={macro.volume} color="#06B6D4" />
-                  </div>
-                </div>
-
-                {active && macro.bestFor && (
-                  <p style={{
-                    fontSize: 10, color: macro.color, marginTop: 10,
-                    paddingTop: 10, borderTop: `1px dashed ${macro.color}55`,
-                    fontStyle: 'italic',
-                  }}>
-                    💡 {macro.bestFor}
-                  </p>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-      )}
-
       {/* CONFIRM (sticky con backdrop para no superponerse con cards) */}
-      <div style={{
-        position: 'absolute', bottom: 76, left: 0, right: 0,
-        zIndex: 40,
-        padding: '14px 16px 12px',
-        background: 'linear-gradient(to top, var(--bg) 0%, var(--bg) 60%, transparent 100%)',
-        backdropFilter: 'blur(8px)',
-      }}>
-        <button
-          onClick={handleConfirm}
-          disabled={!selected}
-          style={{
-            width: '100%', padding: '15px 0', borderRadius: 14,
-            background: selected ? 'var(--cta-bg)' : 'var(--surface)',
-            color: selected ? 'var(--cta-text)' : 'var(--text-secondary)',
-            border: selected ? 'none' : '1px solid var(--card-border)',
-            fontSize: 13, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase',
-            cursor: selected ? 'pointer' : 'not-allowed',
-            fontFamily: 'inherit',
-            opacity: selected ? 1 : 0.6,
-            transition: 'all .2s ease',
-            boxShadow: selected ? '0 6px 20px rgba(0,0,0,0.4)' : 'none',
-          }}
-        >
+      <div className="am-confirm-bar">
+        <button className="am-confirm" onClick={handleConfirm} disabled={!selected}>
           {selectedMacro
             ? `Confirmar · ${selectedMacro.name}`
             : 'Elegí un macrociclo'}
