@@ -2,6 +2,8 @@ import React, { useEffect, useMemo } from 'react';
 import { useAthlete } from '../context/AthleteContext';
 import { useProduct } from '../context/ProductContext';
 import { useToast } from '../components/Toast';
+import { PlateBadge, type PlateTier } from '../components/PlateBadge';
+import '../styles/v2/victory.css';
 
 /**
  * VictoryScreen · sesión finalizada · informativa, NO viral.
@@ -12,9 +14,11 @@ import { useToast } from '../components/Toast';
  *    persiste ActiveSession antes de navegar acá.
  *  - volta: pantalla "celebración genérica" original (no se rompe).
  *
- * Diseño:
+ * Diseño (V2 dark · scoped `.vic-root`):
+ *  - Acento producto-aware: HO rojo/ámbar · Volta cyan (vía data-product).
  *  - Cero botones (el atleta toma screenshot nativo del dispositivo)
  *  - Toast "✓ Sesión guardada" al entrar (confirmación explícita)
+ *  - Disco PlateBadge como centerpiece celebratorio (HO · tier por PR/peso)
  *  - Toda la data útil de la sesión + recomendación post-sesión basada en IMR
  *  - Contexto del mesociclo (semana X/Y)
  */
@@ -81,6 +85,19 @@ const recommendationByIMR = (imr: number): { title: string; body: string; color:
 
 const imrColor = (imr: number) => imr > 82 ? '#EF4444' : imr >= 72 ? '#F5C518' : '#22C55E';
 
+/**
+ * Mapea un peso (kg) a un tier de disco para el centerpiece celebratorio.
+ * Sólo cosmético: traduce magnitud de carga al color del disco oficial
+ * (blanco→verde→amarillo→azul→rojo) para que el PR "se sienta" más grande.
+ */
+const weightToTier = (kg: number): PlateTier => {
+  if (kg >= 140) return 'red';
+  if (kg >= 100) return 'blue';
+  if (kg >= 60)  return 'yellow';
+  if (kg > 0)    return 'green';
+  return 'white';
+};
+
 const VictoryScreenHO: React.FC<{ summary: SessionSummary | null }> = ({ summary }) => {
   const { athlete } = useAthlete();
   const { showToast } = useToast();
@@ -129,40 +146,41 @@ const VictoryScreenHO: React.FC<{ summary: SessionSummary | null }> = ({ summary
     data.zone_distribution.fuerza +
     data.zone_distribution.maximo;
 
+  // Centerpiece: si hubo PR, el disco toma el tier del PR más pesado.
+  const topPrWeight = prCount > 0 ? Math.max(...data.prs_detected.map(p => p.weight)) : 0;
+  const heroTier = weightToTier(topPrWeight);
+
   return (
-    <div className="flex flex-col min-h-full bg-holy-bg text-holy-text overflow-y-auto" style={{ paddingBottom: 28 }}>
+    <div className="vic-root" data-product="holy-oly">
 
       {/* HERO */}
-      <div className="px-6 pt-10 pb-4 flex flex-col items-center text-center relative">
-        <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-holy-gold/15 via-holy-gold/5 to-transparent pointer-events-none" />
-
-        <div className="relative mb-4 z-10">
-          <div className="absolute inset-0 bg-holy-gold/30 blur-3xl rounded-full" />
-          <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-holy-gold to-amber-700 flex items-center justify-center text-4xl shadow-2xl shadow-holy-gold/50 relative border border-white/20">
-            🏆
-          </div>
+      <header className="vic-hero">
+        <div className="vic-emblem">
+          {prCount > 0 ? (
+            <PlateBadge tier={heroTier} size={104} animate />
+          ) : (
+            <div className="vic-emblem-trophy">🏆</div>
+          )}
           {prCount > 0 && (
-            <div className="absolute -bottom-2 -right-2 bg-green-500 text-black text-[10px] font-black px-2 py-0.5 rounded-full border-2 border-holy-bg shadow-xl">
-              {prCount} PR
-            </div>
+            <span className="vic-emblem-pr">{prCount} PR</span>
           )}
         </div>
 
-        <p className="text-[10px] font-black tracking-[0.3em] text-holy-gold uppercase">HOLY OLY · SMART TRAINING</p>
-        <h1 className="text-2xl font-black italic tracking-tighter uppercase mt-1">Sesión guardada</h1>
-        <p className="text-[10px] font-bold text-green-400 mt-1 tracking-wide">✓ Confirmado · datos persistidos</p>
+        <p className="vic-eyebrow">HOLY OLY · SMART TRAINING</p>
+        <h1 className="vic-title">Sesión guardada</h1>
+        <span className="vic-confirm"><span className="dot" />Confirmado · datos persistidos</span>
         {macro && (
-          <p className="text-[11px] font-bold text-holy-text-secondary mt-2 tracking-wide">
+          <p className="vic-macro-line">
             {macro.program_name} · Semana {macro.week}/{macro.total_weeks} · {macro.focus}
           </p>
         )}
-        <p className="text-[10px] text-holy-text-secondary mt-1" style={{ fontVariantNumeric: 'tabular-nums' }}>
+        <p className="vic-date">
           {mm}:{ss} · {new Date(data.date).toLocaleDateString('es', { day: '2-digit', month: 'short', year: 'numeric' })}
         </p>
-      </div>
+      </header>
 
       {/* HERO STATS · 4 boxes */}
-      <div className="px-4 grid grid-cols-2 gap-3 mb-3">
+      <div className="vic-stats">
         <StatBox
           label="Tonelaje"
           value={tons}
@@ -194,45 +212,35 @@ const VictoryScreenHO: React.FC<{ summary: SessionSummary | null }> = ({ summary
       </div>
 
       {/* DISTRIBUCIÓN POR ZONA · halterofilia-specific */}
-      <div className="px-4 mb-3">
-        <p className="text-[10px] font-black uppercase tracking-[0.12em] text-holy-text-secondary mb-2 px-1">
-          Distribución por zona de intensidad
-        </p>
-        <div className="bg-[#0F0F1C] border border-[#1E1E32] rounded-2xl p-4">
+      <section className="vic-section">
+        <p className="vic-section-head">Distribución por zona de intensidad</p>
+        <div className="vic-card vic-zone-card">
           {/* Stacked bar */}
-          <div className="flex h-3 rounded-full overflow-hidden bg-[#1E1E32] mb-3">
+          <div className="vic-zone-bar">
             {ZONES.map(z => {
               const count = data.zone_distribution[z.id as keyof typeof data.zone_distribution];
               const w = totalZoneSets > 0 ? (count / totalZoneSets) * 100 : 0;
               if (w === 0) return null;
               return (
-                <div
+                <span
                   key={z.id}
-                  style={{
-                    width: `${w}%`,
-                    background: z.color,
-                    transition: 'width 0.6s ease',
-                  }}
+                  style={{ width: `${w}%`, background: z.color }}
                   title={`${z.label} · ${count} sets`}
                 />
               );
             })}
           </div>
           {/* Legend */}
-          <div className="grid grid-cols-2 gap-2">
+          <div className="vic-zone-legend">
             {ZONES.map(z => {
               const count = data.zone_distribution[z.id as keyof typeof data.zone_distribution];
               const pct = totalZoneSets > 0 ? Math.round((count / totalZoneSets) * 100) : 0;
               return (
-                <div key={z.id} className="flex items-center gap-2">
-                  <span style={{ width: 8, height: 8, borderRadius: 2, background: z.color, display: 'inline-block' }} />
-                  <span className="text-[10px] font-bold text-holy-text" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                    {z.label}
-                  </span>
-                  <span className="text-[10px] text-holy-text-secondary">
-                    {z.range}
-                  </span>
-                  <span className="text-[10px] font-black ml-auto" style={{ color: z.color, fontVariantNumeric: 'tabular-nums' }}>
+                <div key={z.id} className="vic-zone-row">
+                  <span className="vic-zone-swatch" style={{ background: z.color }} />
+                  <span className="vic-zone-name">{z.label}</span>
+                  <span className="vic-zone-range">{z.range}</span>
+                  <span className="vic-zone-val" style={{ color: z.color }}>
                     {count} · {pct}%
                   </span>
                 </div>
@@ -240,124 +248,106 @@ const VictoryScreenHO: React.FC<{ summary: SessionSummary | null }> = ({ summary
             })}
           </div>
         </div>
-      </div>
+      </section>
 
       {/* PRs DETECTADOS */}
       {prCount > 0 && (
-        <div className="px-4 mb-3">
-          <p className="text-[10px] font-black uppercase tracking-[0.12em] text-green-400 mb-2 px-1">
-            🔥 NUEVO PR detectado
-          </p>
-          <div className="bg-green-500/10 border border-green-500/40 rounded-2xl overflow-hidden">
+        <section className="vic-section">
+          <p className="vic-section-head accent">🔥 NUEVO PR detectado</p>
+          <div className="vic-card vic-pr-card">
             {data.prs_detected.map((pr, i) => (
-              <div
-                key={`${pr.label}-${i}`}
-                className="flex items-center justify-between px-4 py-3"
-                style={{ borderTop: i === 0 ? 'none' : '1px solid rgba(34,197,94,0.2)' }}
-              >
-                <span className="text-sm font-black tracking-tight text-green-400">{pr.label}</span>
-                <div className="text-right">
-                  <p className="text-sm font-black italic" style={{ color: '#22C55E', fontVariantNumeric: 'tabular-nums' }}>
-                    {pr.weight}kg
+              <div key={`${pr.label}-${i}`} className="vic-pr-row">
+                <span className="vic-pr-disc">
+                  <PlateBadge tier={weightToTier(pr.weight)} size={40} />
+                </span>
+                <div className="vic-pr-main">
+                  <span className="vic-pr-label">{pr.label}</span>
+                </div>
+                <div className="vic-pr-target">
+                  <p className="vic-pr-weight">
+                    {pr.weight}<span className="u">kg</span>
                   </p>
-                  <p className="text-[10px] text-green-300 font-bold" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                    +{pr.delta}kg vs anterior
-                  </p>
+                  <p className="vic-pr-delta">+{pr.delta}kg vs anterior</p>
                 </div>
               </div>
             ))}
           </div>
-        </div>
+        </section>
       )}
 
       {/* DETALLE EJERCICIOS */}
       {data.exercises.length > 0 && (
-        <div className="px-4 mb-3">
-          <p className="text-[10px] font-black uppercase tracking-[0.12em] text-holy-text-secondary mb-2 px-1">
-            Detalle de la sesión
-          </p>
-          <div className="bg-[#0F0F1C] border border-[#1E1E32] rounded-2xl overflow-hidden">
-            {data.exercises.map((ex, i) => {
+        <section className="vic-section">
+          <p className="vic-section-head">Detalle de la sesión</p>
+          <div className="vic-card vic-ex-card">
+            {data.exercises.map((ex) => {
               const exTonelaje = ex.sets.reduce((a, s) => s.result === 'completed' ? a + s.weight * s.reps : a, 0);
               const avgWeight = ex.sets_completed > 0
                 ? Math.round(ex.sets.filter(s => s.result === 'completed').reduce((a, s) => a + s.weight, 0) / ex.sets_completed)
                 : 0;
               return (
-                <div
-                  key={ex.name}
-                  className="flex items-center gap-3 px-4 py-3"
-                  style={{ borderTop: i === 0 ? 'none' : '1px solid #1E1E32' }}
-                >
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-black tracking-tight">{ex.name}</p>
-                    <p className="text-[10px] text-holy-text-secondary mt-0.5" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                <div key={ex.name} className="vic-ex-row">
+                  <div className="vic-ex-main">
+                    <p className="vic-ex-name">{ex.name}</p>
+                    <p className="vic-ex-detail">
                       {ex.sets_completed}/{ex.targetSets} × {ex.targetReps} @ {avgWeight}kg · {ex.pct}% 1RM
                       {ex.sets_failed > 0 && (
-                        <span className="text-red-400 font-bold"> · {ex.sets_failed} fallo{ex.sets_failed > 1 ? 's' : ''}</span>
+                        <span className="vic-ex-fail"> · {ex.sets_failed} fallo{ex.sets_failed > 1 ? 's' : ''}</span>
                       )}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-black italic text-holy-gold" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                      {exTonelaje.toLocaleString('es')}
-                      <span className="text-[10px] text-holy-text-secondary ml-0.5 not-italic">kg</span>
+                  <div className="vic-ex-vol">
+                    <p className="vic-ex-vol-num">
+                      {exTonelaje.toLocaleString('es')}<span className="u">kg</span>
                     </p>
-                    <p className="text-[9px] text-holy-text-secondary uppercase tracking-wider">volumen</p>
+                    <p className="vic-ex-vol-label">volumen</p>
                   </div>
                 </div>
               );
             })}
           </div>
-        </div>
+        </section>
       )}
 
       {/* MESOCICLO */}
       {macro && macro.total_weeks > 0 && (
-        <div className="px-4 mb-3">
-          <p className="text-[10px] font-black uppercase tracking-[0.12em] text-holy-text-secondary mb-2 px-1">
-            Tu mesociclo
-          </p>
-          <div className="bg-[#0F0F1C] border border-[#1E1E32] rounded-2xl p-4">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-xs font-black">{macro.program_name}</span>
-              <span className="text-[10px] font-bold text-holy-gold" style={{ fontVariantNumeric: 'tabular-nums' }}>
+        <section className="vic-section">
+          <p className="vic-section-head">Tu mesociclo</p>
+          <div className="vic-card vic-meso-card">
+            <div className="vic-meso-head">
+              <span className="vic-meso-name">{macro.program_name}</span>
+              <span className="vic-meso-week">
                 Semana {macro.week} / {macro.total_weeks}
               </span>
             </div>
-            <div className="h-1.5 w-full bg-[#1E1E32] rounded-full overflow-hidden">
+            <div className="vic-meso-track">
               <div
-                className="h-full bg-gradient-to-r from-holy-gold to-amber-500"
-                style={{ width: `${Math.round((macro.week / macro.total_weeks) * 100)}%`, transition: 'width 1s ease' }}
+                className="vic-meso-fill"
+                style={{ width: `${Math.round((macro.week / macro.total_weeks) * 100)}%` }}
               />
             </div>
           </div>
-        </div>
+        </section>
       )}
 
-      {/* RECOMENDACIÓN POST-SESIÓN basada en IMR */}
-      <div className="px-4 mb-3">
+      {/* RECOMENDACIÓN POST-SESIÓN basada en IMR (color data-driven) */}
+      <section className="vic-reco">
         <div
-          className="rounded-2xl p-4"
+          className="vic-reco-card"
           style={{
             background: `${reco.color}14`,
             border: `1px solid ${reco.color}44`,
           }}
         >
-          <p className="text-[10px] font-black uppercase tracking-[0.12em] mb-2" style={{ color: reco.color }}>
+          <p className="vic-reco-eyebrow" style={{ color: reco.color }}>
             Recomendación post-sesión
           </p>
-          <p className="text-[14px] font-black tracking-tight mb-1">
-            {reco.title}
-          </p>
-          <p className="text-[12px] text-holy-text-secondary leading-relaxed">
-            {reco.body}
-          </p>
+          <p className="vic-reco-title">{reco.title}</p>
+          <p className="vic-reco-body">{reco.body}</p>
         </div>
-      </div>
+      </section>
 
-      <p className="text-center text-[9px] font-black italic tracking-tighter text-holy-text-secondary mt-2 px-6">
-        holyoly.app · SMART TRAINING · ZERO BURNOUT
-      </p>
+      <p className="vic-foot">holyoly.app · SMART TRAINING · ZERO BURNOUT</p>
     </div>
   );
 };
@@ -370,15 +360,15 @@ const VictoryScreenVolta: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
-    <div className="flex flex-col min-h-full bg-holy-bg text-holy-text overflow-y-auto" style={{ paddingBottom: 28 }}>
-      <div className="px-6 pt-10 pb-4 flex flex-col items-center text-center">
-        <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-holy-gold to-amber-700 flex items-center justify-center text-4xl shadow-2xl shadow-holy-gold/50 border border-white/20 mb-4">
-          🏆
+    <div className="vic-root" data-product="volta">
+      <header className="vic-hero">
+        <div className="vic-emblem">
+          <div className="vic-emblem-trophy">🏆</div>
         </div>
-        <p className="text-[10px] font-black tracking-[0.3em] text-holy-gold uppercase">VOLTA · PEAK QUAL</p>
-        <h1 className="text-2xl font-black italic tracking-tighter uppercase mt-1">WOD guardado</h1>
-        <p className="text-[10px] font-bold text-green-400 mt-1 tracking-wide">✓ Confirmado · datos persistidos</p>
-      </div>
+        <p className="vic-eyebrow">VOLTA · PEAK QUAL</p>
+        <h1 className="vic-title">WOD guardado</h1>
+        <span className="vic-confirm"><span className="dot" />Confirmado · datos persistidos</span>
+      </header>
     </div>
   );
 };
@@ -391,19 +381,13 @@ const VictoryScreen: React.FC = () => {
 };
 
 const StatBox: React.FC<{ label: string; value: string; unit: string; sub: string; accent: string }> = ({ label, value, unit, sub, accent }) => (
-  <div
-    className="rounded-2xl p-4"
-    style={{
-      background: 'rgba(255,255,255,0.03)',
-      border: `1px solid ${accent}33`,
-    }}
-  >
-    <p className="text-[9px] font-black uppercase tracking-[0.1em] text-holy-text-secondary">{label}</p>
-    <div className="flex items-baseline gap-1 mt-1">
-      <span className="text-2xl font-black italic tracking-tighter" style={{ color: accent, fontVariantNumeric: 'tabular-nums' }}>{value}</span>
-      {unit && <span className="text-[11px] font-bold text-holy-text-secondary">{unit}</span>}
+  <div className="vic-stat" style={{ ['--stat-c' as string]: accent }}>
+    <p className="vic-stat-label">{label}</p>
+    <div className="vic-stat-value">
+      <span className="vic-stat-num">{value}</span>
+      {unit && <span className="vic-stat-unit">{unit}</span>}
     </div>
-    <p className="text-[9px] text-holy-text-secondary mt-1 leading-tight">{sub}</p>
+    <p className="vic-stat-sub">{sub}</p>
   </div>
 );
 

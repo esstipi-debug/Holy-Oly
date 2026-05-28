@@ -1,0 +1,528 @@
+/* ============================================================
+   PEAK QUAL · VICTORY · sesión finalizada · estilos V2
+   ------------------------------------------------------------
+   Pantalla VICTORY · celebración post-sesión (PR detectado).
+   COMPARTIDA por ambos productos:
+     · Holy Oly  → acento ROJO/ÁMBAR (halterofilia)
+     · Volta     → acento CYAN (CrossFit)
+   El acento se conmuta vía `.vic-root[data-product="volta"]`,
+   exponiendo `--vic-accent` / `--vic-accent-soft` / `--vic-glow`
+   que el resto del archivo consume (cero colores de marca
+   hardcodeados · los colores data-driven —zonas, IMR, reco—
+   siguen viniendo inline desde la lógica, intactos).
+
+   SCOPING · todo vive bajo `.vic-root`; sin resets globales.
+   Se monta DENTRO de PhoneLayout, que aporta el marco del
+   dispositivo, la status bar y la bottom nav (76px · NO la
+   dibujamos acá). Hereda tokens de tokens.css.
+   ============================================================ */
+
+.vic-root,
+.vic-root *,
+.vic-root *::before,
+.vic-root *::after { box-sizing: border-box; }
+
+.vic-root {
+  /* Acento por defecto = HOLY OLY (rojo + ámbar) */
+  --vic-accent: var(--tier-4);          /* #EF4444 */
+  --vic-accent-2: var(--engine-macro);  /* #FFB300 ámbar */
+  --vic-accent-soft: rgba(239, 68, 68, 0.12);
+  --vic-accent-line: rgba(239, 68, 68, 0.4);
+  --vic-glow: var(--glow-red);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding-bottom: 28px;
+  font-family: var(--font-body);
+  color: var(--text);
+  background: var(--bg);
+  background-image:
+    linear-gradient(rgba(239,68,68,0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(239,68,68,0.022) 1px, transparent 1px),
+    radial-gradient(ellipse at 50% -5%, rgba(255,179,0,0.10), transparent 55%);
+  background-size: 40px 40px, 40px 40px, 100% 100%;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* ---------- VOLTA → acento cyan ---------- */
+.vic-root[data-product="volta"] {
+  --vic-accent: var(--engine-stress);   /* #00E5FF */
+  --vic-accent-2: var(--engine-adapt);  /* #A855F7 violeta de apoyo */
+  --vic-accent-soft: rgba(0, 229, 255, 0.12);
+  --vic-accent-line: rgba(0, 229, 255, 0.4);
+  --vic-glow: var(--glow-cyan);
+  background-image:
+    linear-gradient(rgba(0,229,255,0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,255,0.022) 1px, transparent 1px),
+    radial-gradient(ellipse at 50% -5%, rgba(0,229,255,0.10), transparent 55%);
+  background-size: 40px 40px, 40px 40px, 100% 100%;
+}
+
+/* Reset de márgenes/padding sólo dentro del root */
+.vic-root h1, .vic-root h2, .vic-root h3,
+.vic-root p, .vic-root span { margin: 0; }
+
+/* Halo de celebración detrás del hero · pulsa suave */
+.vic-root::before {
+  content: "";
+  position: absolute;
+  top: -120px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 360px;
+  height: 360px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--vic-accent-soft), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  animation: vicHalo 4s ease-in-out infinite;
+}
+@keyframes vicHalo {
+  0%, 100% { opacity: 0.55; transform: translateX(-50%) scale(1); }
+  50%      { opacity: 0.9;  transform: translateX(-50%) scale(1.08); }
+}
+
+/* ---------- HERO ---------- */
+.vic-hero {
+  position: relative;
+  z-index: 1;
+  padding: 40px 24px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* Centerpiece · disco (HO) o trofeo (fallback / Volta) */
+.vic-emblem {
+  position: relative;
+  margin-bottom: 18px;
+  line-height: 0;
+  animation: vicEmblemIn 600ms cubic-bezier(.16, 1, .3, 1) both;
+}
+@keyframes vicEmblemIn {
+  from { opacity: 0; transform: scale(0.6) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.vic-emblem-trophy {
+  width: 88px;
+  height: 88px;
+  border-radius: var(--r-xl);
+  display: grid;
+  place-items: center;
+  font-size: 42px;
+  background: linear-gradient(135deg, var(--vic-accent-2), color-mix(in oklab, var(--vic-accent-2) 55%, #000));
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: var(--vic-glow), inset 0 1px 0 rgba(255,255,255,0.25);
+}
+/* Pill PR · anclado al borde inf-der del emblema */
+.vic-emblem-pr {
+  position: absolute;
+  bottom: -8px;
+  right: -10px;
+  padding: 3px 9px;
+  border-radius: var(--r-full);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #04140a;
+  background: var(--engine-oly);
+  border: 2px solid var(--bg);
+  box-shadow: var(--glow-green);
+  line-height: 1.2;
+}
+
+.vic-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--vic-accent);
+}
+.vic-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 30px;
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  color: var(--text-hi);
+  margin-top: 6px;
+}
+.vic-confirm {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--engine-oly);
+}
+.vic-confirm .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--engine-oly);
+  box-shadow: 0 0 8px var(--engine-oly);
+}
+.vic-macro-line {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-mid);
+  margin-top: 10px;
+}
+.vic-date {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--text-lo);
+  margin-top: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Generic section block ---------- */
+.vic-section {
+  position: relative;
+  z-index: 1;
+  padding: 0 16px;
+  margin-bottom: 12px;
+}
+.vic-section-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 2px 8px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-lo);
+}
+.vic-section-head.accent { color: var(--engine-oly); }
+
+/* ---------- Card base ---------- */
+.vic-card {
+  position: relative;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-card);
+}
+
+/* ---------- HERO STATS · 4 boxes ---------- */
+.vic-stats {
+  position: relative;
+  z-index: 1;
+  padding: 8px 16px 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.vic-stat {
+  position: relative;
+  padding: 14px;
+  border-radius: var(--r-lg);
+  background: var(--surface-1);
+  border: 1px solid var(--stat-c, var(--border-soft));
+  overflow: hidden;
+}
+/* hairline de acento superior, color por stat */
+.vic-stat::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--stat-c, var(--vic-accent));
+  opacity: 0.85;
+}
+.vic-stat-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-lo);
+}
+.vic-stat-value {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-top: 6px;
+}
+.vic-stat-num {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 26px;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--stat-c, var(--text-hi));
+  font-variant-numeric: tabular-nums;
+}
+.vic-stat-unit {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-mid);
+}
+.vic-stat-sub {
+  font-family: var(--font-body);
+  font-size: 10px;
+  line-height: 1.3;
+  color: var(--text-lo);
+  margin-top: 6px;
+}
+
+/* ---------- Distribución por zona ---------- */
+.vic-zone-card { padding: 16px; }
+.vic-zone-bar {
+  display: flex;
+  height: 12px;
+  border-radius: var(--r-full);
+  overflow: hidden;
+  background: var(--surface-3);
+  margin-bottom: 14px;
+}
+.vic-zone-bar > span {
+  display: block;
+  height: 100%;
+  transition: width 0.6s ease;
+}
+.vic-zone-legend {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.vic-zone-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.vic-zone-swatch {
+  width: 8px; height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.vic-zone-name {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text);
+}
+.vic-zone-range {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-lo);
+}
+.vic-zone-val {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- PRs detectados ---------- */
+.vic-pr-card {
+  background: linear-gradient(180deg, var(--surface-1), color-mix(in oklab, var(--engine-oly) 7%, var(--surface-1)));
+  border-color: rgba(34,197,94,0.4);
+  overflow: hidden;
+}
+.vic-pr-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+}
+.vic-pr-row + .vic-pr-row { border-top: 1px solid rgba(34,197,94,0.2); }
+.vic-pr-disc {
+  flex-shrink: 0;
+  line-height: 0;
+}
+.vic-pr-main { flex: 1; min-width: 0; }
+.vic-pr-label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  color: var(--engine-oly);
+}
+.vic-pr-target { text-align: right; flex-shrink: 0; }
+.vic-pr-weight {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--engine-oly);
+  text-shadow: 0 0 12px rgba(34,197,94,0.35);
+  font-variant-numeric: tabular-nums;
+}
+.vic-pr-weight .u {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-mid);
+  margin-left: 2px;
+}
+.vic-pr-delta {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--engine-oly);
+  margin-top: 3px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Detalle ejercicios ---------- */
+.vic-ex-card { overflow: hidden; }
+.vic-ex-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+}
+.vic-ex-row + .vic-ex-row { border-top: 1px solid var(--border-soft); }
+.vic-ex-main { flex: 1; min-width: 0; }
+.vic-ex-name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 14.5px;
+  letter-spacing: -0.01em;
+  color: var(--text-hi);
+}
+.vic-ex-detail {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-lo);
+  margin-top: 3px;
+  font-variant-numeric: tabular-nums;
+}
+.vic-ex-fail { color: var(--engine-pulse); font-weight: 700; }
+.vic-ex-vol { text-align: right; flex-shrink: 0; }
+.vic-ex-vol-num {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--vic-accent-2);
+  font-variant-numeric: tabular-nums;
+}
+.vic-ex-vol-num .u {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-mid);
+  margin-left: 2px;
+}
+.vic-ex-vol-label {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-lo);
+  margin-top: 2px;
+}
+
+/* ---------- Mesociclo ---------- */
+.vic-meso-card { padding: 16px; }
+.vic-meso-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.vic-meso-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-hi);
+}
+.vic-meso-week {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--vic-accent-2);
+  font-variant-numeric: tabular-nums;
+}
+.vic-meso-track {
+  height: 6px;
+  width: 100%;
+  background: var(--surface-3);
+  border-radius: var(--r-full);
+  overflow: hidden;
+}
+.vic-meso-fill {
+  height: 100%;
+  border-radius: var(--r-full);
+  background: linear-gradient(90deg, var(--vic-accent-2), var(--vic-accent));
+  box-shadow: 0 0 8px var(--vic-accent-2);
+  transition: width 1s ease;
+}
+
+/* ---------- Recomendación post-sesión (color data-driven inline) ---------- */
+.vic-reco {
+  position: relative;
+  z-index: 1;
+  padding: 0 16px;
+  margin-bottom: 12px;
+}
+.vic-reco-card {
+  border-radius: var(--r-lg);
+  padding: 16px;
+  /* fondo/borde llegan inline desde la lógica (reco.color) */
+}
+.vic-reco-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  /* color inline (reco.color) */
+}
+.vic-reco-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  color: var(--text-hi);
+  margin-bottom: 4px;
+}
+.vic-reco-body {
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+/* ---------- Footer ---------- */
+.vic-foot {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  margin-top: 6px;
+  padding: 0 24px;
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-lo);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vic-root::before,
+  .vic-emblem { animation: none; }
+}
