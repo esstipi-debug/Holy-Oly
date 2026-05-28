@@ -10,6 +10,14 @@ import { useAthlete } from '../../context/AthleteContext';
 import { useNav } from '../../context/NavigationContext';
 import { progressionApi } from '../../lib/progression';
 import { getPendingForToday } from '../../lib/plannedSessions';
+import { PlateBadge, type PlateTier } from '../../components/PlateBadge';
+
+/* ---------- Disco · mapeo tier numérico V2 (0-4) → tier nominal PlateBadge ---------- */
+// El componente real PlateBadge usa nombres de color; el resto de la home razona
+// en índices 0-4. Este mapa traduce sin perder el color por tier.
+const TIER_TO_PLATE: PlateTier[] = ['white', 'green', 'yellow', 'blue', 'red'];
+const tierToPlate = (t: string | number): PlateTier =>
+  TIER_TO_PLATE[Math.max(0, Math.min(4, parseInt(String(t), 10) || 0))];
 
 /* ---------- Lucide-style icons (stroke 1.5) ---------- */
 const ICONS = {
@@ -60,20 +68,6 @@ function Card({ critical, children, className = '', style, onClick }) {
   );
 }
 
-/* ---------- Status bar ---------- */
-function StatusBar() {
-  return (
-    <div className="status-bar">
-      <span>9:41</span>
-      <div className="right">
-        <span className="bars">▮▮▮▮</span>
-        <span>5G</span>
-        <span>96</span>
-      </div>
-    </div>
-  );
-}
-
 /* ---------- Header ---------- */
 const MONTHS_ES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
 const DAYS_ES = ['dom','lun','mar','mié','jue','vie','sáb'];
@@ -82,11 +76,17 @@ function formatHeaderDate(d, week, totalWeeks) {
   return totalWeeks > 0 ? `${base} · semana ${week}/${totalWeeks}` : base;
 }
 
-function Header({ firstName, initial, dateLabel, streak, onProfile }) {
+function Header({ firstName, initial, dateLabel, streak, tier, onProfile }) {
   return (
     <header className="ah-header">
       <div className="ah-greeting">
-        <div className="ah-avatar">{initial}</div>
+        <div className="ah-avatar-wrap">
+          <div className="ah-avatar">{initial}</div>
+          {/* Level badge · disco pequeño marca el tier actual del atleta */}
+          <span className="ah-avatar-badge" aria-hidden="true">
+            <PlateBadge tier={tierToPlate(tier)} size={22}/>
+          </span>
+        </div>
         <div>
           <div className="ah-hello">Hola, {firstName} <span style={{color:'var(--text)'}}>👋</span></div>
           <div className="ah-date">{dateLabel}</div>
@@ -182,7 +182,7 @@ function TierCard({ tier = '3', name = 'AZUL', pct = 73 }) {
     <Card className="ah-tier-card">
       <div className="ah-eyebrow">DISCO · T{tier}</div>
       <div className="ah-tier-disc">
-        <plate-3d tier={tier} size="62"/>
+        <PlateBadge tier={tierToPlate(tier)} size={62}/>
       </div>
       <div className="ah-tier-meta">
         <div className="ah-tier-label" style={{color: c}}>{name}</div>
@@ -330,28 +330,6 @@ function Quests() {
   );
 }
 
-/* ---------- Bottom Nav ---------- */
-function BottomNav({ active, onNavigate }) {
-  const tabs = [
-    { k: 'home',    icon: 'home',  label: 'Home',    view: 'HOME' },
-    { k: 'stats',   icon: 'bar',   label: 'Stats',   view: 'HO_STATS' },
-    { k: 'log',     icon: 'plus',  label: 'Log',     view: 'WARMUP' },
-    { k: 'skills',  icon: 'tree',  label: 'Skills',  view: 'PROGRESSION' },
-    { k: 'profile', icon: 'user',  label: 'Profile', view: 'PROFILE' },
-  ];
-  return (
-    <nav className="ah-nav">
-      {tabs.map(t => (
-        <button key={t.k} className={`ah-nav-tab ${active === t.k ? 'on' : ''}`}
-                onClick={() => onNavigate && onNavigate(t.view)}>
-          <Icon name={t.icon} size={22} stroke={active === t.k ? 1.8 : 1.5}/>
-          <span>{t.label}</span>
-        </button>
-      ))}
-    </nav>
-  );
-}
-
 /* ---------- Derivaciones (espejo de la home legacy AtletaHome.tsx) ---------- */
 
 // readiness → estado semáforo (mismos cortes que ringColor legacy: 70 / 50)
@@ -473,85 +451,79 @@ function App() {
 
   return (
     <div className="ah-v2-root">
-      <div className="phone">
-        <div className="phone-inner">
-          <StatusBar/>
-          <div className="ah-sticky">
-            <Header
-              firstName={firstName}
-              initial={initial}
-              dateLabel={formatHeaderDate(new Date(), macroWeek, macroTotal)}
-              streak={streakValue}
-              onProfile={() => navigate('PROFILE')}
+      <div className="ah-sticky">
+        <Header
+          firstName={firstName}
+          initial={initial}
+          dateLabel={formatHeaderDate(new Date(), macroWeek, macroTotal)}
+          streak={streakValue}
+          tier={tier}
+          onProfile={() => navigate('PROFILE')}
+        />
+        <Semaforo state={semState} onClick={() => navigate('PULSE')}/>
+      </div>
+      <div className="ah-scroll">
+        <div className="ah-bento">
+          {/* ROW 1 */}
+          <div className="ah-row-1">
+            <ReadinessCard
+              value={readiness}
+              state={semState}
+              loading={stressLoading}
+              meta={readinessMeta}
+              onClick={() => navigate('PULSE')}
             />
-            <Semaforo state={semState} onClick={() => navigate('PULSE')}/>
+            <OlyCard value={olyIndex} sub={olySub} onClick={() => navigate('INDEX')}/>
+            <TierWithAnimate
+              tier={tier} name={tierName} pct={tierPct} animate={false}
+              onClick={() => navigate('PROGRESSION')}
+            />
           </div>
-          <div className="ah-scroll">
-            <div className="ah-bento">
-              {/* ROW 1 */}
-              <div className="ah-row-1">
-                <ReadinessCard
-                  value={readiness}
-                  state={semState}
-                  loading={stressLoading}
-                  meta={readinessMeta}
-                  onClick={() => navigate('PULSE')}
-                />
-                <OlyCard value={olyIndex} sub={olySub} onClick={() => navigate('INDEX')}/>
-                <TierWithAnimate
-                  tier={tier} name={tierName} pct={tierPct} animate={false}
-                  onClick={() => navigate('PROGRESSION')}
-                />
-              </div>
-              {/* ROW 2 */}
-              <div className="ah-row-2">
-                <MacroCard
-                  current={macroWeek} total={macroTotal} peakAt={macroPeak}
-                  title={macroTitle} fullWidth={!hormonal}
-                  onClick={() => navigate('HO_MACRO_ATHLETE')}
-                />
-                {hormonal && (
-                  <HormonalCard
-                    phase={hormPhase} day={hormDay} foot={hormFoot}
-                    onClick={() => navigate('HORMONAL')}
-                  />
-                )}
-              </div>
-              {/* ROW 3 - CTA */}
-              <TodayCTA
-                eyebrow={ctaEyebrow} title={ctaTitle} foot={ctaFoot}
-                onClick={() => navigate('WARMUP')}
+          {/* ROW 2 */}
+          <div className="ah-row-2">
+            <MacroCard
+              current={macroWeek} total={macroTotal} peakAt={macroPeak}
+              title={macroTitle} fullWidth={!hormonal}
+              onClick={() => navigate('HO_MACRO_ATHLETE')}
+            />
+            {hormonal && (
+              <HormonalCard
+                phase={hormPhase} day={hormDay} foot={hormFoot}
+                onClick={() => navigate('HORMONAL')}
               />
-              {/* ROW 4 - heatmap */}
-              <HeatmapCard activeLabel={heatActive} xpLabel={heatXp} onClick={() => navigate('HO_STATS')}/>
-              {/* ROW 5 - quests */}
-              <Quests/>
-            </div>
+            )}
           </div>
-          <BottomNav active="home" onNavigate={(v) => navigate(v)}/>
+          {/* ROW 3 - CTA */}
+          <TodayCTA
+            eyebrow={ctaEyebrow} title={ctaTitle} foot={ctaFoot}
+            onClick={() => navigate('WARMUP')}
+          />
+          {/* ROW 4 - heatmap */}
+          <HeatmapCard activeLabel={heatActive} xpLabel={heatXp} onClick={() => navigate('HO_STATS')}/>
+          {/* ROW 5 - quests */}
+          <Quests/>
         </div>
       </div>
     </div>
   );
 }
 
-// Tier card needs to react to animate toggle by re-rendering plate-3d
+// Tier card · disco real (PlateBadge) reacciona al toggle animate re-montando vía key
 function TierWithAnimate({ tier, name, pct, animate, onClick }) {
+  const c = ['#F5F5F7','#22C55E','#FBBF24','#3B82F6','#EF4444'][parseInt(tier)];
   return (
     <Card className="ah-tier-card" onClick={onClick}>
       <div className="ah-eyebrow">DISCO · T{tier}</div>
       <div className="ah-tier-disc">
-        <plate-3d key={`${tier}-${animate}`} tier={tier} size="62" {...(animate ? {animate: ''} : {})}/>
+        <PlateBadge key={`${tier}-${animate}`} tier={tierToPlate(tier)} size={62} animate={!!animate}/>
       </div>
       <div className="ah-tier-meta">
-        <div className="ah-tier-label" style={{
-          color: ['#F5F5F7','#22C55E','#FBBF24','#3B82F6','#EF4444'][parseInt(tier)]
-        }}>{name}</div>
+        <div className="ah-tier-label" style={{color: c}}>{name}</div>
         <div className="ah-tier-progress">
           <div className="fill" style={{
             width: `${pct}%`,
-            background: ['#F5F5F7','#22C55E','#FBBF24','#3B82F6','#EF4444'][parseInt(tier)],
-            boxShadow: `0 0 6px ${['#F5F5F7','#22C55E','#FBBF24','#3B82F6','#EF4444'][parseInt(tier)]}`,
+            background: c,
+            boxShadow: `0 0 6px ${c}`,
           }}/>
         </div>
         <div className="ah-tier-pct">{pct}%</div>

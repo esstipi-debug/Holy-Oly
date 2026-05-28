@@ -2,11 +2,12 @@
    PEAK QUAL · ATLETA HOME · estilos
    ------------------------------------------------------------
    SCOPING · todo vive bajo `.ah-v2-root` para que los resets
-   globales (* { margin:0 } · centrado del body) NO se filtren a
-   otras pantallas cuando esta pantalla pasa a estar siempre
-   montada (home real). El root replica el background + centrado
-   que antes vivía en html/body, así el resultado visual de ESTA
-   pantalla no cambia.
+   globales NO se filtren a otras pantallas. Esta pantalla es la
+   HOME REAL: se monta DENTRO de PhoneLayout, que ya aporta el
+   marco del dispositivo, la status bar y la bottom nav. Por eso
+   este archivo YA NO dibuja chrome de teléfono — `.ah-v2-root`
+   es sólo el contenedor de contenido que rellena el área
+   scrollable de PhoneLayout (header sticky + cuerpo scroll).
    ============================================================ */
 
 .ah-v2-root,
@@ -16,16 +17,19 @@
 
 .ah-v2-root {
   font-family: var(--font-body);
-  background: var(--bg-deep);
+  background: var(--bg);
   background-image:
     linear-gradient(rgba(0,229,255,0.025) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0,229,255,0.025) 1px, transparent 1px),
     radial-gradient(ellipse at 50% 0%, rgba(0,229,255,0.06), transparent 60%);
   background-size: 40px 40px, 40px 40px, 100% 100%;
+  /* Rellena el área scrollable de PhoneLayout (height: 100% para resolver
+     contra su altura definida); el scroll vive en `.ah-scroll`, así el
+     header queda fijo dentro del frame igual que en el diseño original. */
   min-height: 100%;
-  display: grid;
-  place-items: center;
-  padding: 24px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
   color: var(--text);
   -webkit-font-smoothing: antialiased;
 }
@@ -36,63 +40,11 @@
 .ah-v2-root p, .ah-v2-root figure, .ah-v2-root button { margin: 0; }
 .ah-v2-root button { padding: 0; }
 
-/* ---------- Phone shell ---------- */
-.phone {
-  width: 390px;
-  height: 844px;
-  background: #000;
-  border-radius: 44px;
-  padding: 10px;
-  box-shadow:
-    0 24px 80px rgba(0,0,0,0.7),
-    0 0 0 1px rgba(255,255,255,0.06),
-    inset 0 0 0 1px rgba(255,255,255,0.04);
-  position: relative;
-}
-.phone-inner {
-  width: 100%;
-  height: 100%;
-  background: var(--bg);
-  border-radius: 34px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-}
-/* notch */
-.phone-inner::before {
-  content: "";
-  position: absolute;
-  top: 8px; left: 50%;
-  transform: translateX(-50%);
-  width: 110px; height: 24px;
-  background: #000;
-  border-radius: 14px;
-  z-index: 30;
-}
-.status-bar {
-  flex-shrink: 0;
-  height: 38px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px 28px 0;
-  font-family: var(--font-body);
-  font-size: 13px;
-  color: var(--text-hi);
-  font-weight: 600;
-  position: relative;
-  z-index: 20;
-}
-.status-bar .right {
-  display: flex; gap: 6px; align-items: center;
-  font-size: 12px;
-}
-.status-bar .bars { letter-spacing: -1px; }
-
 /* ---------- Sticky top ---------- */
 .ah-sticky {
   flex-shrink: 0;
+  position: sticky;
+  top: 0;
   background: var(--bg);
   border-bottom: 1px solid var(--border-soft);
   z-index: 5;
@@ -110,6 +62,11 @@
   display: flex; align-items: center;
   gap: 10px;
 }
+.ah-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+  line-height: 0;
+}
 .ah-avatar {
   width: 36px; height: 36px;
   background: linear-gradient(135deg, var(--engine-stress), var(--engine-adapt));
@@ -120,6 +77,15 @@
   font-weight: 700;
   font-size: 14px;
   letter-spacing: -0.02em;
+}
+/* Level badge · disco pequeño anclado al borde inf-der del avatar */
+.ah-avatar-badge {
+  position: absolute;
+  right: -6px;
+  bottom: -5px;
+  line-height: 0;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.55));
 }
 .ah-hello {
   font-family: var(--font-display);
@@ -691,40 +657,7 @@
   text-transform: uppercase;
 }
 
-/* ---------- Bottom Nav ---------- */
-.ah-nav {
-  flex-shrink: 0;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  padding: 10px 8px 22px;
-  border-top: 1px solid var(--border-soft);
-  background: var(--bg-deep);
-  height: 76px;
-}
-.ah-nav-tab {
-  background: transparent;
-  border: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  font-family: var(--font-mono);
-  font-size: 8.5px;
-  letter-spacing: 0.15em;
-  color: var(--text-lo);
-  text-transform: uppercase;
-  padding: 4px 8px;
-  cursor: pointer;
-  transition: color 200ms;
-}
-.ah-nav-tab:hover { color: var(--text-mid); }
-.ah-nav-tab.on {
-  color: var(--engine-stress);
-}
-.ah-nav-tab.on svg {
-  filter: drop-shadow(0 0 6px var(--engine-stress));
-}
+/* La bottom nav la aporta PhoneLayout · esta home ya no dibuja la suya. */
 
 /* Tweaks panel slot */
 .tweaks-host { position: fixed; top: 20px; right: 20px; z-index: 100; }

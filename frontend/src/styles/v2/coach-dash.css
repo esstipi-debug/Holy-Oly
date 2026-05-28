@@ -1,40 +1,32 @@
 /* ============================================================
    PEAK QUAL · COACH DASHBOARD
-   Mobile 390×844 first · desktop scales to 3-col roster
+   Renders as plain content INSIDE PhoneLayout (390×844 frame,
+   status bar + bottom nav provided by the layout).
+   All rules are scoped under .coach-frame so nothing leaks
+   globally now that this screen is always-loaded.
    ============================================================ */
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-html, body {
+/* ============================================================
+   FRAME · the screen root. Box-model + look scoped here so we
+   don't ship a global `*` reset or `body` background.
+   ============================================================ */
+.coach-frame {
+  /* intentionally NOT position:relative — so the FAB/actions/scrim
+     (position:absolute) anchor to the PhoneLayout phone frame and stay
+     pinned above the bottom nav instead of to the tall scrolling content. */
+  min-height: 100%;
   font-family: var(--font-body);
-  background: var(--bg-deep);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  padding: 16px 12px 96px;
+  /* subtle engine grid + top glow — was on body, now scoped to the screen */
   background-image:
     linear-gradient(rgba(0,229,255,0.025) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0,229,255,0.025) 1px, transparent 1px),
     radial-gradient(ellipse at 50% 0%, rgba(0,229,255,0.05), transparent 60%);
   background-size: 40px 40px, 40px 40px, 100% 100%;
-  min-height: 100vh;
-  color: var(--text);
-  -webkit-font-smoothing: antialiased;
 }
-
-/* ============================================================
-   FRAME · centered, scales gracefully
-   ============================================================ */
-.coach-frame {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 24px 16px 120px;
-  position: relative;
-}
-
-/* On mobile pretend we're inside a phone: hard 390 width, snug paddings */
-@media (max-width: 768px) {
-  .coach-frame {
-    max-width: 390px;
-    padding: 0 12px 120px;
-  }
-}
+.coach-frame * { box-sizing: border-box; }
 
 .cd-section {
   margin-top: 12px;
@@ -299,6 +291,18 @@ html, body {
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
+/* empty state · no critical alerts */
+.cd-alerts[data-empty="true"] {
+  border-left-color: var(--engine-oly);
+  background: linear-gradient(90deg, rgba(34,197,94,0.06), transparent 70%);
+}
+.cd-alert-empty {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-mid);
+  letter-spacing: 0.04em;
+  padding: 4px 2px;
+}
 
 /* ============================================================
    MACRO HERO
@@ -439,17 +443,25 @@ html, body {
 
 /* ============================================================
    ROSTER · FIFA AthleteCard
+   Single column always — this screen lives inside the fixed 390px
+   PhoneLayout frame, so viewport-based multi-col media queries
+   (which would fire on a desktop viewport) are intentionally dropped.
    ============================================================ */
 .cd-roster-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 10px;
 }
-@media (min-width: 768px) {
-  .cd-roster-grid { grid-template-columns: repeat(2, 1fr); }
-}
-@media (min-width: 1100px) {
-  .cd-roster-grid { grid-template-columns: repeat(3, 1fr); }
+.cd-roster-empty {
+  padding: 28px 16px;
+  text-align: center;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
+  color: var(--text-mid);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
 }
 
 .athlete {
@@ -771,11 +783,14 @@ html, body {
 
 /* ============================================================
    FAB · bottom right · cyan glow + actions sheet
+   position:absolute (not fixed) so it stays inside the PhoneLayout
+   frame and clears the 76px bottom nav instead of escaping to the
+   viewport. Anchors to the phone frame (nearest positioned ancestor).
    ============================================================ */
 .cd-fab {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
+  position: absolute;
+  bottom: 88px;
+  right: 16px;
   width: 56px; height: 56px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--engine-stress), color-mix(in oklab, var(--engine-stress) 55%, #000));
@@ -798,9 +813,9 @@ html, body {
 .cd-fab[data-open="true"] { transform: rotate(45deg); }
 
 .cd-actions {
-  position: fixed;
-  bottom: 96px;
-  right: 24px;
+  position: absolute;
+  bottom: 152px;
+  right: 16px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -848,7 +863,7 @@ html, body {
 }
 
 .cd-scrim {
-  position: fixed;
+  position: absolute;
   inset: 0;
   background: rgba(0,0,0,0.5);
   backdrop-filter: blur(2px);

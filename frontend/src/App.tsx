@@ -7,13 +7,11 @@ import { ProductProvider, useProduct } from './context/ProductContext';
 import { RoleProvider, useRole } from './context/RoleContext';
 import { ToastProvider } from './components/Toast';
 import PhoneLayout, { type NavTab } from './layouts/PhoneLayout';
-import AtletaHome from './pages/AtletaHome';
 import ActiveSession from './pages/ActiveSession';
 import WarmupGenerator from './pages/WarmupGenerator';
 import SessionSummaryPreview from './pages/SessionSummaryPreview';
 import VictoryScreen from './pages/VictoryScreen';
 import OlyIndex from './pages/OlyIndex';
-import CommandCenter from './pages/CommandCenter';
 import CoachStatsHO from './pages/CoachStatsHO';
 import AthleteDeepDive from './pages/AthleteDeepDive';
 import AssignMacrocycle from './pages/AssignMacrocycle';
@@ -381,7 +379,7 @@ function AppInner() {
       case 'SOCIAL_GALLERY': return <SocialCardsGallery />;
       case 'BASELINE':       return <BaselineAssessment />;
       case 'PROFILE':        return <Profile />;
-      case 'COACH_DASH':     return <CommandCenter />;
+      case 'COACH_DASH':     return <React.Suspense fallback={null}><CoachDashV2 /></React.Suspense>;
       case 'COACH_STATS':    return <CoachStatsHO />;
       case 'COACH_MACRO_VIEW': return <CoachMacroView />;
       case 'ATHLETE_DETAIL': return <AthleteDeepDive />;
@@ -394,7 +392,7 @@ function AppInner() {
       case 'COACH_VIRAL_TOOLS': return <CoachViralTools />;
       case 'HOME':
       default:
-        return role === 'coach' ? <CommandCenter /> : <AtletaHome />;
+        return <React.Suspense fallback={null}>{role === 'coach' ? <CoachDashV2 /> : <AtletaHomeV2 />}</React.Suspense>;
     }
   };
 
