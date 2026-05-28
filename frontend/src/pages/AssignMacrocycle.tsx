@@ -4,6 +4,7 @@ import { useAthlete } from '../context/AthleteContext';
 import { useProduct } from '../context/ProductContext';
 import { MACROCYCLES, type Macrocycle } from '../data/macrocycles';
 import { PlateBadge, type PlateTier } from '../components/PlateBadge';
+import { api } from '../lib/api';
 import {
   tryFetchMacrocycles,
   trySuggestMacrosFor,
@@ -32,6 +33,163 @@ function intensityTier(intensity: number): PlateTier {
   if (intensity === 3) return 'yellow';
   if (intensity === 4) return 'blue';
   return 'red';
+}
+
+// Extrae el nº de semanas desde duration ("16 semanas" / "12 sem" / "8").
+// Fallback a 12 si no se puede parsear (rango válido 1..52).
+function parseWeeks(duration: string): number {
+  const m = duration.match(/\d+/);
+  const n = m ? parseInt(m[0], 10) : NaN;
+  if (!Number.isFinite(n) || n < 1) return 12;
+  return Math.min(52, n);
+}
+
+// Colorea cada semana por fase (cuartil) · mismos colores que los mesociclos
+// de HolyOlyDetailV2 (GPP verde → fuerza amarillo → SPP naranja → peaking rojo).
+// El UIMacro de esta pantalla NO trae data por-semana (IMR/meso/foco) como el
+// MACRO de HolyOlyDetailV2, así que derivamos la fase del % de avance.
+const PHASE_COLORS = ['#84CC16', '#FBBF24', '#F97316', '#EF4444'];
+function weekPhaseColor(week: number, totalWeeks: number): string {
+  if (totalWeeks <= 1) return PHASE_COLORS[0];
+  const q = Math.min(3, Math.floor(((week - 1) / totalWeeks) * 4));
+  return PHASE_COLORS[q];
+}
+
+// Razones de inicio · espejo de HolyOlyDetailV2.WeekPickerModal.REASONS.
+const START_REASONS: { id: string; label: string }[] = [
+  { id: 'beginning',        label: 'Empezar desde el principio' },
+  { id: 'previous_program', label: 'Atleta viene de otro programa similar' },
+  { id: 'recovery',         label: 'Recovery post-lesión · empezar en deload' },
+  { id: 'peaking',          label: 'Peaking · saltar a fase final' },
+  { id: 'other',            label: 'Otro motivo' },
+];
+
+// ============================================================
+// Week Picker Modal · coach elige desde QUÉ SEMANA arranca el atleta.
+// Replicado de HolyOlyDetailV2.WeekPickerModal (no exportado como standalone)
+// y adaptado al UIMacro de esta pantalla (sin data IMR por-semana).
+// Scopeado bajo .am-root vía clases .am-wp-*.
+// ============================================================
+function WeekPickerModal({
+  open, onClose, macroName, totalWeeks, accent, submitting, onConfirm,
+}: {
+  open: boolean;
+  onClose: () => void;
+  macroName: string;
+  totalWeeks: number;
+  accent: string;
+  submitting: boolean;
+  onConfirm: (startWeek: number, reason: string) => void;
+}) {
+  const [selectedWeek, setSelectedWeek] = useState<number>(1);
+  const [reason, setReason] = useState<string>('beginning');
+
+  // Reset a S1 cada vez que se abre con otro macro (cambia el total).
+  useEffect(() => {
+    if (open) {
+      setSelectedWeek(1);
+      setReason('beginning');
+    }
+  }, [open, totalWeeks]);
+
+  if (!open) return null;
+
+  const weeks = Array.from({ length: totalWeeks }, (_, i) => i + 1);
+  const previewColor = weekPhaseColor(selectedWeek, totalWeeks);
+
+  return (
+    <>
+      <div className="am-wp-scrim" onClick={() => !submitting && onClose()} />
+      <div
+        className="am-wp-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="am-wp-title"
+        style={{ ['--cc' as string]: accent } as CSSProperties}
+      >
+        <button
+          className="am-wp-close"
+          onClick={onClose}
+          disabled={submitting}
+          aria-label="Cerrar"
+        >✕</button>
+
+        <div className="am-wp-head">
+          <span className="am-wp-tag">Asignar macrociclo</span>
+          <h2 id="am-wp-title">{macroName}</h2>
+          <p className="am-wp-sub">¿Desde qué semana arranca este atleta?</p>
+        </div>
+
+        <div className="am-wp-weeks-scroll scroll-x-no-bar">
+          <div className="am-wp-weeks">
+            {weeks.map(w => {
+              const active = w === selectedWeek;
+              return (
+                <button
+                  key={w}
+                  type="button"
+                  className="am-wp-week"
+                  data-active={active}
+                  style={{ ['--meso-c' as string]: weekPhaseColor(w, totalWeeks) } as CSSProperties}
+                  onClick={() => setSelectedWeek(w)}
+                  aria-pressed={active}
+                >
+                  <span className="num">S{w}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div
+          className="am-wp-preview"
+          style={{ ['--meso-c' as string]: previewColor } as CSSProperties}
+        >
+          <span className="am-wp-preview-label">Semana {selectedWeek}</span>
+          <span className="am-wp-preview-focus">
+            {selectedWeek === 1
+              ? 'Inicio del macrociclo'
+              : `Arranca en S${selectedWeek} de ${totalWeeks}`}
+          </span>
+          <span className="am-wp-preview-meta">{totalWeeks - selectedWeek + 1} sem restantes</span>
+        </div>
+
+        <div className="am-wp-reasons">
+          <span className="am-wp-reasons-label">Razón (opcional)</span>
+          {START_REASONS.map(r => (
+            <label key={r.id} className="am-wp-reason" data-active={reason === r.id}>
+              <input
+                type="radio"
+                name="am-wp-reason"
+                value={r.id}
+                checked={reason === r.id}
+                onChange={() => setReason(r.id)}
+              />
+              <span className="dot" />
+              <span>{r.label}</span>
+            </label>
+          ))}
+        </div>
+
+        <div className="am-wp-actions">
+          <button
+            type="button"
+            className="am-wp-cancel"
+            onClick={onClose}
+            disabled={submitting}
+          >Cancelar</button>
+          <button
+            type="button"
+            className="am-wp-confirm"
+            onClick={() => onConfirm(selectedWeek, reason)}
+            disabled={submitting}
+          >
+            {submitting ? 'Asignando…' : `Asignar · empieza S${selectedWeek}`}
+          </button>
+        </div>
+      </div>
+    </>
+  );
 }
 
 // Shape común UI (super-set entre Macrocycle local y RemoteMacrocycle).
@@ -88,6 +246,9 @@ const AssignMacrocycle: React.FC = () => {
   const [suggestionsLoading, setSuggestionsLoading] = useState(false);
   const [expandedSuggestion, setExpandedSuggestion] = useState<string | null>(null);
   const [showFullList, setShowFullList] = useState(false);
+  const [weekPickerOpen, setWeekPickerOpen] = useState(false);
+  const [assigning, setAssigning] = useState(false);
+  const [assignError, setAssignError] = useState<string | null>(null);
 
   // Fetch desde el backend real (con fallback a data local)
   useEffect(() => {
@@ -167,13 +328,50 @@ const AssignMacrocycle: React.FC = () => {
     }
   }, [product, familyFilter, focusFilter, familiesForProduct, focusesForProduct]);
 
-  const handleConfirm = () => {
-    if (!selected) return;
-    navigate('ATHLETE_DETAIL');
-  };
-
   const initials = target ? target.name.split(' ').slice(0, 2).map(n => n[0]).join('') : '';
   const selectedMacro = selected ? macrosForProduct.find(m => m.id === selected) : null;
+  const selectedWeeks = selectedMacro ? parseWeeks(selectedMacro.duration) : 0;
+
+  // Confirmar macro → abrir Week Picker (el coach elige desde qué semana arranca).
+  const handleConfirm = () => {
+    if (!selected) return;
+    setAssignError(null);
+    setWeekPickerOpen(true);
+  };
+
+  // Confirmar semana → POST /v1/macrocycles/assign para el atleta seleccionado.
+  // Mismo endpoint/payload que HolyOlyDetailV2.onWeekPickerConfirm, pero el
+  // athlete_id sale del atleta seleccionado por el coach (no del user logueado).
+  const handleAssign = async (startWeek: number, reason: string) => {
+    if (!selectedMacro || !target) {
+      // Sin atleta destino o macro → cerrar y navegar (no debería pasar).
+      setWeekPickerOpen(false);
+      navigate('ATHLETE_DETAIL');
+      return;
+    }
+    setAssigning(true);
+    setAssignError(null);
+    try {
+      await api.post('/v1/macrocycles/assign', {
+        athlete_id: target.id,
+        program_id: selectedMacro.id,
+        start_week: startWeek,
+        start_date: new Date().toISOString().slice(0, 10),
+        reason,
+      });
+      setWeekPickerOpen(false);
+      navigate('ATHLETE_DETAIL');
+    } catch (e) {
+      // Backend puede fallar (sin token, programa Volta no soportado, etc).
+      // Mostramos el error pero igualmente avanzamos (paridad con el mock que
+      // navega; el coach no queda atascado).
+      setAssignError((e as Error).message || 'Error al asignar');
+      setWeekPickerOpen(false);
+      navigate('ATHLETE_DETAIL');
+    } finally {
+      setAssigning(false);
+    }
+  };
 
   // Mostrar filtros + listado completo cuando: no hay panel WISE (no holy-oly / sin atleta)
   // o el coach pidió "ver todos".
@@ -395,12 +593,26 @@ const AssignMacrocycle: React.FC = () => {
 
       {/* CONFIRM (sticky con backdrop para no superponerse con cards) */}
       <div className="am-confirm-bar">
+        {assignError && <p className="am-assign-error">⚠ {assignError}</p>}
         <button className="am-confirm" onClick={handleConfirm} disabled={!selected}>
           {selectedMacro
             ? `Confirmar · ${selectedMacro.name}`
             : 'Elegí un macrociclo'}
         </button>
       </div>
+
+      {/* WEEK PICKER · coach elige desde qué semana arranca el atleta */}
+      {selectedMacro && (
+        <WeekPickerModal
+          open={weekPickerOpen}
+          onClose={() => setWeekPickerOpen(false)}
+          macroName={selectedMacro.name}
+          totalWeeks={selectedWeeks}
+          accent={selectedMacro.color}
+          submitting={assigning}
+          onConfirm={handleAssign}
+        />
+      )}
     </div>
   );
 };
