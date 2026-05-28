@@ -12,6 +12,8 @@ import ManualSessionAssigner from './ManualSessionAssigner';
 import SkillEvaluationPanel from './SkillEvaluationPanel';
 import CustomWodAssigner from './CustomWodAssigner';
 import SessionHistoryList from './SessionHistoryList';
+import { PlateBadge, type PlateTier } from './PlateBadge';
+import '../styles/v2/athlete-training-view.css';
 
 // ──────────────────────────────────────────────────────────────────
 // Tipos internos
@@ -57,9 +59,6 @@ const DAY_LETTERS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
 const DAY_LABELS  = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 const MONTHS      = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 
-const HO_GOLD   = '#F5C518';
-const HO_PURPLE = '#7C5CFF';
-
 // ──────────────────────────────────────────────────────────────────
 // Helpers
 // ──────────────────────────────────────────────────────────────────
@@ -86,14 +85,15 @@ const round2_5 = (kg: number) => Math.round(kg / 2.5) * 2.5;
 const fmtDayLabel = (d: Date) =>
   `${DAY_LABELS[dowMon0(d)]} ${String(d.getDate()).padStart(2, '0')}/${MONTHS[d.getMonth()]}`;
 
+// Intensity → V2 token-driven heatmap color. Drives the 30d map cells and
+// week-strip ring background. Colors come from engine/tier tokens (no hardcodes).
 const intensityColor = (pct: number, completed: boolean): { bg: string; border: string } => {
-  if (pct <= 0) return { bg: 'rgba(255,255,255,0.04)', border: 'var(--card-border)' };
-  if (pct < 0.6)  return { bg: 'rgba(148,163,184,0.18)', border: 'rgba(148,163,184,0.35)' };
-  if (pct < 0.75) return { bg: 'rgba(34,197,94,0.22)',  border: 'rgba(34,197,94,0.45)'  };
-  if (pct < 0.9)  return { bg: `${HO_GOLD}33`,           border: `${HO_GOLD}66`          };
-  return            { bg: 'rgba(239,68,68,0.28)',       border: 'rgba(239,68,68,0.55)'  };
-  // 'completed' no cambia el color base; un dot extra lo marca abajo
-  void completed;
+  void completed; // 'completed' no cambia el color base; un dot extra lo marca abajo
+  if (pct <= 0)   return { bg: 'var(--surface-2)', border: 'var(--border-soft)' };
+  if (pct < 0.6)  return { bg: 'color-mix(in oklab, var(--text-lo) 22%, transparent)',     border: 'color-mix(in oklab, var(--text-lo) 40%, transparent)' };
+  if (pct < 0.75) return { bg: 'color-mix(in oklab, var(--engine-oly) 24%, transparent)',  border: 'color-mix(in oklab, var(--engine-oly) 48%, transparent)' };
+  if (pct < 0.9)  return { bg: 'color-mix(in oklab, var(--engine-belt) 26%, transparent)', border: 'color-mix(in oklab, var(--engine-belt) 52%, transparent)' };
+  return            { bg: 'color-mix(in oklab, var(--engine-pulse) 30%, transparent)',     border: 'color-mix(in oklab, var(--engine-pulse) 56%, transparent)' };
 };
 
 const intensityLabel = (pct: number) => {
@@ -102,6 +102,16 @@ const intensityLabel = (pct: number) => {
   if (pct < 0.75) return 'técnico';
   if (pct < 0.9)  return 'fuerza';
   return 'max';
+};
+
+// Intensity → halterofilia plate tier (PlateBadge). Used as the visual
+// intensity marker on today's session header.
+const intensityTier = (pct: number): PlateTier => {
+  if (pct <= 0)   return 'white';
+  if (pct < 0.6)  return 'green';
+  if (pct < 0.75) return 'yellow';
+  if (pct < 0.9)  return 'blue';
+  return 'red';
 };
 
 // ──────────────────────────────────────────────────────────────────
@@ -321,64 +331,49 @@ const AthleteTrainingView: React.FC<Props> = ({ athlete }) => {
   // ──────────────────────────────────────────────────────────────
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+    <div className="atv-root">
 
       {/* ── Sección 1 · HOY ───────────────────────────────────── */}
-      <section>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }}>
-          <p style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase' }}>
-            Hoy · {fmtDayLabel(today)}
-          </p>
+      <section className="atv-section atv-today">
+        <div className="atv-head">
+          <span className="atv-eyebrow">
+            <span className="pip" />Hoy · {fmtDayLabel(today)}
+          </span>
           <StatusBadge status={todayStatus} />
         </div>
 
-        <div style={{
-          background: 'var(--surface)',
-          border: `1px solid ${todayStatus === 'completed' ? 'rgba(34,197,94,0.30)' : `${HO_GOLD}40`}`,
-          borderRadius: 18,
-          padding: 16,
-          boxShadow: todayStatus === 'in_progress' ? `0 0 0 1px ${HO_GOLD}33, 0 6px 24px -10px ${HO_GOLD}55` : 'none',
-        }}>
+        <div className={`atv-card atv-today${todayStatus === 'completed' ? ' is-completed' : ''}${todayStatus === 'in_progress' ? ' is-progress' : ''}`}>
+          <span className="br br-tl" /><span className="br br-tr" />
           {todayPlanned.type === 'descanso' ? (
-            <div style={{ textAlign: 'center', padding: '14px 0 6px' }}>
-              <p style={{ fontSize: 30, lineHeight: 1, marginBottom: 6 }}>🛌</p>
-              <p style={{ fontSize: 13, fontWeight: 800, color: 'var(--text)' }}>Día de descanso programado</p>
-              <p style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 4 }}>
+            <div className="atv-rest">
+              <span className="icon">🛌</span>
+              <p className="atv-rest-title">Día de descanso programado</p>
+              <p className="atv-rest-sub">
                 {athlete.macrocycle.focus} · Sem {athlete.macrocycle.week}/{athlete.macrocycle.total_weeks}
               </p>
             </div>
           ) : (
             <>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12 }}>
-                <p style={{ fontSize: 14, fontWeight: 800, color: 'var(--text)', fontStyle: 'italic', letterSpacing: '-.01em' }}>
-                  Sesión {todayPlanned.type}
-                </p>
-                <p style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 700 }}>
-                  Intensidad ~{Math.round(todayPlanned.avgPct * 100)}%
-                </p>
+              <div className="atv-today-head">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <PlateBadge tier={intensityTier(todayPlanned.avgPct)} size={34} />
+                  <p className="atv-today-title">Sesión {todayPlanned.type}</p>
+                </div>
+                <p className="atv-today-int">~{Math.round(todayPlanned.avgPct * 100)}% 1RM</p>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div className="atv-ex-list">
                 {todayPlanned.exercises.map((ex, i) => {
                   const kg = round2_5(ex.max * ex.pct);
                   return (
-                    <div key={i} style={{
-                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                      background: 'var(--bg)', borderRadius: 12, padding: '10px 12px',
-                      border: '1px solid var(--card-border)',
-                    }}>
+                    <div key={i} className="atv-ex">
                       <div>
-                        <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)' }}>{ex.name}</p>
-                        <p style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
+                        <p className="atv-ex-name">{ex.name}</p>
+                        <p className="atv-ex-scheme">
                           {ex.sets} × {ex.reps} @ {Math.round(ex.pct * 100)}%
                         </p>
                       </div>
-                      <p style={{
-                        fontSize: 15, fontWeight: 900, color: HO_GOLD,
-                        letterSpacing: '-.02em', fontVariantNumeric: 'tabular-nums',
-                      }}>
-                        {kg}kg
-                      </p>
+                      <p className="atv-ex-kg">{kg}kg</p>
                     </div>
                   );
                 })}
@@ -389,14 +384,12 @@ const AthleteTrainingView: React.FC<Props> = ({ athlete }) => {
       </section>
 
       {/* ── Sección 2 · ESTA SEMANA ──────────────────────────── */}
-      <section>
-        <p style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 10 }}>
-          Esta semana
-        </p>
+      <section className="atv-section atv-week">
+        <div className="atv-head">
+          <span className="atv-eyebrow"><span className="pip" />Esta semana</span>
+        </div>
 
-        <div className="scroll-x-no-bar" style={{
-          display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 6,
-        }}>
+        <div className="atv-week-strip scroll-x-no-bar">
           {weekDays.map((d, i) => {
             const isOpen = expandedDay === i;
             const { bg, border } = intensityColor(d.plan.avgPct, d.status === 'completed');
@@ -404,37 +397,26 @@ const AthleteTrainingView: React.FC<Props> = ({ athlete }) => {
               <button
                 key={i}
                 onClick={() => setExpandedDay(isOpen ? -1 : i)}
-                className="btn-press"
-                style={{
-                  flex: '0 0 auto', width: 58, padding: '10px 0', borderRadius: 14,
-                  background: bg, border: `1px solid ${isOpen ? HO_GOLD : border}`,
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
-                  cursor: 'pointer', fontFamily: 'inherit',
-                  boxShadow: d.isToday ? `inset 0 0 0 1px ${HO_GOLD}` : 'none',
-                }}
+                className="atv-day btn-press"
+                data-open={isOpen}
+                data-today={d.isToday}
+                style={{ ['--db' as string]: border, background: bg }}
               >
-                <span style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 800, letterSpacing: '.06em' }}>
-                  {d.plan.letter}
-                </span>
+                <span className="atv-day-letter">{d.plan.letter}</span>
                 <MiniRing pct={d.plan.avgPct} status={d.status} />
-                <span style={{ fontSize: 9, color: 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums' }}>
-                  {d.date.getDate()}
-                </span>
+                <span className="atv-day-num">{d.date.getDate()}</span>
               </button>
             );
           })}
         </div>
 
         {expandedDay >= 0 && (
-          <div style={{
-            marginTop: 10, background: 'var(--surface)',
-            border: '1px solid var(--card-border)', borderRadius: 14, padding: 12,
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
-              <p style={{ fontSize: 12, fontWeight: 800, color: 'var(--text)', fontStyle: 'italic' }}>
+          <div className="atv-day-detail">
+            <div className="atv-day-detail-head">
+              <p className="atv-day-detail-title">
                 {weekDays[expandedDay].plan.label} · {weekDays[expandedDay].plan.type}
               </p>
-              <p style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
+              <p className="atv-day-detail-int">
                 {weekDays[expandedDay].plan.avgPct > 0
                   ? `~${Math.round(weekDays[expandedDay].plan.avgPct * 100)}% 1RM`
                   : 'sin carga'}
@@ -442,20 +424,15 @@ const AthleteTrainingView: React.FC<Props> = ({ athlete }) => {
             </div>
 
             {weekDays[expandedDay].plan.exercises.length === 0 ? (
-              <p style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Descanso · recuperación activa opcional.</p>
+              <p className="atv-day-detail-empty">Descanso · recuperación activa opcional.</p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <div className="atv-day-detail-list">
                 {weekDays[expandedDay].plan.exercises.map((ex, i) => {
                   const kg = round2_5(ex.max * ex.pct);
                   return (
-                    <div key={i} style={{
-                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                      fontSize: 11,
-                    }}>
-                      <span style={{ color: 'var(--text)', fontWeight: 700 }}>{ex.name}</span>
-                      <span style={{ color: 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums' }}>
-                        {ex.sets}×{ex.reps} · {kg}kg
-                      </span>
+                    <div key={i} className="atv-day-detail-row">
+                      <span className="nm">{ex.name}</span>
+                      <span className="vl">{ex.sets}×{ex.reps} · {kg}kg</span>
                     </div>
                   );
                 })}
@@ -469,72 +446,46 @@ const AthleteTrainingView: React.FC<Props> = ({ athlete }) => {
       <SkillFocusAssign athlete={athlete} />
 
       {/* ── Sección 3 · CALENDAR 30 DÍAS ─────────────────────── */}
-      <section>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }}>
-          <p style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase' }}>
-            Mapa 30 días · intensidad
-          </p>
-          <p style={{ fontSize: 9, color: 'var(--text-secondary)', fontWeight: 600 }}>
-            buscar carga para planificar
-          </p>
+      <section className="atv-section atv-map">
+        <div className="atv-head">
+          <span className="atv-eyebrow"><span className="pip" />Mapa 30 días · intensidad</span>
+          <span className="atv-meta">buscar carga para planificar</span>
         </div>
 
-        <div style={{
-          background: 'var(--surface)', border: '1px solid var(--card-border)',
-          borderRadius: 16, padding: 12,
-        }}>
+        <div className="atv-card">
+          <span className="br br-tl" /><span className="br br-tr" />
           {/* header L M X J V S D */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4, marginBottom: 6 }}>
+          <div className="atv-map-grid-head">
             {DAY_LETTERS.map((d, i) => (
-              <p key={i} style={{ fontSize: 9, color: 'var(--text-secondary)', fontWeight: 700, textAlign: 'center', letterSpacing: '.08em' }}>
-                {d}
-              </p>
+              <p key={i} className="atv-map-dow">{d}</p>
             ))}
           </div>
 
           {/* grid 5×7 */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
+          <div className="atv-map-grid">
             {calendarCells.map((c, i) => {
-              const isSel = selectedCell && sameYMD(selectedCell.date, c.date);
+              const isSel = !!(selectedCell && sameYMD(selectedCell.date, c.date));
               const { bg, border } = intensityColor(c.pct, c.completed);
               return (
                 <button
                   key={i}
                   onClick={() => setSelectedCell(isSel ? null : c)}
-                  className="btn-press"
-                  style={{
-                    aspectRatio: '1', borderRadius: 8,
-                    background: bg,
-                    border: `1px solid ${isSel ? HO_GOLD : (c.isToday ? `${HO_PURPLE}` : border)}`,
-                    cursor: 'pointer', position: 'relative',
-                    padding: 0, fontFamily: 'inherit',
-                    opacity: !c.inPast && !c.isToday ? 0.6 : 1,
-                  }}
+                  className="atv-cell btn-press"
+                  data-selected={isSel}
+                  data-today={c.isToday}
+                  data-future={!c.inPast && !c.isToday}
+                  style={{ ['--cbg' as string]: bg, ['--cb' as string]: border }}
                   aria-label={fmtDayLabel(c.date)}
                 >
-                  <span style={{
-                    position: 'absolute', top: 2, left: 4,
-                    fontSize: 8, color: 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums',
-                  }}>
-                    {c.date.getDate()}
-                  </span>
-                  {c.completed && (
-                    <span style={{
-                      position: 'absolute', bottom: 3, right: 3,
-                      width: 5, height: 5, borderRadius: '50%',
-                      background: '#22C55E',
-                    }} />
-                  )}
+                  <span className="atv-cell-num">{c.date.getDate()}</span>
+                  {c.completed && <span className="atv-cell-done" />}
                 </button>
               );
             })}
           </div>
 
           {/* leyenda */}
-          <div style={{
-            display: 'flex', gap: 10, marginTop: 10, flexWrap: 'wrap',
-            justifyContent: 'center', alignItems: 'center',
-          }}>
+          <div className="atv-legend">
             {[
               { label: 'descanso', pct: 0 },
               { label: 'liviano',  pct: 0.55 },
@@ -544,12 +495,9 @@ const AthleteTrainingView: React.FC<Props> = ({ athlete }) => {
             ].map((leg, i) => {
               const { bg, border } = intensityColor(leg.pct, false);
               return (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <span style={{
-                    width: 10, height: 10, borderRadius: 3,
-                    background: bg, border: `1px solid ${border}`,
-                  }} />
-                  <span style={{ fontSize: 9, color: 'var(--text-secondary)', fontWeight: 600 }}>{leg.label}</span>
+                <div key={i} className="atv-legend-item">
+                  <span className="atv-legend-swatch" style={{ ['--lbg' as string]: bg, ['--lb' as string]: border }} />
+                  <span className="atv-legend-label">{leg.label}</span>
                 </div>
               );
             })}
@@ -557,26 +505,21 @@ const AthleteTrainingView: React.FC<Props> = ({ athlete }) => {
 
           {/* detalle de celda seleccionada */}
           {selectedCell && (
-            <div style={{
-              marginTop: 10, padding: 10, borderRadius: 10,
-              background: 'var(--bg)', border: '1px solid var(--card-border)',
-            }}>
-              <p style={{ fontSize: 11, fontWeight: 800, color: 'var(--text)', fontStyle: 'italic' }}>
-                {fmtDayLabel(selectedCell.date)}
-              </p>
+            <div className="atv-cell-detail">
+              <p className="atv-cell-detail-title">{fmtDayLabel(selectedCell.date)}</p>
               {selectedCell.inPast || selectedCell.isToday ? (
                 selectedCell.session && selectedCell.session.load > 0 ? (
-                  <p style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 4, fontVariantNumeric: 'tabular-nums' }}>
+                  <p className="atv-cell-detail-meta">
                     Load {selectedCell.load} · RPE {selectedCell.rpe}/10 · IMR ~{Math.round(selectedCell.pct * 100)}%
                     {selectedCell.completed ? ' · ✓ completada' : ' · pendiente'}
                   </p>
                 ) : (
-                  <p style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 4 }}>
+                  <p className="atv-cell-detail-meta">
                     {selectedCell.plannedType === 'descanso' ? 'Descanso programado' : 'Sin sesión registrada'}
                   </p>
                 )
               ) : (
-                <p style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 4, fontVariantNumeric: 'tabular-nums' }}>
+                <p className="atv-cell-detail-meta">
                   Plan: {intensityLabel(selectedCell.plannedPct ?? 0)}
                   {selectedCell.plannedPct && selectedCell.plannedPct > 0
                     ? ` · ~${Math.round(selectedCell.plannedPct * 100)}% 1RM`
@@ -604,63 +547,38 @@ const AthleteTrainingView: React.FC<Props> = ({ athlete }) => {
       <SessionHistoryList athlete={athlete} />
 
       {/* ── Sección 4 · CTAs COACH ───────────────────────────── */}
-      <section>
-        <p style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 10 }}>
-          Acciones del coach
-        </p>
+      <section className="atv-section atv-actions">
+        <div className="atv-head">
+          <span className="atv-eyebrow"><span className="pip" />Acciones del coach</span>
+        </div>
 
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div className="atv-cta-row">
           <button
             onClick={() => navigate('ASSIGN_MACRO')}
-            className="btn-press"
-            style={{
-              flex: 1, padding: '12px 6px', borderRadius: 12,
-              background: 'rgba(124,92,255,0.14)', color: HO_PURPLE,
-              border: `1px solid ${HO_PURPLE}55`,
-              fontSize: 10, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase',
-              cursor: 'pointer', fontFamily: 'inherit',
-            }}
+            className="atv-cta atv-cta-violet btn-press"
           >
             Modificar sesión
           </button>
 
           <button
             onClick={() => setRestAssigned(v => !v)}
-            className="btn-press"
-            style={{
-              flex: 1, padding: '12px 6px', borderRadius: 12,
-              background: restAssigned ? 'rgba(34,197,94,0.18)' : 'var(--surface)',
-              color: restAssigned ? '#4ade80' : 'var(--text)',
-              border: `1px solid ${restAssigned ? 'rgba(34,197,94,0.45)' : 'var(--card-border)'}`,
-              fontSize: 10, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase',
-              cursor: 'pointer', fontFamily: 'inherit',
-            }}
+            className={`atv-cta btn-press ${restAssigned ? 'atv-cta-on' : 'atv-cta-neutral'}`}
           >
             {restAssigned ? '✓ Descanso' : 'Asignar descanso'}
           </button>
 
           <button
             onClick={() => setCommentOpen(v => !v)}
-            className="btn-press"
-            style={{
-              flex: 1, padding: '12px 6px', borderRadius: 12,
-              background: `${HO_GOLD}22`, color: HO_GOLD,
-              border: `1px solid ${HO_GOLD}55`,
-              fontSize: 10, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase',
-              cursor: 'pointer', fontFamily: 'inherit',
-            }}
+            className="atv-cta atv-cta-belt btn-press"
           >
             Comentar
           </button>
         </div>
 
         {commentOpen && (
-          <div style={{
-            marginTop: 10, background: 'var(--surface)', border: '1px solid var(--card-border)',
-            borderRadius: 12, padding: 12,
-          }}>
+          <div className="atv-comment">
             {commentSent ? (
-              <p style={{ fontSize: 12, color: '#4ade80', fontWeight: 700, textAlign: 'center' }}>
+              <p className="atv-comment-sent">
                 ✓ Comentario enviado a {athlete.name.split(' ')[0]}
               </p>
             ) : (
@@ -670,26 +588,12 @@ const AthleteTrainingView: React.FC<Props> = ({ athlete }) => {
                   onChange={(e) => setCommentText(e.target.value)}
                   placeholder={`Mensaje rápido para ${athlete.name.split(' ')[0]}…`}
                   autoFocus
-                  style={{
-                    width: '100%', padding: '10px 12px',
-                    background: 'var(--bg)', border: '1px solid var(--card-border)',
-                    borderRadius: 10, color: 'var(--text)', fontSize: 12,
-                    fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box',
-                  }}
+                  className="atv-input"
                 />
                 <button
                   onClick={sendComment}
                   disabled={!commentText.trim()}
-                  className="btn-press"
-                  style={{
-                    width: '100%', marginTop: 8, padding: '10px 0', borderRadius: 10,
-                    background: commentText.trim() ? HO_GOLD : 'transparent',
-                    color: commentText.trim() ? '#000' : 'var(--text-secondary)',
-                    border: commentText.trim() ? 'none' : '1px solid var(--card-border)',
-                    fontSize: 11, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase',
-                    cursor: commentText.trim() ? 'pointer' : 'not-allowed',
-                    fontFamily: 'inherit',
-                  }}
+                  className="atv-send btn-press"
                 >
                   Enviar
                 </button>
@@ -707,20 +611,18 @@ const AthleteTrainingView: React.FC<Props> = ({ athlete }) => {
 // ──────────────────────────────────────────────────────────────────
 
 const StatusBadge: React.FC<{ status: DayStatus }> = ({ status }) => {
-  const map: Record<DayStatus, { label: string; bg: string; fg: string; bd: string }> = {
-    completed:   { label: '✓ Completado', bg: 'rgba(34,197,94,0.14)',  fg: '#4ade80', bd: 'rgba(34,197,94,0.35)' },
-    in_progress: { label: '🏃 En curso',   bg: `${HO_GOLD}22`,           fg: HO_GOLD,   bd: `${HO_GOLD}55`         },
-    future:      { label: '⏸ Pendiente',  bg: 'rgba(124,92,255,0.14)', fg: HO_PURPLE, bd: `${HO_PURPLE}55`        },
-    rest:        { label: '🛌 Descanso',   bg: 'rgba(148,163,184,0.14)', fg: 'var(--text-secondary)', bd: 'var(--card-border)' },
-    missed:      { label: '✕ Saltada',     bg: 'rgba(239,68,68,0.14)',  fg: '#f87171', bd: 'rgba(239,68,68,0.35)' },
+  const map: Record<DayStatus, { label: string; color: string }> = {
+    completed:   { label: 'Completado', color: 'var(--engine-oly)' },
+    in_progress: { label: 'En curso',   color: 'var(--engine-belt)' },
+    future:      { label: 'Pendiente',  color: 'var(--engine-adapt)' },
+    rest:        { label: 'Descanso',   color: 'var(--text-mid)' },
+    missed:      { label: 'Saltada',    color: 'var(--engine-pulse)' },
   };
   const s = map[status];
   return (
-    <span style={{
-      fontSize: 9, fontWeight: 800, letterSpacing: '.08em',
-      padding: '4px 10px', borderRadius: 10,
-      background: s.bg, color: s.fg, border: `1px solid ${s.bd}`,
-    }}>{s.label}</span>
+    <span className="atv-badge" style={{ ['--bc' as string]: s.color }}>
+      <span className="dot" />{s.label}
+    </span>
   );
 };
 
@@ -731,25 +633,25 @@ const MiniRing: React.FC<{ pct: number; status: DayStatus }> = ({ pct, status })
   const c = 2 * Math.PI * r;
   const filled = c * (1 - Math.min(1, Math.max(0, pct)));
   const color =
-    status === 'completed' ? '#22C55E'
-    : status === 'in_progress' ? HO_GOLD
-    : status === 'missed' ? '#EF4444'
-    : status === 'rest' ? 'var(--text-secondary)'
-    : HO_PURPLE;
+    status === 'completed' ? 'var(--engine-oly)'
+    : status === 'in_progress' ? 'var(--engine-belt)'
+    : status === 'missed' ? 'var(--engine-pulse)'
+    : status === 'rest' ? 'var(--text-mid)'
+    : 'var(--engine-adapt)';
 
   if (status === 'rest') {
     return (
       <span style={{
         width: size, height: size, borderRadius: '50%',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: 10, color: 'var(--text-secondary)',
+        fontSize: 10, color: 'var(--text-mid)',
       }}>·</span>
     );
   }
 
   return (
     <svg width={size} height={size} style={{ display: 'block' }}>
-      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="var(--card-border)" strokeWidth={stroke} />
+      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="var(--border-soft)" strokeWidth={stroke} />
       <circle
         cx={size/2} cy={size/2} r={r} fill="none"
         stroke={color} strokeWidth={stroke} strokeLinecap="round"
@@ -761,7 +663,7 @@ const MiniRing: React.FC<{ pct: number; status: DayStatus }> = ({ pct, status })
           x="50%" y="52%"
           dominantBaseline="middle" textAnchor="middle"
           fontSize="7" fontWeight={800} fill={color}
-          style={{ fontVariantNumeric: 'tabular-nums' }}
+          style={{ fontVariantNumeric: 'tabular-nums', fontFamily: 'var(--font-mono)' }}
         >
           {Math.round(pct * 100)}
         </text>
@@ -845,119 +747,68 @@ const DoubleSessionPanel: React.FC<{ athlete: AthleteProfile; today: Date }> = (
   };
 
   return (
-    <section>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }}>
-        <p style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase' }}>
-          Doble sesión · hoy
-        </p>
+    <section className="atv-section atv-double">
+      <div className="atv-head">
+        <span className="atv-eyebrow"><span className="pip" />Doble sesión · hoy</span>
         {hasDouble && (
-          <span style={{
-            fontSize: 9, fontWeight: 800, letterSpacing: '.08em',
-            padding: '3px 8px', borderRadius: 8,
-            background: `${HO_GOLD}22`, color: HO_GOLD, border: `1px solid ${HO_GOLD}55`,
-          }}>AM + PM</span>
+          <span className="atv-badge" style={{ ['--bc' as string]: 'var(--engine-belt)' }}>
+            <span className="dot" />AM + PM
+          </span>
         )}
       </div>
 
       {hasDouble ? (
-        <div style={{
-          background: 'var(--surface)', border: `1px solid ${HO_GOLD}40`,
-          borderRadius: 14, padding: 12,
-        }}>
-          <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+        <div className="atv-card">
+          <span className="br br-tl" /><span className="br br-tr" />
+          <div className="atv-double-slots">
             {existing.map(s => (
-              <div key={s.slot} style={{
-                flex: 1, background: 'var(--bg)', border: '1px solid var(--card-border)',
-                borderRadius: 10, padding: '10px 12px',
-              }}>
-                <p style={{ fontSize: 10, fontWeight: 800, color: HO_GOLD, letterSpacing: '.1em' }}>
-                  {s.slot.toUpperCase()} · {s.focus}
-                </p>
-                <p style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 3, fontVariantNumeric: 'tabular-nums' }}>
+              <div key={s.slot} className="atv-slot">
+                <p className="atv-slot-tag">{s.slot.toUpperCase()} · {s.focus}</p>
+                <p className="atv-slot-meta">
                   {s.exercises.length} ejerc · ~{Math.round((s.exercises.reduce((a,e)=>a+e.pct,0) / Math.max(1,s.exercises.length)) * 100)}%
                 </p>
               </div>
             ))}
           </div>
-          <button
-            onClick={handleRemove}
-            className="btn-press"
-            style={{
-              width: '100%', padding: '10px 0', borderRadius: 10,
-              background: 'transparent', color: 'var(--text-secondary)',
-              border: '1px solid var(--card-border)',
-              fontSize: 10, fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase',
-              cursor: 'pointer', fontFamily: 'inherit',
-            }}
-          >Quitar doble sesión</button>
+          <button onClick={handleRemove} className="atv-ghost-btn btn-press">
+            Quitar doble sesión
+          </button>
         </div>
       ) : open ? (
-        <div style={{
-          background: 'var(--surface)', border: '1px solid var(--card-border)',
-          borderRadius: 14, padding: 12,
-        }}>
-          <p style={{ fontSize: 10, color: 'var(--text-secondary)', marginBottom: 10, fontStyle: 'italic' }}>
+        <div className="atv-card">
+          <span className="br br-tl" /><span className="br br-tr" />
+          <p className="atv-double-hint">
             Form básico · plantilla HO (AM Snatch + C&amp;J · PM Squat + Pull). Expandir en el futuro.
           </p>
 
           <SlotIntensityRow label="AM · Olympic" pct={amPct} onChange={setAmPct} />
           <SlotIntensityRow label="PM · Strength" pct={pmPct} onChange={setPmPct} />
 
-          <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-            <button
-              onClick={() => setOpen(false)}
-              className="btn-press"
-              style={{
-                flex: 1, padding: '10px 0', borderRadius: 10,
-                background: 'transparent', color: 'var(--text-secondary)',
-                border: '1px solid var(--card-border)',
-                fontSize: 10, fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase',
-                cursor: 'pointer', fontFamily: 'inherit',
-              }}
-            >Cancelar</button>
-            <button
-              onClick={handleAssign}
-              className="btn-press"
-              style={{
-                flex: 1, padding: '10px 0', borderRadius: 10,
-                background: HO_GOLD, color: '#000', border: 'none',
-                fontSize: 10, fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase',
-                cursor: 'pointer', fontFamily: 'inherit',
-              }}
-            >Asignar</button>
+          <div className="atv-btn-pair">
+            <button onClick={() => setOpen(false)} className="atv-ghost-btn btn-press">
+              Cancelar
+            </button>
+            <button onClick={handleAssign} className="atv-confirm-btn btn-press">
+              Asignar
+            </button>
           </div>
         </div>
       ) : (
-        <button
-          onClick={() => setOpen(true)}
-          className="btn-press"
-          style={{
-            width: '100%', padding: '12px 14px', borderRadius: 12,
-            background: `${HO_GOLD}14`, color: HO_GOLD,
-            border: `1px dashed ${HO_GOLD}55`,
-            fontSize: 11, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase',
-            cursor: 'pointer', fontFamily: 'inherit', textAlign: 'center',
-          }}
-        >+ Asignar doble sesión hoy</button>
+        <button onClick={() => setOpen(true)} className="atv-add-btn btn-press">
+          + Asignar doble sesión hoy
+        </button>
       )}
 
-      {toast && (
-        <p style={{
-          marginTop: 8, fontSize: 11, fontWeight: 700, textAlign: 'center',
-          color: '#4ade80',
-        }}>✓ {toast}</p>
-      )}
+      {toast && <p className="atv-toast">✓ {toast}</p>}
     </section>
   );
 };
 
 const SlotIntensityRow: React.FC<{ label: string; pct: number; onChange: (v: number) => void }> = ({ label, pct, onChange }) => (
-  <div style={{ marginBottom: 10 }}>
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
-      <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text)' }}>{label}</span>
-      <span style={{ fontSize: 11, fontWeight: 800, color: HO_GOLD, fontVariantNumeric: 'tabular-nums' }}>
-        ~{Math.round(pct * 100)}%
-      </span>
+  <div className="atv-slider-row">
+    <div className="atv-slider-head">
+      <span className="atv-slider-label">{label}</span>
+      <span className="atv-slider-val">~{Math.round(pct * 100)}%</span>
     </div>
     <input
       type="range"
@@ -966,7 +817,7 @@ const SlotIntensityRow: React.FC<{ label: string; pct: number; onChange: (v: num
       step={1}
       value={Math.round(pct * 100)}
       onChange={(e) => onChange(parseInt(e.target.value, 10) / 100)}
-      style={{ width: '100%', accentColor: HO_GOLD }}
+      className="atv-slider"
     />
   </div>
 );

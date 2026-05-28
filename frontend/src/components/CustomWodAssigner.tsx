@@ -11,7 +11,9 @@ import {
   type CompetitorCategory,
 } from '../lib/competitor';
 import { useToast } from './Toast';
+import { PlateBadge } from './PlateBadge';
 import type { AthleteProfile } from '../data/athletes';
+import '../styles/v2/custom-wod-assigner.css';
 
 /**
  * Coach UI · gestiona tier competidor de un atleta Volta:
@@ -23,12 +25,11 @@ import type { AthleteProfile } from '../data/athletes';
  *
  * Solo se renderiza dentro de AthleteTrainingView (coach scope).
  * Si el atleta no es competidor todavía, mostramos solo el form de promoción.
+ *
+ * Estilo V2 dark · scoped bajo `.cwa-root` · tokens de styles/v2/tokens.css.
+ * Solo presentación restyleada: toda la lógica (hooks, handlers, build del
+ * WOD, API calls) se preserva idéntica.
  */
-
-const HO_GOLD = '#F5C518';
-const HO_PURPLE = '#7C5CFF';
-const VOLTA_CYAN = '#00E5FF';
-const VOLTA_RED = '#FF3D00';
 
 const WOD_TYPES: CustomWodType[] = [
   'AMRAP',
@@ -181,108 +182,69 @@ const PromoteForm: React.FC<PromoteFormProps> = ({ athlete, onPromoted }) => {
   };
 
   return (
-    <div style={{
-      background: 'var(--surface)', border: `1px solid ${VOLTA_CYAN}44`,
-      borderRadius: 14, padding: 14,
-    }}>
-      <p style={{
-        fontSize: 11, color: VOLTA_CYAN, fontWeight: 800, marginBottom: 8,
-        letterSpacing: '.04em',
-      }}>
+    <div className="cwa-panel">
+      <span className="br br-tl" />
+      <span className="br br-tr" />
+
+      <p className="cwa-panel-title" style={{ marginBottom: 6 }}>
         Promover a tier competidor
       </p>
-      <p style={{ fontSize: 10, color: 'var(--text-secondary)', marginBottom: 12, lineHeight: 1.4 }}>
+      <p className="cwa-panel-sub" style={{ marginBottom: 14 }}>
         Habilita layout extra · custom WODs · open rank tracking · target event.
       </p>
 
-      <div style={{ marginBottom: 10 }}>
-        <p style={{ fontSize: 9, color: 'var(--text-secondary)', fontWeight: 700, marginBottom: 4, textTransform: 'uppercase' }}>
-          Categoría
-        </p>
-        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+      <div className="cwa-field">
+        <span className="cwa-label">Categoría</span>
+        <div className="cwa-seg">
           {CATEGORIES.map(c => (
             <button
               key={c}
               onClick={() => setCategory(c)}
-              className="btn-press"
-              style={{
-                padding: '5px 10px', borderRadius: 8,
-                background: category === c ? VOLTA_CYAN : 'transparent',
-                color: category === c ? '#000' : 'var(--text-secondary)',
-                border: `1px solid ${category === c ? VOLTA_CYAN : 'var(--card-border)'}`,
-                fontSize: 10, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit',
-              }}
+              className="btn-press cwa-seg-btn"
+              data-active={category === c}
             >{c}</button>
           ))}
         </div>
       </div>
 
-      <div style={{ marginBottom: 10 }}>
-        <p style={{ fontSize: 9, color: 'var(--text-secondary)', fontWeight: 700, marginBottom: 4, textTransform: 'uppercase' }}>
-          Target event
-        </p>
+      <div className="cwa-field">
+        <span className="cwa-label">Target event</span>
         <input
+          className="cwa-input"
           value={targetEvent}
           onChange={(e) => setTargetEvent(e.target.value.slice(0, 64))}
           placeholder="Open 2026 · Quarterfinals · Semifinals · Games"
-          style={{
-            width: '100%', padding: '8px 10px',
-            background: 'var(--bg)', border: '1px solid var(--card-border)',
-            borderRadius: 8, color: 'var(--text)', fontSize: 11,
-            fontFamily: 'inherit', boxSizing: 'border-box',
-          }}
         />
       </div>
 
-      <div style={{ marginBottom: 10 }}>
-        <p style={{ fontSize: 9, color: 'var(--text-secondary)', fontWeight: 700, marginBottom: 4, textTransform: 'uppercase' }}>
-          Sessions / semana · target
-        </p>
+      <div className="cwa-field">
+        <span className="cwa-label">Sessions / semana · target</span>
         <input
+          className="cwa-input cwa-input--num"
           type="number"
           min={1}
           max={21}
           value={weeklySessions}
           onChange={(e) => setWeeklySessions(Number(e.target.value) || 12)}
-          style={{
-            width: 80, padding: '8px 10px',
-            background: 'var(--bg)', border: '1px solid var(--card-border)',
-            borderRadius: 8, color: 'var(--text)', fontSize: 11,
-            fontFamily: 'inherit', boxSizing: 'border-box',
-          }}
         />
       </div>
 
-      <div style={{ marginBottom: 12 }}>
-        <p style={{ fontSize: 9, color: 'var(--text-secondary)', fontWeight: 700, marginBottom: 4, textTransform: 'uppercase' }}>
-          Notas (coach → atleta)
-        </p>
+      <div className="cwa-field">
+        <span className="cwa-label">Notas (coach → atleta)</span>
         <textarea
+          className="cwa-textarea"
           value={coachNotes}
           onChange={(e) => setCoachNotes(e.target.value.slice(0, 2000))}
           placeholder="Ej. 'Foco en gymnastics · OHS 90kg para Open 26'"
           rows={2}
-          style={{
-            width: '100%', padding: '8px 10px',
-            background: 'var(--bg)', border: '1px solid var(--card-border)',
-            borderRadius: 8, color: 'var(--text)', fontSize: 11,
-            fontFamily: 'inherit', outline: 'none', resize: 'vertical',
-            boxSizing: 'border-box',
-          }}
         />
       </div>
 
       <button
         onClick={handlePromote}
         disabled={submitting}
-        className="btn-press"
-        style={{
-          width: '100%', padding: '10px 0', borderRadius: 10,
-          background: VOLTA_CYAN, color: '#000', border: 'none',
-          fontSize: 11, fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase',
-          cursor: submitting ? 'wait' : 'pointer', fontFamily: 'inherit',
-          opacity: submitting ? 0.6 : 1,
-        }}
+        className="btn-press cwa-cta cwa-cta--cyan"
+        data-busy={submitting}
       >{submitting ? 'Promoviendo…' : '✦ Promover a competidor'}</button>
     </div>
   );
@@ -383,61 +345,39 @@ const WodForm: React.FC<WodFormProps> = ({ athleteId, onCreated }) => {
   };
 
   return (
-    <div style={{
-      background: 'var(--surface)', border: '1px solid var(--card-border)',
-      borderRadius: 14, padding: 12, marginTop: 10,
-    }}>
+    <div className="cwa-panel" data-accent="gold" style={{ marginTop: 10 }}>
+      <span className="br br-tl" />
+      <span className="br br-tr" />
+
       {/* Templates */}
-      <p style={{ fontSize: 9, color: 'var(--text-secondary)', fontWeight: 700, marginBottom: 4, textTransform: 'uppercase' }}>
-        Template rápido
-      </p>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 12 }}>
+      <span className="cwa-label">Template rápido</span>
+      <div className="cwa-tpls">
         {TEMPLATES.map(t => (
           <button
             key={t.id}
             onClick={() => applyTemplate(t.id)}
-            className="btn-press"
-            style={{
-              padding: '4px 8px', borderRadius: 6,
-              background: 'transparent', color: 'var(--text-secondary)',
-              border: `1px solid ${HO_PURPLE}55`,
-              fontSize: 9, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
-            }}
+            className="btn-press cwa-tpl"
           >{t.label}</button>
         ))}
       </div>
 
       {/* Fila 1: fecha + tipo */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
-        <div style={{ flex: 1 }}>
-          <p style={{ fontSize: 9, color: 'var(--text-secondary)', fontWeight: 700, marginBottom: 4, textTransform: 'uppercase' }}>
-            Fecha
-          </p>
+      <div className="cwa-row">
+        <div>
+          <span className="cwa-label">Fecha</span>
           <input
+            className="cwa-input"
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            style={{
-              width: '100%', padding: '6px 8px',
-              background: 'var(--bg)', border: '1px solid var(--card-border)',
-              borderRadius: 8, color: 'var(--text)', fontSize: 11,
-              fontFamily: 'inherit', boxSizing: 'border-box',
-            }}
           />
         </div>
-        <div style={{ flex: 1 }}>
-          <p style={{ fontSize: 9, color: 'var(--text-secondary)', fontWeight: 700, marginBottom: 4, textTransform: 'uppercase' }}>
-            Tipo
-          </p>
+        <div>
+          <span className="cwa-label">Tipo</span>
           <select
+            className="cwa-select"
             value={type}
             onChange={(e) => setType(e.target.value as CustomWodType)}
-            style={{
-              width: '100%', padding: '6px 8px',
-              background: 'var(--bg)', border: '1px solid var(--card-border)',
-              borderRadius: 8, color: 'var(--text)', fontSize: 11,
-              fontFamily: 'inherit', boxSizing: 'border-box',
-            }}
           >
             {WOD_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
           </select>
@@ -445,38 +385,24 @@ const WodForm: React.FC<WodFormProps> = ({ athleteId, onCreated }) => {
       </div>
 
       {/* Fila 2: duración + intensidad */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
-        <div style={{ flex: 1 }}>
-          <p style={{ fontSize: 9, color: 'var(--text-secondary)', fontWeight: 700, marginBottom: 4, textTransform: 'uppercase' }}>
-            Duración (min)
-          </p>
+      <div className="cwa-row">
+        <div>
+          <span className="cwa-label">Duración (min)</span>
           <input
+            className="cwa-input"
             type="number"
             min={1}
             max={180}
             value={durationMin}
             onChange={(e) => setDurationMin(Number(e.target.value) || 20)}
-            style={{
-              width: '100%', padding: '6px 8px',
-              background: 'var(--bg)', border: '1px solid var(--card-border)',
-              borderRadius: 8, color: 'var(--text)', fontSize: 11,
-              fontFamily: 'inherit', boxSizing: 'border-box',
-            }}
           />
         </div>
-        <div style={{ flex: 1 }}>
-          <p style={{ fontSize: 9, color: 'var(--text-secondary)', fontWeight: 700, marginBottom: 4, textTransform: 'uppercase' }}>
-            Intensidad
-          </p>
+        <div>
+          <span className="cwa-label">Intensidad</span>
           <select
+            className="cwa-select"
             value={intensity}
             onChange={(e) => setIntensity(e.target.value as CustomWodIntensity)}
-            style={{
-              width: '100%', padding: '6px 8px',
-              background: 'var(--bg)', border: '1px solid var(--card-border)',
-              borderRadius: 8, color: 'var(--text)', fontSize: 11,
-              fontFamily: 'inherit', boxSizing: 'border-box',
-            }}
           >
             <option value="low">low</option>
             <option value="medium">medium</option>
@@ -485,74 +411,44 @@ const WodForm: React.FC<WodFormProps> = ({ athleteId, onCreated }) => {
         </div>
       </div>
 
-      <div style={{ marginBottom: 10 }}>
-        <p style={{ fontSize: 9, color: 'var(--text-secondary)', fontWeight: 700, marginBottom: 4, textTransform: 'uppercase' }}>
-          Título
-        </p>
+      <div className="cwa-field">
+        <span className="cwa-label">Título</span>
         <input
+          className="cwa-input"
           value={title}
           onChange={(e) => setTitle(e.target.value.slice(0, 120))}
           placeholder='Ej. "AMRAP 20 · gymnastics focus"'
-          style={{
-            width: '100%', padding: '6px 8px',
-            background: 'var(--bg)', border: '1px solid var(--card-border)',
-            borderRadius: 8, color: 'var(--text)', fontSize: 11,
-            fontFamily: 'inherit', boxSizing: 'border-box',
-          }}
         />
       </div>
 
       {/* Movements editable */}
-      <p style={{ fontSize: 9, color: 'var(--text-secondary)', fontWeight: 700, marginBottom: 6, textTransform: 'uppercase' }}>
-        Movimientos · {movements.length}
-      </p>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 10 }}>
+      <span className="cwa-label">Movimientos · {movements.length}</span>
+      <div className="cwa-moves">
         {movements.map((m, idx) => (
-          <div key={idx} style={{
-            background: 'var(--bg)', border: '1px solid var(--card-border)',
-            borderRadius: 10, padding: 8,
-          }}>
-            <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
+          <div key={idx} className="cwa-move">
+            <div className="cwa-move-head">
               <input
+                className="cwa-input"
                 value={m.name}
                 onChange={(e) => updateMovement(idx, { name: e.target.value.slice(0, 80) })}
                 placeholder="Movimiento"
-                style={{
-                  flex: 1, padding: '5px 8px',
-                  background: 'var(--surface)', border: '1px solid var(--card-border)',
-                  borderRadius: 6, color: 'var(--text)', fontSize: 11,
-                  fontFamily: 'inherit', boxSizing: 'border-box',
-                }}
               />
               {movements.length > 1 && (
                 <button
                   onClick={() => removeMovement(idx)}
-                  className="btn-press"
-                  style={{
-                    padding: '5px 8px', borderRadius: 6,
-                    background: 'transparent', color: VOLTA_RED,
-                    border: `1px solid ${VOLTA_RED}55`,
-                    fontSize: 10, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit',
-                  }}
+                  className="btn-press cwa-x"
+                  aria-label="Quitar movimiento"
                 >×</button>
               )}
             </div>
             {(['rx', 'scaled', 'beginner'] as const).map(scale => (
-              <div key={scale} style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
-                <span style={{
-                  fontSize: 9, fontWeight: 800, color: 'var(--text-secondary)',
-                  width: 50, textTransform: 'uppercase', letterSpacing: '.06em',
-                }}>{scale}</span>
+              <div key={scale} className="cwa-scale" data-scale={scale}>
+                <span className="cwa-scale-k">{scale}</span>
                 <input
+                  className="cwa-input"
                   value={m.scaling[scale]}
                   onChange={(e) => updateMovement(idx, { scaling: { [scale]: e.target.value.slice(0, 80) } as any })}
                   placeholder={scale === 'rx' ? '5 reps @ 60kg' : scale === 'scaled' ? '5 @ 45kg' : '5 @ 30kg'}
-                  style={{
-                    flex: 1, padding: '5px 8px',
-                    background: 'var(--surface)', border: '1px solid var(--card-border)',
-                    borderRadius: 6, color: 'var(--text)', fontSize: 10,
-                    fontFamily: 'inherit', boxSizing: 'border-box',
-                  }}
                 />
               </div>
             ))}
@@ -562,48 +458,25 @@ const WodForm: React.FC<WodFormProps> = ({ athleteId, onCreated }) => {
 
       <button
         onClick={addMovement}
-        className="btn-press"
-        style={{
-          width: '100%', padding: '6px 0', borderRadius: 8,
-          background: 'transparent', color: 'var(--text-secondary)',
-          border: '1px dashed var(--card-border)',
-          fontSize: 10, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
-          marginBottom: 10,
-        }}
+        className="btn-press cwa-add"
       >+ Movimiento</button>
 
-      <div style={{ marginBottom: 10 }}>
-        <p style={{ fontSize: 9, color: 'var(--text-secondary)', fontWeight: 700, marginBottom: 4, textTransform: 'uppercase' }}>
-          Notas (opcional)
-        </p>
+      <div className="cwa-field">
+        <span className="cwa-label">Notas (opcional)</span>
         <textarea
+          className="cwa-textarea"
           value={notes}
           onChange={(e) => setNotes(e.target.value.slice(0, 1000))}
           placeholder='Ej. "Foco en pacing · sub-13min"'
           rows={2}
-          style={{
-            width: '100%', padding: '6px 8px',
-            background: 'var(--bg)', border: '1px solid var(--card-border)',
-            borderRadius: 8, color: 'var(--text)', fontSize: 11,
-            fontFamily: 'inherit', outline: 'none', resize: 'vertical',
-            boxSizing: 'border-box',
-          }}
         />
       </div>
 
       <button
         onClick={handleSubmit}
         disabled={submitting || !valid}
-        className="btn-press"
-        style={{
-          width: '100%', padding: '10px 0', borderRadius: 10,
-          background: valid ? HO_GOLD : 'var(--card-border)',
-          color: valid ? '#000' : 'var(--text-secondary)',
-          border: 'none',
-          fontSize: 11, fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase',
-          cursor: submitting ? 'wait' : valid ? 'pointer' : 'not-allowed', fontFamily: 'inherit',
-          opacity: submitting ? 0.6 : 1,
-        }}
+        className="btn-press cwa-cta cwa-cta--gold"
+        data-busy={submitting}
       >{submitting ? 'Asignando…' : '✦ Asignar custom WOD'}</button>
     </div>
   );
@@ -616,6 +489,17 @@ const WodForm: React.FC<WodFormProps> = ({ athleteId, onCreated }) => {
 interface Props {
   athlete: AthleteProfile;
 }
+
+/** Categoría competidor → disco de tier (emblema visual, no carga). */
+const categoryTier = (cat: CompetitorCategory): 'white' | 'green' | 'yellow' | 'blue' | 'red' => {
+  switch (cat) {
+    case 'RX': return 'red';
+    case 'Masters': return 'blue';
+    case 'Teens': return 'green';
+    case 'Scaled':
+    default: return 'yellow';
+  }
+};
 
 const CustomWodAssigner: React.FC<Props> = ({ athlete }) => {
   const { showToast } = useToast();
@@ -686,31 +570,27 @@ const CustomWodAssigner: React.FC<Props> = ({ athlete }) => {
   };
 
   return (
-    <section>
-      <div style={{
-        display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10,
-      }}>
-        <p style={{
-          fontSize: 10, color: 'var(--text-secondary)', fontWeight: 700,
-          letterSpacing: '.12em', textTransform: 'uppercase',
-        }}>
-          Tier competidor · Volta
-        </p>
+    <section className="cwa-root">
+      <div className="cwa-head">
+        <div className="cwa-head-l">
+          {profile?.is_competitor && (
+            <PlateBadge
+              tier={categoryTier(profile.category)}
+              size={28}
+              className="cwa-emblem"
+            />
+          )}
+          <span className="cwa-eyebrow">Tier competidor · Volta</span>
+        </div>
         {profile?.is_competitor && (
-          <span style={{
-            fontSize: 9, fontWeight: 800, color: VOLTA_CYAN,
-            background: `${VOLTA_CYAN}18`, border: `1px solid ${VOLTA_CYAN}55`,
-            borderRadius: 8, padding: '3px 8px', letterSpacing: '.04em',
-          }}>
-            ✦ {profile.category}
-          </span>
+          <span className="cwa-chip">✦ {profile.category}</span>
         )}
       </div>
 
       {loading ? (
-        <p style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Cargando…</p>
+        <p className="cwa-muted">Cargando…</p>
       ) : error ? (
-        <p style={{ fontSize: 11, color: '#f87171' }}>{error}</p>
+        <p className="cwa-error">{error}</p>
       ) : !profile || !profile.is_competitor ? (
         <PromoteForm
           athlete={athlete}
@@ -719,45 +599,31 @@ const CustomWodAssigner: React.FC<Props> = ({ athlete }) => {
       ) : (
         <>
           {/* Profile summary */}
-          <div style={{
-            background: 'var(--surface)', border: `1px solid ${VOLTA_CYAN}33`,
-            borderRadius: 14, padding: 12, marginBottom: 10,
-            boxShadow: `0 0 12px ${VOLTA_CYAN}11`,
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontSize: 13, fontWeight: 900, color: 'var(--text)', marginBottom: 4 }}>
+          <div className="cwa-profile">
+            <div className="cwa-profile-top">
+              <div className="cwa-profile-body">
+                <p className="cwa-profile-event">
                   {profile.target_event ?? 'Sin target event'}
                 </p>
-                <p style={{ fontSize: 10, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                <p className="cwa-profile-meta">
                   {profile.category} · {profile.weekly_sessions_target} sesiones/sem
                   {profile.weekly_volume_target_kg ? ` · ${profile.weekly_volume_target_kg}kg target` : ''}
                 </p>
                 {(profile.open_rank_worldwide || profile.open_rank_regional) && (
-                  <p style={{ fontSize: 10, color: VOLTA_CYAN, marginTop: 4, fontWeight: 700 }}>
+                  <p className="cwa-profile-rank">
                     Open {profile.open_year ?? ''}: {profile.open_rank_worldwide ? `#${profile.open_rank_worldwide} worldwide` : ''}
                     {profile.open_rank_regional ? ` · #${profile.open_rank_regional} regional` : ''}
                   </p>
                 )}
                 {profile.coach_notes && (
-                  <p style={{
-                    fontSize: 10, color: 'var(--text-secondary)', marginTop: 6, lineHeight: 1.4,
-                    fontStyle: 'italic',
-                  }}>
+                  <p className="cwa-profile-notes">
                     "{profile.coach_notes}"
                   </p>
                 )}
               </div>
               <button
                 onClick={handleDemote}
-                className="btn-press"
-                style={{
-                  padding: '4px 8px', borderRadius: 6,
-                  background: 'transparent', color: VOLTA_RED,
-                  border: `1px solid ${VOLTA_RED}55`,
-                  fontSize: 9, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit',
-                  flexShrink: 0,
-                }}
+                className="btn-press cwa-ghost-danger"
               >desactivar</button>
             </div>
           </div>
@@ -766,14 +632,7 @@ const CustomWodAssigner: React.FC<Props> = ({ athlete }) => {
           {!showForm ? (
             <button
               onClick={() => setShowForm(true)}
-              className="btn-press"
-              style={{
-                width: '100%', padding: '10px 0', borderRadius: 10,
-                background: 'transparent', color: HO_GOLD,
-                border: `1px solid ${HO_GOLD}66`,
-                fontSize: 11, fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase',
-                cursor: 'pointer', fontFamily: 'inherit',
-              }}
+              className="btn-press cwa-cta-outline"
             >+ Asignar custom WOD del día</button>
           ) : (
             <WodForm
@@ -788,36 +647,22 @@ const CustomWodAssigner: React.FC<Props> = ({ athlete }) => {
           {/* Lista de WODs recientes */}
           {recentWods.length > 0 && (
             <>
-              <p style={{
-                fontSize: 10, color: 'var(--text-secondary)', fontWeight: 700,
-                letterSpacing: '.12em', textTransform: 'uppercase', margin: '14px 0 6px',
-              }}>
+              <p className="cwa-list-head">
                 Custom WODs recientes · {recentWods.length}
               </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <div className="cwa-list">
                 {recentWods.slice(0, 8).map(w => (
-                  <div key={w.id} style={{
-                    background: 'var(--surface)', border: '1px solid var(--card-border)',
-                    borderRadius: 10, padding: '8px 10px',
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8,
-                  }}>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontSize: 11, fontWeight: 800, color: 'var(--text)' }}>
-                        {w.title}
-                      </p>
-                      <p style={{ fontSize: 9, color: 'var(--text-secondary)', marginTop: 2 }}>
+                  <div key={w.id} className="cwa-wod">
+                    <div className="cwa-wod-body">
+                      <p className="cwa-wod-title">{w.title}</p>
+                      <p className="cwa-wod-meta">
                         {w.date} · {w.type} · {w.movements.length} mov
                       </p>
                     </div>
                     <button
                       onClick={() => handleDeleteWod(w.id)}
-                      className="btn-press"
-                      style={{
-                        background: 'transparent', color: 'var(--text-secondary)',
-                        border: '1px solid var(--card-border)', borderRadius: 6,
-                        padding: '4px 8px', fontSize: 9, fontWeight: 800,
-                        cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0,
-                      }}
+                      className="btn-press cwa-wod-x"
+                      aria-label="Borrar WOD"
                     >×</button>
                   </div>
                 ))}

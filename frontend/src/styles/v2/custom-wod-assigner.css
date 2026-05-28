@@ -1,0 +1,500 @@
+/* ============================================================
+   PEAK QUAL · CUSTOM WOD ASSIGNER (Volta competitor tier)
+   Coach builds/assigns a custom WOD/session to an athlete.
+   Renders as plain content INSIDE AthleteTrainingView — the page
+   frame/scroll is provided by the parent. Everything here is scoped
+   under `.cwa-root` so nothing leaks globally. No `*` reset, no body.
+   Uses ONLY tokens from styles/v2/tokens.css — no hardcoded colors.
+   ============================================================ */
+
+.cwa-root {
+  font-family: var(--font-body);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  /* local accent palette mapped to design tokens */
+  --cwa-cyan:   var(--engine-stress);  /* Volta competitor accent */
+  --cwa-violet: var(--engine-adapt);   /* templates */
+  --cwa-gold:   var(--engine-belt);    /* primary WOD CTA */
+  --cwa-red:    var(--engine-pulse);   /* destructive / demote */
+}
+.cwa-root * { box-sizing: border-box; }
+
+/* ============================================================
+   SECTION HEAD
+   ============================================================ */
+.cwa-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin: 0 2px 12px;
+}
+.cwa-head-l {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+.cwa-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--cwa-cyan);
+  line-height: 1.3;
+}
+.cwa-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border-radius: var(--r-full);
+  background: rgba(0, 229, 255, 0.08);
+  border: 1px solid var(--border-hard);
+  color: var(--cwa-cyan);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+/* ============================================================
+   PANEL · shared card shell
+   ============================================================ */
+.cwa-panel {
+  position: relative;
+  background:
+    linear-gradient(135deg, rgba(0, 229, 255, 0.05), transparent 60%),
+    var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  padding: 14px;
+  overflow: hidden;
+}
+.cwa-panel + .cwa-panel { margin-top: 10px; }
+.cwa-panel .br {
+  position: absolute;
+  top: 0;
+  width: 16px;
+  height: 4px;
+  background: var(--cwa-cyan);
+  box-shadow: 0 0 6px var(--cwa-cyan);
+}
+.cwa-panel .br-tl { left: 0; }
+.cwa-panel .br-tr { right: 0; }
+
+/* accent variants */
+.cwa-panel[data-accent="gold"] {
+  background:
+    linear-gradient(135deg, rgba(245, 166, 35, 0.06), transparent 60%),
+    var(--surface-1);
+}
+.cwa-panel[data-accent="gold"] .br {
+  background: var(--cwa-gold);
+  box-shadow: 0 0 6px var(--cwa-gold);
+}
+
+/* ============================================================
+   TYPOGRAPHY HELPERS
+   ============================================================ */
+.cwa-panel-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: -0.01em;
+  color: var(--text-hi);
+}
+.cwa-panel-sub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.45;
+  color: var(--text-mid);
+  letter-spacing: 0.02em;
+}
+.cwa-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-lo);
+  margin-bottom: 5px;
+}
+.cwa-muted {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-mid);
+  letter-spacing: 0.03em;
+}
+.cwa-error {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--cwa-red);
+  letter-spacing: 0.02em;
+}
+
+/* ============================================================
+   FORM CONTROLS
+   ============================================================ */
+.cwa-field { margin-bottom: 12px; }
+.cwa-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.cwa-row > * { flex: 1; }
+
+.cwa-input,
+.cwa-select,
+.cwa-textarea {
+  width: 100%;
+  padding: 8px 10px;
+  background: var(--bg);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-sm);
+  color: var(--text-hi);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  outline: none;
+  transition: border-color 160ms, box-shadow 160ms;
+}
+.cwa-input::placeholder,
+.cwa-textarea::placeholder { color: var(--text-lo); }
+.cwa-input:focus,
+.cwa-select:focus,
+.cwa-textarea:focus {
+  border-color: var(--border-hard);
+  box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.12);
+}
+.cwa-textarea { resize: vertical; line-height: 1.4; }
+.cwa-input--num { width: 90px; flex: 0 0 auto; }
+.cwa-select { cursor: pointer; }
+
+/* ============================================================
+   SEGMENTED · category pills
+   ============================================================ */
+.cwa-seg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.cwa-seg-btn {
+  padding: 6px 12px;
+  border-radius: var(--r-sm);
+  background: transparent;
+  border: 1px solid var(--border-soft);
+  color: var(--text-mid);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 160ms, color 160ms, border-color 160ms;
+}
+.cwa-seg-btn:hover { border-color: var(--border-hard); color: var(--text-hi); }
+.cwa-seg-btn[data-active="true"] {
+  background: var(--cwa-cyan);
+  border-color: var(--cwa-cyan);
+  color: #001218;
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.4);
+}
+
+/* ============================================================
+   TEMPLATE CHIPS
+   ============================================================ */
+.cwa-tpls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 14px;
+}
+.cwa-tpl {
+  padding: 5px 10px;
+  border-radius: var(--r-sm);
+  background: rgba(168, 85, 247, 0.08);
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  color: var(--cwa-violet);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: background 160ms, box-shadow 160ms;
+}
+.cwa-tpl:hover {
+  background: rgba(168, 85, 247, 0.16);
+  box-shadow: var(--glow-violet);
+}
+
+/* ============================================================
+   MOVEMENTS EDITOR
+   ============================================================ */
+.cwa-moves {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.cwa-move {
+  background: var(--bg);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  padding: 9px;
+}
+.cwa-move-head {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.cwa-move-head .cwa-input { background: var(--surface-1); }
+.cwa-scale {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 5px;
+}
+.cwa-scale-k {
+  flex: 0 0 46px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-lo);
+}
+.cwa-scale[data-scale="rx"] .cwa-scale-k { color: var(--cwa-cyan); }
+.cwa-scale .cwa-input {
+  background: var(--surface-1);
+  font-size: 11px;
+  padding: 6px 8px;
+}
+
+/* icon-ish destructive mini button */
+.cwa-x {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  border-radius: var(--r-sm);
+  background: transparent;
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  color: var(--cwa-red);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 160ms, box-shadow 160ms;
+}
+.cwa-x:hover { background: rgba(239, 68, 68, 0.12); box-shadow: var(--glow-red); }
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.cwa-add {
+  width: 100%;
+  padding: 8px 0;
+  border-radius: var(--r-sm);
+  background: transparent;
+  border: 1px dashed var(--border-soft);
+  color: var(--text-mid);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: border-color 160ms, color 160ms;
+  margin-bottom: 12px;
+}
+.cwa-add:hover { border-color: var(--border-hard); color: var(--text-hi); }
+
+.cwa-cta {
+  width: 100%;
+  padding: 11px 0;
+  border-radius: var(--r-md);
+  border: none;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: box-shadow 200ms, opacity 160ms;
+}
+.cwa-cta--cyan {
+  background: linear-gradient(135deg, var(--cwa-cyan), color-mix(in oklab, var(--cwa-cyan) 60%, #000));
+  color: #001218;
+  box-shadow: 0 0 18px rgba(0, 229, 255, 0.35);
+}
+.cwa-cta--cyan:hover:not(:disabled) { box-shadow: 0 0 26px rgba(0, 229, 255, 0.55); }
+.cwa-cta--gold {
+  background: linear-gradient(135deg, var(--cwa-gold), color-mix(in oklab, var(--cwa-gold) 60%, #000));
+  color: #1a1200;
+  box-shadow: var(--glow-amber);
+}
+.cwa-cta--gold:hover:not(:disabled) { box-shadow: 0 0 30px rgba(255, 179, 0, 0.5); }
+.cwa-cta:disabled {
+  background: var(--surface-3);
+  color: var(--text-lo);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+.cwa-cta[data-busy="true"] { cursor: wait; opacity: 0.65; }
+
+/* outline CTA · "open WOD form" toggle */
+.cwa-cta-outline {
+  width: 100%;
+  padding: 11px 0;
+  border-radius: var(--r-md);
+  background: rgba(245, 166, 35, 0.08);
+  border: 1px solid rgba(245, 166, 35, 0.45);
+  color: var(--cwa-gold);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 200ms, box-shadow 200ms;
+}
+.cwa-cta-outline:hover { background: rgba(245, 166, 35, 0.16); box-shadow: var(--glow-amber); }
+
+/* small ghost destructive · "desactivar" */
+.cwa-ghost-danger {
+  flex-shrink: 0;
+  padding: 5px 10px;
+  border-radius: var(--r-sm);
+  background: transparent;
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  color: var(--cwa-red);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 160ms;
+}
+.cwa-ghost-danger:hover { background: rgba(239, 68, 68, 0.12); }
+
+/* ============================================================
+   PROFILE SUMMARY
+   ============================================================ */
+.cwa-profile {
+  background:
+    linear-gradient(135deg, rgba(0, 229, 255, 0.06), transparent 55%),
+    var(--surface-1);
+  border: 1px solid var(--border-hard);
+  border-radius: var(--r-md);
+  padding: 14px;
+  box-shadow: var(--glow-cyan);
+  margin-bottom: 10px;
+}
+.cwa-profile-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+.cwa-profile-body { flex: 1; min-width: 0; }
+.cwa-profile-event {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: -0.02em;
+  color: var(--text-hi);
+  line-height: 1.1;
+  margin-bottom: 5px;
+}
+.cwa-profile-meta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-mid);
+  letter-spacing: 0.03em;
+  line-height: 1.5;
+}
+.cwa-profile-rank {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--cwa-cyan);
+  letter-spacing: 0.03em;
+  margin-top: 5px;
+}
+.cwa-profile-notes {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-style: italic;
+  color: var(--text-mid);
+  line-height: 1.45;
+  margin-top: 7px;
+}
+
+/* ============================================================
+   RECENT WODS LIST
+   ============================================================ */
+.cwa-list-head {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-lo);
+  margin: 16px 2px 8px;
+}
+.cwa-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.cwa-wod {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-left: 3px solid var(--cwa-cyan);
+  border-radius: var(--r-sm);
+  padding: 9px 11px;
+  transition: background 160ms, transform 150ms;
+}
+.cwa-wod:hover { background: var(--surface-2); transform: translateX(2px); }
+.cwa-wod-body { flex: 1; min-width: 0; }
+.cwa-wod-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--text-hi);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cwa-wod-meta {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-mid);
+  letter-spacing: 0.04em;
+  margin-top: 3px;
+}
+.cwa-wod-x {
+  flex-shrink: 0;
+  padding: 5px 9px;
+  border-radius: var(--r-sm);
+  background: transparent;
+  border: 1px solid var(--border-soft);
+  color: var(--text-mid);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 160ms, border-color 160ms;
+}
+.cwa-wod-x:hover { color: var(--cwa-red); border-color: rgba(239, 68, 68, 0.45); }
+
+/* tier emblem (PlateBadge) sits flush in the head/profile */
+.cwa-emblem { display: inline-flex; flex-shrink: 0; }

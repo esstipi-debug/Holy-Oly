@@ -1,0 +1,665 @@
+/* ============================================================
+   PEAK QUAL · ATHLETE TRAINING VIEW (coach per-athlete hub)
+   V2 dark restyle. Renders as plain content inside the host
+   page (AthleteDeepDive / VoltaCoachDash) — NO device chrome,
+   NO phone frame, NO bottom nav here.
+   ------------------------------------------------------------
+   ALL rules scoped under .atv-root so nothing leaks globally.
+   This file owns ONLY this hub's OWN markup (section heads,
+   today card, week strip, 30d map, double-session panel, coach
+   CTAs). The 5 imported child components style themselves.
+   ============================================================ */
+
+.atv-root {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  font-family: var(--font-body);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+.atv-root * { box-sizing: border-box; }
+
+/* ---------- section + heads ---------- */
+.atv-section { display: flex; flex-direction: column; }
+.atv-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0 2px 10px;
+  gap: 10px;
+}
+.atv-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--atv-accent, var(--engine-stress));
+}
+.atv-eyebrow .pip {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--atv-accent, var(--engine-stress));
+  box-shadow: 0 0 6px var(--atv-accent, var(--engine-stress));
+  flex-shrink: 0;
+}
+.atv-meta {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--text-lo);
+  text-align: right;
+}
+
+/* ---------- generic card + bracket corners ---------- */
+.atv-card {
+  position: relative;
+  background:
+    linear-gradient(135deg, color-mix(in oklab, var(--atv-accent, var(--engine-stress)) 6%, transparent), transparent 55%),
+    var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  padding: 14px;
+  overflow: hidden;
+}
+.atv-card .br {
+  position: absolute;
+  top: 0;
+  width: 14px; height: 3px;
+  background: var(--atv-accent, var(--engine-stress));
+  box-shadow: 0 0 6px var(--atv-accent, var(--engine-stress));
+}
+.atv-card .br-tl { left: 0; }
+.atv-card .br-tr { right: 0; }
+
+/* ============================================================
+   SECTION 1 · HOY
+   ============================================================ */
+.atv-today { --atv-accent: var(--engine-belt); }
+.atv-today.is-completed { --atv-accent: var(--engine-oly); }
+.atv-today.is-progress {
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--engine-belt) 25%, transparent),
+              0 8px 28px -12px var(--engine-belt);
+}
+.atv-today-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 12px;
+  gap: 10px;
+}
+.atv-today-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text-hi);
+  letter-spacing: -0.01em;
+  text-transform: capitalize;
+}
+.atv-today-int {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--engine-belt);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* rest day */
+.atv-rest {
+  text-align: center;
+  padding: 12px 0 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.atv-rest .icon {
+  width: 44px; height: 44px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 1px solid var(--border-soft);
+  color: var(--text-mid);
+}
+.atv-rest-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-hi);
+  letter-spacing: -0.01em;
+}
+.atv-rest-sub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-mid);
+  letter-spacing: 0.05em;
+}
+
+/* exercise rows */
+.atv-ex-list { display: flex; flex-direction: column; gap: 8px; }
+.atv-ex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+}
+.atv-ex-name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 12.5px;
+  color: var(--text-hi);
+  letter-spacing: -0.005em;
+}
+.atv-ex-scheme {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-mid);
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  margin-top: 2px;
+}
+.atv-ex-kg {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--engine-belt);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 12px rgba(245,166,35,0.35);
+}
+
+/* ============================================================
+   STATUS BADGE
+   ============================================================ */
+.atv-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: var(--r-full);
+  background: color-mix(in oklab, var(--bc, var(--engine-stress)) 14%, transparent);
+  color: var(--bc, var(--engine-stress));
+  border: 1px solid color-mix(in oklab, var(--bc, var(--engine-stress)) 40%, transparent);
+  white-space: nowrap;
+}
+.atv-badge .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--bc, var(--engine-stress));
+  box-shadow: 0 0 6px var(--bc, var(--engine-stress));
+}
+
+/* ============================================================
+   SECTION 2 · ESTA SEMANA · day strip
+   ============================================================ */
+.atv-week { --atv-accent: var(--engine-stress); }
+.atv-week-strip {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+}
+.atv-day {
+  flex: 0 0 auto;
+  width: 60px;
+  padding: 10px 0;
+  border-radius: var(--r-sm);
+  background: var(--surface-1);
+  border: 1px solid var(--db, var(--border-soft));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: transform 150ms, border-color 200ms, background 200ms;
+}
+.atv-day:hover { transform: translateY(-2px); }
+.atv-day[data-open="true"] {
+  border-color: var(--engine-belt);
+  background: color-mix(in oklab, var(--engine-belt) 8%, var(--surface-1));
+}
+.atv-day[data-today="true"] {
+  box-shadow: inset 0 0 0 1px var(--engine-belt);
+}
+.atv-day-letter {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--text-lo);
+}
+.atv-day[data-today="true"] .atv-day-letter { color: var(--engine-belt); }
+.atv-day-num {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-mid);
+  font-variant-numeric: tabular-nums;
+}
+
+/* expanded day detail */
+.atv-day-detail {
+  margin-top: 10px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  padding: 12px;
+}
+.atv-day-detail-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+.atv-day-detail-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 12.5px;
+  color: var(--text-hi);
+  letter-spacing: -0.01em;
+  text-transform: capitalize;
+}
+.atv-day-detail-int {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-mid);
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.atv-day-detail-empty {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-mid);
+  letter-spacing: 0.03em;
+}
+.atv-day-detail-list { display: flex; flex-direction: column; gap: 6px; }
+.atv-day-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+.atv-day-detail-row .nm {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.005em;
+}
+.atv-day-detail-row .vl {
+  color: var(--text-mid);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================
+   SECTION 3 · MAPA 30 DÍAS · intensity heatmap
+   ============================================================ */
+.atv-map { --atv-accent: var(--engine-pulse); }
+.atv-map-grid-head {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 6px;
+}
+.atv-map-dow {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text-lo);
+  text-align: center;
+}
+.atv-map-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+.atv-cell {
+  aspect-ratio: 1;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--cb, var(--border-soft));
+  cursor: pointer;
+  position: relative;
+  padding: 0;
+  font-family: inherit;
+  background: var(--cbg, var(--surface-2));
+  transition: transform 120ms, border-color 150ms;
+}
+.atv-cell:hover { transform: scale(1.06); }
+.atv-cell[data-future="true"] { opacity: 0.55; }
+.atv-cell[data-selected="true"] { border-color: var(--engine-belt); }
+.atv-cell[data-today="true"]:not([data-selected="true"]) { border-color: var(--engine-adapt); }
+.atv-cell-num {
+  position: absolute;
+  top: 2px; left: 4px;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--text-mid);
+  font-variant-numeric: tabular-nums;
+}
+.atv-cell-done {
+  position: absolute;
+  bottom: 3px; right: 3px;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--engine-oly);
+  box-shadow: 0 0 5px var(--engine-oly);
+}
+
+/* legend */
+.atv-legend {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+.atv-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.atv-legend-swatch {
+  width: 10px; height: 10px;
+  border-radius: 3px;
+  background: var(--lbg);
+  border: 1px solid var(--lb);
+}
+.atv-legend-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--text-mid);
+  letter-spacing: 0.04em;
+}
+
+/* selected cell detail */
+.atv-cell-detail {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: var(--r-sm);
+  background: var(--bg);
+  border: 1px solid var(--border-soft);
+}
+.atv-cell-detail-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 11.5px;
+  color: var(--text-hi);
+  letter-spacing: -0.01em;
+}
+.atv-cell-detail-meta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-mid);
+  letter-spacing: 0.03em;
+  margin-top: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================
+   SECTION · DOBLE SESIÓN
+   ============================================================ */
+.atv-double { --atv-accent: var(--engine-belt); }
+.atv-double-slots {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.atv-slot {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+}
+.atv-slot-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--engine-belt);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.atv-slot-meta {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-mid);
+  margin-top: 3px;
+  font-variant-numeric: tabular-nums;
+}
+.atv-double-hint {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-mid);
+  letter-spacing: 0.02em;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+/* intensity slider row */
+.atv-slider-row { margin-bottom: 12px; }
+.atv-slider-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 5px;
+}
+.atv-slider-label {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 11.5px;
+  color: var(--text-hi);
+  letter-spacing: -0.005em;
+}
+.atv-slider-val {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--engine-belt);
+  font-variant-numeric: tabular-nums;
+}
+.atv-slider {
+  width: 100%;
+  accent-color: var(--engine-belt);
+}
+.atv-toast {
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--engine-oly);
+  letter-spacing: 0.03em;
+}
+
+/* ============================================================
+   SECTION 4 · COACH CTAs
+   ============================================================ */
+.atv-actions { --atv-accent: var(--engine-adapt); }
+.atv-cta-row {
+  display: flex;
+  gap: 8px;
+}
+.atv-cta {
+  flex: 1;
+  padding: 12px 6px;
+  border-radius: var(--r-sm);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  background: color-mix(in oklab, var(--ctc, var(--engine-stress)) 12%, var(--surface-1));
+  color: var(--ctc, var(--engine-stress));
+  border: 1px solid color-mix(in oklab, var(--ctc, var(--engine-stress)) 40%, transparent);
+  transition: background 200ms, border-color 200ms, box-shadow 200ms;
+}
+.atv-cta:hover {
+  background: color-mix(in oklab, var(--ctc, var(--engine-stress)) 20%, var(--surface-1));
+  box-shadow: 0 0 16px color-mix(in oklab, var(--ctc, var(--engine-stress)) 30%, transparent);
+}
+.atv-cta-violet { --ctc: var(--engine-adapt); }
+.atv-cta-belt   { --ctc: var(--engine-belt); }
+.atv-cta-neutral {
+  background: var(--surface-1);
+  color: var(--text);
+  border-color: var(--border-soft);
+}
+.atv-cta-neutral:hover {
+  background: var(--surface-2);
+  border-color: var(--border-hard);
+  box-shadow: none;
+}
+.atv-cta-on {
+  background: color-mix(in oklab, var(--engine-oly) 16%, var(--surface-1));
+  color: var(--engine-oly);
+  border-color: color-mix(in oklab, var(--engine-oly) 45%, transparent);
+}
+
+/* comment composer */
+.atv-comment {
+  margin-top: 10px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  padding: 12px;
+}
+.atv-comment-sent {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--engine-oly);
+  letter-spacing: 0.02em;
+}
+.atv-input {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-sm);
+  color: var(--text-hi);
+  font-family: var(--font-body);
+  font-size: 12px;
+  outline: none;
+  transition: border-color 150ms, box-shadow 150ms;
+}
+.atv-input::placeholder { color: var(--text-lo); }
+.atv-input:focus {
+  border-color: var(--engine-belt);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--engine-belt) 35%, transparent);
+}
+.atv-send {
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px 0;
+  border-radius: var(--r-sm);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  background: var(--engine-belt);
+  color: #14110A;
+  border: none;
+  transition: filter 150ms;
+}
+.atv-send:disabled {
+  background: transparent;
+  color: var(--text-lo);
+  border: 1px solid var(--border-soft);
+  cursor: not-allowed;
+}
+
+/* generic full-width add button (double session opener) */
+.atv-add-btn {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  background: color-mix(in oklab, var(--engine-belt) 8%, transparent);
+  color: var(--engine-belt);
+  border: 1px dashed color-mix(in oklab, var(--engine-belt) 45%, transparent);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-align: center;
+  transition: background 200ms, border-color 200ms;
+}
+.atv-add-btn:hover {
+  background: color-mix(in oklab, var(--engine-belt) 14%, transparent);
+  border-color: var(--engine-belt);
+}
+
+/* secondary ghost button (remove / cancel) */
+.atv-ghost-btn {
+  width: 100%;
+  padding: 10px 0;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--text-mid);
+  border: 1px solid var(--border-soft);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 200ms, color 200ms, border-color 200ms;
+}
+.atv-ghost-btn:hover {
+  background: var(--surface-2);
+  color: var(--text-hi);
+  border-color: var(--border-hard);
+}
+
+/* two-button footer (cancel + confirm) */
+.atv-btn-pair {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.atv-btn-pair > * { flex: 1; }
+.atv-confirm-btn {
+  padding: 10px 0;
+  border-radius: var(--r-sm);
+  background: var(--engine-belt);
+  color: #14110A;
+  border: none;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: filter 150ms, box-shadow 200ms;
+}
+.atv-confirm-btn:hover {
+  filter: brightness(1.06);
+  box-shadow: 0 0 16px color-mix(in oklab, var(--engine-belt) 35%, transparent);
+}

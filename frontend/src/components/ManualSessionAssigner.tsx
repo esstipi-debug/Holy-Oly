@@ -21,9 +21,17 @@ import {
   type ManualSessionResponse,
   type ManualSessionSlot,
 } from '../lib/api';
+import { PlateBadge, type PlateTier } from './PlateBadge';
+import '../styles/v2/manual-session-assigner.css';
 
-const HO_GOLD = '#F5C518';
-const HO_PURPLE = '#7C5CFF';
+// % 1RM → tier de disco · visualiza intensidad del ejercicio.
+const pctToTier = (pct: number): PlateTier => {
+  if (pct < 0.55) return 'white';
+  if (pct < 0.68) return 'green';
+  if (pct < 0.80) return 'yellow';
+  if (pct < 0.90) return 'blue';
+  return 'red';
+};
 
 const FOCUS_OPTIONS: { value: ManualSessionFocus; label: string; emoji: string }[] = [
   { value: 'technique', label: 'Técnica',  emoji: '🎯' },
@@ -196,23 +204,14 @@ const ManualSessionAssigner: React.FC<Props> = ({ athlete }) => {
   const showForm = adHocMode || !hasMacro;
 
   return (
-    <section>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }}>
-        <p style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase' }}>
-          Asignación manual del día
-        </p>
+    <section className="msa-root">
+      <div className="msa-head">
+        <p className="msa-eyebrow">Asignación manual del día</p>
         {hasMacro && (
           <button
             onClick={() => setAdHocMode((v) => !v)}
-            className="btn-press"
-            style={{
-              fontSize: 9, fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase',
-              padding: '3px 8px', borderRadius: 8,
-              background: adHocMode ? `${HO_GOLD}22` : 'transparent',
-              color: adHocMode ? HO_GOLD : 'var(--text-secondary)',
-              border: `1px solid ${adHocMode ? `${HO_GOLD}55` : 'var(--card-border)'}`,
-              cursor: 'pointer', fontFamily: 'inherit',
-            }}
+            className="btn-press msa-toggle"
+            data-active={adHocMode}
           >
             {adHocMode ? '✓ ad-hoc' : '+ ad-hoc'}
           </button>
@@ -220,169 +219,101 @@ const ManualSessionAssigner: React.FC<Props> = ({ athlete }) => {
       </div>
 
       {!hasMacro && (
-        <div style={{
-          marginBottom: 10, padding: '8px 12px', borderRadius: 10,
-          background: 'rgba(124,92,255,0.10)', border: `1px solid ${HO_PURPLE}40`,
-          fontSize: 11, color: 'var(--text-secondary)',
-        }}>
-          <span style={{ color: HO_PURPLE, fontWeight: 800 }}>Sin macrociclo asignado.</span>{' '}
+        <div className="msa-banner">
+          <strong>Sin macrociclo asignado.</strong>{' '}
           Asignale la sesión del día manualmente — soporta doble turno (AM + PM).
         </div>
       )}
 
       {showForm && (
-        <div style={{
-          background: 'var(--surface)', border: '1px solid var(--card-border)',
-          borderRadius: 14, padding: 14, marginBottom: 12,
-        }}>
+        <div className="msa-card">
           {/* Fecha + Slot */}
-          <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
-            <div style={{ flex: 1 }}>
-              <label style={{ display: 'block', fontSize: 9, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 4 }}>
-                Fecha
-              </label>
+          <div className="msa-row">
+            <div className="msa-field msa-col-date">
+              <label className="msa-label">Fecha</label>
               <input
                 type="date"
+                className="msa-input"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                style={{
-                  width: '100%', padding: '8px 10px', borderRadius: 8,
-                  background: 'var(--bg)', border: '1px solid var(--card-border)',
-                  color: 'var(--text)', fontSize: 12, fontFamily: 'inherit',
-                  outline: 'none', boxSizing: 'border-box',
-                }}
               />
             </div>
-            <div style={{ flex: 1.4 }}>
-              <label style={{ display: 'block', fontSize: 9, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 4 }}>
-                Turno
-              </label>
-              <div style={{ display: 'flex', gap: 4 }}>
-                {SLOT_OPTIONS.map((opt) => {
-                  const sel = slot === opt.value;
-                  return (
-                    <button
-                      key={opt.value}
-                      onClick={() => setSlot(opt.value)}
-                      className="btn-press"
-                      style={{
-                        flex: 1, padding: '6px 4px', borderRadius: 8,
-                        background: sel ? `${HO_GOLD}22` : 'var(--bg)',
-                        color: sel ? HO_GOLD : 'var(--text)',
-                        border: `1px solid ${sel ? `${HO_GOLD}66` : 'var(--card-border)'}`,
-                        fontSize: 10, fontWeight: 800, letterSpacing: '.04em',
-                        cursor: 'pointer', fontFamily: 'inherit',
-                      }}
-                    >
-                      <div>{opt.label}</div>
-                      <div style={{ fontSize: 8, color: 'var(--text-secondary)', fontWeight: 600 }}>
-                        {opt.sublabel}
-                      </div>
-                    </button>
-                  );
-                })}
+            <div className="msa-field msa-col-slot">
+              <label className="msa-label">Turno</label>
+              <div className="msa-slots">
+                {SLOT_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setSlot(opt.value)}
+                    className="btn-press msa-slot"
+                    data-active={slot === opt.value}
+                  >
+                    <div className="msa-slot-main">{opt.label}</div>
+                    <div className="msa-slot-sub">{opt.sublabel}</div>
+                  </button>
+                ))}
               </div>
             </div>
           </div>
 
           {/* Focus */}
-          <div style={{ marginBottom: 12 }}>
-            <label style={{ display: 'block', fontSize: 9, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 4 }}>
-              Foco · template pre-fill
-            </label>
-            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-              {FOCUS_OPTIONS.map((opt) => {
-                const sel = focus === opt.value;
-                return (
-                  <button
-                    key={opt.value}
-                    onClick={() => applyTemplate(opt.value)}
-                    className="btn-press"
-                    style={{
-                      flex: '1 1 auto', padding: '6px 10px', borderRadius: 8,
-                      background: sel ? `${HO_GOLD}22` : 'var(--bg)',
-                      color: sel ? HO_GOLD : 'var(--text)',
-                      border: `1px solid ${sel ? `${HO_GOLD}66` : 'var(--card-border)'}`,
-                      fontSize: 10, fontWeight: 800, letterSpacing: '.04em',
-                      cursor: 'pointer', fontFamily: 'inherit',
-                    }}
-                  >
-                    {opt.emoji} {opt.label}
-                  </button>
-                );
-              })}
+          <div className="msa-field">
+            <label className="msa-label">Foco · template pre-fill</label>
+            <div className="msa-focus">
+              {FOCUS_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => applyTemplate(opt.value)}
+                  className="btn-press msa-focus-chip"
+                  data-active={focus === opt.value}
+                >
+                  {opt.emoji} {opt.label}
+                </button>
+              ))}
             </div>
           </div>
 
           {/* Ejercicios */}
-          <div style={{ marginBottom: 12 }}>
-            <label style={{ display: 'block', fontSize: 9, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 6 }}>
-              Ejercicios
-            </label>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div className="msa-field">
+            <label className="msa-label">Ejercicios</label>
+            <div className="msa-ex-list">
               {exercises.map((ex, i) => (
-                <div key={i} style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1.6fr 0.5fr 0.5fr 0.6fr 1fr auto',
-                  gap: 4, alignItems: 'center',
-                }}>
+                <div key={i} className="msa-ex">
+                  <span className="msa-ex-disc" title={`~${Math.round(ex.pct * 100)}% 1RM`}>
+                    <PlateBadge tier={pctToTier(ex.pct)} size={22} />
+                  </span>
                   <input
                     type="text"
+                    className="msa-input"
                     placeholder="Ejercicio"
                     value={ex.name}
                     onChange={(e) => updateExercise(i, { name: e.target.value })}
-                    style={{
-                      padding: '6px 8px', borderRadius: 6,
-                      background: 'var(--bg)', border: '1px solid var(--card-border)',
-                      color: 'var(--text)', fontSize: 11, fontFamily: 'inherit',
-                      outline: 'none', minWidth: 0,
-                    }}
                   />
                   <input
                     type="number" min={1} max={20}
+                    className="msa-input msa-ex-num"
                     value={ex.sets}
                     onChange={(e) => updateExercise(i, { sets: parseInt(e.target.value || '1', 10) })}
                     title="sets"
-                    style={{
-                      padding: '6px 4px', borderRadius: 6,
-                      background: 'var(--bg)', border: '1px solid var(--card-border)',
-                      color: 'var(--text)', fontSize: 11, fontFamily: 'inherit',
-                      outline: 'none', textAlign: 'center', minWidth: 0,
-                    }}
                   />
                   <input
                     type="number" min={1} max={50}
+                    className="msa-input msa-ex-num"
                     value={ex.reps}
                     onChange={(e) => updateExercise(i, { reps: parseInt(e.target.value || '1', 10) })}
                     title="reps"
-                    style={{
-                      padding: '6px 4px', borderRadius: 6,
-                      background: 'var(--bg)', border: '1px solid var(--card-border)',
-                      color: 'var(--text)', fontSize: 11, fontFamily: 'inherit',
-                      outline: 'none', textAlign: 'center', minWidth: 0,
-                    }}
                   />
                   <input
                     type="number" min={30} max={110}
+                    className="msa-input msa-ex-num msa-ex-pct"
                     value={Math.round(ex.pct * 100)}
                     onChange={(e) => updateExercise(i, { pct: Math.max(0.3, Math.min(1.1, parseInt(e.target.value || '70', 10) / 100)) })}
                     title="% 1RM"
-                    style={{
-                      padding: '6px 4px', borderRadius: 6,
-                      background: 'var(--bg)', border: '1px solid var(--card-border)',
-                      color: HO_GOLD, fontSize: 11, fontWeight: 700, fontFamily: 'inherit',
-                      outline: 'none', textAlign: 'center', minWidth: 0,
-                    }}
                   />
                   <select
+                    className="msa-select"
                     value={ex.max_key}
                     onChange={(e) => updateExercise(i, { max_key: e.target.value as ManualSessionMaxKey })}
-                    style={{
-                      padding: '6px 4px', borderRadius: 6,
-                      background: 'var(--bg)', border: '1px solid var(--card-border)',
-                      color: 'var(--text)', fontSize: 10, fontFamily: 'inherit',
-                      outline: 'none', minWidth: 0,
-                    }}
                   >
                     {MAX_KEY_OPTIONS.map((m) => (
                       <option key={m.value} value={m.value}>{m.label}</option>
@@ -390,114 +321,68 @@ const ManualSessionAssigner: React.FC<Props> = ({ athlete }) => {
                   </select>
                   <button
                     onClick={() => removeExercise(i)}
-                    className="btn-press"
+                    className="btn-press msa-ex-del"
                     title="Quitar"
-                    style={{
-                      padding: '6px 8px', borderRadius: 6,
-                      background: 'transparent', color: '#f87171',
-                      border: '1px solid rgba(239,68,68,0.35)',
-                      fontSize: 11, fontWeight: 800, cursor: 'pointer',
-                      fontFamily: 'inherit',
-                    }}
                   >×</button>
                 </div>
               ))}
             </div>
             <button
               onClick={addExercise}
-              className="btn-press"
-              style={{
-                width: '100%', marginTop: 6, padding: '7px 0', borderRadius: 8,
-                background: 'transparent', color: HO_PURPLE,
-                border: `1px dashed ${HO_PURPLE}55`,
-                fontSize: 10, fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase',
-                cursor: 'pointer', fontFamily: 'inherit',
-              }}
+              className="btn-press msa-ex-add"
             >+ Agregar ejercicio</button>
           </div>
 
           {/* Note */}
-          <div style={{ marginBottom: 12 }}>
-            <label style={{ display: 'block', fontSize: 9, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 4 }}>
-              Nota (opcional)
-            </label>
+          <div className="msa-field">
+            <label className="msa-label">Nota (opcional)</label>
             <textarea
+              className="msa-textarea"
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="Ej: trabajá técnica, sin pesos máximos hoy"
               rows={2}
               maxLength={500}
-              style={{
-                width: '100%', padding: '8px 10px', borderRadius: 8,
-                background: 'var(--bg)', border: '1px solid var(--card-border)',
-                color: 'var(--text)', fontSize: 11, fontFamily: 'inherit',
-                outline: 'none', boxSizing: 'border-box', resize: 'vertical',
-              }}
             />
           </div>
 
           <button
             onClick={handleSubmit}
             disabled={submitting}
-            className="btn-press"
-            style={{
-              width: '100%', padding: '11px 0', borderRadius: 10,
-              background: submitting ? 'var(--card-border)' : HO_GOLD,
-              color: submitting ? 'var(--text-secondary)' : '#000',
-              border: 'none',
-              fontSize: 11, fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase',
-              cursor: submitting ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
-            }}
+            className="btn-press msa-submit"
           >
             {submitting ? 'Asignando…' : `Asignar ${slot === 'full' ? 'sesión' : slot.toUpperCase()} · ${fmtDateShort(date)}`}
           </button>
 
           {toast && (
-            <p style={{
-              marginTop: 8, fontSize: 11, fontWeight: 700, textAlign: 'center',
-              color: toast.kind === 'ok' ? '#4ade80' : '#f87171',
-            }}>{toast.kind === 'ok' ? '✓ ' : '⚠ '}{toast.text}</p>
+            <p className="msa-toast" data-kind={toast.kind}>
+              {toast.kind === 'ok' ? '✓ ' : '⚠ '}{toast.text}
+            </p>
           )}
         </div>
       )}
 
       {/* Lista de sesiones manuales recientes */}
       {recent.length > 0 && (
-        <div style={{
-          background: 'var(--surface)', border: '1px solid var(--card-border)',
-          borderRadius: 12, padding: 10,
-        }}>
-          <p style={{ fontSize: 9, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 8 }}>
-            Asignaciones manuales recientes
-          </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <div className="msa-recent">
+          <p className="msa-recent-head">Asignaciones manuales recientes</p>
+          <div className="msa-recent-list">
             {recent.map((m) => (
-              <div key={m.id} style={{
-                display: 'flex', alignItems: 'center', gap: 8,
-                padding: '8px 10px', borderRadius: 8,
-                background: 'var(--bg)', border: '1px solid var(--card-border)',
-              }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--text)' }}>
-                    {fmtDateShort(m.date)} · <span style={{ color: HO_GOLD }}>{m.slot.toUpperCase()}</span>{' '}
-                    · {m.focus}
+              <div key={m.id} className="msa-recent-item">
+                <div className="msa-recent-body">
+                  <p className="msa-recent-title">
+                    {fmtDateShort(m.date)} · <span className="slot">{m.slot.toUpperCase()}</span>{' '}
+                    · <span className="focus">{m.focus}</span>
                   </p>
-                  <p style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 2, fontVariantNumeric: 'tabular-nums' }}>
+                  <p className="msa-recent-meta">
                     {m.exercises.length} ejerc · ~{Math.round((m.exercises.reduce((a, e) => a + e.pct, 0) / Math.max(1, m.exercises.length)) * 100)}%
                     {m.note ? ` · ${m.note.slice(0, 40)}${m.note.length > 40 ? '…' : ''}` : ''}
                   </p>
                 </div>
                 <button
                   onClick={() => handleDelete(m.id)}
-                  className="btn-press"
+                  className="btn-press msa-recent-del"
                   title="Borrar"
-                  style={{
-                    padding: '4px 9px', borderRadius: 6,
-                    background: 'transparent', color: '#f87171',
-                    border: '1px solid rgba(239,68,68,0.35)',
-                    fontSize: 10, fontWeight: 800, cursor: 'pointer',
-                    fontFamily: 'inherit',
-                  }}
                 >Borrar</button>
               </div>
             ))}
@@ -506,7 +391,7 @@ const ManualSessionAssigner: React.FC<Props> = ({ athlete }) => {
       )}
 
       {!showForm && recent.length === 0 && !loadingRecent && (
-        <p style={{ fontSize: 11, color: 'var(--text-secondary)', fontStyle: 'italic', textAlign: 'center', padding: '8px 0' }}>
+        <p className="msa-empty">
           Sin asignaciones manuales recientes · usá ad-hoc para modificar la sesión del día.
         </p>
       )}
