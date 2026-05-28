@@ -10,8 +10,9 @@
  *  - onclick inline del chip "¿Por qué este plan?" → useState con data-open
  *  - mock data inline (4 cards: diagnóstico, impacto, plan, mensaje IA)
  */
-import { useState, type ReactElement } from 'react';
+import { useEffect, useState, type ReactElement } from 'react';
 import { useNav } from '../../context/NavigationContext';
+import { api, deviationsApi, type DeviationsResponse } from '../../lib/api';
 import '../../styles/v2/control-danios.css';
 
 // ============================================================
@@ -124,6 +125,31 @@ function IconCheckBig(): ReactElement {
 export default function ControlDaniosV2(): ReactElement {
   const { back } = useNav();
   const [whyOpen, setWhyOpen] = useState<boolean>(false);
+  const [deviations, setDeviations] = useState<DeviationsResponse | null>(null);
+  const [source, setSource] = useState<'backend' | 'fallback'>('fallback');
+
+  // Pipeline:
+  // 1. GET /v1/macrocycles/me/active → busca macro activo del atleta logueado.
+  // 2. Si hay macro → GET /v1/macrocycles/{id}/deviations → deviations reales.
+  // 3. Si cualquier paso falla → fallback al mock estático (FACTORS/IMPACTS/PLAN_ROWS).
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const active = await api.get<{ id?: string; macro_id?: string }>('/v1/macrocycles/me/active');
+        if (cancelled) return;
+        const macroId = active?.id ?? active?.macro_id;
+        if (!macroId) return;
+        const dev = await deviationsApi.get({ macro_id: macroId });
+        if (cancelled) return;
+        setDeviations(dev);
+        setSource('backend');
+      } catch {
+        if (!cancelled) setSource('fallback');
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   return (
     <div className="cd-root">
@@ -132,9 +158,16 @@ export default function ControlDaniosV2(): ReactElement {
         <div className="cd-h-text">
           <span className="cd-h-eyebrow">
             <span className="pip"/> COACH IA · CONTROL DE DAÑOS
+            <span style={{ marginLeft: 6, fontFamily: 'monospace', fontSize: 9, opacity: 0.6 }}>
+              · {source === 'backend' ? 'live' : 'offline'}
+            </span>
           </span>
           <h1 className="cd-h-title">Acompañemos <span className="accent">esto</span>.</h1>
-          <p className="cd-h-sub">Sin culpa · sin sermón. Vamos a recuperar el rumbo juntos.</p>
+          <p className="cd-h-sub">
+            {deviations
+              ? `${deviations.summary.total_deviations} desvíos en ${deviations.weeks_analyzed} semanas · severidad ${deviations.summary.severity}.`
+              : 'Sin culpa · sin sermón. Vamos a recuperar el rumbo juntos.'}
+          </p>
         </div>
         <button className="cd-h-x" aria-label="Cerrar" onClick={back}>
           <IconClose/>

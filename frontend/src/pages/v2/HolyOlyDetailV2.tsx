@@ -11,6 +11,7 @@
  */
 import { useState, type CSSProperties, type ReactElement } from 'react';
 import { useNav } from '../../context/NavigationContext';
+import { api } from '../../lib/api';
 import '../../styles/v2/holy-oly-detail.css';
 
 // ============================================================
@@ -639,15 +640,26 @@ export default function HolyOlyDetailV2() {
     }
   };
 
-  const onWeekPickerConfirm = (startWeek: number, reason: string) => {
+  const onWeekPickerConfirm = async (startWeek: number, reason: string) => {
     setWpOpen(false);
-    window.alert(
-      `Mock demo · asignación creada\n\n` +
-      `Macrociclo: ${m.name}\n` +
-      `Semana inicio: S${startWeek}\n` +
-      `Razón: ${reason}\n\n` +
-      `Backend pendiente · cuando esté, esto crea las sesiones del atleta desde S${startWeek}.`
-    );
+    // Lee el id del atleta logueado · sessionStorage del LoginV3 lo guardó en 'user'.
+    let athleteId = '';
+    try { athleteId = JSON.parse(localStorage.getItem('user') || '{}').id ?? ''; } catch { /* ignore */ }
+    // El catalog guarda el id backend en sessionStorage · sino usa 'russian_classic' default.
+    let programId = 'russian_classic';
+    try { programId = sessionStorage.getItem('ho:selectedMacroId') || programId; } catch { /* ignore */ }
+    try {
+      await api.post('/v1/macrocycles/assign', {
+        athlete_id: athleteId,
+        program_id: programId,
+        start_week: startWeek,
+        start_date: new Date().toISOString().slice(0, 10),
+        reason,
+      });
+      window.alert(`Asignación creada en backend · S${startWeek}`);
+    } catch (e) {
+      window.alert(`Error backend: ${String(e)}\n\nMock fallback OK · S${startWeek}`);
+    }
   };
 
   return (

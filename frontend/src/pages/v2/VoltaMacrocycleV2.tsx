@@ -10,7 +10,8 @@
  *  - removido ReactDOM.createRoot(...).render(<App/>) leftover
  *  - removido `useEffect` import (no se usa en source)
  */
-import { useRef, useState, type CSSProperties, type ReactElement } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactElement } from 'react';
+import { api } from '../../lib/api';
 import '../../styles/v2/volta-macrocycle.css';
 
 // ============================================================
@@ -153,7 +154,7 @@ function Icon({ name, size = 14, stroke = 1.7, style, className }: {
 // ============================================================
 // ZONE A · HEADER
 // ============================================================
-function Header({ data }: { data: MacrocycleData }) {
+function Header({ data, source }: { data: MacrocycleData; source: 'backend' | 'fallback' }) {
   return (
     <header className="vm-header" role="banner">
       <div className="vm-h-top">
@@ -166,6 +167,9 @@ function Header({ data }: { data: MacrocycleData }) {
               <span>·</span>
               <span className="flag">{data.athlete.flag}</span>
               <span>VOLTA</span>
+              <span style={{ marginLeft: 6, fontFamily: 'monospace', fontSize: 9, opacity: 0.6 }}>
+                · {source === 'backend' ? 'live' : 'offline'}
+              </span>
             </div>
           </div>
         </div>
@@ -458,13 +462,48 @@ function AdjustModal({ open, onClose }: { open: boolean; onClose: () => void }) 
 // Main
 // ============================================================
 export default function VoltaMacrocycleV2() {
-  const data = mockMacrocycle;
-  const [expandedIdx, setExpanded] = useState<number | null>(data.currentBlockIndex);
+  const [backendData, setBackendData] = useState<Record<string, unknown> | null>(null);
+  const [source, setSource] = useState<'backend' | 'fallback'>('fallback');
   const [modalOpen, setModalOpen] = useState<boolean>(false);
+
+  // Fetch macro activo Volta · GET /v1/macrocycles/me/active?product=volta.
+  // Si responde OK · merge sobre mock. Si 404/500 · mock display intacto.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await api.get<Record<string, unknown>>('/v1/macrocycles/me/active?product=volta');
+        if (cancelled) return;
+        if (res) {
+          setBackendData(res);
+          setSource('backend');
+        }
+      } catch {
+        if (!cancelled) setSource('fallback');
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  // Merge superficial · backend campos posibles (currentWeek, currentBlockIndex) sobre mock.
+  // Si backend shape distinto · cae a mock. UI nunca rompe.
+  const data: MacrocycleData = useMemo(() => {
+    if (!backendData) return mockMacrocycle;
+    const b = backendData as Record<string, unknown>;
+    const cw = (b.current_week ?? b.currentWeek) as number | undefined;
+    const cbi = (b.current_block_index ?? b.currentBlockIndex) as number | undefined;
+    return {
+      ...mockMacrocycle,
+      currentWeek: typeof cw === 'number' ? cw : mockMacrocycle.currentWeek,
+      currentBlockIndex: typeof cbi === 'number' ? cbi : mockMacrocycle.currentBlockIndex,
+    };
+  }, [backendData]);
+
+  const [expandedIdx, setExpanded] = useState<number | null>(data.currentBlockIndex);
 
   return (
     <div className="vm-root">
-      <Header data={data}/>
+      <Header data={data} source={source}/>
       <div className="vm-scroll">
         <HeroCard data={data} onLongPress={() => setModalOpen(true)}/>
         <Timeline

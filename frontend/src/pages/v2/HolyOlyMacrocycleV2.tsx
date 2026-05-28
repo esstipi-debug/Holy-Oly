@@ -13,8 +13,9 @@
  *  - removido ReactDOM.createRoot leftover del jsx fuente
  *  - mock holyOly (Marco Vitali · semana 5/8 PEAKING SNATCH) por ahora · backend pendiente
  */
-import { useState, useMemo, type CSSProperties, type ReactElement } from 'react';
+import { useState, useEffect, useMemo, type CSSProperties, type ReactElement } from 'react';
 import { useNav } from '../../context/NavigationContext';
+import { api } from '../../lib/api';
 import '../../lib/web-components';
 import '../../styles/v2/holy-oly-macrocycle.css';
 
@@ -177,7 +178,7 @@ function describePlates(plates: string[] | undefined, oneRm: number): string {
 // ============================================================
 // ZONE A · HEADER
 // ============================================================
-function Header({ data }: { data: HolyOlyMacrocycle }) {
+function Header({ data, source }: { data: HolyOlyMacrocycle; source: 'backend' | 'fallback' }) {
   return (
     <header className="ho-header" role="banner">
       <div className="ho-h-top">
@@ -187,6 +188,9 @@ function Header({ data }: { data: HolyOlyMacrocycle }) {
           <div className="ho-h-coach">
             <Icon name="sparkle" size={9} stroke={2} className="ic"/>
             COACH <span className="nm">{data.athlete.coach.name}</span>
+            <span style={{ marginLeft: 6, fontFamily: 'monospace', fontSize: 9, opacity: 0.6 }}>
+              · {source === 'backend' ? 'live' : 'offline'}
+            </span>
           </div>
         </div>
         <div className="ho-disco"
@@ -496,15 +500,48 @@ function DamageControl({ data }: { data: DamageControlData }) {
 // ============================================================
 export default function HolyOlyMacrocycleV2() {
   const { navigate } = useNav();
-  const data = mockHolyOlyMacrocycle;
+  const [backendData, setBackendData] = useState(null);
+  const [source, setSource] = useState<'backend' | 'fallback'>('fallback');
   const [expandedIdx, setExpanded] = useState<number | null>(2); // current block expanded
 
   // navigate referenced for future · ej tap macro badge → catálogo
   void navigate;
 
+  // Fetch macro activo del atleta logueado · GET /v1/macrocycles/me/active.
+  // Si responde OK · usamos backendData (merge sobre mock). Si 404/500 · fallback al mock.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await api.get('/v1/macrocycles/me/active');
+        if (cancelled) return;
+        if (res) {
+          setBackendData(res);
+          setSource('backend');
+        }
+      } catch {
+        if (!cancelled) setSource('fallback');
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  // Merge superficial · backend campos posibles (currentWeek, totalWeeks, macroLabel) sobre el mock.
+  // Si backend devuelve shape distinto · cae al mock display. UI nunca rompe.
+  const data: HolyOlyMacrocycle = useMemo(() => {
+    if (!backendData) return mockHolyOlyMacrocycle;
+    const b: any = backendData;
+    return {
+      ...mockHolyOlyMacrocycle,
+      macroLabel:  b.macro_label  ?? b.name        ?? mockHolyOlyMacrocycle.macroLabel,
+      currentWeek: b.current_week ?? b.currentWeek ?? mockHolyOlyMacrocycle.currentWeek,
+      totalWeeks:  b.total_weeks  ?? b.weeks       ?? mockHolyOlyMacrocycle.totalWeeks,
+    };
+  }, [backendData]);
+
   return (
     <div className="hmm-root">
-      <Header data={data}/>
+      <Header data={data} source={source}/>
 
       <div className="ho-scroll">
         <div className="ho-section-head">
