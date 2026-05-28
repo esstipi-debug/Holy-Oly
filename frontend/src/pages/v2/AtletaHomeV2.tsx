@@ -4,8 +4,12 @@
    Mobile 390×844 · bento HUD
    ============================================================ */
 
-import React, { useState, useMemo  } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import '../../styles/v2/atleta-home.css';
+import { useAthlete } from '../../context/AthleteContext';
+import { useNav } from '../../context/NavigationContext';
+import { progressionApi } from '../../lib/progression';
+import { getPendingForToday } from '../../lib/plannedSessions';
 
 /* ---------- Lucide-style icons (stroke 1.5) ---------- */
 const ICONS = {
@@ -71,22 +75,29 @@ function StatusBar() {
 }
 
 /* ---------- Header ---------- */
-function Header() {
+const MONTHS_ES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const DAYS_ES = ['dom','lun','mar','mié','jue','vie','sáb'];
+function formatHeaderDate(d, week, totalWeeks) {
+  const base = `${DAYS_ES[d.getDay()]} ${d.getDate()} ${MONTHS_ES[d.getMonth()]}`;
+  return totalWeeks > 0 ? `${base} · semana ${week}/${totalWeeks}` : base;
+}
+
+function Header({ firstName, initial, dateLabel, streak, onProfile }) {
   return (
     <header className="ah-header">
       <div className="ah-greeting">
-        <div className="ah-avatar">M</div>
+        <div className="ah-avatar">{initial}</div>
         <div>
-          <div className="ah-hello">Hola, MARCO <span style={{color:'var(--text)'}}>👋</span></div>
-          <div className="ah-date">jue 27 may · semana 4/12</div>
+          <div className="ah-hello">Hola, {firstName} <span style={{color:'var(--text)'}}>👋</span></div>
+          <div className="ah-date">{dateLabel}</div>
         </div>
       </div>
       <div className="ah-header-right">
         <span className="ah-streak">
           <Icon name="flame" size={13} stroke={2}/>
-          <span>12</span>
+          <span>{streak}</span>
         </span>
-        <span className="ah-icon-btn"><Icon name="bell" size={18}/></span>
+        <span className="ah-icon-btn" onClick={onProfile} role="button" aria-label="Perfil"><Icon name="user" size={18}/></span>
       </div>
     </header>
   );
@@ -114,32 +125,33 @@ function Semaforo({ state, onClick }) {
 }
 
 /* ---------- Readiness Ring ---------- */
-function ReadinessCard({ value, state }) {
+function ReadinessCard({ value, state, loading, meta, onClick }) {
   const color = state === 'red'   ? 'var(--engine-pulse)'
               : state === 'amber' ? 'var(--engine-macro)'
               :                     'var(--engine-stress)';
   const label = state === 'red'   ? 'CAUTION'
               : state === 'amber' ? 'PROCEED'
               :                     'READY';
+  const display = value == null ? '—' : value;
 
   return (
-    <Card critical className="ah-ring-card">
+    <Card critical className="ah-ring-card" onClick={onClick}>
       <div className="ah-eyebrow">
         <Icon name="activity" size={11}/> READINESS · CNS
       </div>
       <div className="ah-ring-wrap">
         <div className="ah-ring"
              style={{
-               background: `conic-gradient(${color} ${value}%, rgba(255,255,255,0.05) 0)`,
-               filter: `drop-shadow(0 0 10px ${color})`,
+               background: `conic-gradient(${color} ${value == null ? 0 : value}%, rgba(255,255,255,0.05) 0)`,
+               filter: value == null ? 'none' : `drop-shadow(0 0 10px ${color})`,
              }}>
           <div className="ah-ring-inner">
-            <div className="ah-ring-num">{value}</div>
-            <div className="ah-ring-label" style={{color}}>{label}</div>
+            <div className="ah-ring-num">{loading ? '…' : display}</div>
+            <div className="ah-ring-label" style={{color}}>{value == null ? '—' : label}</div>
           </div>
         </div>
         <div className="ah-ring-meta">
-          <div className="ah-ring-trend">HRV 68ms · ↑ +4 vs base</div>
+          <div className="ah-ring-trend">{meta}</div>
         </div>
       </div>
     </Card>
@@ -147,14 +159,14 @@ function ReadinessCard({ value, state }) {
 }
 
 /* ---------- OLY Index ---------- */
-function OlyCard() {
+function OlyCard({ value, sub, onClick }) {
   return (
-    <Card className="ah-oly-card">
+    <Card className="ah-oly-card" onClick={onClick}>
       <div className="ah-eyebrow">
         <Icon name="trending" size={11}/> OLY IDX
       </div>
-      <div className="ah-big-num oly">7.4</div>
-      <div className="ah-trend up">▲ +0.3 / 30d</div>
+      <div className="ah-big-num oly">{value}</div>
+      <div className="ah-trend up">{sub}</div>
     </Card>
   );
 }
@@ -188,56 +200,59 @@ function TierCard({ tier = '3', name = 'AZUL', pct = 73 }) {
 }
 
 /* ---------- Macrocycle ---------- */
-function MacroCard({ current = 4, total = 12, peakAt = 8 }) {
+function MacroCard({ current = 4, total = 12, peakAt = 8, title = 'Macrociclo', fullWidth = false, onClick }) {
+  const safeTotal = total > 0 ? total : 12;
+  const safeCurrent = Math.min(current, safeTotal);
+  const weeksToPeak = Math.max(0, peakAt - safeCurrent);
   return (
-    <Card>
+    <Card onClick={onClick} style={fullWidth ? { gridColumn: '1 / -1' } : undefined}>
       <div className="ah-eyebrow">
         <Icon name="calendar" size={11}/> MACROCYCLE
       </div>
-      <div className="ah-macro-title">Fuerza Máx · Sem {current}/{total}</div>
+      <div className="ah-macro-title">{title} · Sem {safeCurrent}/{safeTotal}</div>
       <div className="ah-macro-bar">
-        {Array.from({length: total}, (_, i) => {
+        {Array.from({length: safeTotal}, (_, i) => {
           const w = i + 1;
-          const isPast = w <= current;
+          const isPast = w <= safeCurrent;
           const isPeak = w === peakAt;
           return (
             <div key={w}
                  className={`tick ${isPast ? 'on' : ''} ${isPeak ? 'peak' : ''}`}/>
           );
         })}
-        <span className="flag" style={{ left: `${((peakAt - 0.5) / total) * 100}%` }}/>
+        <span className="flag" style={{ left: `${((peakAt - 0.5) / safeTotal) * 100}%` }}/>
       </div>
       <div className="ah-macro-foot">
-        <span>{Math.round((current / total) * 100)}% completado</span>
-        <span className="next">↗ pico en {peakAt - current} sem</span>
+        <span>{Math.round((safeCurrent / safeTotal) * 100)}% completado</span>
+        <span className="next">{weeksToPeak > 0 ? `↗ pico en ${weeksToPeak} sem` : '↗ fase pico'}</span>
       </div>
     </Card>
   );
 }
 
 /* ---------- Hormonal ---------- */
-function HormonalCard({ phase = 'LUTEAL', day = 18 }) {
+function HormonalCard({ phase, day, foot, onClick }) {
   return (
-    <Card className="ah-horm-card">
+    <Card className="ah-horm-card" onClick={onClick}>
       <div className="ah-eyebrow">
         <Icon name="venus" size={11}/> CICLO
       </div>
       <div className="ah-horm-phase">{phase}</div>
       <div className="ah-horm-day">D-{day}</div>
-      <div className="ah-horm-foot">-5% intens</div>
+      <div className="ah-horm-foot">{foot}</div>
     </Card>
   );
 }
 
 /* ---------- Today CTA ---------- */
-function TodayCTA() {
+function TodayCTA({ eyebrow, title, foot, onClick }) {
   return (
-    <button className="ah-cta">
+    <button className="ah-cta" onClick={onClick}>
       <span className="ah-cta-eyebrow">
-        <Icon name="play" size={10} stroke={2}/> HOY · STRENGTH
+        <Icon name="play" size={10} stroke={2}/> {eyebrow}
       </span>
-      <span className="ah-cta-title">Back Squat 5×5 @ 85%</span>
-      <span className="ah-cta-foot">1h 15min · 4 ejercicios accesorios</span>
+      <span className="ah-cta-title">{title}</span>
+      <span className="ah-cta-foot">{foot}</span>
       <span className="ah-cta-arrow">
         <Icon name="arrow" size={16} stroke={2}/>
       </span>
@@ -246,7 +261,7 @@ function TodayCTA() {
 }
 
 /* ---------- Heatmap 365 ---------- */
-function HeatmapCard() {
+function HeatmapCard({ activeLabel = '—', xpLabel = '', onClick }) {
   // Deterministic-ish fake data: most sessions, some rest, occasional override
   const cells = useMemo(() => {
     const seed = 42;
@@ -265,7 +280,7 @@ function HeatmapCard() {
   }, []);
 
   return (
-    <Card className="ah-heatmap-card">
+    <Card className="ah-heatmap-card" onClick={onClick}>
       <div className="ah-eyebrow">
         <Icon name="calendar" size={11}/> 365 DÍAS · CONSISTENCIA
       </div>
@@ -276,8 +291,8 @@ function HeatmapCard() {
         ))}
       </div>
       <div className="ah-hm-foot">
-        <span>287 días activo</span>
-        <span className="up">+42 XP semana</span>
+        <span>{activeLabel}</span>
+        <span className="up">{xpLabel}</span>
       </div>
     </Card>
   );
@@ -316,18 +331,19 @@ function Quests() {
 }
 
 /* ---------- Bottom Nav ---------- */
-function BottomNav({ active }) {
+function BottomNav({ active, onNavigate }) {
   const tabs = [
-    { k: 'home',    icon: 'home',  label: 'Home' },
-    { k: 'stats',   icon: 'bar',   label: 'Stats' },
-    { k: 'log',     icon: 'plus',  label: 'Log' },
-    { k: 'skills',  icon: 'tree',  label: 'Skills' },
-    { k: 'profile', icon: 'user',  label: 'Profile' },
+    { k: 'home',    icon: 'home',  label: 'Home',    view: 'HOME' },
+    { k: 'stats',   icon: 'bar',   label: 'Stats',   view: 'HO_STATS' },
+    { k: 'log',     icon: 'plus',  label: 'Log',     view: 'WARMUP' },
+    { k: 'skills',  icon: 'tree',  label: 'Skills',  view: 'PROGRESSION' },
+    { k: 'profile', icon: 'user',  label: 'Profile', view: 'PROFILE' },
   ];
   return (
     <nav className="ah-nav">
       {tabs.map(t => (
-        <button key={t.k} className={`ah-nav-tab ${active === t.k ? 'on' : ''}`}>
+        <button key={t.k} className={`ah-nav-tab ${active === t.k ? 'on' : ''}`}
+                onClick={() => onNavigate && onNavigate(t.view)}>
           <Icon name={t.icon} size={22} stroke={active === t.k ? 1.8 : 1.5}/>
           <span>{t.label}</span>
         </button>
@@ -336,115 +352,193 @@ function BottomNav({ active }) {
   );
 }
 
-/* ---------- Tweaks panel ---------- */
-function TweaksOverlay({ semState, setSemState, tier, setTier, ready, setReady, animatePlate, setAnimatePlate }) {
-  const { TweaksPanel, TweakSection, TweakSlider, TweakToggle, TweakRadio } = window;
-  if (!TweaksPanel) return null;
-  return (
-    <TweaksPanel title="Atleta Home">
-      <TweakSection label="Estado">
-        <TweakRadio
-          label="Semáforo"
-          value={semState}
-          onChange={setSemState}
-          options={[
-            { value:'green', label:'🟢' },
-            { value:'amber', label:'🟡' },
-            { value:'red',   label:'🔴' },
-          ]}/>
-        <TweakSlider
-          label="Readiness"
-          value={ready}
-          min={0} max={100} step={1} unit="%"
-          onChange={setReady}/>
-      </TweakSection>
-      <TweakSection label="Disco">
-        <TweakRadio
-          label="Tier"
-          value={tier}
-          onChange={setTier}
-          options={[
-            { value:'0', label:'T0' },
-            { value:'1', label:'T1' },
-            { value:'2', label:'T2' },
-            { value:'3', label:'T3' },
-            { value:'4', label:'T4' },
-          ]}/>
-        <TweakToggle
-          label="Pulse disco"
-          value={animatePlate}
-          onChange={setAnimatePlate}/>
-      </TweakSection>
-    </TweaksPanel>
-  );
-}
+/* ---------- Derivaciones (espejo de la home legacy AtletaHome.tsx) ---------- */
+
+// readiness → estado semáforo (mismos cortes que ringColor legacy: 70 / 50)
+const readinessToState = (r) => r == null ? 'green' : r >= 70 ? 'green' : r >= 50 ? 'amber' : 'red';
+
+// Cinturón 0-7 (engine 05) → disco V2 0-4. Mapeo proporcional para que el
+// color del disco siga la progresión real del atleta.
+//   blanco/amarillo → T0/T1 · naranja/azul → T2/T3 · púrpura+ → T4
+const BELT_TO_TIER = ['0', '0', '1', '2', '3', '4', '4', '4'];
+const TIER_NAME = ['STARTER', 'VERDE', 'AMARILLO', 'AZUL', 'ÉLITE'];
+
+// Ejercicio principal de hoy derivado de los maxes (igual criterio que la
+// sección "Sesión de hoy" legacy: Arrancada 5×3 @ 85%).
+const FOCUS_LABEL = (focus) => (focus || 'STRENGTH').toString().toUpperCase();
 
 /* ---------- Main App ---------- */
 function App() {
-  const [semState, setSemState]           = useState('green');
-  const [tier, setTier]                   = useState('3');
-  const [ready, setReady]                 = useState(84);
-  const [animatePlate, setAnimatePlate]   = useState(false);
+  const { athlete, stress, stressLoading } = useAthlete();
+  const { navigate } = useNav();
 
-  // Cycle semáforo on tap
-  const cycleSem = () => {
-    setSemState(s => s === 'green' ? 'amber' : s === 'amber' ? 'red' : 'green');
-  };
+  // Estado backend de progresión (cinturón + racha + oly index) · graceful fallback.
+  const [belt, setBelt] = useState(null);
+  const [streak, setStreak] = useState(null);
+  const [olyApi, setOlyApi] = useState(null);
+  // Estado hormonal (engine 13) · sólo se intenta para atletas femeninas · opt-in.
+  const [hormonal, setHormonal] = useState(null);
 
-  const tierMeta = {
-    '0': { name: 'STARTER',    pct: 12, next: 'VERDE'    },
-    '1': { name: 'VERDE',      pct: 48, next: 'AMARILLO' },
-    '2': { name: 'AMARILLO',   pct: 65, next: 'AZUL'     },
-    '3': { name: 'AZUL',       pct: 73, next: 'ROJO'     },
-    '4': { name: 'ÉLITE',      pct: 92, next: 'LEYENDA'  },
-  }[tier];
+  useEffect(() => {
+    let alive = true;
+    progressionApi.bundle()
+      .then(b => { if (alive) { setBelt(b.belt); setStreak(b.streak); setOlyApi(b.oly_index); } })
+      .catch(() => { /* silent · usamos fallbacks locales */ });
+    return () => { alive = false; };
+  }, [athlete?.id]);
+
+  useEffect(() => {
+    if (!athlete || athlete.gender !== 'F') { setHormonal(null); return; }
+    let alive = true;
+    // Import diferido para no acoplar el bundle si nunca se usa.
+    import('../../lib/hormonal').then(({ hormonalApi, PHASE_COLORS }) => {
+      hormonalApi.current()
+        .then(c => { if (alive) setHormonal({ data: c, colors: PHASE_COLORS }); })
+        .catch(() => { if (alive) setHormonal(null); /* 404 = no configurado */ });
+    }).catch(() => { /* ignore */ });
+    return () => { alive = false; };
+  }, [athlete?.id, athlete?.gender]);
+
+  if (!athlete) return null;
+
+  const { macrocycle, maxes } = athlete;
+  const firstName = (athlete.name.split(' ')[0] || '').toUpperCase();
+  const initial = firstName[0] || '·';
+
+  // ── Readiness / semáforo ──
+  const readiness = stress ? Math.round(stress.readiness) : null;
+  const semState = readinessToState(readiness);
+  const readinessMeta = stressLoading
+    ? 'Calculando…'
+    : stress
+      ? `Fitness ${Math.round(stress.fitness)} · Fatiga ${Math.round(stress.fatigue)}`
+      : 'Completá tu check-in diario';
+
+  // ── OLY index ── (API si está · si no, fórmula legacy snatch/bw*2.5)
+  const olyIndex = olyApi != null
+    ? olyApi.oly_index.toFixed(1)
+    : maxes.body_weight > 0
+      ? (maxes.snatch / maxes.body_weight * 2.5).toFixed(1)
+      : '—';
+  const olySub = `${maxes.snatch}kg snatch`;
+
+  // ── Cinturón → disco ──
+  const beltIdx = belt ? Math.max(0, Math.min(7, belt.belt_idx)) : null;
+  const tier = beltIdx != null ? BELT_TO_TIER[beltIdx] : '3';
+  const tierPct = belt ? Math.max(4, Math.min(100, Math.round(belt.progress_pct))) : 0;
+  const tierName = TIER_NAME[parseInt(tier)] ?? 'AZUL';
+
+  // ── Macrociclo ──
+  const macroWeek = macrocycle.week ?? 0;
+  const macroTotal = macrocycle.total_weeks ?? 0;
+  const macroPeak = macroTotal > 0 ? Math.max(1, Math.round(macroTotal * 0.7)) : 8;
+  const macroTitle = macrocycle.focus || macrocycle.program_name || 'Macrociclo';
+
+  // ── Racha ── (API best/current · fallback: sesiones completadas 7d)
+  const completed = athlete.sessions_last_7.filter(s => s.completed);
+  const streakValue = streak ? streak.current : completed.length;
+
+  // ── Sesión de hoy ── (planned real si existe · si no, derivada de maxes)
+  const pending = getPendingForToday(athlete.id);
+  const todaySession = pending[0] ?? null;
+  let ctaEyebrow, ctaTitle, ctaFoot;
+  if (todaySession && todaySession.exercises.length > 0) {
+    const ex = todaySession.exercises[0];
+    const w = Math.round((maxes[ex.max_key] ?? 0) * ex.pct);
+    ctaEyebrow = `HOY · ${FOCUS_LABEL(todaySession.focus)}`;
+    ctaTitle = `${ex.name} ${ex.sets}×${ex.reps}${w > 0 ? ` @ ${w}kg` : ''}`;
+    ctaFoot = `${todaySession.exercises.length} ejercicios · ${Math.round(ex.pct * 100)}% 1RM`;
+  } else {
+    // Misma sesión por defecto que la home legacy (Arrancada 5×3 @ 85%)
+    const snatchW = Math.round(maxes.snatch * 0.85);
+    ctaEyebrow = `HOY · ${FOCUS_LABEL(macrocycle.focus)}`;
+    ctaTitle = snatchW > 0 ? `Arrancada 5×3 @ ${snatchW}kg` : 'Sesión de hoy';
+    ctaFoot = '3 ejercicios principales · 85% 1RM';
+  }
+
+  // ── Heatmap footer ── (días activos reales + sesiones de la semana)
+  const activeDays = streak ? streak.total_active_days : completed.length;
+  const heatActive = `${activeDays} día${activeDays === 1 ? '' : 's'} activo${activeDays === 1 ? '' : 's'}`;
+  const heatXp = `${completed.length} sesion${completed.length === 1 ? '' : 'es'} · 7d`;
+
+  // ── Hormonal (real, sólo si configurado) ──
+  let hormPhase, hormDay, hormFoot;
+  if (hormonal) {
+    const c = hormonal.data;
+    hormPhase = (hormonal.colors[c.phase]?.label ?? c.phase).toUpperCase();
+    hormDay = c.day_of_cycle;
+    const adj = c.recommendation?.intensity_adjustment_pct ?? 0;
+    hormFoot = `${adj >= 0 ? '+' : ''}${adj}% intens`;
+  }
 
   return (
-    <>
+    <div className="ah-v2-root">
       <div className="phone">
         <div className="phone-inner">
           <StatusBar/>
           <div className="ah-sticky">
-            <Header/>
-            <Semaforo state={semState} onClick={cycleSem}/>
+            <Header
+              firstName={firstName}
+              initial={initial}
+              dateLabel={formatHeaderDate(new Date(), macroWeek, macroTotal)}
+              streak={streakValue}
+              onProfile={() => navigate('PROFILE')}
+            />
+            <Semaforo state={semState} onClick={() => navigate('PULSE')}/>
           </div>
           <div className="ah-scroll">
             <div className="ah-bento">
               {/* ROW 1 */}
               <div className="ah-row-1">
-                <ReadinessCard value={ready} state={semState}/>
-                <OlyCard/>
-                <TierWithAnimate tier={tier} name={tierMeta.name} pct={tierMeta.pct} animate={animatePlate}/>
+                <ReadinessCard
+                  value={readiness}
+                  state={semState}
+                  loading={stressLoading}
+                  meta={readinessMeta}
+                  onClick={() => navigate('PULSE')}
+                />
+                <OlyCard value={olyIndex} sub={olySub} onClick={() => navigate('INDEX')}/>
+                <TierWithAnimate
+                  tier={tier} name={tierName} pct={tierPct} animate={false}
+                  onClick={() => navigate('PROGRESSION')}
+                />
               </div>
               {/* ROW 2 */}
               <div className="ah-row-2">
-                <MacroCard/>
-                <HormonalCard/>
+                <MacroCard
+                  current={macroWeek} total={macroTotal} peakAt={macroPeak}
+                  title={macroTitle} fullWidth={!hormonal}
+                  onClick={() => navigate('HO_MACRO_ATHLETE')}
+                />
+                {hormonal && (
+                  <HormonalCard
+                    phase={hormPhase} day={hormDay} foot={hormFoot}
+                    onClick={() => navigate('HORMONAL')}
+                  />
+                )}
               </div>
               {/* ROW 3 - CTA */}
-              <TodayCTA/>
+              <TodayCTA
+                eyebrow={ctaEyebrow} title={ctaTitle} foot={ctaFoot}
+                onClick={() => navigate('WARMUP')}
+              />
               {/* ROW 4 - heatmap */}
-              <HeatmapCard/>
+              <HeatmapCard activeLabel={heatActive} xpLabel={heatXp} onClick={() => navigate('HO_STATS')}/>
               {/* ROW 5 - quests */}
               <Quests/>
             </div>
           </div>
-          <BottomNav active="home"/>
+          <BottomNav active="home" onNavigate={(v) => navigate(v)}/>
         </div>
       </div>
-      <TweaksOverlay
-        semState={semState} setSemState={setSemState}
-        tier={tier} setTier={setTier}
-        ready={ready} setReady={setReady}
-        animatePlate={animatePlate} setAnimatePlate={setAnimatePlate}/>
-    </>
+    </div>
   );
 }
 
 // Tier card needs to react to animate toggle by re-rendering plate-3d
-function TierWithAnimate({ tier, name, pct, animate }) {
+function TierWithAnimate({ tier, name, pct, animate, onClick }) {
   return (
-    <Card className="ah-tier-card">
+    <Card className="ah-tier-card" onClick={onClick}>
       <div className="ah-eyebrow">DISCO · T{tier}</div>
       <div className="ah-tier-disc">
         <plate-3d key={`${tier}-${animate}`} tier={tier} size="62" {...(animate ? {animate: ''} : {})}/>

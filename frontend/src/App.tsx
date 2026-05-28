@@ -8,8 +8,6 @@ import { RoleProvider, useRole } from './context/RoleContext';
 import { ToastProvider } from './components/Toast';
 import PhoneLayout, { type NavTab } from './layouts/PhoneLayout';
 import AtletaHome from './pages/AtletaHome';
-import Login from './pages/Login';
-import Register from './pages/Register';
 import ActiveSession from './pages/ActiveSession';
 import WarmupGenerator from './pages/WarmupGenerator';
 import SessionSummaryPreview from './pages/SessionSummaryPreview';
@@ -20,7 +18,6 @@ import CoachStatsHO from './pages/CoachStatsHO';
 import AthleteDeepDive from './pages/AthleteDeepDive';
 import AssignMacrocycle from './pages/AssignMacrocycle';
 import NewAthlete from './pages/NewAthlete';
-import Onboarding from './pages/Onboarding';
 import Premium from './pages/PreMium';
 import PulseHub from './pages/PulseHub';
 import Profile from './pages/Profile';
@@ -37,7 +34,6 @@ import BeltCeremony from './pages/BeltCeremony';
 import PrewodShare from './pages/PrewodShare';
 import CoachViralTools from './pages/CoachViralTools';
 import LogWodResult from './pages/LogWodResult';
-import VoltaDashboard from './pages/VoltaDashboard';
 import VoltaPreWod from './pages/VoltaPreWod';
 import VoltaWarmup from './pages/VoltaWarmup';
 import VoltaActiveWod from './pages/VoltaActiveWod';
@@ -47,7 +43,6 @@ import VoltaCoachWod from './pages/VoltaCoachWod';
 import VoltaCoachTools from './pages/VoltaCoachTools';
 import CoachMacroView from './pages/CoachMacroView';
 import MovementProgression from './pages/MovementProgression';
-import Landing from './pages/Landing';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Terms from './pages/Terms';
 import HormonalSetup from './pages/HormonalSetup';
@@ -319,10 +314,10 @@ function AppInner() {
     if (currentView === 'ONBOARDING_V3') return <OnboardingV3 />;
     if (currentView === 'VOLTA_HOME_V3') return <VoltaDashboardV3 />;
     if (currentView === 'LOGIN' && !isAuthenticated && !getDeepLinkProduct()) {
-      return <Landing />;
+      return <LandingV3 />;
     }
     if (currentView === 'LOGIN') {
-      return <Login onSuccess={() => {
+      return <LoginV3 onSuccess={() => {
         const last = readLastView(product, role);
         if (last && HOME_VIEWS.has(last)) { navigate(last); return; }
         navigate(role === 'coach'
@@ -330,7 +325,7 @@ function AppInner() {
           : (product === 'volta' ? 'VOLTA_HOME' : 'HOME'));
       }} />;
     }
-    if (currentView === 'REGISTER') return <Register />;
+    if (currentView === 'REGISTER') return <RegisterV3 />;
 
     // VOLTA
     if (product === 'volta') {
@@ -362,16 +357,16 @@ function AppInner() {
         case 'COACH_VIRAL_TOOLS':     return <CoachViralTools />;
         case 'VOLTA_WOD_LOG':         return <LogWodResult />;
         case 'PREMIUM':               return <Premium />;
-        case 'ONBOARDING':            return <Onboarding />;
+        case 'ONBOARDING':            return <OnboardingV3 />;
         case 'VOLTA_HOME':
         case 'HOME':
         default:
-          return role === 'coach' ? <VoltaCoachDash /> : <VoltaDashboard />;
+          return role === 'coach' ? <VoltaCoachDash /> : <VoltaDashboardV3 />;
       }
     }
     // HOLY OLY
     switch (currentView) {
-      case 'ONBOARDING':     return <Onboarding />;
+      case 'ONBOARDING':     return <OnboardingV3 />;
       case 'PREMIUM':        return <Premium />;
       case 'SUMMARY':        return <SessionSummaryPreview />;
       case 'WARMUP':         return <WarmupGenerator />;

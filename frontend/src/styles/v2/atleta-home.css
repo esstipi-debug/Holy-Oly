@@ -1,10 +1,20 @@
 /* ============================================================
    PEAK QUAL · ATLETA HOME · estilos
+   ------------------------------------------------------------
+   SCOPING · todo vive bajo `.ah-v2-root` para que los resets
+   globales (* { margin:0 } · centrado del body) NO se filtren a
+   otras pantallas cuando esta pantalla pasa a estar siempre
+   montada (home real). El root replica el background + centrado
+   que antes vivía en html/body, así el resultado visual de ESTA
+   pantalla no cambia.
    ============================================================ */
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+.ah-v2-root,
+.ah-v2-root *,
+.ah-v2-root *::before,
+.ah-v2-root *::after { box-sizing: border-box; }
 
-html, body {
+.ah-v2-root {
   font-family: var(--font-body);
   background: var(--bg-deep);
   background-image:
@@ -12,13 +22,19 @@ html, body {
     linear-gradient(90deg, rgba(0,229,255,0.025) 1px, transparent 1px),
     radial-gradient(ellipse at 50% 0%, rgba(0,229,255,0.06), transparent 60%);
   background-size: 40px 40px, 40px 40px, 100% 100%;
-  min-height: 100vh;
+  min-height: 100%;
   display: grid;
   place-items: center;
   padding: 24px;
   color: var(--text);
   -webkit-font-smoothing: antialiased;
 }
+
+/* Reset de márgenes/padding sólo dentro del root · sustituye al `* {…}` global */
+.ah-v2-root h1, .ah-v2-root h2, .ah-v2-root h3,
+.ah-v2-root h4, .ah-v2-root h5, .ah-v2-root h6,
+.ah-v2-root p, .ah-v2-root figure, .ah-v2-root button { margin: 0; }
+.ah-v2-root button { padding: 0; }
 
 /* ---------- Phone shell ---------- */
 .phone {

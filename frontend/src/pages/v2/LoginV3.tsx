@@ -12,16 +12,16 @@
  *  - CTA full width · "ENTRAR →" verde lime si HO · cyan si Volta
  *  - Links secundarios: "Olvidé mi contraseña" + "Crear cuenta nueva"
  *  - Demo mode opt-in si localStorage app:demo_mode === '1'
- *  - Mock validation:
- *      · email regex inline · password >= 6
- *      · demo@demo.com / demo → success simulado · localStorage + navigate DEMO_HUB
- *      · cualquier otro → error inline "Email o contraseña inválidos"
+ *  - Auth REAL vía AuthContext (useAuth.login) contra backend · misma lógica
+ *    que la pantalla legacy Login.tsx · error inline desde e.message
+ *  - Banner backend down ligado a useAuth.backendAlive
  *
  * Scope CSS bajo .lg-root · sin globals agresivos.
- * Router: vista 'LOGIN_V3' (Boss integra después al type View).
+ * Router: vista 'LOGIN_V3'.
  */
 import { useEffect, useRef, useState, type CSSProperties, type ReactElement } from 'react';
 import { useNav, type View } from '../../context/NavigationContext';
+import { useAuth } from '../../context/AuthContext';
 import '../../styles/v2/login.css';
 
 // ============================================================
@@ -46,9 +46,6 @@ const PRODUCTS: Record<ProductId, ProductMeta> = {
 };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-
-const DEMO_EMAIL = 'demo@demo.com';
-const DEMO_PASSWORD = 'demo';
 
 // ============================================================
 // Icons · stroke 1.7 línea
@@ -90,18 +87,11 @@ function readCurrentProduct(): ProductId {
   }
 }
 
+// Gate del modo demo · solo visible si la URL trajo `?demo=1`
+// (persistido por main.tsx en localStorage al boot) · igual que Login.tsx legacy
 function isDemoModeAllowed(): boolean {
   try { return localStorage.getItem('app:demo_mode') === '1'; }
   catch { return false; }
-}
-
-// Mock fallback backend health · si no responde en 800ms, marcamos down
-function probeBackend(): Promise<boolean> {
-  return new Promise(resolve => {
-    // Mock: si window expone fetch a /health, intentar. Si falla rápido, false.
-    // Aquí simulamos siempre OK para no romper preview · Boss reemplaza con AuthContext real.
-    window.setTimeout(() => resolve(true), 200);
-  });
 }
 
 // ============================================================
@@ -214,6 +204,7 @@ interface LoginV3Props {
 }
 export default function LoginV3({ onSuccess }: LoginV3Props = {}) {
   const { navigate } = useNav();
+  const { login, enterDemoMode, backendAlive } = useAuth();
 
   const [productId] = useState<ProductId>(readCurrentProduct());
   const product = PRODUCTS[productId];
@@ -227,17 +218,9 @@ export default function LoginV3({ onSuccess }: LoginV3Props = {}) {
   const [formErr, setFormErr] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [networkErr, setNetworkErr] = useState<string | null>(null);
-  const [backendAlive, setBackendAlive] = useState<boolean>(true);
 
   const emailRef = useRef<HTMLInputElement | null>(null);
   const passwordRef = useRef<HTMLInputElement | null>(null);
-
-  // mock probe backend en mount · UI muestra banner si down
-  useEffect(() => {
-    let cancelled = false;
-    probeBackend().then(ok => { if (!cancelled) setBackendAlive(ok); });
-    return () => { cancelled = true; };
-  }, []);
 
   // autofocus email al mount
   useEffect(() => {
@@ -302,31 +285,25 @@ export default function LoginV3({ onSuccess }: LoginV3Props = {}) {
     setEmailErr(eErr);
     setPwErr(pErr);
     setFormErr(null);
+    setNetworkErr(null);
     if (eErr || pErr) return;
 
     setLoading(true);
     try {
-      // Mock: simular llamada · 600ms latency
-      await new Promise(resolve => setTimeout(resolve, 600));
-      // API esperada: POST /v1/auth/login { email, password }
-      if (email.trim().toLowerCase() === DEMO_EMAIL && password === DEMO_PASSWORD) {
-        try {
-          localStorage.setItem('auth:demo_session', '1');
-          localStorage.setItem('auth:user_email', email.trim().toLowerCase());
-        } catch { /* ignore */ }
-        goAfterSuccess();
-      } else {
-        setFormErr('Email o contraseña inválidos');
-      }
-    } catch {
-      setNetworkErr('Sin conexión · revisá tu red');
+      // Auth REAL · POST /v1/auth/login vía AuthContext (igual que Login.tsx legacy)
+      await login(email, password);
+      goAfterSuccess();
+    } catch (e: unknown) {
+      // El backend devuelve el detalle del error en e.message
+      // (ej. "Credenciales inválidas"). Lo mostramos inline en el form.
+      setFormErr(e instanceof Error ? e.message : 'Email o contraseña inválidos');
     } finally {
       setLoading(false);
     }
   };
 
   const enterDemo = () => {
-    try { localStorage.setItem('auth:demo_session', '1'); } catch { /* ignore */ }
+    enterDemoMode();
     goAfterSuccess();
   };
 
@@ -338,7 +315,7 @@ export default function LoginV3({ onSuccess }: LoginV3Props = {}) {
       <div className="lg-scroll">
         <Header product={product} onBack={goLanding}/>
 
-        {!backendAlive && <BackendBanner alive={backendAlive}/>}
+        {backendAlive === false && <BackendBanner alive={backendAlive}/>}
 
         <section className="lg-form-wrap" aria-label="Formulario de login">
           <div className="lg-form-card">

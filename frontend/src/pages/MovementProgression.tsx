@@ -12,6 +12,7 @@ import {
   type SkillEvaluationLevel,
 } from '../lib/skillEvaluation';
 import { useToast } from '../components/Toast';
+import { useProduct } from '../context/ProductContext';
 
 /**
  * Movement Progression — Skill Tree CrossFit con 95 movimientos.
@@ -424,6 +425,7 @@ const MovementProgression: React.FC = () => {
   const [coachEvaluations, setCoachEvaluations] = useState<SkillEvaluationResponse[]>([]);
   const [markingDominated, setMarkingDominated] = useState<boolean>(false);
   const { showToast } = useToast();
+  const { product } = useProduct();
 
   // Fetch focos del coach (best-effort · si no hay backend o usuario no es atleta, queda vacío)
   useEffect(() => {
@@ -567,6 +569,21 @@ const MovementProgression: React.FC = () => {
     const targetTop = scroller.scrollTop + (elRect.top - scrollerRect.top) - 12;
     scroller.scrollTo({ top: targetTop, behavior: 'smooth' });
   };
+
+  // Skill Tree = 95 movimientos CrossFit · contenido propio de Volta.
+  // En Holy Oly (halterofilia) no aplica · estado neutral en vez del árbol
+  // para no exponer contenido del otro producto. (product-aware guard)
+  if (product === 'holy-oly') {
+    return (
+      <div style={{ background: C.bg, minHeight: '100%', color: C.text, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', gap: 14, padding: '48px 28px' }} className="anim-fade-in">
+        <div style={{ fontSize: 34, opacity: 0.7 }}>🌳</div>
+        <h2 style={{ fontSize: 18, fontWeight: 800, margin: 0, color: C.text }}>Skill Tree · exclusivo de Volta</h2>
+        <p style={{ fontSize: 13, color: C.muted, maxWidth: 280, lineHeight: 1.5, margin: 0 }}>
+          El árbol de 95 movimientos es de CrossFit. En Holy Oly tu progreso de halterofilia vive en tus Stats y macrociclos.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div style={{ background: C.bg, minHeight: '100%', paddingBottom: 90, color: C.text, position: 'relative' }} className="anim-fade-in">

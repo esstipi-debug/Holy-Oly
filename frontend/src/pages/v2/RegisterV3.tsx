@@ -10,11 +10,15 @@
  *  - Form 4 inputs + checkbox + strength indicator + match validation
  *  - CTA neón producto · validación inline antes de submit
  *
- * Mock: success siempre · navigate(ONBOARDING) ya que NavigationContext
- * todavía no incluye ONBOARDING_V3. Cuando se agregue, swap el navigate.
+ * Auth REAL: registro vía AuthContext (useAuth.register) contra backend ·
+ * misma lógica que la pantalla legacy Register.tsx · role siempre 'atleta' ·
+ * el producto del switcher se sincroniza con ProductContext y se envía al
+ * backend · en éxito navega a ONBOARDING_V3 · errores inline desde e.message.
  */
-import { useMemo, useState, type CSSProperties, type ReactElement } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties, type ReactElement } from 'react';
 import { useNav } from '../../context/NavigationContext';
+import { useAuth } from '../../context/AuthContext';
+import { useProduct, type Product as ProductCtxId } from '../../context/ProductContext';
 import '../../styles/v2/register.css';
 
 // ============================================================
@@ -186,7 +190,12 @@ function ProductSwitcher({ active, setActive }: { active: Product; setActive: (p
 // ============================================================
 export default function RegisterV3(): ReactElement {
   const { navigate, back } = useNav();
-  const [product, setProduct] = useState<Product>('holy-oly');
+  const { register } = useAuth();
+  const { product: ctxProduct, setProduct: setCtxProduct } = useProduct();
+  // El switcher arranca con el producto activo del ProductContext (elegido en
+  // Landing). Mantenemos estado local para el render inmediato del switcher y
+  // lo sincronizamos con el contexto para que el registro real envíe el producto correcto.
+  const [product, setProduct] = useState<Product>(ctxProduct as Product);
   const [form, setForm] = useState<FormState>({
     name: '', email: '', password: '', confirm: '', terms: false,
   });
@@ -203,6 +212,12 @@ export default function RegisterV3(): ReactElement {
   const errors = useMemo(() => validateAll(form), [form]);
   const valid = Object.keys(errors).length === 0;
 
+  // Sincronizar el producto del switcher con el ProductContext global · igual
+  // que la pantalla legacy (donde el selector maneja useProduct directamente).
+  useEffect(() => {
+    setCtxProduct(product as ProductCtxId);
+  }, [product, setCtxProduct]);
+
   const onField = <K extends keyof FormState>(k: K) => (v: FormState[K]) => {
     setForm(prev => ({ ...prev, [k]: v }));
   };
@@ -217,21 +232,20 @@ export default function RegisterV3(): ReactElement {
     if (!valid) return;
     setLoading(true);
     try {
-      // Mock: cualquier email valida · success siempre
-      // API real: POST /v1/auth/register { email, password, name, product }
-      await new Promise(r => setTimeout(r, 600));
-      // 409 mock · si email contiene "exists"
-      if (form.email.toLowerCase().includes('exists')) {
-        setSubmitErr('Email ya registrado · ¿iniciar sesión?');
-        return;
-      }
+      // Auth REAL · POST /v1/auth/register vía AuthContext (igual que Register.tsx
+      // legacy). Role siempre 'atleta' · product viene del switcher.
+      await register(form.email.trim(), form.password, form.name.trim(), 'atleta', product as ProductCtxId);
+      // Pista para OnboardingV3 (pre-llena el nombre desde 'rg:registered').
       try {
         localStorage.setItem('rg:registered', JSON.stringify({
-          email: form.email, name: form.name, product, at: Date.now(),
+          email: form.email.trim(), name: form.name.trim(), product, at: Date.now(),
         }));
       } catch { /* ignore */ }
-      // Navigate al onboarding V3 (ya declarado en NavigationContext)
+      // En éxito → onboarding V3.
       navigate('ONBOARDING_V3');
+    } catch (err: unknown) {
+      // El backend devuelve el detalle en err.message (ej. "Email ya registrado").
+      setSubmitErr(err instanceof Error ? err.message : 'Error al registrarte');
     } finally {
       setLoading(false);
     }

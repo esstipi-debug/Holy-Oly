@@ -10,8 +10,13 @@
  * CSS scope: .vd-root (Volta Dashboard)
  * API: GET /v1/volta/dashboard/me
  */
-import { useState, type CSSProperties, type ReactElement } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties, type ReactElement } from 'react';
 import { useNav } from '../../context/NavigationContext';
+import { useAthlete } from '../../context/AthleteContext';
+import { coachById, type AthleteProfile, type AthleteSession, type CFBenchmark } from '../../data/athletes';
+import { getPendingForToday } from '../../lib/plannedSessions';
+import { voltaWod, type RecommendedWodResponse } from '../../lib/voltaWod';
+import type { PlannedSession } from '../../types/training';
 import '../../styles/v2/volta-dashboard.css';
 
 // ============================================================
@@ -102,64 +107,252 @@ interface DashboardData {
 }
 
 // ============================================================
-// Mock data · API: GET /v1/volta/dashboard/me
+// Real-data builders · mapean AthleteContext / voltaWod /
+// plannedSessions al shape DashboardData del layout V3.
+//
+// Fuente de verdad: la home legacy src/pages/VoltaDashboard.tsx.
+// Slots sin equivalente real → default sensato (ver SIN MAPEO abajo).
 // ============================================================
-const mockData: DashboardData = {
-  athlete: {
-    name: 'MARCO V.',
-    avatar: 'MV',
-    level: 'RX',
-    flag: '🇨🇱',
-    box: 'CrossFit Santiago',
-    coach: 'CARLA R.',
-  },
-  notifications: 2,
-  wodToday: {
-    name: 'FRAN',
-    category: 'Girl WOD',
-    type: 'For Time',
-    movements: [
-      { reps: '21-15-9', name: 'Thrusters', weight: '95lb' },
-      { reps: '21-15-9', name: 'Pull-ups' },
-    ],
-    schemeDesc: '21-15-9 Thrusters 95lb · Pull-ups',
-    estimatedRx: '5-8 min',
-    estimatedScaled: '8-12 min',
-  },
-  secondSession: {
-    enabled: true,
-    at: '18:00',
-    type: 'Strength',
-    description: 'Back Squat 5x5 @ 75%',
-  },
-  readiness: {
-    score: 78,
-    zone: 'green',
-    cns: 78,
-    sleepHours: 7,
-    recommendation: 'Vas en RX hoy',
-  },
-  benchmarks: [
-    { key: 'FRAN',  label: 'FRAN',  pr: '4:23',  prRaw: 263,  deltaSec: -32, unit: 'time' },
-    { key: 'GRACE', label: 'GRACE', pr: '3:51',  prRaw: 231,  deltaSec: -12, unit: 'time' },
-    { key: 'HELEN', label: 'HELEN', pr: '9:42',  prRaw: 582,  deltaSec: +8,  unit: 'time' },
-    { key: 'MURPH', label: 'MURPH', pr: '38:21', prRaw: 2301, deltaSec: -45, unit: 'split', variantToggle: 'Half' },
-  ],
-  lastSessions: [
-    { date: 'Hoy',  tag: 'WOD',      duration: '—',     scale: '—',      feedback: 'good' },
-    { date: 'Ayer', tag: 'Strength', duration: '52:10', scale: 'RX',     feedback: 'fire' },
-    { date: 'Lun',  tag: 'WOD',      duration: '14:08', scale: 'RX',     feedback: 'good' },
-    { date: 'Dom',  tag: 'Yoga',     duration: '38:00', scale: '—',      feedback: 'ok' },
-    { date: 'Sáb',  tag: 'WOD',      duration: '18:42', scale: 'Scaled', feedback: 'hard' },
-    { date: 'Vie',  tag: 'Cardio',   duration: '25:00', scale: '—',      feedback: 'good' },
-    { date: 'Jue',  tag: 'WOD',      duration: '12:33', scale: 'RX',     feedback: 'fire' },
-  ],
-  quests: [
-    { id: 'q1', text: '4 sesiones esta semana',  current: 3, target: 4, unit: 'sesiones' },
-    { id: 'q2', text: 'PR Helen · check post-WOD', current: 0, target: 1 },
-    { id: 'q3', text: '1 día yoga',                current: 0, target: 1, unit: 'día' },
-  ],
+
+/** Iniciales para el avatar (máx 2 chars). "Camila Bravo" → "CB". */
+function toInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '—';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+/** "MARCO V." styling de la home V3: nombre en mayúsculas. */
+function displayName(name: string): string {
+  return (name || 'Atleta').toUpperCase();
+}
+
+/** Provincia/país → emoji bandera. Sólo conocemos provincias AR en seed → 🇦🇷. */
+function flagFor(_athlete: AthleteProfile): string {
+  // SIN MAPEO real de país · seed sólo tiene provincias argentinas.
+  return '🇦🇷';
+}
+
+/** Nivel del atleta derivado del scale predominante de sus benchmarks. */
+function deriveLevel(athlete: AthleteProfile | null): AthleteLevel {
+  const bms = athlete?.cf_benchmarks ?? [];
+  if (bms.length === 0) return 'Intermediate';
+  const rxCount = bms.filter(b => b.scale === 'rx' || b.scale === 'rx_plus').length;
+  if (rxCount >= Math.ceil(bms.length / 2)) return 'RX';
+  return 'Scaled';
+}
+
+/** "mm:ss" o "hh:mm:ss" → segundos. Devuelve null si no parsea. */
+function parseTimeToSec(t?: string): number | null {
+  if (!t) return null;
+  const parts = t.split(':').map(p => parseInt(p, 10));
+  if (parts.some(Number.isNaN)) return null;
+  if (parts.length === 2) return parts[0] * 60 + parts[1];
+  if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+  return null;
+}
+
+const HERO_KEYS = ['FRAN', 'GRACE', 'HELEN', 'MURPH'] as const;
+type HeroKey = (typeof HERO_KEYS)[number];
+
+/** Construye los 4 benchmarks heroes desde cf_benchmarks reales del atleta. */
+function buildBenchmarks(athlete: AthleteProfile | null): Benchmark[] {
+  const byName = new Map<string, CFBenchmark>();
+  for (const b of athlete?.cf_benchmarks ?? []) {
+    byName.set(b.name.trim().toUpperCase(), b);
+  }
+  return HERO_KEYS.map((key: HeroKey) => {
+    const real = byName.get(key);
+    const pr = real?.time ?? real?.rounds ?? '—';
+    const prRaw = parseTimeToSec(real?.time) ?? 0;
+    // SIN MAPEO de histórico · sólo tenemos el PR actual, no el previo → delta neutro.
+    return {
+      key,
+      label: key,
+      pr,
+      prRaw,
+      deltaSec: 0,
+      unit: key === 'MURPH' ? 'split' : 'time',
+      ...(key === 'MURPH' ? { variantToggle: 'Half' as const } : {}),
+    };
+  });
+}
+
+/** Mapea la zona del engine (readiness_category / cns_zone) a la del widget V3. */
+function deriveReadiness(
+  stress: ReturnType<typeof useAthlete>['stress'],
+  today: AthleteSession | undefined,
+): Readiness {
+  if (!stress) {
+    return {
+      score: 0,
+      zone: 'amber',
+      cns: 0,
+      sleepHours: today?.sleep_hours ?? 0,
+      recommendation: 'Calculando readiness…',
+    };
+  }
+  const cat = (stress.readiness_category ?? '').toUpperCase();
+  const zone: ReadinessZone =
+    cat === 'GREEN' || cat === 'READY' || cat === 'OPTIMAL' ? 'green'
+    : cat === 'RED' || cat === 'CRITICAL' || cat === 'LOW' ? 'red'
+    : 'amber';
+  const recommendation =
+    zone === 'green' ? 'Vas en RX hoy'
+    : zone === 'red' ? 'Tu cuerpo pide descanso'
+    : 'Entrená con criterio hoy';
+  return {
+    score: Math.round(stress.readiness),
+    zone,
+    cns: stress.cns_score != null ? Math.round(stress.cns_score) : Math.round(stress.readiness),
+    sleepHours: today?.sleep_hours ?? 0,
+    recommendation,
+  };
+}
+
+const WOD_TYPE_MAP: Record<RecommendedWodResponse['type'], WodType> = {
+  AMRAP: 'AMRAP',
+  EMOM: 'EMOM',
+  'For Time': 'For Time',
+  Strength: 'EMOM',          // no hay chip 'Strength' en V3 · cae a EMOM visual
+  'Active Recovery': 'AMRAP',
 };
+
+/** Recommended WOD del backend → shape WodToday del hero V3. */
+function buildWodToday(wod: RecommendedWodResponse | null, scale: 'rx' | 'scaled' | 'beginner'): WodToday | null {
+  if (!wod) return null;
+  const durMin = Math.round(wod.duration_sec / 60);
+  const scaledMin = Math.round(durMin * 1.4);
+  return {
+    name: wod.title.toUpperCase(),
+    // SIN MAPEO de categoría Girl/Hero · el engine no la expone → Custom / Open.
+    category: wod.template_id ? 'Open WOD' : 'Custom',
+    type: WOD_TYPE_MAP[wod.type] ?? 'AMRAP',
+    movements: wod.movements.map(m => ({
+      reps: m.scaling[scale] ?? m.scaling.rx ?? '',
+      name: m.name,
+    })),
+    schemeDesc: wod.movements.map(m => m.name).join(' · '),
+    estimatedRx: `~${durMin} min`,
+    estimatedScaled: `~${scaledMin} min`,
+  };
+}
+
+const FOCUS_TO_TAG: Record<string, SessionTag> = {
+  metcon: 'WOD',
+  strength: 'Strength',
+  technique: 'Skill',
+  olympic: 'Strength',
+  accessory: 'Skill',
+};
+
+/** Segunda sesión hoy desde plannedSessions (slot PM si hay doble). */
+function buildSecondSession(pending: PlannedSession[]): SecondSession {
+  const pm = pending.find(s => s.slot === 'pm');
+  if (!pm) return { enabled: false, at: '', type: 'Strength', description: '' };
+  const tag = FOCUS_TO_TAG[pm.focus] ?? 'Strength';
+  const avgPct = pm.exercises.length
+    ? Math.round((pm.exercises.reduce((a, e) => a + e.pct, 0) / pm.exercises.length) * 100)
+    : 0;
+  const first = pm.exercises[0];
+  const desc = first
+    ? `${first.name} ${first.sets}×${first.reps}${avgPct ? ` @ ${avgPct}%` : ''}`
+    : `${pm.exercises.length} ejercicios`;
+  return { enabled: true, at: 'PM', type: tag, description: desc };
+}
+
+const DAY_LABELS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+
+/** Fecha ISO → label relativo ("Hoy"/"Ayer") o día de semana. */
+function dateLabel(iso: string): string {
+  const d = new Date(`${iso}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return iso;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const diffDays = Math.round((today.getTime() - d.getTime()) / 86400000);
+  if (diffDays === 0) return 'Hoy';
+  if (diffDays === 1) return 'Ayer';
+  return DAY_LABELS[d.getDay()];
+}
+
+/** Adivina el tipo de sesión a partir de las notas (heurística simple). */
+function tagFromSession(s: AthleteSession): SessionTag {
+  const n = (s.notes ?? '').toLowerCase();
+  if (n.includes('mobility') || n.includes('foam') || n.includes('yoga')) return 'Yoga';
+  if (n.includes('descanso') || n.includes('día libre') || n.includes('rest')) return 'Rest';
+  if (n.includes('squat') || n.includes('strength') || n.includes('deadlift') || n.includes('press')) return 'Strength';
+  if (n.includes('row') || n.includes('run') || n.includes('bike') || n.includes('cardio')) return 'Cardio';
+  if (!s.completed && s.load === 0) return 'Rest';
+  return 'WOD';
+}
+
+/** Feedback emoji-zone derivado de RPE reportado + motivación. */
+function feedbackFromSession(s: AthleteSession): Feedback {
+  if (!s.completed && s.load === 0) return 'ok';
+  const rpe = s.rpe_reported || 0;
+  if (rpe >= 9) return 'broken';
+  if (rpe >= 8) return 'hard';
+  if (s.motivation >= 8 && rpe <= 7) return 'fire';
+  if (rpe === 0) return 'ok';
+  return 'good';
+}
+
+/** Duración legible · no hay duración real → usamos tonelaje como proxy informativo. */
+function durationFromSession(s: AthleteSession): string {
+  if (s.load <= 0) return '—';
+  return `${(s.load / 1000).toFixed(1)}t`;
+}
+
+/** Escala del set actual (Rx si completó con buen RPE, si no Scaled). */
+function scaleFromSession(s: AthleteSession): 'RX' | 'Scaled' | '—' {
+  if (!s.completed || s.load === 0) return '—';
+  return s.rpe_reported && s.rpe_reported <= s.rpe_expected + 1 ? 'RX' : 'Scaled';
+}
+
+/** Últimas 7 sesiones reales (más reciente primero) → cards del track V3. */
+function buildLastSessions(athlete: AthleteProfile | null): LastSession[] {
+  const sessions = athlete?.sessions_last_7 ?? [];
+  return sessions
+    .slice()
+    .reverse()
+    .map(s => ({
+      date: dateLabel(s.date),
+      tag: tagFromSession(s),
+      duration: durationFromSession(s),
+      scale: scaleFromSession(s),
+      feedback: feedbackFromSession(s),
+    }));
+}
+
+/** Inicio de la semana ISO (lunes) a las 00:00. */
+function startOfWeek(d: Date): Date {
+  const r = new Date(d);
+  r.setHours(0, 0, 0, 0);
+  const day = (r.getDay() + 6) % 7; // 0 = lunes
+  r.setDate(r.getDate() - day);
+  return r;
+}
+
+/** Quests semanales derivados de sesiones reales. */
+function buildQuests(athlete: AthleteProfile | null): Quest[] {
+  const sessions = athlete?.sessions_last_7 ?? [];
+  const weekStart = startOfWeek(new Date());
+  const thisWeek = sessions.filter(s => {
+    const d = new Date(`${s.date}T00:00:00`);
+    return !Number.isNaN(d.getTime()) && d >= weekStart && s.completed && s.load > 0;
+  });
+  const sessionCount = thisWeek.length;
+  const mobilityDays = sessions.filter(s => {
+    const n = (s.notes ?? '').toLowerCase();
+    return n.includes('mobility') || n.includes('foam') || n.includes('yoga');
+  }).length;
+  const goodSleepDays = sessions.filter(s => s.sleep_hours >= 7.5).length;
+  return [
+    { id: 'q1', text: '4 sesiones esta semana', current: Math.min(sessionCount, 4), target: 4, unit: 'sesiones' },
+    { id: 'q2', text: '1 día de movilidad', current: Math.min(mobilityDays, 1), target: 1, unit: 'día' },
+    { id: 'q3', text: '3 noches de 7.5h+', current: Math.min(goodSleepDays, 3), target: 3, unit: 'noches' },
+  ];
+}
 
 // ============================================================
 // Icons (line · 1.7px stroke · viewBox 24)
@@ -545,20 +738,105 @@ function QuestsFooter({ quests }: { quests: Quest[] }) {
 }
 
 // ============================================================
-// Main
+// WOD Hero · estado loading/sin-datos (cuando el engine aún no respondió)
+// ============================================================
+function WodHeroPlaceholder({ loading, onStart }: { loading: boolean; onStart: () => void }) {
+  return (
+    <section className="vd-wod-hero" aria-label="WOD del día">
+      <span className="br-tl"/><span className="br-tr"/>
+      <span className="br-bl"/><span className="br-br"/>
+      <div className="vd-wod-head">
+        <div className="vd-wod-titles">
+          <div className="vd-wod-eyebrow">
+            <Icon name="zap" size={9} stroke={2.4} filled/> WOD DEL DÍA
+          </div>
+          <h2 className="vd-wod-name">{loading ? '···' : 'SIN WOD'}</h2>
+        </div>
+      </div>
+      <div className="vd-wod-movements">
+        <div className="vd-move-row">
+          <span className="vd-move-name">
+            {loading ? 'WISE está generando tu WOD de hoy…' : 'No pudimos cargar el WOD del día.'}
+          </span>
+        </div>
+      </div>
+      <button className="vd-cta-prewod" onClick={onStart} aria-label="Ir a Pre-WOD">
+        IR A PRE-WOD <Icon name="arrowR" size={14} stroke={2.4}/>
+      </button>
+    </section>
+  );
+}
+
+// ============================================================
+// Main · lee de AthleteContext + voltaWod + plannedSessions
+// (sin props · rule 3). Reemplaza el home legacy VoltaDashboard.
 // ============================================================
 export default function VoltaDashboardV3() {
   const { navigate } = useNav();
-  const data = mockData;
+  const { athlete, stress } = useAthlete();
 
   const goPreWod = () => navigate('VOLTA_PREWOD');
   const goStats  = () => navigate('VOLTA_STATS');
+
+  // ─── WOD recomendado del día (mismo endpoint que la home legacy) ───
+  const [wod, setWod] = useState<RecommendedWodResponse | null>(null);
+  const [wodLoading, setWodLoading] = useState(true);
+  const scale = voltaWod.getScale();
+
+  useEffect(() => {
+    let cancelled = false;
+    setWodLoading(true);
+    voltaWod.today()
+      .then(res => { if (!cancelled) setWod(res); })
+      .catch(() => { if (!cancelled) setWod(null); })
+      .finally(() => { if (!cancelled) setWodLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
+
+  // ─── Sesiones planificadas hoy (doble sesión AM/PM) ───
+  const [pending, setPending] = useState<PlannedSession[]>([]);
+  useEffect(() => {
+    if (!athlete) { setPending([]); return; }
+    const refresh = () => setPending(getPendingForToday(athlete.id));
+    refresh();
+    window.addEventListener('storage', refresh);
+    const id = window.setInterval(refresh, 1500);
+    return () => { window.removeEventListener('storage', refresh); window.clearInterval(id); };
+  }, [athlete?.id]);
+
+  const today = athlete?.sessions_last_7?.at(-1);
+  const coachName = athlete?.coach_id ? coachById[athlete.coach_id]?.name : undefined;
+
+  const data: DashboardData = useMemo(() => ({
+    athlete: {
+      name: displayName(athlete?.name ?? 'Atleta'),
+      avatar: toInitials(athlete?.name ?? 'Atleta'),
+      level: deriveLevel(athlete),
+      flag: flagFor(athlete ?? ({} as AthleteProfile)),
+      box: athlete?.club ?? 'Sin box',
+      coach: coachName ? displayName(coachName) : '—',
+    },
+    notifications: 0, // SIN MAPEO · no hay feed de notificaciones real
+    wodToday: buildWodToday(wod, scale) ?? {
+      name: '—', category: 'Custom', type: 'AMRAP',
+      movements: [], schemeDesc: '', estimatedRx: '—', estimatedScaled: '—',
+    },
+    secondSession: buildSecondSession(pending),
+    readiness: deriveReadiness(stress, today),
+    benchmarks: buildBenchmarks(athlete),
+    lastSessions: buildLastSessions(athlete),
+    quests: buildQuests(athlete),
+  }), [athlete, stress, wod, scale, pending, today, coachName]);
+
+  const hasWod = !!buildWodToday(wod, scale);
 
   return (
     <div className="vd-root">
       <Header data={data}/>
       <div className="vd-scroll">
-        <WodHero wod={data.wodToday} onStart={goPreWod}/>
+        {hasWod
+          ? <WodHero wod={data.wodToday} onStart={goPreWod}/>
+          : <WodHeroPlaceholder loading={wodLoading} onStart={goPreWod}/>}
         <DoubleSession s={data.secondSession}/>
         <ReadinessWidget r={data.readiness}/>
         <BenchmarksGrid items={data.benchmarks} onTap={() => goStats()}/>
