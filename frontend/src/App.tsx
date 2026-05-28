@@ -53,10 +53,14 @@ import Terms from './pages/Terms';
 import HormonalSetup from './pages/HormonalSetup';
 import PlateDemo from './pages/_dev/PlateDemo';
 import DesignV2 from './pages/_dev/DesignV2';
-import AtletaHomeV2 from './pages/v2/AtletaHomeV2';
-import CheckinV2 from './pages/v2/CheckinV2';
-import CoachDashV2 from './pages/v2/CoachDashV2';
-import SkillTreeV2 from './pages/v2/SkillTreeV2';
+// V2 PARCIALES (drop anterior) · lazy-load para que su CSS con resets globales
+// (body centering, * margin:0) NO contamine las pantallas activas. Solo cargan
+// su CSS cuando se navega explícitamente a ellas.
+type NoProps = Record<string, never>;
+const AtletaHomeV2 = React.lazy(() => import('./pages/v2/AtletaHomeV2') as Promise<{ default: React.ComponentType<NoProps> }>);
+const CheckinV2 = React.lazy(() => import('./pages/v2/CheckinV2') as Promise<{ default: React.ComponentType<NoProps> }>);
+const CoachDashV2 = React.lazy(() => import('./pages/v2/CoachDashV2') as Promise<{ default: React.ComponentType<NoProps> }>);
+const SkillTreeV2 = React.lazy(() => import('./pages/v2/SkillTreeV2') as Promise<{ default: React.ComponentType<NoProps> }>);
 import HolyOlyCatalogV2 from './pages/v2/HolyOlyCatalogV2';
 import HolyOlyDetailV2 from './pages/v2/HolyOlyDetailV2';
 import HolyOlyMacrocycleV2 from './pages/v2/HolyOlyMacrocycleV2';
@@ -290,10 +294,10 @@ function AppInner() {
     if (currentView === 'HORMONAL') return <HormonalSetup />;
     if (currentView === 'PLATE_DEMO') return <PlateDemo />;
     if (currentView === 'DESIGN_V2') return <DesignV2 />;
-    if (currentView === 'V2_HOME') return <AtletaHomeV2 />;
-    if (currentView === 'V2_CHECKIN') return <CheckinV2 />;
-    if (currentView === 'V2_COACH') return <CoachDashV2 />;
-    if (currentView === 'V2_SKILL_TREE') return <SkillTreeV2 />;
+    if (currentView === 'V2_HOME') return <React.Suspense fallback={null}><AtletaHomeV2 /></React.Suspense>;
+    if (currentView === 'V2_CHECKIN') return <React.Suspense fallback={null}><CheckinV2 /></React.Suspense>;
+    if (currentView === 'V2_COACH') return <React.Suspense fallback={null}><CoachDashV2 /></React.Suspense>;
+    if (currentView === 'V2_SKILL_TREE') return <React.Suspense fallback={null}><SkillTreeV2 /></React.Suspense>;
     if (currentView === 'CARDS_COMPARE') return <CardsCompareDemo />;
     if (currentView === 'HO_MACRO_CATALOG') return <HolyOlyCatalogV2 />;
     if (currentView === 'HO_MACRO_DETAIL') return <HolyOlyDetailV2 />;

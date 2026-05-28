@@ -9,8 +9,11 @@ load_dotenv(os.path.join(BASE_DIR, '.env'))
 if os.getenv("GOOGLE_APPLICATION_CREDENTIALS"):
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
 
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from .api.router import router
 from .api.auth import auth_router, verify_token
 from .api.baseline import router as baseline_router
@@ -134,6 +137,44 @@ app = FastAPI(
     version="1.1.0",
     lifespan=lifespan,
 )
+
+
+# ---------------------------------------------------------------------------
+# Global exception handler (P3)
+# ---------------------------------------------------------------------------
+# Convierte cualquier excepción NO manejada en JSON `{"detail": "..."}` con
+# status 500 · en vez de `text/plain` crudo de uvicorn (que el frontend no puede
+# parsear → "Failed to fetch" sin mensaje útil).
+#
+# IMPORTANTE: NO pisamos los handlers existentes de HTTPException ni de
+# RequestValidationError → los re-registramos explícitamente con el comportamiento
+# default de FastAPI/Starlette para conservar status codes correctos (401/403/404/422).
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    headers = getattr(exc, "headers", None)
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+        headers=headers,
+    )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    return JSONResponse(
+        status_code=422,
+        content={"detail": exc.errors()},
+    )
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.exception("[Motor25] Unhandled exception on %s %s", request.method, request.url.path)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal server error"},
+    )
+
 
 # CORS:
 # - Default explícito (no "*") porque `allow_credentials=True` + `*` viola spec

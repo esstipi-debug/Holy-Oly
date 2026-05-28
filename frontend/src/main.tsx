@@ -43,6 +43,9 @@ async function autoDemoLogin(): Promise<boolean> {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: body.toString(),
+      // Timeout 8s · Render free tier puede estar frío. Si no responde,
+      // abortamos y renderizamos la app igual (cae a LOGIN normal).
+      signal: AbortSignal.timeout(8000),
     });
     if (!res.ok) return false;
     const data = await res.json();

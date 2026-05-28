@@ -13,6 +13,7 @@ Endpoints públicos para coach + atleta · usa macrocycle_db_service.
 
 from __future__ import annotations
 
+import logging
 from datetime import date as date_type
 from typing import Optional, List
 from uuid import UUID
@@ -25,6 +26,8 @@ from ..auth.jwt_utils import User
 from ...services import macrocycle_db_service as svc
 from ...db import users_repo
 
+
+logger = logging.getLogger("macrocycles")
 
 router = APIRouter(prefix="/v1/macrocycles", tags=["macrocycles"])
 
@@ -100,10 +103,35 @@ async def list_templates(
     product: Optional[str] = Query(default=None),
     include_custom: bool = Query(default=True),
 ) -> List[TemplateResponse]:
-    """Lista templates · system + custom del coach."""
+    """Lista templates · system + custom del coach.
+
+    Defensivo: si la query a DB falla (p.ej. tabla `macrocycle_templates` no
+    migrada) caemos al catálogo hardcoded del engine. Nunca 500 · siempre lista
+    (puede ser []).
+    """
     coach_id = user.id if user.role == "coach" and include_custom else None
-    rows = await svc.list_templates(product=product, coach_id=coach_id, include_system=True)
-    return [TemplateResponse(**r.__dict__) for r in rows]
+    try:
+        rows = await svc.list_templates(product=product, coach_id=coach_id, include_system=True)
+    except Exception as e:
+        logger.warning("list_templates DB query failed, using engine fallback: %s", e)
+        try:
+            rows = svc._fallback_templates(product)
+        except Exception as e2:
+            logger.error("list_templates fallback also failed: %s", e2)
+            return []
+
+    out: List[TemplateResponse] = []
+    for r in rows:
+        try:
+            data = dict(r.__dict__)
+            # Coerce json cols a list por si el parser devolvió otro tipo (None/dict).
+            for key in ("goal_tags", "required_equipment"):
+                if not isinstance(data.get(key), list):
+                    data[key] = []
+            out.append(TemplateResponse(**data))
+        except Exception as e:
+            logger.warning("skipping malformed template row: %s", e)
+    return out
 
 
 @router.post("/assign", response_model=AssignmentResponse)
@@ -157,11 +185,31 @@ async def assign_template_to_athlete(
     return AssignmentResponse(**assignment.__dict__)
 
 
-@router.get("/me/active", response_model=Optional[AssignmentResponse])
+@router.get("/me/active", response_model=None)
 async def get_my_active(user: User = Depends(verify_token)):
-    """Atleta ve su asignación activa."""
-    a = await svc.get_active_assignment(user.id)
-    return AssignmentResponse(**a.__dict__) if a else None
+    """Atleta ve su asignación activa.
+
+    Defensivo · NUNCA 500. Si no hay asignación activa (o la DB falla) devuelve
+    `{assigned: false, active: null}`, consistente con los endpoints hermanos
+    (`/macrocycles/me`, `/macrocycles/assigned`). Si hay, devuelve
+    `{assigned: true, active: {...}}`.
+    """
+    try:
+        a = await svc.get_active_assignment(user.id)
+    except Exception as e:
+        logger.warning("get_active_assignment failed for %s: %s", user.id, e)
+        return {"assigned": False, "active": None}
+
+    if not a:
+        return {"assigned": False, "active": None}
+
+    try:
+        active = AssignmentResponse(**a.__dict__).model_dump(mode="json")
+    except Exception as e:
+        logger.warning("serializing active assignment failed for %s: %s", user.id, e)
+        return {"assigned": False, "active": None}
+
+    return {"assigned": True, "active": active}
 
 
 @router.get("/athlete/{athlete_id}/active", response_model=Optional[AssignmentResponse])

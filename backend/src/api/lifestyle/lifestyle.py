@@ -12,6 +12,7 @@ Lifestyle API · Engine 12 endpoints.
 
 from __future__ import annotations
 
+import logging
 from datetime import date as date_type, datetime
 from typing import Optional, List
 from uuid import UUID
@@ -24,6 +25,8 @@ from ..auth.jwt_utils import User
 from ...services import lifestyle_service as svc
 from ...db import users_repo
 
+
+logger = logging.getLogger("lifestyle")
 
 router = APIRouter(prefix="/v1/lifestyle", tags=["lifestyle"])
 
@@ -127,9 +130,19 @@ async def create_checkin(payload: CheckinPayload, user: User = Depends(verify_to
 
 @router.get("/today", response_model=SnapshotResponse)
 async def get_today(user: User = Depends(verify_token)) -> SnapshotResponse:
-    """Snapshot lifestyle del atleta hoy + derivados."""
-    snap = await svc.build_snapshot(user.id)
-    return SnapshotResponse(**snap.__dict__)
+    """Snapshot lifestyle del atleta hoy + derivados.
+
+    Defensivo: si el cálculo falla (p.ej. tablas no migradas) devuelve un
+    snapshot vacío válido en vez de 500 · el HOME del atleta debe renderizar.
+    """
+    try:
+        snap = await svc.build_snapshot(user.id)
+        return SnapshotResponse(**snap.__dict__)
+    except Exception as e:
+        logger.warning("build_snapshot failed for %s, returning empty: %s", user.id, e)
+        return SnapshotResponse(user_id=user.id, caffeine_mg=0, alcohol_units=0,
+                                smoking_today=False, cigarettes_count=0,
+                                pain_zones_active=0, pain_max_level=0)
 
 
 @router.get("/history")
@@ -137,23 +150,30 @@ async def get_history(
     user: User = Depends(verify_token),
     days: int = Query(default=14, ge=1, le=90),
 ):
-    """Últimos N días de checkins · para sparklines + tendencias."""
+    """Últimos N días de checkins · para sparklines + tendencias.
+
+    Defensivo: lista vacía si no hay DB o la query falla (nunca 500).
+    """
     pool = await users_repo.get_pool()
     if pool is None:
         return []
-    async with pool.acquire() as conn:
-        rows = await conn.fetch(
-            """
-            SELECT checkin_date, sleep_hours, life_stress, energy_level,
-                   caffeine_mg, alcohol_units, smoking_today
-              FROM lifestyle_checkins
-             WHERE user_id = $1::uuid
-               AND checkin_date >= CURRENT_DATE - ($2 || ' days')::INTERVAL
-             ORDER BY checkin_date DESC
-            """,
-            user.id, days,
-        )
-    return [dict(r) for r in rows]
+    try:
+        async with pool.acquire() as conn:
+            rows = await conn.fetch(
+                """
+                SELECT checkin_date, sleep_hours, life_stress, energy_level,
+                       caffeine_mg, alcohol_units, smoking_today
+                  FROM lifestyle_checkins
+                 WHERE user_id = $1::uuid
+                   AND checkin_date >= CURRENT_DATE - ($2 || ' days')::INTERVAL
+                 ORDER BY checkin_date DESC
+                """,
+                user.id, days,
+            )
+        return [dict(r) for r in rows]
+    except Exception as e:
+        logger.warning("lifestyle history query failed for %s: %s", user.id, e)
+        return []
 
 
 @router.post("/pain", status_code=201)
@@ -198,25 +218,32 @@ async def report_pain(payload: PainPayload, user: User = Depends(verify_token)):
 
 @router.get("/pain/active")
 async def get_active_pain(user: User = Depends(verify_token)):
-    """Zonas con dolor activo (reportadas últimos 3 días)."""
+    """Zonas con dolor activo (reportadas últimos 3 días).
+
+    Defensivo: lista vacía si no hay DB o la query falla (nunca 500).
+    """
     pool = await users_repo.get_pool()
     if pool is None:
         return []
-    async with pool.acquire() as conn:
-        rows = await conn.fetch(
-            """
-            SELECT zone, MAX(pain_level) AS pain_level,
-                   MAX(reported_at) AS last_reported,
-                   COUNT(*) AS report_count
-              FROM pain_reports
-             WHERE user_id = $1::uuid
-               AND reported_at >= NOW() - INTERVAL '3 days'
-             GROUP BY zone
-             ORDER BY pain_level DESC
-            """,
-            user.id,
-        )
-    return [dict(r) for r in rows]
+    try:
+        async with pool.acquire() as conn:
+            rows = await conn.fetch(
+                """
+                SELECT zone, MAX(pain_level) AS pain_level,
+                       MAX(reported_at) AS last_reported,
+                       COUNT(*) AS report_count
+                  FROM pain_reports
+                 WHERE user_id = $1::uuid
+                   AND reported_at >= NOW() - INTERVAL '3 days'
+                 GROUP BY zone
+                 ORDER BY pain_level DESC
+                """,
+                user.id,
+            )
+        return [dict(r) for r in rows]
+    except Exception as e:
+        logger.warning("active pain query failed for %s: %s", user.id, e)
+        return []
 
 
 @router.get("/pills/{context}", response_model=List[PillResponse])
