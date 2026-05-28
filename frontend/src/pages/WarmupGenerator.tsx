@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import Card from '../components/Card';
-import Button from '../components/Button';
 import { useNav } from '../context/NavigationContext';
+import { PlateBadge, type PlateTier } from '../components/PlateBadge';
+import '../styles/v2/warmup.css';
 
 type Phase = 'MOBILITY' | 'SPECIFIC' | 'RAMP';
 type Status = 'done' | 'active' | 'pending';
@@ -23,6 +23,44 @@ const PHASE_ITEMS: Record<Phase, { name: string; info: string }[]> = {
     { name: 'Snatch @ 75% 1RM',    info: '1 rep · Última antes del work set' },
   ],
 };
+
+/* Eyebrow + descripción por fase · usado en header y línea contextual */
+const PHASE_META: Record<Phase, { tab: string; eyebrow: string }> = {
+  MOBILITY: { tab: 'MOVILIDAD',  eyebrow: 'FASE 1 · MOVILIDAD' },
+  SPECIFIC: { tab: 'ESPECÍFICO', eyebrow: 'FASE 2 · PATRÓN' },
+  RAMP:     { tab: 'RAMP-UP',    eyebrow: 'FASE 3 · APROXIMACIÓN' },
+};
+
+/* Disco por intensidad de la serie de ramp-up (halterofilia · el peso sube → el
+   disco "pesa" más). Mapea el % de 1RM a un tier nominal de PlateBadge. */
+const pctToPlate = (pct: number): PlateTier =>
+  pct >= 75 ? 'red' : pct >= 65 ? 'blue' : pct >= 55 ? 'yellow' : 'green';
+
+/* Icons (lucide-style stroke 1.5) · inline para no acoplar dependencias */
+const IconFlame = (p: { size?: number }) => (
+  <svg width={p.size ?? 12} height={p.size ?? 12} viewBox="0 0 24 24" fill="none"
+       stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
+  </svg>
+);
+const IconCheck = (p: { size?: number }) => (
+  <svg width={p.size ?? 14} height={p.size ?? 14} viewBox="0 0 24 24" fill="none"
+       stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="20 6 9 17 4 12"/>
+  </svg>
+);
+const IconClock = (p: { size?: number }) => (
+  <svg width={p.size ?? 16} height={p.size ?? 16} viewBox="0 0 24 24" fill="none"
+       stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+  </svg>
+);
+const IconSkip = (p: { size?: number }) => (
+  <svg width={p.size ?? 13} height={p.size ?? 13} viewBox="0 0 24 24" fill="none"
+       stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+    <polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/>
+  </svg>
+);
 
 const WarmupGenerator: React.FC = () => {
   const { navigate } = useNav();
@@ -48,105 +86,117 @@ const WarmupGenerator: React.FC = () => {
 
   const phaseDoneCount = done[phase].length;
   const phaseTotal = PHASE_ITEMS[phase].length;
+  const phasePct = phaseTotal > 0 ? Math.round((phaseDoneCount / phaseTotal) * 100) : 0;
   const phaseLabel = phase === 'MOBILITY' ? 'movilidad general' : phase === 'SPECIFIC' ? 'el patrón de Arrancada' : 'ramp-up al peso de trabajo';
 
   return (
-    <div className="flex flex-col h-full bg-holy-bg">
-      <div className="px-6 py-4 flex-1 overflow-y-auto">
-        {/* Header */}
-        <header className="flex justify-between items-center mb-8">
-          <div className="flex items-center gap-3">
-             <div>
-               <h2 className="text-holy-text text-lg font-black">Calentamiento</h2>
-               <p className="text-holy-primary text-[10px] font-bold uppercase tracking-wider">Adaptado a tu readiness</p>
-             </div>
-          </div>
-          <button onClick={() => navigate('SESSION')} className="text-holy-text-secondary text-xs font-bold hover:text-holy-text transition-colors">OMITIR</button>
-        </header>
+    <div className="wu-root">
+      {/* Header · eyebrow + título + SKIP claramente visible */}
+      <header className="wu-header">
+        <div className="wu-head-titles">
+          <span className="wu-eyebrow"><IconFlame size={11} /> {PHASE_META[phase].eyebrow}</span>
+          <h2 className="wu-title">Calentamiento</h2>
+          <span className="wu-sub">Adaptado a tu readiness <span className="dot">·</span> <b>{phaseDoneCount}/{phaseTotal}</b> hechos</span>
+        </div>
+        {/* SKIP · botón visible (no link diminuto) → SESSION */}
+        <button className="wu-skip" onClick={() => navigate('SESSION')} aria-label="Saltar calentamiento">
+          <IconSkip size={12} /> OMITIR ›
+        </button>
+      </header>
 
+      <div className="wu-scroll">
         {/* Phase Tabs */}
-        <div className="flex gap-1 bg-holy-surface p-1 rounded-xl mb-6">
-          {(['MOBILITY', 'SPECIFIC', 'RAMP'] as const).map((p) => (
+        <div className="wu-tabs" role="tablist">
+          {(['MOBILITY', 'SPECIFIC', 'RAMP'] as const).map((p) => {
+            const complete = done[p].length === PHASE_ITEMS[p].length;
+            return (
+              <button
+                key={p}
+                role="tab"
+                aria-selected={phase === p}
+                className="wu-tab"
+                data-active={phase === p}
+                data-complete={complete}
+                onClick={() => setPhase(p)}
+              >
+                <span className="wu-tab-label">{PHASE_META[p].tab}</span>
+                <span className="wu-tab-count">{complete ? '✓ listo' : `${done[p].length}/${PHASE_ITEMS[p].length}`}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Phase Info + progreso de la fase */}
+        <div className="wu-phase-info">
+          <p className="wu-phase-line">
+            Preparamos <b>{phaseLabel}</b> · {phaseDoneCount}/{phaseTotal} ejercicios hechos
+          </p>
+          <div className="wu-phase-bar">
+            <div className="wu-phase-bar-head">
+              <span className="wu-phase-bar-label">Progreso fase</span>
+              <span className="wu-phase-bar-pct">{phasePct}%</span>
+            </div>
+            <div className="wu-phase-bar-track">
+              <div className="wu-phase-bar-fill" style={{ width: `${phasePct}%` }} />
+            </div>
+          </div>
+        </div>
+
+        {/* Movement list · checklist */}
+        <div className="wu-movs">
+          {items.map((item) => (
             <button
-              key={p}
-              onClick={() => setPhase(p)}
-              className={`flex-1 py-2 text-[10px] font-black rounded-lg transition-all ${
-                phase === p ? 'bg-holy-surface text-holy-text' : 'text-holy-text-secondary'
-              }`}
+              key={item.idx}
+              className="wu-mov"
+              data-state={item.status}
+              onClick={() => toggleItem(item.idx)}
             >
-              {p} {done[p].length === PHASE_ITEMS[p].length ? '✓' : `${done[p].length}/${PHASE_ITEMS[p].length}`}
+              <span className="wu-check">{item.status === 'done' && <IconCheck size={14} />}</span>
+              <span className="wu-mov-body">
+                <span className="wu-mov-name">{item.name}</span>
+                <span className="wu-mov-info">{item.info}</span>
+              </span>
+              {item.status === 'active' && <span className="wu-mov-dot" aria-hidden="true" />}
             </button>
           ))}
         </div>
 
-        {/* Phase Info */}
-        <div className="mb-6">
-          <p className="text-holy-text-secondary text-sm leading-relaxed">
-            Preparamos <span className="text-holy-text font-bold">{phaseLabel}</span> · {phaseDoneCount}/{phaseTotal} hechos
-          </p>
+        {/* Ramp-up · separador + serie con DISCO (halterofilia) */}
+        <div className="wu-divider">
+          <span className="line" />
+          <span className="lbl">Aproximación</span>
+          <span className="line" />
         </div>
 
-        {/* List */}
-        <div className="space-y-4">
-           {items.map((item) => (
-             <Card
-               key={item.idx}
-               variant={item.status === 'active' ? 'glass' : 'solid'}
-               padding="sm"
-               className={`flex items-center gap-4 transition-all cursor-pointer ${item.status === 'done' ? 'opacity-40' : ''} ${item.status === 'active' ? 'border-holy-primary/40 ring-1 ring-holy-primary/10' : ''}`}
-               onClick={() => toggleItem(item.idx)}
-             >
-               <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 ${
-                 item.status === 'done' ? 'bg-holy-primary border-holy-primary' : 'border-holy-surface'
-               }`}>
-                 {item.status === 'done' && <span className="text-holy-text text-[10px]">✓</span>}
-               </div>
-               <div className="flex-1">
-                 <p className="text-holy-text text-sm font-bold">{item.name}</p>
-                 <p className="text-holy-text-secondary text-[11px]">{item.info}</p>
-               </div>
-               {item.status === 'active' && <span className="text-holy-primary text-xs">●</span>}
-             </Card>
-           ))}
-
-           {/* Ramp-up Indicator */}
-           <div className="flex items-center gap-4 py-4">
-              <div className="h-px flex-1 bg-holy-surface" />
-              <span className="text-holy-text-secondary text-[9px] font-black uppercase tracking-widest">Aproximación</span>
-              <div className="h-px flex-1 bg-holy-surface" />
-           </div>
-
-           <Card variant="solid" padding="sm" className="flex items-center gap-4">
-              <div className="w-6 h-6 rounded-full border-2 border-holy-surface" />
-              <div className="flex-1">
-                <p className="text-holy-text-secondary text-sm font-bold">Serie 1</p>
-                <p className="text-holy-text-secondary text-[11px]">3 reps · 45% 1RM</p>
-              </div>
-              <p className="text-holy-primary font-black text-lg">40 kg</p>
-           </Card>
+        <div className="wu-serie">
+          <span className="wu-serie-disc">
+            <PlateBadge tier={pctToPlate(45)} size={44} />
+          </span>
+          <span className="wu-serie-body">
+            <span className="wu-serie-name">Serie 1</span>
+            <span className="wu-serie-info">3 reps · 45% 1RM</span>
+          </span>
+          <span className="wu-serie-kg">40 kg</span>
         </div>
 
-        {/* Timer Rest */}
-        <div className="mt-8 mb-24 bg-holy-primary/10 border border-holy-primary/20 rounded-2xl p-4 flex items-center gap-4">
-           <span className="text-2xl">⏱️</span>
-           <div>
-             <p className="text-holy-text text-xs font-bold">Siguiente: Descanso 45s</p>
-             <p className="text-holy-primary/60 text-[10px]">Mantén pulsaciones en Zona 2</p>
-           </div>
+        {/* Next-up · descanso (ámbar) */}
+        <div className="wu-next">
+          <span className="wu-next-icon"><IconClock size={18} /></span>
+          <span className="wu-next-body">
+            <span className="wu-next-title">Siguiente: Descanso 45s</span>
+            <span className="wu-next-sub">Mantén pulsaciones en Zona 2</span>
+          </span>
         </div>
       </div>
 
-      {/* Footer CTA con backdrop */}
-      <footer
-        className="absolute left-0 right-0 z-30"
-        style={{
-          bottom: 76,
-          padding: '14px 24px 12px',
-          background: 'linear-gradient(to top, var(--bg) 0%, var(--bg) 65%, transparent 100%)',
-          backdropFilter: 'blur(8px)',
-        }}
-      >
-        <Button fullWidth variant="primary" size="lg" onClick={() => navigate('SESSION')}>FINALIZAR CALENTAMIENTO →</Button>
+      {/* Footer · FINALIZAR (→ SESSION) + SKIP secundario visible (→ SESSION) */}
+      <footer className="wu-footer">
+        <button className="wu-cta" onClick={() => navigate('SESSION')}>
+          FINALIZAR CALENTAMIENTO →
+        </button>
+        <button className="wu-skip-secondary" onClick={() => navigate('SESSION')} aria-label="Saltar calentamiento e ir directo a la sesión">
+          <IconSkip size={11} /> Saltar calentamiento
+        </button>
       </footer>
     </div>
   );

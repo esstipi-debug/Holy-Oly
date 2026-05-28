@@ -2,6 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { useNav } from '../context/NavigationContext';
 import { useAthlete } from '../context/AthleteContext';
 import { useToast } from '../components/Toast';
+import { PlateBadge, type PlateTier } from '../components/PlateBadge';
+import '../styles/v2/active-session.css';
+
+/**
+ * Mapea la intensidad relativa (peso / 1RM) de un set a un tier de disco
+ * para la visualización de carga. Sigue la semántica de PlateBadge:
+ * liviano = verde · técnico = amarillo · fuerza = azul · máximo = rojo.
+ * Halterofilia · el disco refleja qué tan pesada es la barra cargada.
+ */
+const loadToTier = (weight: number, max: number): PlateTier => {
+  if (max <= 0) return 'white';
+  const pct = (weight / max) * 100;
+  if (pct < 50) return 'green';
+  if (pct < 70) return 'yellow';
+  if (pct < 88) return 'blue';
+  return 'red';
+};
 
 /**
  * Mapea nombre de ejercicio (UI) → clave de `athlete.maxes` y celebration id.
@@ -151,8 +168,8 @@ const ActiveSession: React.FC = () => {
 
   if (!athlete || !current) {
     return (
-      <div style={{ background: 'var(--bg)', padding: 40, textAlign: 'center', color: 'var(--text-secondary)' }}>
-        No hay sesión activa.
+      <div className="as-root">
+        <p className="as-empty">No hay sesión activa.</p>
       </div>
     );
   }
@@ -438,220 +455,118 @@ const ActiveSession: React.FC = () => {
 
   const showBanner = outOfDate && bannerVisible;
 
+  // Tier de disco para la barra cargada del set actual (peso ingresado vs 1RM).
+  const currentWeightNum = parseFloat(weight) || 0;
+  const loadTier = loadToTier(currentWeightNum, current.max);
+
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100%', paddingBottom: allDone ? 180 : 100 }}>
+    <div className="as-root">
 
       {/* BANNER · entrenando fuera de fecha */}
       {showBanner && (
-        <div style={{
-          position: 'sticky', top: 0, zIndex: 11,
-          height: 44,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '0 14px',
-          background: 'rgba(245,158,11,0.10)',
-          borderBottom: '1px solid rgba(245,158,11,0.30)',
-          color: '#F59E0B',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, fontWeight: 800, letterSpacing: '.01em', overflow: 'hidden' }}>
-            <span style={{ fontSize: 14 }}>📅</span>
-            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              Entrenando fuera de fecha · esperado: {formatShortDate(plannedDate)} · hoy: {formatShortDate(todayISO)}
+        <div className="as-banner">
+          <div className="as-banner-text">
+            <span aria-hidden="true">📅</span>
+            <span>
+              Fuera de fecha · esperado {formatShortDate(plannedDate)} · hoy {formatShortDate(todayISO)}
             </span>
           </div>
           <button
+            className="as-banner-close"
             onClick={() => setBannerVisible(false)}
             aria-label="Cerrar banner"
-            style={{
-              background: 'transparent', border: 'none',
-              color: '#F59E0B', fontSize: 16, fontWeight: 900,
-              cursor: 'pointer', padding: '0 6px', fontFamily: 'inherit',
-              flexShrink: 0,
-            }}
           >×</button>
         </div>
       )}
 
       {/* HEADER */}
-      <div style={{
-        position: 'sticky', top: 0, zIndex: 10,
-        padding: '52px 20px 14px',
-        background: 'rgba(7,7,15,0.85)',
-        backdropFilter: 'blur(10px)',
-        borderBottom: '1px solid var(--card-border)',
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
-              <p style={{ fontSize: 18, fontWeight: 900, color: 'var(--text)', letterSpacing: '-.01em' }}>{current.name}</p>
-              <p style={{
-                fontSize: 15, fontWeight: 900, color: 'var(--primary)',
-                fontVariantNumeric: 'tabular-nums', letterSpacing: '-.01em',
-              }}>
-                {current.targetSets}×{current.targetReps}
-              </p>
-              <span style={{
-                fontSize: 10, fontWeight: 800,
-                padding: '2px 6px', borderRadius: 6,
-                background: 'rgba(245,158,11,0.10)', color: '#F59E0B',
-                border: '1px solid rgba(245,158,11,0.20)',
-              }}>{Math.round(current.pct * 100)}%</span>
-            </div>
-            <p style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.06em', marginTop: 4 }}>
-              Bloque {exIdx + 1}/{exercises.length} · Serie {Math.min(setNumber, current.targetSets)}/{current.targetSets}
-            </p>
+      <div className="as-header">
+        <div className="as-head-titles">
+          <div className="as-head-row">
+            <p className="as-head-name">{current.name}</p>
+            <p className="as-head-scheme">{current.targetSets}×{current.targetReps}</p>
+            <span className="as-head-pct">{Math.round(current.pct * 100)}%</span>
           </div>
+          <p className="as-head-sub">
+            Bloque {exIdx + 1}/{exercises.length} · Serie {Math.min(setNumber, current.targetSets)}/{current.targetSets}
+          </p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ textAlign: 'right' }}>
-            <p style={{ fontSize: 9, color: 'var(--text-secondary)', fontWeight: 800, letterSpacing: '.08em' }}>CRONO</p>
-            <p style={{ fontSize: 18, fontWeight: 900, color: 'var(--text)', letterSpacing: '-.02em', fontVariantNumeric: 'tabular-nums' }}>
-              {mm}:{ss}
-            </p>
+        <div className="as-head-right">
+          <div className="as-crono">
+            <p className="as-crono-label">CRONO</p>
+            <p className="as-crono-value">{mm}:{ss}</p>
           </div>
           {/* Mini nav (← anterior / terminar) en header para no solapar logging buttons */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginLeft: 6 }}>
+          <div className="as-head-nav">
             <button
+              className="as-mini-btn"
               onClick={goPrevExercise}
               disabled={exIdx === 0}
               title="Ejercicio anterior"
-              style={{
-                padding: '4px 8px', borderRadius: 8,
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid var(--card-border)',
-                color: 'var(--text-secondary)',
-                fontSize: 9, fontWeight: 800, letterSpacing: '.04em',
-                cursor: exIdx === 0 ? 'not-allowed' : 'pointer',
-                opacity: exIdx === 0 ? 0.4 : 1, fontFamily: 'inherit',
-              }}
             >← Ant</button>
             <button
+              className="as-mini-btn danger"
               onClick={finishSession}
               title="Terminar sesión"
-              style={{
-                padding: '4px 8px', borderRadius: 8,
-                background: 'rgba(239,68,68,0.08)',
-                border: '1px solid rgba(239,68,68,0.25)',
-                color: '#f87171',
-                fontSize: 9, fontWeight: 800, letterSpacing: '.04em',
-                cursor: 'pointer', fontFamily: 'inherit',
-              }}
             >Fin</button>
           </div>
         </div>
       </div>
 
-      <div style={{ padding: '20px' }}>
+      <div className="as-body">
 
         {/* Progress dots */}
-        <div style={{ display: 'flex', gap: 4, marginBottom: 20 }}>
+        <div className="as-progress">
           {Array.from({ length: current.targetSets }).map((_, i) => (
-            <div
-              key={i}
-              style={{
-                flex: 1, height: 8, borderRadius: 4,
-                background: i < setsDone ? 'var(--primary)' : 'rgba(255,255,255,0.15)',
-                boxShadow: i < setsDone ? '0 0 8px rgba(34,197,94,0.4)' : 'none',
-                transition: 'background .3s ease, box-shadow .3s ease',
-              }}
-            />
+            <div key={i} className={`dot${i < setsDone ? ' on' : ''}`} />
           ))}
         </div>
 
         {/* Coach note */}
-        <div style={{
-          background: 'rgba(34,197,94,0.05)',
-          border: '1px solid rgba(34,197,94,0.18)',
-          borderRadius: 14, padding: 12, marginBottom: 20,
-        }}>
-          <p style={{ fontSize: 11, color: 'var(--text)', lineHeight: 1.5 }}>
-            <strong style={{ color: 'var(--primary)' }}>Coach: </strong>
+        <div className="as-coach">
+          <p>
+            <strong>Coach · </strong>
             {current.coachNote}
           </p>
         </div>
 
         {/* RAMP-UP TÉCNICO (calentamiento de pesos) */}
         {current.warmupSets.length > 0 && (
-          <div style={{ marginBottom: 20 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-              <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
-                Ramp-up técnico
-              </p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <div>
+            <div className="as-section-head">
+              <p className="as-eyebrow">Ramp-up técnico</p>
+              <div className="as-section-tools">
                 {!warmupComplete && (
-                  <button
-                    onClick={skipWarmup}
-                    style={{
-                      fontSize: 10, fontWeight: 700,
-                      padding: '3px 8px', borderRadius: 10,
-                      background: 'rgba(255,255,255,0.04)',
-                      color: 'var(--text-secondary)',
-                      border: '1px solid var(--card-border)',
-                      cursor: 'pointer', fontFamily: 'inherit',
-                      letterSpacing: '.02em',
-                    }}
-                  >⏩ Saltar calentamiento</button>
+                  <button className="as-skip-btn" onClick={skipWarmup}>⏩ Saltar</button>
                 )}
-                <span style={{
-                  fontSize: 10, fontWeight: 700,
-                  padding: '3px 8px', borderRadius: 10,
-                  background: warmupComplete ? 'rgba(34,197,94,0.12)' : 'var(--surface)',
-                  color: warmupComplete ? '#22C55E' : 'var(--text-secondary)',
-                  border: `1px solid ${warmupComplete ? 'rgba(34,197,94,0.3)' : 'var(--card-border)'}`,
-                }}>
+                <span className={`as-pill${warmupComplete ? ' done' : ''}`}>
                   {currentWarmupDone.size}/{current.warmupSets.length} {warmupComplete ? '✓' : ''}
                 </span>
               </div>
             </div>
 
-            <div style={{
-              background: 'var(--surface)',
-              border: '1px solid var(--card-border)',
-              borderRadius: 14, overflow: 'hidden',
-            }}>
+            <div className="as-list">
               {current.warmupSets.map((ws, i) => {
                 const w = ws.pct === 0 ? 20 : roundToPlate(current.max * ws.pct); // 20kg = barra olímpica vacía
                 const done = currentWarmupDone.has(i);
                 return (
                   <button
                     key={i}
+                    className={`as-warmup-row${done ? ' done' : ''}`}
                     onClick={() => toggleWarmup(i)}
-                    style={{
-                      width: '100%', display: 'flex',
-                      alignItems: 'center', justifyContent: 'space-between',
-                      padding: '12px 14px',
-                      borderBottom: i < current.warmupSets.length - 1 ? '1px solid var(--card-border)' : 'none',
-                      background: done ? 'rgba(34,197,94,0.06)' : 'transparent',
-                      border: 'none', cursor: 'pointer', fontFamily: 'inherit',
-                      textAlign: 'left',
-                    }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <div style={{
-                        width: 22, height: 22, borderRadius: '50%',
-                        background: done ? '#22C55E' : 'transparent',
-                        border: `2px solid ${done ? '#22C55E' : 'var(--card-border)'}`,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        color: '#07070F', fontSize: 12, fontWeight: 900,
-                      }}>{done ? '✓' : ''}</div>
-                      <div>
-                        <p style={{
-                          fontSize: 11, fontWeight: 700,
-                          color: done ? 'var(--text-secondary)' : 'var(--text)',
-                          textDecoration: done ? 'line-through' : 'none',
-                        }}>
-                          {ws.pct === 0 ? 'Barra vacía' : `${Math.round(ws.pct * 100)}% 1RM`}
-                          {ws.note && ws.pct > 0 && <span style={{ color: 'var(--text-secondary)', fontWeight: 600, marginLeft: 6 }}>· {ws.note}</span>}
-                        </p>
-                      </div>
+                    <div className="as-warmup-left">
+                      <div className="as-check">{done ? '✓' : ''}</div>
+                      <p className="as-warmup-label">
+                        {ws.pct === 0 ? 'Barra vacía' : `${Math.round(ws.pct * 100)}% 1RM`}
+                        {ws.note && ws.pct > 0 && <span className="note"> · {ws.note}</span>}
+                      </p>
                     </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <p style={{ fontSize: 13, fontWeight: 800, color: 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>
-                        {w} kg
-                      </p>
-                      <p style={{ fontSize: 9, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.04em' }}>
-                        × {ws.reps} reps
-                      </p>
+                    <div className="as-warmup-right">
+                      <div className="as-warmup-figs">
+                        <p className="as-warmup-kg">{w} kg</p>
+                        <p className="as-warmup-reps">× {ws.reps} reps</p>
+                      </div>
                     </div>
                   </button>
                 );
@@ -659,115 +574,77 @@ const ActiveSession: React.FC = () => {
             </div>
 
             {!warmupComplete && (
-              <p style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 6, lineHeight: 1.4 }}>
-                Completá el ramp-up antes de empezar las series de trabajo.
-              </p>
+              <p className="as-hint">Completá el ramp-up antes de empezar las series de trabajo.</p>
             )}
           </div>
         )}
 
         {/* Logging */}
-        <div style={{ marginBottom: 20, opacity: warmupComplete ? 1 : 0.55, transition: 'opacity .25s ease' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
-              Series de trabajo
-            </p>
-            <span style={{
-              fontSize: 10, fontWeight: 700,
-              padding: '3px 8px', borderRadius: 10,
-              background: 'var(--surface)', color: 'var(--primary)',
-              border: '1px solid var(--card-border)',
-            }}>
-              Target {targetWeight}kg · {current.targetReps}r · {Math.round(current.pct * 100)}% 1RM
+        <div className="as-log" data-locked={!warmupComplete}>
+          <div className="as-section-head">
+            <p className="as-eyebrow">Series de trabajo</p>
+            <span className="as-pill target">
+              Target {targetWeight}kg · {current.targetReps}r · {Math.round(current.pct * 100)}%
             </span>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 }}>
+          <div className="as-inputs">
             <div>
-              <p style={{ fontSize: 9, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 4 }}>
-                Peso (kg)
-              </p>
+              <p className="as-field-label">Peso (kg)</p>
               <input
+                className="as-input"
                 type="number"
                 step="0.5"
                 value={weight}
                 onChange={(e) => setWeight(e.target.value)}
-                style={{
-                  width: '100%', padding: '14px 12px',
-                  background: 'var(--surface)', border: '1px solid var(--card-border)',
-                  borderRadius: 12, fontSize: 18, fontWeight: 800, color: 'var(--text)',
-                  fontFamily: 'inherit', textAlign: 'center', outline: 'none',
-                }}
               />
             </div>
             <div>
-              <p style={{ fontSize: 9, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 4 }}>
-                Reps
-              </p>
+              <p className="as-field-label">Reps</p>
               <input
+                className="as-input"
                 type="number"
                 value={reps}
                 onChange={(e) => setReps(e.target.value)}
-                style={{
-                  width: '100%', padding: '14px 12px',
-                  background: 'var(--surface)', border: '1px solid var(--card-border)',
-                  borderRadius: 12, fontSize: 18, fontWeight: 800, color: 'var(--text)',
-                  fontFamily: 'inherit', textAlign: 'center', outline: 'none',
-                }}
               />
             </div>
           </div>
 
+          {/* Disco · visualiza la barra cargada del set actual (halterofilia) */}
+          {currentWeightNum > 0 && (
+            <div className="as-load">
+              <span className="as-load-disc" aria-hidden="true">
+                <PlateBadge tier={loadTier} size={48} />
+              </span>
+              <div className="as-load-meta">
+                <p className="as-load-kg">Barra cargada · <b>{currentWeightNum} kg</b></p>
+                <p className="as-load-sub">
+                  {current.max > 0 ? `${Math.round((currentWeightNum / current.max) * 100)}% 1RM` : 'Carga de trabajo'}
+                </p>
+              </div>
+            </div>
+          )}
+
           {allDone ? (
             /* Ejercicio terminado · prescripción cumplida · invitar a avanzar */
-            <div style={{
-              padding: '16px',
-              background: 'rgba(34,197,94,0.10)',
-              border: '1px solid rgba(34,197,94,0.40)',
-              borderRadius: 14, textAlign: 'center',
-            }}>
-              <p style={{ fontSize: 12, fontWeight: 800, color: 'var(--primary)', letterSpacing: '.06em', textTransform: 'uppercase', margin: 0 }}>
-                ✓ {current.targetSets}×{current.targetReps} completado
-              </p>
-              <p style={{ fontSize: 10, color: 'var(--text-secondary)', margin: '4px 0 12px' }}>
-                Prescripción cumplida · pasá al siguiente ejercicio
-              </p>
-              <button
-                onClick={goNextExercise}
-                style={{
-                  width: '100%', padding: '14px 0', borderRadius: 12,
-                  background: 'var(--cta-bg)', color: 'var(--cta-text)',
-                  border: 'none',
-                  fontSize: 13, fontWeight: 900, letterSpacing: '.06em', textTransform: 'uppercase',
-                  cursor: 'pointer', fontFamily: 'inherit',
-                }}
-              >
+            <div className="as-done-card">
+              <p className="as-done-title">✓ {current.targetSets}×{current.targetReps} completado</p>
+              <p className="as-done-sub">Prescripción cumplida · pasá al siguiente ejercicio</p>
+              <button className="as-cta" onClick={goNextExercise}>
                 {exIdx < exercises.length - 1 ? 'Siguiente ejercicio →' : 'Finalizar sesión 🏆'}
               </button>
             </div>
           ) : (
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div className="as-actions">
             <button
+              className="as-btn as-btn-fail"
               onClick={() => logSet('failed')}
               disabled={!warmupComplete}
-              style={{
-                flex: 1, padding: '12px 0', borderRadius: 12,
-                background: 'rgba(239,68,68,0.08)', color: '#f87171',
-                border: '1px solid rgba(239,68,68,0.25)',
-                fontSize: 12, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase',
-                cursor: warmupComplete ? 'pointer' : 'not-allowed', fontFamily: 'inherit',
-              }}
             >Fallo</button>
             <button
+              className="as-btn as-btn-done"
               onClick={() => logSet('completed')}
               disabled={!warmupComplete}
-              style={{
-                flex: 2, padding: '12px 0', borderRadius: 12,
-                background: 'var(--cta-bg)', color: 'var(--cta-text)',
-                border: 'none',
-                fontSize: 12, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase',
-                cursor: warmupComplete ? 'pointer' : 'not-allowed', fontFamily: 'inherit',
-              }}
             >Completar serie</button>
           </div>
           )}
@@ -775,161 +652,74 @@ const ActiveSession: React.FC = () => {
 
         {/* History */}
         {currentLogs.length > 0 && (
-          <>
-            <p style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 10 }}>
-              Historial · {current.name}
-            </p>
-            <div style={{ background: 'var(--surface)', border: '1px solid var(--card-border)', borderRadius: 14, overflow: 'hidden', marginBottom: 20 }}>
+          <div>
+            <p className="as-eyebrow" style={{ marginBottom: 10 }}>Historial · {current.name}</p>
+            <div className="as-list">
               {currentLogs.map((log, i) => {
                 const rowKey = `${exIdx}:${i}`;
                 const isEditing = editingSet === rowKey;
                 const isMenuOpen = setMenuOpen === rowKey;
                 const isEdited = !!log.edited_at;
+                const ok = log.result === 'completed';
                 return (
-                  <div key={i} style={{
-                    borderBottom: i < currentLogs.length - 1 ? '1px solid var(--card-border)' : 'none',
-                  }}>
+                  <div key={i} className="as-history-row">
                     {isEditing ? (
                       /* Editor inline · peso + reps + confirmar/cancelar */
-                      <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                          <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--primary)', letterSpacing: '.06em' }}>
-                            Editar Set {i + 1}
-                          </span>
-                          <button
-                            onClick={() => setEditingSet(null)}
-                            style={{
-                              background: 'transparent', border: 'none',
-                              color: 'var(--text-secondary)', fontSize: 11, fontWeight: 700,
-                              cursor: 'pointer', fontFamily: 'inherit',
-                            }}
-                          >Cancelar</button>
+                      <div className="as-editor">
+                        <div className="as-editor-head">
+                          <span className="as-editor-title">Editar Set {i + 1}</span>
+                          <button className="as-editor-cancel" onClick={() => setEditingSet(null)}>Cancelar</button>
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                        <div className="as-editor-inputs">
                           <input
+                            className="as-editor-input"
                             type="number"
                             step="0.5"
                             value={editWeight}
                             onChange={(e) => setEditWeight(e.target.value)}
                             placeholder="kg"
-                            style={{
-                              padding: '10px 8px', background: 'var(--bg)',
-                              border: '1px solid var(--card-border)', borderRadius: 10,
-                              fontSize: 14, fontWeight: 800, color: 'var(--text)',
-                              fontFamily: 'inherit', textAlign: 'center', outline: 'none',
-                            }}
                           />
                           <input
+                            className="as-editor-input"
                             type="number"
                             value={editReps}
                             onChange={(e) => setEditReps(e.target.value)}
                             placeholder="reps"
-                            style={{
-                              padding: '10px 8px', background: 'var(--bg)',
-                              border: '1px solid var(--card-border)', borderRadius: 10,
-                              fontSize: 14, fontWeight: 800, color: 'var(--text)',
-                              fontFamily: 'inherit', textAlign: 'center', outline: 'none',
-                            }}
                           />
                         </div>
-                        <div style={{ display: 'flex', gap: 6 }}>
+                        <div className="as-editor-actions">
                           <button
+                            className={`as-act ${ok ? 'toggle-fail' : 'toggle-done'}`}
                             onClick={() => toggleSetResult(i)}
-                            style={{
-                              flex: 1, padding: '8px 0', borderRadius: 10,
-                              background: log.result === 'completed' ? 'rgba(239,68,68,0.08)' : 'rgba(34,197,94,0.10)',
-                              color: log.result === 'completed' ? '#f87171' : 'var(--primary)',
-                              border: `1px solid ${log.result === 'completed' ? 'rgba(239,68,68,0.25)' : 'rgba(34,197,94,0.30)'}`,
-                              fontSize: 10, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase',
-                              cursor: 'pointer', fontFamily: 'inherit',
-                            }}
-                          >{log.result === 'completed' ? '→ Marcar fallo' : '→ Marcar completado'}</button>
-                          <button
-                            onClick={() => commitEditSet(i)}
-                            style={{
-                              flex: 1, padding: '8px 0', borderRadius: 10,
-                              background: 'var(--cta-bg)', color: 'var(--cta-text)',
-                              border: 'none',
-                              fontSize: 11, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase',
-                              cursor: 'pointer', fontFamily: 'inherit',
-                            }}
-                          >Guardar</button>
+                          >{ok ? '→ Marcar fallo' : '→ Marcar completado'}</button>
+                          <button className="as-editor-save" onClick={() => commitEditSet(i)}>Guardar</button>
                         </div>
                       </div>
                     ) : (
                       <>
                         <button
+                          className="as-row-toggle"
+                          data-open={isMenuOpen}
                           onClick={() => setSetMenuOpen(isMenuOpen ? null : rowKey)}
-                          style={{
-                            width: '100%', display: 'flex',
-                            justifyContent: 'space-between', alignItems: 'center',
-                            padding: '12px 14px',
-                            background: isMenuOpen ? 'rgba(255,255,255,0.04)' : 'transparent',
-                            border: 'none', cursor: 'pointer', fontFamily: 'inherit',
-                            textAlign: 'left',
-                          }}
                         >
-                          <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: '.06em', display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <span className="as-row-label">
                             Set {i + 1}
-                            {isEdited && (
-                              <span style={{
-                                fontSize: 8, fontWeight: 800, color: '#F59E0B',
-                                background: 'rgba(245,158,11,0.10)', padding: '1px 5px',
-                                borderRadius: 4, letterSpacing: '.04em',
-                              }}>EDIT</span>
-                            )}
+                            {isEdited && <span className="as-edit-tag">EDIT</span>}
                           </span>
-                          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                            <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>
-                              {log.weight} kg
-                            </span>
-                            <span style={{ fontSize: 13, fontWeight: 800, color: log.result === 'completed' ? 'var(--primary)' : '#f87171', fontVariantNumeric: 'tabular-nums' }}>
-                              {log.reps} reps
-                            </span>
-                            <span style={{ fontSize: 14 }}>
-                              {log.result === 'completed' ? '✓' : '✗'}
-                            </span>
+                          <div className="as-row-figs">
+                            <span className="as-row-kg">{log.weight} kg</span>
+                            <span className={`as-row-reps ${ok ? 'ok' : 'fail'}`}>{log.reps} reps</span>
+                            <span className={`as-row-mark ${ok ? 'ok' : 'fail'}`}>{ok ? '✓' : '✗'}</span>
                           </div>
                         </button>
                         {isMenuOpen && (
-                          <div style={{
-                            display: 'flex', gap: 6,
-                            padding: '0 14px 12px',
-                            background: 'rgba(255,255,255,0.02)',
-                          }}>
+                          <div className="as-row-menu">
+                            <button className="as-act neutral" onClick={() => beginEditSet(i)}>✏️ Editar</button>
                             <button
-                              onClick={() => beginEditSet(i)}
-                              style={{
-                                flex: 1, padding: '8px 0', borderRadius: 10,
-                                background: 'rgba(255,255,255,0.05)',
-                                color: 'var(--text)',
-                                border: '1px solid var(--card-border)',
-                                fontSize: 10, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase',
-                                cursor: 'pointer', fontFamily: 'inherit',
-                              }}
-                            >✏️ Editar</button>
-                            <button
+                              className={`as-act ${ok ? 'toggle-fail' : 'toggle-done'}`}
                               onClick={() => toggleSetResult(i)}
-                              style={{
-                                flex: 1, padding: '8px 0', borderRadius: 10,
-                                background: log.result === 'completed' ? 'rgba(239,68,68,0.08)' : 'rgba(34,197,94,0.10)',
-                                color: log.result === 'completed' ? '#f87171' : 'var(--primary)',
-                                border: `1px solid ${log.result === 'completed' ? 'rgba(239,68,68,0.25)' : 'rgba(34,197,94,0.30)'}`,
-                                fontSize: 10, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase',
-                                cursor: 'pointer', fontFamily: 'inherit',
-                              }}
-                            >{log.result === 'completed' ? '✗ Fallo' : '✓ Completado'}</button>
-                            <button
-                              onClick={() => deleteSet(i)}
-                              style={{
-                                flex: 1, padding: '8px 0', borderRadius: 10,
-                                background: 'rgba(239,68,68,0.08)',
-                                color: '#f87171',
-                                border: '1px solid rgba(239,68,68,0.25)',
-                                fontSize: 10, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase',
-                                cursor: 'pointer', fontFamily: 'inherit',
-                              }}
-                            >🗑 Anular</button>
+                            >{ok ? '✗ Fallo' : '✓ Completado'}</button>
+                            <button className="as-act delete" onClick={() => deleteSet(i)}>🗑 Anular</button>
                           </div>
                         )}
                       </>
@@ -938,30 +728,14 @@ const ActiveSession: React.FC = () => {
                 );
               })}
             </div>
-          </>
+          </div>
         )}
       </div>
 
       {/* FOOTER · solo aparece cuando todas las series completadas (Siguiente ejercicio) */}
       {allDone && (
-        <div style={{
-          position: 'absolute', bottom: 76, left: 0, right: 0, zIndex: 40,
-          padding: '14px 16px 12px',
-          background: 'linear-gradient(to top, var(--bg) 0%, var(--bg) 70%, transparent 100%)',
-          backdropFilter: 'blur(8px)',
-        }}>
-          <button
-            onClick={goNextExercise}
-            style={{
-              width: '100%',
-              padding: '14px 0', borderRadius: 14,
-              background: 'linear-gradient(135deg, #F59E0B, #B8860B)',
-              color: '#07070F', border: 'none',
-              fontSize: 13, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase',
-              cursor: 'pointer', fontFamily: 'inherit',
-              boxShadow: '0 6px 20px rgba(245,158,11,0.3)',
-            }}
-          >
+        <div className="as-footer">
+          <button className="as-cta" onClick={goNextExercise}>
             {exIdx < exercises.length - 1 ? 'Siguiente ejercicio →' : 'Finalizar sesión 🏆'}
           </button>
         </div>

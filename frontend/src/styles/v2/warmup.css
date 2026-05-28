@@ -1,0 +1,547 @@
+/* ============================================================
+   PEAK QUAL · HOLY OLY · WARMUP GENERATOR V2
+   ------------------------------------------------------------
+   Calentamiento halterofilia · 3 fases: Movilidad → Específico
+   → Ramp-up al peso de trabajo.
+   Acento HO = ROJO (--tier-4 / --engine-pulse) + ÁMBAR
+   (--engine-macro). NO cyan (cyan = Volta).
+   Todo vive bajo `.wu-root`: el reset de box-sizing y los
+   resets de margen NO se filtran fuera de esta pantalla. Se
+   monta DENTRO de PhoneLayout (frame, status bar, bottom nav
+   76px ya provistos) — este archivo NO dibuja chrome de
+   teléfono. El root rellena el área scrollable.
+   ============================================================ */
+
+.wu-root,
+.wu-root *,
+.wu-root *::before,
+.wu-root *::after { box-sizing: border-box; }
+
+.wu-root {
+  font-family: var(--font-body);
+  background: var(--bg);
+  background-image:
+    linear-gradient(rgba(239,68,68,0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(239,68,68,0.022) 1px, transparent 1px),
+    radial-gradient(ellipse at 50% 0%, rgba(239,68,68,0.07), transparent 60%);
+  background-size: 40px 40px, 40px 40px, 100% 100%;
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  height: 100%;
+  width: 100%;
+  position: relative;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Reset de márgenes/padding sólo dentro del root */
+.wu-root h1, .wu-root h2, .wu-root h3,
+.wu-root h4, .wu-root h5, .wu-root h6,
+.wu-root p, .wu-root figure { margin: 0; }
+.wu-root button { margin: 0; font-family: inherit; }
+
+/* ============================================================
+   HEADER · sticky · eyebrow + título + SKIP prominente
+   ============================================================ */
+.wu-header {
+  flex-shrink: 0;
+  padding: 14px 16px 12px;
+  background: linear-gradient(180deg, var(--bg) 0%,
+    color-mix(in oklab, var(--bg) 91%, var(--tier-4) 9%) 100%);
+  border-bottom: 1px solid var(--border-soft);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 4;
+}
+.wu-head-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+.wu-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--tier-4);
+  text-shadow: 0 0 8px rgba(239,68,68,0.5);
+}
+.wu-eyebrow svg { filter: drop-shadow(0 0 4px var(--tier-4)); }
+.wu-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 26px;
+  color: var(--text-hi);
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+  text-transform: uppercase;
+  text-shadow: 0 0 16px rgba(239,68,68,0.15);
+}
+.wu-sub {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  color: var(--text-mid);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.wu-sub b {
+  color: var(--tier-4);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.wu-sub .dot { color: var(--text-lo); }
+
+/* SKIP · botón claramente visible (no link diminuto) */
+.wu-skip {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(239,68,68,0.08);
+  border: 1px solid color-mix(in oklab, var(--tier-4) 45%, transparent);
+  border-radius: 999px;
+  padding: 8px 13px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--tier-4);
+  cursor: pointer;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: background 160ms, border-color 160ms, transform 150ms;
+}
+.wu-skip:hover {
+  background: rgba(239,68,68,0.16);
+  border-color: var(--tier-4);
+  transform: translateY(-1px);
+}
+.wu-skip:active { transform: translateY(0); }
+.wu-skip svg { flex-shrink: 0; }
+
+/* ============================================================
+   SCROLL CONTAINER
+   ============================================================ */
+.wu-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-3) transparent;
+}
+.wu-scroll::-webkit-scrollbar { width: 4px; }
+.wu-scroll::-webkit-scrollbar-thumb {
+  background: var(--surface-3);
+  border-radius: 2px;
+}
+
+/* ============================================================
+   PHASE TABS · chip por fase (Movilidad / Específico / Ramp)
+   ============================================================ */
+.wu-tabs {
+  display: flex;
+  gap: 6px;
+}
+.wu-tab {
+  flex: 1;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 11px;
+  border-radius: 10px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  transition: background 180ms, border-color 180ms, box-shadow 180ms;
+  text-align: left;
+}
+.wu-tab:hover {
+  border-color: color-mix(in oklab, var(--tier-4) 35%, transparent);
+}
+.wu-tab-label {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  white-space: nowrap;
+}
+.wu-tab-count {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text-lo);
+  font-variant-numeric: tabular-nums;
+}
+.wu-tab[data-active="true"] {
+  background: color-mix(in oklab, var(--tier-4) 15%, var(--surface-2));
+  border-color: color-mix(in oklab, var(--tier-4) 55%, transparent);
+  box-shadow: 0 0 14px rgba(239,68,68,0.22);
+}
+.wu-tab[data-active="true"] .wu-tab-label { color: var(--tier-4); }
+.wu-tab[data-active="true"] .wu-tab-count { color: var(--text); }
+.wu-tab[data-complete="true"] {
+  border-color: color-mix(in oklab, var(--engine-oly) 45%, transparent);
+}
+.wu-tab[data-complete="true"] .wu-tab-label { color: var(--engine-oly); }
+
+/* ============================================================
+   PHASE INFO · línea contextual de la fase activa
+   ============================================================ */
+.wu-phase-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.wu-phase-line {
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--text-mid);
+}
+.wu-phase-line b { color: var(--text-hi); font-weight: 700; }
+.wu-phase-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 11px 13px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+}
+.wu-phase-bar-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.wu-phase-bar-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: var(--text-lo);
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.wu-phase-bar-pct {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--tier-4);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.wu-phase-bar-track {
+  height: 6px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.wu-phase-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg,
+    var(--engine-macro), var(--tier-4));
+  border-radius: 3px;
+  box-shadow: 0 0 8px rgba(239,68,68,0.5);
+  transition: width 320ms ease-out;
+}
+
+/* ============================================================
+   MOVEMENT LIST · checklist
+   ============================================================ */
+.wu-movs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.wu-mov {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  padding: 13px 14px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-left: 3px solid var(--border-soft);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 180ms, background 180ms, transform 150ms, opacity 180ms;
+}
+.wu-mov:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in oklab, var(--tier-4) 35%, transparent);
+  border-left-color: color-mix(in oklab, var(--tier-4) 50%, transparent);
+}
+/* fase activa · ítem en curso resaltado en rojo */
+.wu-mov[data-state="active"] {
+  border-color: color-mix(in oklab, var(--tier-4) 45%, transparent);
+  border-left-color: var(--tier-4);
+  box-shadow: 0 0 14px rgba(239,68,68,0.14);
+}
+.wu-mov[data-state="done"] {
+  background: color-mix(in oklab, var(--engine-oly) 7%, var(--surface-1));
+  border-color: color-mix(in oklab, var(--engine-oly) 30%, transparent);
+  border-left-color: var(--engine-oly);
+  opacity: 0.6;
+}
+.wu-check {
+  flex-shrink: 0;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border: 2px solid var(--surface-3);
+  color: #04140a;
+  transition: background 180ms, border-color 180ms, box-shadow 180ms;
+}
+.wu-mov[data-state="active"] .wu-check {
+  border-color: var(--tier-4);
+}
+.wu-mov[data-state="done"] .wu-check {
+  background: var(--engine-oly);
+  border-color: var(--engine-oly);
+  box-shadow: 0 0 12px rgba(34,197,94,0.5);
+}
+.wu-mov-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.wu-mov-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-hi);
+  line-height: 1.2;
+}
+.wu-mov[data-state="done"] .wu-mov-name {
+  color: var(--text-mid);
+  text-decoration: line-through;
+}
+.wu-mov-info {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+  color: var(--text-lo);
+  font-weight: 500;
+}
+.wu-mov-dot {
+  flex-shrink: 0;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--tier-4);
+  box-shadow: 0 0 8px var(--tier-4);
+}
+
+/* ============================================================
+   RAMP-UP · separador + series con DISCOS (PlateBadge)
+   ============================================================ */
+.wu-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0;
+}
+.wu-divider .line {
+  height: 1px;
+  flex: 1;
+  background: var(--border-soft);
+}
+.wu-divider .lbl {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-lo);
+}
+
+.wu-serie {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: 10px;
+}
+.wu-serie-disc {
+  flex-shrink: 0;
+  line-height: 0;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+}
+.wu-serie-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.wu-serie-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-hi);
+}
+.wu-serie-info {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+  color: var(--text-lo);
+}
+.wu-serie-kg {
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 18px;
+  color: var(--tier-4);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 10px rgba(239,68,68,0.3);
+}
+
+/* ============================================================
+   NEXT-UP · descanso / pulsaciones (ámbar)
+   ============================================================ */
+.wu-next {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  background: color-mix(in oklab, var(--engine-macro) 8%, var(--surface-1));
+  border: 1px solid color-mix(in oklab, var(--engine-macro) 30%, transparent);
+  border-radius: 12px;
+}
+.wu-next-icon {
+  flex-shrink: 0;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: color-mix(in oklab, var(--engine-macro) 16%, transparent);
+  color: var(--engine-macro);
+}
+.wu-next-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.wu-next-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-hi);
+}
+.wu-next-sub {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+  color: var(--engine-macro);
+}
+
+/* ============================================================
+   FOOTER CTA · FINALIZAR + SKIP secundario · sobre nav 76px
+   ============================================================ */
+.wu-footer {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: 76px;
+  padding: 14px 16px 12px;
+  background: linear-gradient(to top, var(--bg) 0%, var(--bg) 62%, transparent 100%);
+  backdrop-filter: blur(8px);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.wu-cta {
+  width: 100%;
+  background: linear-gradient(135deg,
+    var(--tier-4) 0%,
+    color-mix(in oklab, var(--tier-4) 60%, #000) 100%);
+  color: #fff;
+  border: 1.5px solid color-mix(in oklab, var(--tier-4) 70%, transparent);
+  border-radius: 12px;
+  padding: 15px 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 0 24px rgba(239,68,68,0.4), inset 0 1px 0 rgba(255,255,255,0.18);
+  transition: transform 150ms, box-shadow 200ms;
+}
+.wu-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 34px rgba(239,68,68,0.6), inset 0 1px 0 rgba(255,255,255,0.22);
+}
+.wu-cta:active { transform: translateY(0); }
+
+/* SKIP secundario en footer · botón ghost claramente visible */
+.wu-skip-secondary {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  padding: 12px 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  cursor: pointer;
+  transition: color 160ms, border-color 160ms, background 160ms;
+}
+.wu-skip-secondary:hover {
+  color: var(--text-hi);
+  border-color: var(--text-lo);
+  background: rgba(255,255,255,0.03);
+}
+
+/* ============================================================
+   SAFE AREA (iOS) · el footer respeta la bottom nav (76px) y el
+   inset inferior del dispositivo.
+   ============================================================ */
+@supports (padding: max(0px)) {
+  .wu-header {
+    padding-top: max(14px, env(safe-area-inset-top));
+  }
+  .wu-footer {
+    bottom: max(76px, calc(env(safe-area-inset-bottom) + 76px));
+  }
+}
+
+/* ============================================================
+   ACCESSIBILITY · reduce-motion
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .wu-root *,
+  .wu-root *::before,
+  .wu-root *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
