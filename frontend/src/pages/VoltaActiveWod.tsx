@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, type CSSProperties } from 'react';
 import { useNav } from '../context/NavigationContext';
 import { wodsApi, type TodayWod } from '../lib/wods';
+import { PlateBadge, type PlateTier } from '../components/PlateBadge';
+import '../styles/v2/volta-active-wod.css';
 
 /**
  * Sesión activa CrossFit (Volta) · pantalla de score sheet.
@@ -11,21 +13,19 @@ import { wodsApi, type TodayWod } from '../lib/wods';
  *
  * Esta sección es solo para anotar el score (scale + rondas + extra reps).
  * Para el log completo con auto-PR check vs benchmarks, finalizar → VOLTA_WOD_LOG.
+ *
+ * Estilo V2 (dark FIFA/Tactical HUD · cyan) · scope CSS .vaw-root.
+ * PhoneLayout aporta status bar / back / bottom nav · acá solo contenido.
  */
 
-const C = {
-  bg: '#07070F',
-  surface: '#0F0F1C',
-  surface2: '#161626',
-  line: '#1E1E32',
-  text: '#EAEAF5',
-  muted: '#52527A',
-  cyan: '#00E5FF',
-  amber: '#FFB300',
-  green: '#00E676',
-};
-
 type Scale = 'Rx' | 'Scaled' | 'Beginner';
+
+// Acento disco-tier por escala · refleja exigencia (verde→azul→rojo).
+const SCALE_META: Record<Scale, { tier: PlateTier; color: string }> = {
+  Beginner: { tier: 'green', color: 'var(--tier-1)' }, // verde
+  Scaled:   { tier: 'blue', color: 'var(--tier-3)' }, // azul
+  Rx:       { tier: 'red', color: 'var(--tier-4)' }, // rojo
+};
 
 // Fallback WOD si la API devuelve "none" (atleta sin custom_wod hoy)
 const FALLBACK_WOD = {
@@ -86,172 +86,110 @@ const VoltaActiveWod: React.FC = () => {
   };
 
   return (
-    <div style={{ background: C.bg, minHeight: '100%', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 90px)', color: C.text }}>
-      {/* HEADER */}
-      <div style={{ padding: '52px 16px 16px', borderBottom: `1px solid ${C.line}` }}>
-        <p style={{ fontSize: 10, color: C.cyan, fontWeight: 800, letterSpacing: '.12em', textTransform: 'uppercase' }}>
-          {WOD.type} · {WOD.durationLabel} · CrossFit
-        </p>
-        <h1 style={{ fontSize: 22, fontWeight: 900, color: C.text, marginTop: 4 }}>{WOD.title}</h1>
-        <p style={{ fontSize: 11, color: C.muted, marginTop: 8, lineHeight: 1.5 }}>
-          Hacé el WOD en el box. Cuando termines, anotá tu score acá y pasá al log final.
-        </p>
-      </div>
+    <div className="vaw-root">
+      <div className="vaw-scroll">
+        {/* HERO · header del WOD */}
+        <section className="vaw-hero" aria-label={`WOD: ${WOD.title}`}>
+          <span className="br-tl" /><span className="br-tr" />
+          <span className="br-bl" /><span className="br-br" />
 
-      {/* SCALING TOGGLE */}
-      <div style={{ padding: '16px 16px 0' }}>
-        <p style={{ fontSize: 10, color: C.muted, fontWeight: 800, letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 6 }}>
-          Escala
-        </p>
-        <div style={{ display: 'flex', gap: 6 }}>
-          {(['Rx', 'Scaled', 'Beginner'] as Scale[]).map(s => (
-            <button
-              key={s}
-              onClick={() => setScale(s)}
-              className="btn-press"
-              style={{
-                flex: 1, padding: '10px 0', borderRadius: 12,
-                background: scale === s ? C.cyan : C.surface,
-                color: scale === s ? '#07070F' : C.muted,
-                border: `1px solid ${scale === s ? C.cyan : C.line}`,
-                fontSize: 11, fontWeight: 800, letterSpacing: '.04em',
-                cursor: 'pointer', fontFamily: 'inherit',
-              }}
-            >{s}</button>
-          ))}
+          <span className="vaw-hero-eyebrow">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+            </svg>
+            {WOD.type} · {WOD.durationLabel} · CROSSFIT
+          </span>
+          <h1 className="vaw-hero-title">{WOD.title}</h1>
+          <p className="vaw-hero-note">
+            Hacé el WOD en el box. Cuando termines, anotá tu score acá y pasá al log final.
+          </p>
+        </section>
+
+        {/* SCALING TOGGLE · discos de tier */}
+        <div className="vaw-section">
+          <span className="vaw-eyebrow">Escala</span>
+          <div className="vaw-scale-grid" role="group" aria-label="Escala del WOD">
+            {(['Rx', 'Scaled', 'Beginner'] as Scale[]).map(s => {
+              const meta = SCALE_META[s];
+              return (
+                <button
+                  key={s}
+                  onClick={() => setScale(s)}
+                  className="vaw-scale-btn"
+                  data-active={scale === s}
+                  style={{ ['--scale-c' as string]: meta.color } as CSSProperties}
+                  aria-pressed={scale === s}
+                >
+                  <span className="vaw-scale-disc">
+                    <PlateBadge tier={meta.tier} size={34} />
+                  </span>
+                  <span className="vaw-scale-label">{s}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
 
-      {/* MOVEMENTS · referencia, no checkable */}
-      <div style={{ padding: '16px' }}>
-        <p style={{ fontSize: 10, color: C.muted, fontWeight: 800, letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 6 }}>
-          Movimientos
-        </p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {WOD.movements.map((m, i) => (
-            <div key={i} style={{
-              background: C.surface, border: `1px solid ${C.line}`,
-              borderRadius: 12, padding: '10px 12px',
-              display: 'flex', alignItems: 'center', gap: 10,
-            }}>
-              <div style={{
-                width: 22, height: 22, borderRadius: '50%',
-                background: C.surface2, color: C.cyan,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 10, fontWeight: 900, flexShrink: 0,
-              }}>{i + 1}</div>
-              <div style={{ flex: 1 }}>
-                <p style={{ fontSize: 13, fontWeight: 700, color: C.text }}>{m.name}</p>
-                <p style={{ fontSize: 9, color: C.muted, marginTop: 1 }}>{m.detail}</p>
+        {/* MOVEMENTS · referencia, no checkable */}
+        <div className="vaw-section">
+          <span className="vaw-eyebrow">Movimientos</span>
+          <div className="vaw-moves">
+            {WOD.movements.map((m, i) => (
+              <div key={i} className="vaw-move">
+                <span className="vaw-move-idx">{i + 1}</span>
+                <div className="vaw-move-body">
+                  <p className="vaw-move-name">{m.name}</p>
+                  {m.detail && <p className="vaw-move-detail">{m.detail}</p>}
+                </div>
               </div>
+            ))}
+          </div>
+        </div>
+
+        {/* SCORE INPUTS · sin timer · solo contadores manuales */}
+        <div className="vaw-section">
+          <span className="vaw-eyebrow">Tu score</span>
+          <div className="vaw-steppers">
+            {/* Rondas */}
+            <div className="vaw-stepper" style={{ ['--step-c' as string]: 'var(--engine-oly)' } as CSSProperties}>
+              <div className="vaw-step-info">
+                <p className="vaw-step-label">Rondas completas</p>
+                <p className="vaw-step-hint">Toques manuales · sin timer</p>
+              </div>
+              <button onClick={decRound} className="vaw-step-btn minus" aria-label="Restar ronda">−</button>
+              <span className="vaw-step-val" aria-live="polite">{rounds}</span>
+              <button onClick={incRound} className="vaw-step-btn plus" aria-label="Sumar ronda">+</button>
             </div>
-          ))}
-        </div>
-      </div>
 
-      {/* SCORE INPUTS · sin timer · solo contadores manuales */}
-      <div style={{ padding: '8px 16px 0' }}>
-        <p style={{ fontSize: 10, color: C.muted, fontWeight: 800, letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 10 }}>
-          Tu score
-        </p>
-
-        {/* Rondas */}
-        <div style={{
-          background: C.surface, border: `1px solid ${C.line}`,
-          borderRadius: 14, padding: '14px 16px', marginBottom: 10,
-          display: 'flex', alignItems: 'center', gap: 12,
-        }}>
-          <div style={{ flex: 1 }}>
-            <p style={{ fontSize: 11, fontWeight: 800, color: C.text }}>Rondas completas</p>
-            <p style={{ fontSize: 9, color: C.muted, marginTop: 1 }}>Toques manuales · sin timer</p>
+            {/* Extra reps */}
+            <div className="vaw-stepper" style={{ ['--step-c' as string]: 'var(--engine-stress)' } as CSSProperties}>
+              <div className="vaw-step-info">
+                <p className="vaw-step-label">Reps extra</p>
+                <p className="vaw-step-hint">De la ronda incompleta</p>
+              </div>
+              <button onClick={decRep} className="vaw-step-btn minus" aria-label="Restar rep">−</button>
+              <span className="vaw-step-val" aria-live="polite">+{extraReps}</span>
+              <button onClick={incRep} className="vaw-step-btn plus" aria-label="Sumar rep">+</button>
+            </div>
           </div>
-          <button
-            onClick={decRound}
-            className="btn-press"
-            style={{
-              width: 36, height: 36, borderRadius: '50%',
-              background: C.surface2, color: C.muted, border: `1px solid ${C.line}`,
-              fontSize: 18, fontWeight: 900, cursor: 'pointer', fontFamily: 'inherit',
-            }}
-          >−</button>
-          <span style={{
-            minWidth: 50, textAlign: 'center',
-            fontSize: 28, fontWeight: 900, color: C.green,
-            fontVariantNumeric: 'tabular-nums',
-          }}>{rounds}</span>
-          <button
-            onClick={incRound}
-            className="btn-press"
-            style={{
-              width: 36, height: 36, borderRadius: '50%',
-              background: C.green, color: '#07070F', border: 'none',
-              fontSize: 18, fontWeight: 900, cursor: 'pointer', fontFamily: 'inherit',
-            }}
-          >+</button>
-        </div>
 
-        {/* Extra reps */}
-        <div style={{
-          background: C.surface, border: `1px solid ${C.line}`,
-          borderRadius: 14, padding: '14px 16px',
-          display: 'flex', alignItems: 'center', gap: 12,
-        }}>
-          <div style={{ flex: 1 }}>
-            <p style={{ fontSize: 11, fontWeight: 800, color: C.text }}>Reps extra</p>
-            <p style={{ fontSize: 9, color: C.muted, marginTop: 1 }}>De la ronda incompleta</p>
+          {/* Resumen */}
+          <div className="vaw-readout">
+            Tu score:&nbsp;<b>{rounds} rondas + {extraReps} reps</b>
+            <span className="sep">·</span>
+            <span className="sc">{scale}</span>
           </div>
-          <button
-            onClick={decRep}
-            className="btn-press"
-            style={{
-              width: 36, height: 36, borderRadius: '50%',
-              background: C.surface2, color: C.muted, border: `1px solid ${C.line}`,
-              fontSize: 18, fontWeight: 900, cursor: 'pointer', fontFamily: 'inherit',
-            }}
-          >−</button>
-          <span style={{
-            minWidth: 50, textAlign: 'center',
-            fontSize: 24, fontWeight: 900, color: C.cyan,
-            fontVariantNumeric: 'tabular-nums',
-          }}>+{extraReps}</span>
-          <button
-            onClick={incRep}
-            className="btn-press"
-            style={{
-              width: 36, height: 36, borderRadius: '50%',
-              background: C.cyan, color: '#07070F', border: 'none',
-              fontSize: 18, fontWeight: 900, cursor: 'pointer', fontFamily: 'inherit',
-            }}
-          >+</button>
         </div>
 
-        {/* Resumen */}
-        <p style={{
-          textAlign: 'center', marginTop: 16,
-          fontSize: 12, color: C.muted, fontWeight: 700,
-        }}>
-          Tu score: <strong style={{ color: C.text }}>{rounds} rondas + {extraReps} reps</strong> · <span style={{ color: C.cyan }}>{scale}</span>
-        </p>
-      </div>
-
-      {/* CTA */}
-      <div style={{
-        position: 'absolute', bottom: 'calc(env(safe-area-inset-bottom, 0px) + 76px)', left: 0, right: 0, zIndex: 30,
-        padding: '14px 16px 12px',
-        background: `linear-gradient(to top, ${C.bg} 0%, ${C.bg} 65%, transparent 100%)`,
-        backdropFilter: 'blur(8px)',
-      }}>
-        <button
-          onClick={handleFinish}
-          className="btn-press"
-          style={{
-            width: '100%', padding: '15px 0', borderRadius: 14,
-            background: C.cyan, color: '#07070F', border: 'none',
-            fontSize: 14, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.04em',
-            cursor: 'pointer', fontFamily: 'inherit',
-            boxShadow: '0 6px 20px rgba(0,229,255,0.3)',
-          }}
-        >Anotar score completo →</button>
+        {/* CTA · sticky dentro del scroll */}
+        <div className="vaw-cta-wrap">
+          <button onClick={handleFinish} className="vaw-cta">
+            Anotar score completo
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
   );

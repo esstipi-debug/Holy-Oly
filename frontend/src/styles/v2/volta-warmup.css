@@ -1,0 +1,393 @@
+/* ============================================================
+   PEAK QUAL · VOLTA WARMUP V2
+   Calentamiento pre-WOD · CrossFit · FIFA + Tactical HUD
+   3 fases: Movilidad → Activación → Ramp-up al WOD
+   Scoped a .vwu-root · cyan dominante · lightning iconography
+   ============================================================ */
+
+.vwu-root {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  width: 100%;
+  position: relative;
+}
+.vwu-root *,
+.vwu-root *::before,
+.vwu-root *::after { box-sizing: border-box; }
+
+/* ============================================================
+   HEADER · sticky · tactical eyebrow + título
+   ============================================================ */
+.vwu-header {
+  flex-shrink: 0;
+  padding: 14px 16px 12px;
+  background: linear-gradient(180deg, var(--bg) 0%,
+    color-mix(in oklab, var(--bg) 92%, var(--engine-stress) 8%) 100%);
+  border-bottom: 1px solid var(--border-soft);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 4;
+}
+.vwu-head-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+.vwu-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--engine-stress);
+  text-shadow: 0 0 8px rgba(0,229,255,0.5);
+}
+.vwu-eyebrow .bolt { filter: drop-shadow(0 0 4px var(--engine-stress)); }
+.vwu-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 26px;
+  color: var(--text-hi);
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+  text-transform: uppercase;
+  margin: 0;
+  text-shadow: 0 0 16px rgba(0,229,255,0.15);
+}
+.vwu-sub {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  color: var(--text-mid);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.vwu-sub b {
+  color: var(--engine-stress);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.vwu-sub .dot { color: var(--text-lo); }
+.vwu-skip {
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
+  padding: 7px 11px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--text-mid);
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 160ms;
+}
+.vwu-skip:hover {
+  color: var(--text-hi);
+  border-color: var(--text-lo);
+}
+
+/* ============================================================
+   SCROLL CONTAINER
+   ============================================================ */
+.vwu-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  scrollbar-width: thin;
+}
+.vwu-scroll::-webkit-scrollbar { width: 4px; }
+.vwu-scroll::-webkit-scrollbar-thumb {
+  background: var(--surface-3);
+  border-radius: 2px;
+}
+
+/* ============================================================
+   PHASE TABS · horizontal scroll · chip táctico
+   ============================================================ */
+.vwu-tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+.vwu-tabs::-webkit-scrollbar { display: none; }
+.vwu-tab {
+  flex-shrink: 0;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 9px 13px;
+  border-radius: 10px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  transition: all 180ms;
+  text-align: left;
+}
+.vwu-tab:hover {
+  border-color: color-mix(in oklab, var(--engine-stress) 35%, transparent);
+}
+.vwu-tab-label {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  white-space: nowrap;
+}
+.vwu-tab-count {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text-lo);
+  font-variant-numeric: tabular-nums;
+}
+.vwu-tab[data-active="true"] {
+  background: color-mix(in oklab, var(--engine-stress) 16%, var(--surface-2));
+  border-color: color-mix(in oklab, var(--engine-stress) 55%, transparent);
+  box-shadow: 0 0 14px rgba(0,229,255,0.22);
+}
+.vwu-tab[data-active="true"] .vwu-tab-label { color: var(--engine-stress); }
+.vwu-tab[data-active="true"] .vwu-tab-count { color: var(--text); }
+.vwu-tab[data-complete="true"] .vwu-tab-label { color: var(--engine-oly); }
+.vwu-tab[data-complete="true"] {
+  border-color: color-mix(in oklab, var(--engine-oly) 45%, transparent);
+}
+
+/* ============================================================
+   PHASE PANEL · contenedor de la fase activa
+   ============================================================ */
+.vwu-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.vwu-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 2px;
+}
+.vwu-panel-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-hi);
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+.vwu-panel-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--engine-stress) 14%, transparent);
+  color: var(--engine-stress);
+  border: 1px solid color-mix(in oklab, var(--engine-stress) 45%, transparent);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  font-weight: 800;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   MOVEMENT LIST · checklist táctico
+   ============================================================ */
+.vwu-movs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.vwu-mov {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  padding: 13px 14px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-left: 3px solid var(--border-soft);
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: border-color 180ms, background 180ms, transform 150ms;
+}
+.vwu-mov:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in oklab, var(--engine-stress) 35%, transparent);
+  border-left-color: color-mix(in oklab, var(--engine-stress) 50%, transparent);
+}
+.vwu-mov[data-done="true"] {
+  background: color-mix(in oklab, var(--engine-oly) 7%, var(--surface-1));
+  border-color: color-mix(in oklab, var(--engine-oly) 35%, transparent);
+  border-left-color: var(--engine-oly);
+}
+.vwu-check {
+  flex-shrink: 0;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border: 2px solid var(--surface-3);
+  color: #04140a;
+  transition: all 180ms;
+}
+.vwu-mov[data-done="true"] .vwu-check {
+  background: var(--engine-oly);
+  border-color: var(--engine-oly);
+  box-shadow: 0 0 12px rgba(34,197,94,0.5);
+}
+.vwu-mov-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.vwu-mov-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-hi);
+  line-height: 1.2;
+}
+.vwu-mov[data-done="true"] .vwu-mov-name {
+  color: var(--text-mid);
+  text-decoration: line-through;
+}
+.vwu-mov-info {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.05em;
+  color: var(--text-lo);
+  font-weight: 500;
+}
+
+/* ============================================================
+   PROGRESS · barra global de calentamiento
+   ============================================================ */
+.vwu-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 12px 14px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+}
+.vwu-progress-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.vwu-progress-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: var(--text-lo);
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.vwu-progress-pct {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--engine-stress);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.vwu-progress-track {
+  height: 6px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.vwu-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg,
+    var(--engine-stress), color-mix(in oklab, var(--engine-stress) 70%, var(--engine-oly)));
+  border-radius: 3px;
+  box-shadow: 0 0 8px rgba(0,229,255,0.55);
+  transition: width 320ms ease-out;
+}
+
+/* ============================================================
+   CTA · empezar WOD · neon lime primary (match dashboard)
+   ============================================================ */
+.vwu-cta {
+  margin-top: 2px;
+  width: 100%;
+  background: var(--color-neon-lime, #A3E635);
+  color: #0a1a00;
+  border: 0;
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 0 22px rgba(163,230,53,0.45), 0 4px 14px rgba(0,0,0,0.45);
+  transition: transform 150ms, box-shadow 200ms;
+}
+.vwu-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 32px rgba(163,230,53,0.6), 0 6px 18px rgba(0,0,0,0.55);
+}
+.vwu-cta:active { transform: translateY(0); }
+
+/* ============================================================
+   SAFE AREA (iOS)
+   ============================================================ */
+@supports (padding: max(0px)) {
+  .vwu-header {
+    padding-top: max(14px, env(safe-area-inset-top));
+  }
+  .vwu-scroll {
+    padding-bottom: max(24px, calc(env(safe-area-inset-bottom) + 12px));
+  }
+}
+
+/* ============================================================
+   ACCESSIBILITY · reduce-motion
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .vwu-root *,
+  .vwu-root *::before,
+  .vwu-root *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
