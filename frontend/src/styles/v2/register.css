@@ -1,0 +1,500 @@
+/* ============================================================
+   PEAK QUAL · REGISTER V3 · híbrido FIFA + Strava
+   Scoped to .rg-root · sin globals agresivos
+   Tokens compartidos en styles/v2/tokens.css
+   ============================================================ */
+
+.rg-root {
+  font-family: var(--font-body);
+  background: var(--bg-deep);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  position: relative;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% 0%, var(--p-bg, rgba(0,229,255,0.10)), transparent 70%),
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 100% 100%, 40px 40px, 40px 40px;
+  transition: background-image 300ms;
+}
+.rg-root *,
+.rg-root *::before,
+.rg-root *::after { box-sizing: border-box; }
+
+/* ============================================================
+   HEADER · 56px
+   ============================================================ */
+.rg-header {
+  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px 12px;
+  border-bottom: 1px solid var(--border-soft);
+  background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, transparent 100%);
+  position: relative;
+  z-index: 2;
+}
+.rg-back {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  color: var(--text);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: color 180ms, border-color 180ms, background 180ms;
+}
+.rg-back:hover {
+  color: var(--text-hi);
+  border-color: var(--p-c, var(--engine-stress));
+  background: var(--surface-2);
+}
+.rg-header-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  line-height: 1.1;
+  min-width: 0;
+}
+.rg-header-title .tag {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-lo);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.rg-header-title .brand {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-hi);
+  letter-spacing: 0.12em;
+  margin-top: 2px;
+}
+.rg-header-spacer { width: 36px; height: 36px; }
+
+/* ============================================================
+   PRODUCT SWITCHER · sticky · 88px
+   ============================================================ */
+.rg-switcher {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 12px 14px;
+  background: linear-gradient(180deg, var(--bg-deep) 0%, var(--bg-deep) 80%, transparent 100%);
+  border-bottom: 1px solid var(--border-soft);
+}
+.rg-switcher-btn {
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 10px;
+  row-gap: 0;
+  padding: 10px 12px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  color: var(--text-mid);
+  font-family: var(--font-body);
+  text-align: left;
+  transition: border-color 200ms, background 200ms, color 200ms, box-shadow 250ms, transform 180ms;
+  position: relative;
+  overflow: hidden;
+}
+.rg-switcher-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.12); }
+.rg-switcher-btn[data-active="true"] {
+  border-color: var(--p-c);
+  background: linear-gradient(135deg, var(--p-bg), var(--surface-1) 60%);
+  color: var(--text-hi);
+  box-shadow: var(--p-glow);
+}
+.rg-switcher-btn[data-active="true"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(135deg,
+      transparent 0 8px,
+      rgba(255,255,255,0.025) 8px 9px);
+  pointer-events: none;
+}
+.rg-switcher-emoji {
+  grid-row: 1 / span 2;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-3);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-sm);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--p-c);
+}
+.rg-switcher-btn[data-active="true"] .rg-switcher-emoji {
+  background: color-mix(in oklab, var(--p-c) 18%, var(--surface-1));
+  border-color: var(--p-c);
+}
+.rg-switcher-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  line-height: 1.1;
+  color: inherit;
+}
+.rg-switcher-sub {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-lo);
+  margin-top: 2px;
+}
+
+/* ============================================================
+   FORM
+   ============================================================ */
+.rg-form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px 16px 32px;
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
+}
+.rg-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  color: var(--text-hi);
+  margin: 0;
+}
+.rg-sub {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-mid);
+  margin: 0 0 4px 0;
+  line-height: 1.4;
+}
+
+.rg-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.rg-field label {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  font-weight: 700;
+}
+.rg-field input {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  color: var(--text-hi);
+  font-family: var(--font-body);
+  font-size: 14px;
+  outline: 0;
+  transition: border-color 180ms, box-shadow 180ms, background 180ms;
+  -webkit-text-size-adjust: 100%;
+}
+.rg-field input::placeholder { color: var(--text-lo); }
+.rg-field input:focus {
+  border-color: var(--p-c);
+  background: var(--surface-2);
+  box-shadow: 0 0 0 1px var(--p-c), 0 0 16px color-mix(in oklab, var(--p-c) 25%, transparent);
+}
+.rg-field input[aria-invalid="true"] {
+  border-color: var(--engine-pulse);
+  box-shadow: 0 0 0 1px rgba(239,68,68,0.6), 0 0 14px rgba(239,68,68,0.25);
+}
+
+.rg-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+}
+.rg-input-wrap input { padding-right: 44px; }
+.rg-input-icon {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+  color: var(--text-mid);
+  cursor: pointer;
+  border-radius: var(--r-sm);
+  transition: color 180ms, background 180ms;
+}
+.rg-input-icon:hover { color: var(--text-hi); background: var(--surface-2); }
+
+.rg-err {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #fca5a5;
+  font-weight: 600;
+}
+.rg-ok {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #86efac;
+  font-weight: 600;
+}
+
+/* ============================================================
+   STRENGTH BAR · 4 segments
+   ============================================================ */
+.rg-strength {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+.rg-strength-segs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  flex: 1;
+}
+.rg-strength-seg {
+  height: 4px;
+  background: var(--surface-3);
+  border-radius: 2px;
+  transition: background 220ms;
+}
+.rg-strength-seg.on { box-shadow: 0 0 8px currentColor; }
+.rg-strength-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  font-weight: 700;
+  white-space: nowrap;
+  min-width: 60px;
+  text-align: right;
+}
+
+/* ============================================================
+   TERMS CHECKBOX
+   ============================================================ */
+.rg-terms {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: border-color 180ms;
+}
+.rg-terms:hover { border-color: rgba(255,255,255,0.12); }
+.rg-terms[data-checked="true"] {
+  border-color: color-mix(in oklab, var(--p-c) 50%, var(--border-soft));
+  background: color-mix(in oklab, var(--p-c) 6%, var(--surface-1));
+}
+.rg-terms input { position: absolute; opacity: 0; width: 0; height: 0; }
+.rg-terms-box {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-2);
+  border: 1.5px solid var(--text-lo);
+  border-radius: var(--r-sm);
+  color: var(--bg-deep);
+  transition: background 180ms, border-color 180ms;
+}
+.rg-terms[data-checked="true"] .rg-terms-box {
+  background: var(--p-c);
+  border-color: var(--p-c);
+  box-shadow: 0 0 10px color-mix(in oklab, var(--p-c) 50%, transparent);
+}
+.rg-terms-text {
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  color: var(--text);
+  line-height: 1.45;
+}
+.rg-terms-text a {
+  color: var(--p-c);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+/* ============================================================
+   SUBMIT ERROR INLINE
+   ============================================================ */
+.rg-submit-err {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.35);
+  border-radius: var(--r-md);
+  font-size: 12px;
+  color: #fecaca;
+}
+.rg-submit-err > svg { flex-shrink: 0; }
+.rg-submit-err > span { flex: 1; }
+.rg-submit-err-link {
+  background: transparent;
+  border: 0;
+  color: #fda4af;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   CTA PRIMARIO
+   ============================================================ */
+.rg-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, var(--p-c), color-mix(in oklab, var(--p-c) 70%, #000));
+  color: #050510;
+  border: 0;
+  border-radius: var(--r-md);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: var(--p-glow), inset 0 1px 0 rgba(255,255,255,0.25);
+  transition: transform 160ms, box-shadow 200ms, opacity 200ms;
+  margin-top: 6px;
+}
+.rg-cta:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--p-glow), 0 8px 24px color-mix(in oklab, var(--p-c) 35%, transparent), inset 0 1px 0 rgba(255,255,255,0.3);
+}
+.rg-cta:active:not(:disabled) { transform: translateY(0); }
+.rg-cta:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+.rg-spin {
+  animation: rg-spin 900ms linear infinite;
+}
+@keyframes rg-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ============================================================
+   COACH NOTE + LOGIN LINK
+   ============================================================ */
+.rg-coach-note {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.05em;
+  color: var(--text-mid);
+  text-align: center;
+  margin: 12px 0 0 0;
+  line-height: 1.5;
+  padding: 8px;
+  border-top: 1px dashed var(--border-soft);
+}
+.rg-coach-note a {
+  color: var(--p-c);
+  font-weight: 700;
+  text-decoration: none;
+}
+.rg-coach-note a:hover { text-decoration: underline; }
+
+.rg-login-link {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-mid);
+  text-align: center;
+  margin: 0;
+}
+.rg-login-link button {
+  background: transparent;
+  border: 0;
+  color: var(--p-c);
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .rg-root,
+  .rg-switcher-btn,
+  .rg-field input,
+  .rg-cta,
+  .rg-spin { transition: none !important; animation: none !important; }
+}
+
+/* ============================================================
+   MOBILE TWEAKS · iOS notch + bigger touch area
+   ============================================================ */
+@media (max-width: 380px) {
+  .rg-title { font-size: 20px; }
+  .rg-form { padding: 14px 12px 28px; }
+  .rg-switcher { padding: 10px 12px; }
+}

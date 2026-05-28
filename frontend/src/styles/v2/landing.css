@@ -1,0 +1,488 @@
+/* ============================================================
+   PEAK QUAL · LANDING V3 · selector producto
+   Scoped to .lp-root · sin globals agresivos
+   ============================================================ */
+
+.lp-root {
+  font-family: var(--font-body);
+  background: var(--bg-deep);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.lp-root *,
+.lp-root *::before,
+.lp-root *::after { box-sizing: border-box; }
+
+/* ============================================================
+   BACKGROUND · grid tactical sutil + drift
+   ============================================================ */
+.lp-bg {
+  position: absolute;
+  inset: -10% -10% -10% -10%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 0%,
+      rgba(239,68,68,0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 50% at 80% 100%,
+      rgba(0,229,255,0.08) 0%, transparent 60%),
+    linear-gradient(180deg, #050510 0%, #0A0A14 45%, #050510 100%);
+}
+.lp-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(0deg,  rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, black 30%, transparent 90%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, black 30%, transparent 90%);
+  animation: lp-grid-drift 60s linear infinite;
+}
+.lp-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(135deg,
+      transparent 0 12px,
+      rgba(255,255,255,0.012) 12px 13px);
+}
+@keyframes lp-grid-drift {
+  from { background-position: 0 0, 0 0; }
+  to   { background-position: 40px 40px, 40px 40px; }
+}
+
+/* ============================================================
+   SCROLL CONTAINER
+   ============================================================ */
+.lp-scroll {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: calc(env(safe-area-inset-top, 0px) + 24px) 16px calc(env(safe-area-inset-bottom, 0px) + 16px);
+  gap: 22px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.lp-scroll::-webkit-scrollbar { width: 4px; }
+.lp-scroll::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 2px; }
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.lp-hero {
+  min-height: 28vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 18px 8px 4px;
+  opacity: 0;
+  transform: translateY(-12px);
+  transition: opacity 700ms ease-out, transform 700ms ease-out;
+}
+.lp-hero[data-visible="true"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+.lp-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+.lp-logo-bar {
+  width: 26px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,229,255,0.5), transparent);
+}
+.lp-logo-mark {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  font-size: 24px;
+  color: var(--text-hi);
+  padding: 6px 10px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-sm);
+  background: rgba(0,0,0,0.4);
+  text-shadow: 0 0 12px rgba(0,229,255,0.25);
+}
+.lp-brand {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 30px;
+  letter-spacing: 0.06em;
+  color: var(--text-hi);
+  text-align: center;
+  line-height: 1;
+}
+.lp-tagline {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  color: var(--text-mid);
+  text-align: center;
+}
+.lp-scroll-hint {
+  margin-top: 8px;
+  color: var(--text-lo);
+  animation: lp-scroll-bob 2s ease-in-out infinite;
+}
+@keyframes lp-scroll-bob {
+  0%, 100% { transform: translateY(0); opacity: 0.5; }
+  50%      { transform: translateY(3px); opacity: 1; }
+}
+
+/* ============================================================
+   SECTION HEAD
+   ============================================================ */
+.lp-section-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.lp-section-bar {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.10), transparent);
+}
+.lp-section-head h2 {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  color: var(--text-mid);
+  text-transform: uppercase;
+  margin: 0;
+  font-weight: 700;
+}
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+.lp-products {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.lp-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.lp-card {
+  position: relative;
+  background:
+    linear-gradient(165deg,
+      color-mix(in oklab, var(--cc) 16%, var(--surface-1)) 0%,
+      color-mix(in oklab, var(--cc) 6%, var(--surface-1)) 40%,
+      var(--surface-1) 100%);
+  border: 1px solid color-mix(in oklab, var(--cc) 30%, var(--border-soft));
+  border-radius: var(--r-lg);
+  padding: 14px 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  cursor: pointer;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 500ms ease-out var(--stagger, 0ms),
+    transform 500ms ease-out var(--stagger, 0ms),
+    border-color 200ms,
+    box-shadow 200ms,
+    scale 200ms;
+  outline: none;
+}
+.lp-card[data-visible="true"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+.lp-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(45deg,
+      transparent 0 6px,
+      rgba(255,255,255,0.018) 6px 7px);
+  pointer-events: none;
+}
+.lp-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(ellipse 80% 40% at 50% 0%,
+      color-mix(in oklab, var(--cc) 22%, transparent) 0%,
+      transparent 70%);
+  opacity: 0.55;
+  pointer-events: none;
+}
+.lp-card:hover:not([data-locked="true"]),
+.lp-card:focus-visible:not([data-locked="true"]) {
+  border-color: color-mix(in oklab, var(--cc) 55%, var(--border-soft));
+  box-shadow: var(--cc-glow);
+  scale: 1.015;
+}
+.lp-card:active:not([data-locked="true"]) {
+  scale: 0.995;
+}
+.lp-card[data-locked="true"] {
+  cursor: not-allowed;
+  opacity: 0.5;
+  filter: saturate(0.3);
+}
+.lp-card[data-locked="true"][data-visible="true"] {
+  opacity: 0.55;
+}
+
+.lp-card-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  z-index: 1;
+}
+.lp-card-banner-bar {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--cc) 50%, transparent), transparent);
+}
+.lp-card-banner-tag {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.28em;
+  color: var(--cc);
+  text-transform: uppercase;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.lp-card-body {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  position: relative;
+  z-index: 1;
+}
+.lp-card-icon {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid color-mix(in oklab, var(--cc) 35%, var(--border-soft));
+  border-radius: var(--r-md);
+  color: var(--cc);
+  flex-shrink: 0;
+  box-shadow: inset 0 0 12px color-mix(in oklab, var(--cc) 10%, transparent);
+}
+.lp-card-meta {
+  flex: 1;
+  min-width: 0;
+}
+.lp-card-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: 0.04em;
+  color: var(--text-hi);
+  line-height: 1.05;
+  text-shadow: 0 0 12px color-mix(in oklab, var(--cc) 30%, transparent);
+}
+.lp-card-sub {
+  font-size: 12px;
+  color: var(--text-mid);
+  margin-top: 4px;
+  line-height: 1.3;
+}
+
+.lp-card-bullets {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+  z-index: 1;
+  padding-top: 4px;
+  border-top: 1px dashed var(--border-soft);
+}
+.lp-card-bullets li {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--text);
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.lp-card-bullets li::before {
+  content: "›";
+  color: var(--cc);
+  font-weight: 700;
+}
+
+.lp-card-cta {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+  margin-top: 2px;
+}
+.lp-card-cta-go {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--cc);
+  font-weight: 700;
+  padding: 6px 12px;
+  border: 1px solid color-mix(in oklab, var(--cc) 40%, var(--border-soft));
+  border-radius: 999px;
+  background: rgba(0,0,0,0.3);
+  transition: transform 200ms;
+}
+.lp-card:hover:not([data-locked="true"]) .lp-card-cta-go {
+  transform: translateX(2px);
+}
+.lp-card-cta-locked {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-lo);
+  font-weight: 700;
+  padding: 5px 10px;
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  background: rgba(0,0,0,0.25);
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.lp-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 8px 6px;
+}
+.lp-login-link {
+  background: transparent;
+  border: none;
+  padding: 8px 4px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-mid);
+  cursor: pointer;
+  letter-spacing: 0.02em;
+}
+.lp-login-link span {
+  color: var(--text-hi);
+  border-bottom: 1px dashed color-mix(in oklab, var(--engine-stress) 35%, var(--border-soft));
+  padding-bottom: 1px;
+  margin-left: 2px;
+}
+.lp-login-link:hover span {
+  color: var(--engine-stress);
+  border-bottom-color: var(--engine-stress);
+}
+.lp-legal {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--text-lo);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.lp-legal a {
+  color: var(--text-lo);
+  text-decoration: none;
+  cursor: pointer;
+}
+.lp-legal a:hover { color: var(--text-mid); }
+.lp-legal .sep { opacity: 0.5; }
+.lp-legal .ver { opacity: 0.7; }
+
+/* ============================================================
+   TOAST (long-press preview)
+   ============================================================ */
+.lp-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 24px);
+  transform: translateX(-50%);
+  z-index: 50;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  background: rgba(10,10,20,0.92);
+  border: 1px solid color-mix(in oklab, var(--cc) 40%, var(--border-soft));
+  border-radius: 999px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5), 0 0 16px color-mix(in oklab, var(--cc) 25%, transparent);
+  backdrop-filter: blur(12px);
+  animation: lp-toast-in 220ms ease-out;
+}
+.lp-toast-bar {
+  width: 4px;
+  height: 14px;
+  border-radius: 2px;
+  background: var(--cc);
+  box-shadow: 0 0 6px var(--cc);
+}
+.lp-toast-text {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--text);
+}
+.lp-toast-text strong {
+  color: var(--text-hi);
+  font-weight: 700;
+}
+@keyframes lp-toast-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(6px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .lp-bg::before { animation: none; }
+  .lp-scroll-hint { animation: none; }
+  .lp-toast { animation: none; }
+  .lp-hero, .lp-card {
+    transition: opacity 200ms;
+    transform: none;
+  }
+  .lp-card:hover { scale: 1; }
+}

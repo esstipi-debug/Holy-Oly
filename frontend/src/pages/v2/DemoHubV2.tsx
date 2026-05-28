@@ -36,10 +36,13 @@ const ITEMS: DemoItem[] = [
   { view: 'V2_COACH',          title: 'Coach Dashboard (v2)',   subtitle: 'reemplazo del prompt 24 (CommandCenter) · pendiente',     status: 'pending', block: 'ho-coach', promptId: 24 },
   { view: 'V2_SKILL_TREE',     title: 'Skill Tree (v2)',        subtitle: 'refresh diseño · pendiente',                              status: 'pending', block: 'ho-atleta' },
 
+  // ✅ Nuevo · batch v4 · Ola 1 (auth + onboarding) portado a V3
+  { view: 'LANDING_V3',        title: 'Landing · selector',     subtitle: 'prompt 01 · selector producto · ✅ portado',              status: 'new', block: 'auth', promptId: 1 },
+  { view: 'LOGIN_V3',          title: 'Login',                  subtitle: 'prompt 02 · ✅ portado',                                 status: 'new', block: 'auth', promptId: 2 },
+  { view: 'REGISTER_V3',       title: 'Register',               subtitle: 'prompt 03 · ✅ portado',                                 status: 'new', block: 'auth', promptId: 3 },
+  { view: 'ONBOARDING_V3',     title: 'Onboarding Wizard',      subtitle: 'prompt 04 · 4 steps · ✅ portado (CSS reconstruido)',     status: 'new', block: 'auth', promptId: 4 },
+
   // 🚧 Pending · batch v4 prompts esperando generación + porteo
-  { view: 'LOGIN',             title: 'Login',                  subtitle: 'prompt 02 · batch v4 pendiente',                         status: 'pending', block: 'auth', promptId: 2 },
-  { view: 'REGISTER',          title: 'Register',               subtitle: 'prompt 03 · batch v4 pendiente',                         status: 'pending', block: 'auth', promptId: 3 },
-  { view: 'ONBOARDING',        title: 'Onboarding Wizard',      subtitle: 'prompt 04 · 4 steps · batch v4 pendiente',               status: 'pending', block: 'auth', promptId: 4 },
   { view: 'PREMIUM',           title: 'Premium Paywall',        subtitle: 'prompt 05 · batch v4 pendiente',                         status: 'pending', block: 'auth', promptId: 5 },
 
   { view: 'INDEX',             title: 'OLY Index detail',       subtitle: 'prompt 06 · batch v4 pendiente',                         status: 'pending', block: 'ho-atleta', promptId: 6 },
@@ -56,7 +59,7 @@ const ITEMS: DemoItem[] = [
   { view: 'ATHLETE_DETAIL',    title: 'Athlete Deep Dive',      subtitle: 'prompt 25 · batch v4 pendiente',                         status: 'pending', block: 'ho-coach', promptId: 25 },
   { view: 'ASSIGN_MACRO',      title: 'Assign Macro · Gantt',   subtitle: 'prompt 26 · CON Week Picker · pendiente',                status: 'pending', block: 'ho-coach', promptId: 26 },
 
-  { view: 'VOLTA_HOME',        title: 'Volta Dashboard',        subtitle: 'prompt 30 · home Volta · pendiente',                     status: 'pending', block: 'volta-atleta', promptId: 30 },
+  { view: 'VOLTA_HOME_V3',     title: 'Volta Dashboard',        subtitle: 'prompt 30 · home Volta · ✅ portado',                     status: 'new', block: 'volta-atleta', promptId: 30 },
   { view: 'VOLTA_PREWOD',      title: 'Volta PreWod readiness', subtitle: 'prompt 31 · batch v4 pendiente',                         status: 'pending', block: 'volta-atleta', promptId: 31 },
   { view: 'WARMUP',            title: 'Volta Warmup Mayhem',    subtitle: 'prompt 32 · 3 fases · pendiente',                        status: 'pending', block: 'volta-atleta', promptId: 32 },
   { view: 'VOLTA_STATS',       title: 'Volta Stats',            subtitle: 'prompt 35 · benchmarks · pendiente',                     status: 'pending', block: 'volta-atleta', promptId: 35 },

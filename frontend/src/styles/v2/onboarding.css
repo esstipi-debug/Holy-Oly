@@ -1,0 +1,724 @@
+/* ============================================================
+   PEAK QUAL · ONBOARDING V3 · wizard 4 steps · híbrido FIFA + Strava
+   Scoped to .ob-root · sin globals agresivos
+   Tokens compartidos en styles/v2/tokens.css
+   ------------------------------------------------------------
+   ⚠ RECONSTRUCCIÓN · onboarding.css nunca llegó en el drop pkql_v2.
+   Autoreado para matchear login.css/register.css (misma familia).
+   Validar contra el drop real de Claude Design cuando exista.
+   ============================================================ */
+
+.ob-root {
+  --p-c: #00E5FF;            /* fallback · el componente setea --p-c inline */
+  font-family: var(--font-body);
+  background: var(--bg-deep);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  width: 100%;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  position: relative;
+  overflow: hidden;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% 0%, color-mix(in oklab, var(--p-c) 12%, transparent), transparent 70%),
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 100% 100%, 40px 40px, 40px 40px;
+  transition: background-image 300ms;
+}
+.ob-root *,
+.ob-root *::before,
+.ob-root *::after { box-sizing: border-box; }
+
+/* ============================================================
+   HEADER · back · progress dots · step counter
+   ============================================================ */
+.ob-header {
+  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: 36px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-soft);
+  background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, transparent 100%);
+  position: relative;
+  z-index: 2;
+}
+.ob-back {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  color: var(--text);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: color 180ms, border-color 180ms, background 180ms;
+}
+.ob-back:hover {
+  color: var(--text-hi);
+  border-color: var(--p-c);
+  background: var(--surface-2);
+}
+
+.ob-progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.ob-progress-dot {
+  width: 9px;
+  height: 9px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-full);
+  background: var(--surface-3);
+  cursor: pointer;
+  transition: width 240ms, background 240ms, box-shadow 240ms, opacity 180ms;
+}
+.ob-progress-dot[data-done="true"] { background: color-mix(in oklab, var(--p-c) 55%, var(--surface-3)); }
+.ob-progress-dot[data-active="true"] {
+  width: 28px;
+  background: var(--p-c);
+  box-shadow: 0 0 12px color-mix(in oklab, var(--p-c) 55%, transparent);
+}
+.ob-progress-dot[data-reachable="false"] { opacity: 0.4; cursor: not-allowed; }
+.ob-progress-dot:disabled { cursor: not-allowed; }
+
+.ob-step-counter {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+  font-family: var(--font-mono);
+}
+.ob-step-counter .num {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--p-c);
+}
+.ob-step-counter .sep { color: var(--text-lo); font-size: 12px; }
+.ob-step-counter .total { color: var(--text-lo); font-size: 12px; }
+
+/* ============================================================
+   STAGE · viewport horizontal swipeable
+   ============================================================ */
+.ob-stage {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+.ob-slider-track {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.ob-slide {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ob-step {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 16px 28px;
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
+}
+.ob-step-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  color: var(--text-hi);
+  margin: 0;
+}
+.ob-step-sub {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-mid);
+  margin: -8px 0 4px 0;
+  line-height: 1.4;
+}
+
+/* ============================================================
+   FIELD · input texto / date  (compartido step 1)
+   ============================================================ */
+.ob-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ob-field label {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  font-weight: 700;
+}
+.ob-field input {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  color: var(--text-hi);
+  font-family: var(--font-body);
+  font-size: 14px;
+  outline: 0;
+  transition: border-color 180ms, box-shadow 180ms, background 180ms;
+  -webkit-text-size-adjust: 100%;
+}
+.ob-field input::placeholder { color: var(--text-lo); }
+.ob-field input:focus {
+  border-color: var(--p-c);
+  background: var(--surface-2);
+  box-shadow: 0 0 0 1px var(--p-c), 0 0 16px color-mix(in oklab, var(--p-c) 25%, transparent);
+}
+/* date picker indicator legible en dark */
+.ob-field input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.7);
+  cursor: pointer;
+}
+
+/* ============================================================
+   CHIPS · selección única (género)
+   ============================================================ */
+.ob-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ob-chip {
+  padding: 9px 14px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-full);
+  color: var(--text-mid);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 180ms, background 180ms, color 180ms, box-shadow 200ms;
+}
+.ob-chip:hover { color: var(--text); border-color: rgba(255,255,255,0.14); }
+.ob-chip[data-active="true"] {
+  border-color: var(--p-c);
+  background: color-mix(in oklab, var(--p-c) 12%, var(--surface-1));
+  color: var(--text-hi);
+  box-shadow: 0 0 14px color-mix(in oklab, var(--p-c) 28%, transparent);
+}
+
+/* ============================================================
+   TOGGLE CARD + SWITCH  (hormonal opt-in · coach)
+   ============================================================ */
+.ob-toggle-card,
+.ob-coach {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+}
+.ob-toggle-row,
+.ob-coach-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.ob-toggle-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.ob-toggle-label {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-hi);
+}
+.ob-toggle-desc {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-mid);
+  line-height: 1.4;
+}
+.ob-toggle {
+  flex-shrink: 0;
+  width: 46px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-full);
+  background: var(--surface-3);
+  cursor: pointer;
+  position: relative;
+  transition: background 220ms, border-color 220ms, box-shadow 220ms;
+}
+.ob-toggle .knob {
+  position: absolute;
+  top: 50%;
+  left: 3px;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  border-radius: var(--r-full);
+  background: var(--text-mid);
+  transition: transform 220ms cubic-bezier(0.4,0,0.2,1), background 220ms;
+}
+.ob-toggle[data-on="true"] {
+  background: color-mix(in oklab, var(--p-c) 30%, var(--surface-3));
+  border-color: var(--p-c);
+  box-shadow: 0 0 12px color-mix(in oklab, var(--p-c) 35%, transparent);
+}
+.ob-toggle[data-on="true"] .knob {
+  transform: translate(20px, -50%);
+  background: var(--p-c);
+}
+.ob-toggle-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+  color: var(--text-lo);
+  line-height: 1.4;
+}
+.ob-toggle-note > svg { flex-shrink: 0; color: var(--engine-hormonal); }
+
+/* ============================================================
+   SLIDER · range (altura · peso · 1RM)
+   ============================================================ */
+.ob-slider {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+}
+.ob-slider-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.ob-slider-label {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  font-weight: 700;
+}
+.ob-slider-range {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  color: var(--text-lo);
+}
+.ob-slider-value {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px;
+  padding: 2px 0 4px;
+}
+.ob-slider-value .num {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 38px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.ob-slider-value .unit {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-mid);
+  text-transform: uppercase;
+}
+.ob-slider-input {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: var(--r-full);
+  outline: 0;
+  cursor: pointer;
+  /* el track de color lo pinta el inline-style (gradient según pct) */
+}
+.ob-slider-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--r-full);
+  background: var(--text-hi);
+  border: 3px solid var(--bg-deep);
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+  cursor: grab;
+  transition: transform 120ms;
+}
+.ob-slider-input::-webkit-slider-thumb:active { transform: scale(1.12); cursor: grabbing; }
+.ob-slider-input::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: var(--r-full);
+  background: var(--text-hi);
+  border: 3px solid var(--bg-deep);
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+  cursor: grab;
+}
+.ob-slider-ticks {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-lo);
+}
+
+.ob-weight-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ob-weight-toggle {
+  display: inline-flex;
+  align-self: flex-start;
+  gap: 2px;
+  padding: 3px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-full);
+}
+.ob-weight-toggle button {
+  padding: 5px 16px;
+  border: 0;
+  background: transparent;
+  border-radius: var(--r-full);
+  color: var(--text-mid);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: background 180ms, color 180ms;
+}
+.ob-weight-toggle button[data-active="true"] {
+  background: var(--p-c);
+  color: #050510;
+}
+
+/* ============================================================
+   STEP 3 · EXPERIENCIA cards  (--c accent por card)
+   ============================================================ */
+.ob-exp-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.ob-exp-card {
+  --c: var(--engine-stress);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 12px;
+  text-align: left;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: border-color 180ms, background 180ms, box-shadow 220ms, transform 160ms;
+}
+.ob-exp-card:hover { border-color: rgba(255,255,255,0.14); transform: translateY(-1px); }
+.ob-exp-card[data-active="true"] {
+  border-color: var(--c);
+  background: color-mix(in oklab, var(--c) 10%, var(--surface-1));
+  box-shadow: 0 0 18px color-mix(in oklab, var(--c) 28%, transparent);
+}
+.ob-exp-tag {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--c);
+  font-weight: 700;
+}
+.ob-exp-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text-hi);
+}
+.ob-exp-sub {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-mid);
+  line-height: 1.35;
+}
+.ob-exp-check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-full);
+  background: var(--c);
+  color: #050510;
+  box-shadow: 0 0 10px color-mix(in oklab, var(--c) 50%, transparent);
+}
+
+.ob-1rm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  background: color-mix(in oklab, var(--engine-macro) 5%, var(--surface-1));
+  border: 1px solid color-mix(in oklab, var(--engine-macro) 22%, var(--border-soft));
+  border-radius: var(--r-md);
+}
+.ob-1rm-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.ob-1rm-head > span:first-child {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--engine-macro);
+  font-weight: 700;
+}
+.ob-1rm-skip {
+  font-family: var(--font-body);
+  font-size: 10.5px;
+  color: var(--text-lo);
+  font-style: italic;
+}
+
+/* ============================================================
+   STEP 4 · OBJETIVOS (multi) + COACH CODE
+   ============================================================ */
+.ob-goals {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ob-goal {
+  --c: var(--engine-stress);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  text-align: left;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: border-color 180ms, background 180ms, box-shadow 220ms;
+}
+.ob-goal:hover { border-color: rgba(255,255,255,0.14); }
+.ob-goal[data-active="true"] {
+  border-color: var(--c);
+  background: color-mix(in oklab, var(--c) 9%, var(--surface-1));
+  box-shadow: 0 0 16px color-mix(in oklab, var(--c) 24%, transparent);
+}
+.ob-goal-check {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-sm);
+  border: 1.5px solid var(--text-lo);
+  background: var(--surface-2);
+  color: #050510;
+  transition: background 180ms, border-color 180ms, box-shadow 180ms;
+}
+.ob-goal[data-active="true"] .ob-goal-check {
+  background: var(--c);
+  border-color: var(--c);
+  box-shadow: 0 0 10px color-mix(in oklab, var(--c) 50%, transparent);
+}
+.ob-goal-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ob-goal-label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-hi);
+}
+.ob-goal-desc {
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  color: var(--text-mid);
+}
+
+.ob-coach-code {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 6px;
+  border-top: 1px dashed var(--border-soft);
+}
+.ob-coach-code label {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  font-weight: 700;
+}
+.ob-coach-code-input { position: relative; }
+.ob-coach-code-input input {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  color: var(--text-hi);
+  font-family: var(--font-mono);
+  font-size: 20px;
+  letter-spacing: 0.5em;
+  text-align: center;
+  outline: 0;
+  transition: border-color 180ms, box-shadow 180ms;
+}
+.ob-coach-code-input input:focus {
+  border-color: var(--p-c);
+  box-shadow: 0 0 0 1px var(--p-c), 0 0 16px color-mix(in oklab, var(--p-c) 25%, transparent);
+}
+.ob-coach-code-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+.ob-coach-code-dots .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--r-full);
+  background: var(--surface-3);
+  transition: background 180ms, box-shadow 180ms;
+}
+.ob-coach-code-dots .dot.on {
+  background: var(--p-c);
+  box-shadow: 0 0 8px color-mix(in oklab, var(--p-c) 55%, transparent);
+}
+
+/* ============================================================
+   FOOTER · CTA  (back ghost + primario · final = lime)
+   ============================================================ */
+.ob-footer {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--border-soft);
+  background: linear-gradient(0deg, var(--bg-deep) 0%, transparent 100%);
+}
+.ob-cta-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 13px 16px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  color: var(--text-mid);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 180ms, border-color 180ms, background 180ms;
+}
+.ob-cta-back:hover { color: var(--text-hi); border-color: rgba(255,255,255,0.14); background: var(--surface-2); }
+.ob-cta {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, var(--p-c), color-mix(in oklab, var(--p-c) 70%, #000));
+  color: #050510;
+  border: 0;
+  border-radius: var(--r-md);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 0 24px color-mix(in oklab, var(--p-c) 30%, transparent), inset 0 1px 0 rgba(255,255,255,0.25);
+  transition: transform 160ms, box-shadow 200ms, opacity 200ms;
+}
+.ob-cta:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px color-mix(in oklab, var(--p-c) 35%, transparent), inset 0 1px 0 rgba(255,255,255,0.3);
+}
+.ob-cta:active:not(:disabled) { transform: translateY(0); }
+.ob-cta:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+.ob-cta[data-final="true"] {
+  background: linear-gradient(135deg, var(--engine-oly), color-mix(in oklab, var(--engine-oly) 65%, #000));
+  box-shadow: var(--glow-green), inset 0 1px 0 rgba(255,255,255,0.25);
+}
+.ob-cta[data-final="true"]:hover:not(:disabled) {
+  box-shadow: 0 8px 24px color-mix(in oklab, var(--engine-oly) 40%, transparent), inset 0 1px 0 rgba(255,255,255,0.3);
+}
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .ob-root,
+  .ob-slider-track,
+  .ob-progress-dot,
+  .ob-toggle,
+  .ob-toggle .knob,
+  .ob-cta,
+  .ob-exp-card { transition: none !important; }
+}
+
+/* ============================================================
+   MOBILE TWEAKS
+   ============================================================ */
+@media (max-width: 380px) {
+  .ob-step { padding: 16px 12px 24px; }
+  .ob-step-title { font-size: 20px; }
+  .ob-slider-value .num { font-size: 32px; }
+  .ob-exp-grid { gap: 8px; }
+}

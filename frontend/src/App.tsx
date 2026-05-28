@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AthleteProvider } from './context/AthleteContext';
@@ -67,6 +67,12 @@ import HolyOlyMacrocycleV2 from './pages/v2/HolyOlyMacrocycleV2';
 import VoltaMacrocycleV2 from './pages/v2/VoltaMacrocycleV2';
 import ControlDaniosV2 from './pages/v2/ControlDaniosV2';
 import DemoHubV2 from './pages/v2/DemoHubV2';
+// V3 batch v4 · Ola 1 (auth + onboarding) · CSS scoped (sin globals agresivos)
+import LandingV3 from './pages/v2/LandingV3';
+import LoginV3 from './pages/v2/LoginV3';
+import RegisterV3 from './pages/v2/RegisterV3';
+import OnboardingV3 from './pages/v2/OnboardingV3';
+import VoltaDashboardV3 from './pages/v2/VoltaDashboardV3';
 import CardsCompareDemo from './pages/_dev/CardsCompareDemo';
 import type { View } from './context/NavigationContext';
 
@@ -136,6 +142,7 @@ const PUBLIC_VIEWS = new Set<View>([
   'LOGIN', 'REGISTER', 'PRIVACY', 'TERMS',
   'HO_MACRO_CATALOG', 'HO_MACRO_DETAIL', 'HO_MACRO_ATHLETE', 'VOLTA_MACRO_ATHLETE',
   'CONTROL_DANIOS_V2',
+  'LANDING_V3', 'LOGIN_V3', 'REGISTER_V3', 'ONBOARDING_V3', 'VOLTA_HOME_V3',
   'DEMO_HUB',
 ]);
 
@@ -305,6 +312,12 @@ function AppInner() {
     if (currentView === 'VOLTA_MACRO_ATHLETE') return <VoltaMacrocycleV2 />;
     if (currentView === 'CONTROL_DANIOS_V2') return <ControlDaniosV2 />;
     if (currentView === 'DEMO_HUB') return <DemoHubV2 />;
+    // V3 batch v4 · Ola 1 (públicas para preview/demo · revertir antes de prod)
+    if (currentView === 'LANDING_V3') return <LandingV3 />;
+    if (currentView === 'LOGIN_V3') return <LoginV3 />;
+    if (currentView === 'REGISTER_V3') return <RegisterV3 />;
+    if (currentView === 'ONBOARDING_V3') return <OnboardingV3 />;
+    if (currentView === 'VOLTA_HOME_V3') return <VoltaDashboardV3 />;
     if (currentView === 'LOGIN' && !isAuthenticated && !getDeepLinkProduct()) {
       return <Landing />;
     }

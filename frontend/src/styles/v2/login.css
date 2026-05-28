@@ -1,0 +1,592 @@
+/* ============================================================
+   PEAK QUAL · LOGIN V3
+   Scoped to .lg-root · sin globals agresivos
+   ============================================================ */
+
+.lg-root {
+  font-family: var(--font-body);
+  background: var(--bg-deep);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.lg-root *,
+.lg-root *::before,
+.lg-root *::after { box-sizing: border-box; }
+
+/* ============================================================
+   BACKGROUND
+   ============================================================ */
+.lg-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%,
+      color-mix(in oklab, var(--cc) 14%, transparent) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 50% 100%,
+      color-mix(in oklab, var(--cc) 10%, transparent) 0%, transparent 70%),
+    linear-gradient(180deg, #050510 0%, #0A0A14 50%, #050510 100%);
+}
+.lg-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(135deg,
+      transparent 0 10px,
+      rgba(255,255,255,0.015) 10px 11px);
+  pointer-events: none;
+}
+
+/* ============================================================
+   SCROLL
+   ============================================================ */
+.lg-scroll {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: calc(env(safe-area-inset-top, 0px) + 12px) 16px calc(env(safe-area-inset-bottom, 0px) + 16px);
+  gap: 18px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.lg-scroll::-webkit-scrollbar { width: 4px; }
+.lg-scroll::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 2px; }
+
+/* ============================================================
+   HEADER 80px
+   ============================================================ */
+.lg-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 56px;
+  padding: 8px 4px;
+}
+.lg-back {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  color: var(--text-mid);
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  transition: color 200ms, border-color 200ms;
+}
+.lg-back:hover {
+  color: var(--text-hi);
+  border-color: var(--cc);
+}
+.lg-header-mid {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+}
+.lg-header-logo {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid color-mix(in oklab, var(--cc) 35%, var(--border-soft));
+  border-radius: var(--r-sm);
+  color: var(--cc);
+  box-shadow: inset 0 0 8px color-mix(in oklab, var(--cc) 12%, transparent);
+}
+.lg-header-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  line-height: 1;
+}
+.lg-header-product {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  color: var(--text-hi);
+}
+.lg-header-tag {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.28em;
+  color: var(--text-mid);
+  font-weight: 700;
+}
+.lg-header-spacer {
+  width: 36px;
+  height: 36px;
+}
+
+/* ============================================================
+   BANNER
+   ============================================================ */
+.lg-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  background: rgba(245,158,11,0.08);
+  border: 1px solid rgba(245,158,11,0.30);
+  border-radius: var(--r-md);
+  color: #FBBF24;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.lg-banner strong {
+  color: #FCD34D;
+  font-weight: 700;
+}
+
+/* ============================================================
+   FORM CARD
+   ============================================================ */
+.lg-form-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.lg-form-card {
+  width: 100%;
+  background:
+    linear-gradient(165deg,
+      color-mix(in oklab, var(--cc) 8%, var(--surface-1)) 0%,
+      var(--surface-1) 45%,
+      var(--bg) 100%);
+  border: 1px solid color-mix(in oklab, var(--cc) 22%, var(--border-soft));
+  border-radius: var(--r-lg);
+  padding: 18px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+  position: relative;
+  overflow: hidden;
+}
+.lg-form-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 30% at 50% 0%,
+      color-mix(in oklab, var(--cc) 18%, transparent) 0%, transparent 60%);
+  pointer-events: none;
+  opacity: 0.5;
+}
+.lg-form-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(45deg,
+      transparent 0 6px,
+      rgba(255,255,255,0.015) 6px 7px);
+  pointer-events: none;
+}
+
+.lg-form-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  z-index: 1;
+}
+.lg-form-bar {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--cc) 40%, transparent), transparent);
+}
+.lg-form-tag {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.28em;
+  color: var(--cc);
+  text-transform: uppercase;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.lg-form-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: -0.005em;
+  color: var(--text-hi);
+  margin: 2px 0 0;
+  line-height: 1.2;
+  position: relative;
+  z-index: 1;
+}
+.lg-form-sub {
+  font-size: 12px;
+  color: var(--text-mid);
+  margin: 0;
+  position: relative;
+  z-index: 1;
+}
+
+/* ============================================================
+   FIELDS · floating label
+   ============================================================ */
+.lg-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 4px;
+  position: relative;
+  z-index: 1;
+}
+.lg-field {
+  position: relative;
+  display: block;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  transition: border-color 180ms, box-shadow 180ms, background 180ms;
+  padding: 18px 14px 8px;
+}
+.lg-field-label {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--text-lo);
+  transition: top 180ms, font-size 180ms, color 180ms, letter-spacing 180ms;
+  pointer-events: none;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.lg-field[data-focus="true"] .lg-field-label,
+.lg-field[data-filled="true"] .lg-field-label {
+  top: 5px;
+  font-size: 8.5px;
+  letter-spacing: 0.22em;
+  color: var(--cc);
+}
+.lg-field[data-error="true"] .lg-field-label {
+  color: #EF4444;
+}
+.lg-field input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-hi);
+  font-family: var(--font-body);
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  padding: 0;
+  margin-top: 2px;
+}
+.lg-field input::placeholder { color: transparent; }
+.lg-field[data-focus="true"] {
+  border-color: var(--cc);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--cc) 18%, transparent), var(--cc-glow);
+  background: rgba(0,0,0,0.5);
+}
+.lg-field[data-error="true"] {
+  border-color: #EF4444;
+  box-shadow: 0 0 0 3px rgba(239,68,68,0.18), 0 0 20px rgba(239,68,68,0.20);
+}
+.lg-field-trailing {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+}
+.lg-eye {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-mid);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: var(--r-sm);
+  display: grid;
+  place-items: center;
+  transition: color 150ms, border-color 150ms;
+}
+.lg-eye:hover,
+.lg-eye:focus-visible {
+  color: var(--text-hi);
+  border-color: var(--border-soft);
+  outline: none;
+}
+.lg-eye[aria-pressed="true"] {
+  color: var(--cc);
+}
+.lg-field-error {
+  position: absolute;
+  bottom: -16px;
+  left: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  color: #FCA5A5;
+}
+
+/* ============================================================
+   FORM ERROR (submit-level)
+   ============================================================ */
+.lg-form-err {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.30);
+  border-radius: var(--r-md);
+  color: #FCA5A5;
+  font-size: 12px;
+  margin-top: 8px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ============================================================
+   CTA
+   ============================================================ */
+.lg-cta {
+  margin-top: 8px;
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 18px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #04140A;
+  background: linear-gradient(90deg, var(--cc), var(--cc-soft));
+  border: none;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  box-shadow: var(--cc-glow), 0 4px 16px rgba(0,0,0,0.4);
+  transition: transform 150ms, box-shadow 200ms, opacity 200ms;
+  position: relative;
+  z-index: 1;
+}
+.lg-cta:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+.lg-cta:active:not(:disabled) {
+  transform: translateY(0);
+}
+.lg-cta:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.lg-spinner {
+  animation: lg-spin 700ms linear infinite;
+}
+@keyframes lg-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================================
+   LINKS SECUNDARIOS
+   ============================================================ */
+.lg-links {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  margin-top: 6px;
+  position: relative;
+  z-index: 1;
+}
+.lg-link {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px 6px;
+  font-size: 12.5px;
+  letter-spacing: 0.01em;
+}
+.lg-link-soft {
+  color: var(--text-mid);
+}
+.lg-link-soft:hover {
+  color: var(--text-hi);
+}
+.lg-link-strong {
+  color: var(--text-hi);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-bottom: 1px dashed color-mix(in oklab, var(--cc) 40%, var(--border-soft));
+  border-radius: 0;
+  padding-bottom: 2px;
+}
+.lg-link-strong:hover {
+  color: var(--cc);
+  border-bottom-color: var(--cc);
+}
+
+/* ============================================================
+   DEMO SECTION
+   ============================================================ */
+.lg-demo {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.lg-demo-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 4px;
+}
+.lg-demo-bar {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.10), transparent);
+}
+.lg-demo-or {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.28em;
+  color: var(--text-lo);
+  text-transform: uppercase;
+}
+.lg-demo-cta {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 12px 14px;
+  background: rgba(0,0,0,0.4);
+  border: 1px dashed var(--border-soft);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  transition: border-color 200ms, color 200ms;
+}
+.lg-demo-cta:hover {
+  border-color: var(--cc);
+  color: var(--text-hi);
+}
+.lg-demo-hint {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  color: var(--text-lo);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* ============================================================
+   FOOT LEGAL
+   ============================================================ */
+.lg-foot-legal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 4px 0;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--text-lo);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.lg-foot-legal a {
+  color: var(--text-lo);
+  text-decoration: none;
+  cursor: pointer;
+}
+.lg-foot-legal a:hover { color: var(--text-mid); }
+.lg-foot-legal .sep { opacity: 0.5; }
+.lg-foot-legal .ver { opacity: 0.7; }
+
+/* ============================================================
+   NETWORK TOAST
+   ============================================================ */
+.lg-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 24px);
+  transform: translateX(-50%);
+  z-index: 50;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  max-width: calc(100vw - 32px);
+  background: rgba(10,10,20,0.94);
+  border: 1px solid rgba(239,68,68,0.35);
+  border-radius: 999px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5), 0 0 16px rgba(239,68,68,0.25);
+  backdrop-filter: blur(12px);
+  color: #FCA5A5;
+  animation: lg-toast-in 220ms ease-out;
+}
+.lg-toast-text {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--text);
+}
+.lg-toast-retry {
+  background: rgba(239,68,68,0.18);
+  color: #FCA5A5;
+  border: 1px solid rgba(239,68,68,0.35);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 700;
+  cursor: pointer;
+}
+.lg-toast-retry:hover {
+  background: rgba(239,68,68,0.30);
+  color: #FECACA;
+}
+@keyframes lg-toast-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(6px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .lg-spinner { animation: none; }
+  .lg-toast { animation: none; }
+  .lg-cta { transition: opacity 150ms; }
+  .lg-cta:hover { transform: none; }
+}
