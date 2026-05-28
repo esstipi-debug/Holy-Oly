@@ -1,0 +1,637 @@
+/* ============================================================
+   PEAK QUAL · COACH MACRO VIEW (legacy screen, V2 restyle)
+   Coach's friendly view of an athlete's / club's macrocycle:
+   timeline · current phase · roster distribution · alerts · pulse.
+
+   Renders as plain content INSIDE PhoneLayout (390×844 frame,
+   status bar + bottom nav provided by the layout — no device
+   chrome here). Everything is scoped under `.cmv-root` so nothing
+   leaks globally. No `*` reset on the document, no `body` styles.
+
+   Product-aware accent:
+     · HOLY OLY  → amber  (--engine-macro / --engine-belt)
+     · VOLTA     → cyan   (--engine-stress)
+   driven by [data-product] on the root → --cmv-accent / --cmv-accent-dim.
+   ============================================================ */
+
+.cmv-root {
+  /* accent defaults to HOLY OLY amber */
+  --cmv-accent:     var(--engine-macro);
+  --cmv-accent-dim: var(--engine-belt);
+  --cmv-accent-soft: rgba(255, 179, 0, 0.10);
+  --cmv-accent-line: rgba(255, 179, 0, 0.40);
+  --cmv-accent-glow: rgba(255, 179, 0, 0.30);
+
+  /* phase palette (shared across products) */
+  --cmv-phase-deload: var(--text-mid);  /* descarga */
+  --cmv-phase-test:   var(--engine-adapt); /* test / pico */
+
+  min-height: 100%;
+  font-family: var(--font-body);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  padding: 8px 12px 96px;
+  /* subtle engine grid + top glow — scoped, never on body */
+  background-image:
+    linear-gradient(rgba(255, 179, 0, 0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 179, 0, 0.022) 1px, transparent 1px),
+    radial-gradient(ellipse at 50% 0%, rgba(255, 179, 0, 0.05), transparent 60%);
+  background-size: 40px 40px, 40px 40px, 100% 100%;
+}
+.cmv-root *,
+.cmv-root *::before,
+.cmv-root *::after { box-sizing: border-box; }
+
+.cmv-root[data-product="volta"] {
+  --cmv-accent:     var(--engine-stress);
+  --cmv-accent-dim: #00B8CC;
+  --cmv-accent-soft: rgba(0, 229, 255, 0.10);
+  --cmv-accent-line: rgba(0, 229, 255, 0.35);
+  --cmv-accent-glow: rgba(0, 229, 255, 0.28);
+  background-image:
+    linear-gradient(rgba(0, 229, 255, 0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 229, 255, 0.022) 1px, transparent 1px),
+    radial-gradient(ellipse at 50% 0%, rgba(0, 229, 255, 0.05), transparent 60%);
+  background-size: 40px 40px, 40px 40px, 100% 100%;
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+.cmv-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 4px 14px;
+}
+.cmv-back {
+  width: 34px; height: 34px;
+  flex-shrink: 0;
+  border-radius: var(--r-md);
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  color: var(--text-hi);
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font-display);
+  display: grid;
+  place-items: center;
+  transition: background 200ms, border-color 200ms, color 200ms;
+}
+.cmv-back:hover {
+  background: var(--surface-2);
+  border-color: var(--cmv-accent-line);
+  color: var(--cmv-accent);
+}
+.cmv-head-meta { flex: 1; min-width: 0; }
+.cmv-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-lo);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.cmv-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-hi);
+  letter-spacing: -0.02em;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cmv-week-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 4px;
+  padding: 3px 9px;
+  background: var(--cmv-accent-soft);
+  border: 1px solid var(--cmv-accent-line);
+  border-radius: var(--r-full);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--cmv-accent);
+}
+.cmv-week-chip .pip {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--cmv-accent);
+  box-shadow: 0 0 6px var(--cmv-accent);
+}
+
+/* ============================================================
+   SECTION TITLE
+   ============================================================ */
+.cmv-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 18px 4px 10px;
+}
+.cmv-section-head h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-hi);
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+.cmv-section-head .meta {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-lo);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+/* ============================================================
+   TIMELINE · horizontal week strip
+   ============================================================ */
+.cmv-timeline {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 4px 2px 10px;
+  scrollbar-width: none;
+}
+.cmv-timeline::-webkit-scrollbar { display: none; }
+
+.cmv-week {
+  --pc: var(--cmv-accent);             /* phase color */
+  flex: 0 0 auto;
+  width: 54px;
+  padding: 9px 0 8px;
+  background: transparent;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  color: var(--text-lo);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: transform 150ms, border-color 200ms, background 200ms;
+}
+.cmv-week:hover { transform: translateY(-2px); }
+
+/* phase colors via data-phase */
+.cmv-week[data-phase="ACUM"]   { --pc: color-mix(in oklab, var(--cmv-accent) 55%, transparent); }
+.cmv-week[data-phase="INTENS"] { --pc: var(--cmv-accent-dim); }
+.cmv-week[data-phase="REAL"]   { --pc: var(--cmv-accent); }
+.cmv-week[data-phase="DELOAD"] { --pc: var(--cmv-phase-deload); }
+.cmv-week[data-phase="TEST"]   { --pc: var(--cmv-phase-test); }
+
+/* past weeks: faint phase tint + readable text */
+.cmv-week[data-past="true"] {
+  background: color-mix(in oklab, var(--pc) 12%, transparent);
+  color: var(--text);
+}
+/* future weeks: dimmed */
+.cmv-week[data-future="true"] {
+  opacity: 0.32;
+}
+/* selected (but not current) */
+.cmv-week[data-selected="true"] {
+  border-color: var(--cmv-accent);
+}
+/* current week: strong highlight */
+.cmv-week[data-current="true"] {
+  background: linear-gradient(180deg,
+    color-mix(in oklab, var(--pc) 22%, transparent),
+    color-mix(in oklab, var(--pc) 7%, transparent));
+  border: 1.5px solid var(--cmv-accent);
+  color: var(--cmv-accent);
+  box-shadow: 0 0 14px var(--cmv-accent-glow);
+  opacity: 1;
+}
+.cmv-week .wk {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.cmv-week .marker {
+  font-size: 14px;
+  line-height: 1;
+  min-height: 14px;
+}
+.cmv-week .bar {
+  width: 22px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--pc);
+}
+
+/* ============================================================
+   SELECTED WEEK DETAIL
+   ============================================================ */
+.cmv-week-detail {
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-lg);
+  padding: 12px;
+  margin-bottom: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.cmv-week-detail .info { min-width: 0; }
+.cmv-wd-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-lo);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.cmv-wd-phase {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-hi);
+  letter-spacing: -0.01em;
+  margin-top: 3px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.cmv-wd-load {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-mid);
+  letter-spacing: 0.02em;
+  margin-top: 3px;
+}
+.cmv-wd-chart {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+}
+
+/* ============================================================
+   CURRENT PHASE HERO
+   ============================================================ */
+.cmv-phase-hero {
+  position: relative;
+  background:
+    linear-gradient(135deg, var(--cmv-accent-soft), transparent 60%),
+    var(--surface-1);
+  border: 1px solid var(--cmv-accent-line);
+  border-radius: var(--r-lg);
+  padding: 14px;
+  margin-bottom: 18px;
+  overflow: hidden;
+}
+.cmv-phase-hero .br {
+  position: absolute;
+  top: 0;
+  width: 16px; height: 4px;
+  background: var(--cmv-accent);
+  box-shadow: 0 0 6px var(--cmv-accent);
+}
+.cmv-phase-hero .br-tl { left: 0; }
+.cmv-phase-hero .br-tr { right: 0; }
+.cmv-phase-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+.cmv-phase-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--cmv-accent);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.cmv-phase-left { min-width: 0; }
+.cmv-phase-big {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-hi);
+  letter-spacing: -0.025em;
+  line-height: 1;
+  margin-top: 6px;
+}
+.cmv-phase-next {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-mid);
+  letter-spacing: 0.02em;
+  margin-top: 4px;
+}
+.cmv-phase-disc {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  padding-top: 2px;
+}
+.cmv-phase-expect {
+  text-align: right;
+  flex-shrink: 0;
+}
+.cmv-phase-expect .lbl {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  color: var(--text-lo);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.cmv-phase-expect .row {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text);
+  font-weight: 600;
+  margin-top: 4px;
+  letter-spacing: 0.02em;
+}
+.cmv-phase-expect .row b {
+  color: var(--cmv-accent);
+  font-weight: 700;
+}
+
+/* ============================================================
+   CARD · generic surface block
+   ============================================================ */
+.cmv-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-lg);
+  padding: 14px;
+  margin-bottom: 18px;
+}
+
+/* ============================================================
+   ROSTER DISTRIBUTION
+   ============================================================ */
+.cmv-roster-group { margin-bottom: 14px; }
+.cmv-roster-group:last-child { margin-bottom: 0; }
+.cmv-roster-grouphead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.cmv-roster-status {
+  --sc: var(--text-mid);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--sc);
+}
+.cmv-roster-status .dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--sc);
+  box-shadow: 0 0 6px var(--sc);
+}
+.cmv-roster-count {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-lo);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.cmv-roster-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.cmv-chip {
+  --sc: var(--text-mid);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: color-mix(in oklab, var(--sc) 12%, transparent);
+  border: 1px solid color-mix(in oklab, var(--sc) 28%, transparent);
+  padding: 4px 10px 4px 4px;
+  border-radius: var(--r-full);
+}
+.cmv-chip .ava {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--cmv-accent), var(--cmv-accent-dim));
+  color: var(--bg-deep);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.cmv-chip .nm {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* status accent colors (map status → --sc) */
+.cmv-status-on-track { --sc: var(--engine-oly); }
+.cmv-status-ahead    { --sc: var(--tier-3); }
+.cmv-status-behind   { --sc: var(--engine-macro); }
+.cmv-status-deload   { --sc: var(--text-mid); }
+
+/* ============================================================
+   ALERTS
+   ============================================================ */
+.cmv-alerts {
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+.cmv-alert {
+  --lc: var(--text-mid);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: transparent;
+  border: none;
+  border-left: 3px solid var(--lc);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: background 200ms;
+}
+.cmv-alert + .cmv-alert { border-top: 1px solid var(--border-soft); }
+.cmv-alert:hover { background: color-mix(in oklab, var(--lc) 8%, transparent); }
+.cmv-alert-red   { --lc: var(--engine-pulse); }
+.cmv-alert-green { --lc: var(--engine-oly); }
+.cmv-alert-amber { --lc: var(--engine-macro); }
+.cmv-alert .pip {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--lc);
+  box-shadow: 0 0 8px var(--lc);
+}
+.cmv-alert .body { flex: 1; min-width: 0; }
+.cmv-alert .name {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-hi);
+  letter-spacing: -0.01em;
+}
+.cmv-alert .msg {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-mid);
+  letter-spacing: 0.01em;
+  margin-top: 2px;
+}
+.cmv-alert .chev {
+  font-size: 16px;
+  color: var(--text-lo);
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   PULSE GRID
+   ============================================================ */
+.cmv-pulse {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.cmv-pulse-card {
+  --vc: var(--cmv-accent);
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  padding: 12px;
+}
+.cmv-pulse-card .v {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--vc);
+  letter-spacing: -0.02em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.cmv-pulse-card .l {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--text-mid);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  margin-top: 6px;
+}
+.cmv-pulse-card.is-green { --vc: var(--engine-oly); }
+.cmv-pulse-card.is-red   { --vc: var(--engine-pulse); }
+
+.cmv-deload-card {
+  grid-column: 1 / -1;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.cmv-deload-card .lbl {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-lo);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.cmv-deload-card .wk {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-hi);
+  letter-spacing: -0.01em;
+  margin-top: 3px;
+}
+.cmv-deload-card .badge {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 700;
+  padding: 8px 14px;
+  background: var(--cmv-accent-soft);
+  border: 1px solid var(--cmv-accent-line);
+  color: var(--cmv-accent);
+  border-radius: var(--r-md);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================
+   CTAs
+   ============================================================ */
+.cmv-cta-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.cmv-btn {
+  padding: 12px 10px;
+  border-radius: var(--r-md);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 200ms, border-color 200ms, box-shadow 200ms, transform 100ms;
+}
+.cmv-btn:active { transform: translateY(1px); }
+
+.cmv-btn-ghost {
+  background: transparent;
+  color: var(--text-mid);
+  border: 1px solid var(--border-soft);
+}
+.cmv-btn-ghost:hover {
+  border-color: var(--text-mid);
+  color: var(--text-hi);
+}
+
+.cmv-btn-primary {
+  background: linear-gradient(135deg, var(--cmv-accent), var(--cmv-accent-dim));
+  color: var(--bg-deep);
+  border: none;
+}
+.cmv-btn-primary:hover {
+  box-shadow: 0 0 16px var(--cmv-accent-glow);
+}
+
+.cmv-btn-outline {
+  width: 100%;
+  background: var(--cmv-accent-soft);
+  color: var(--cmv-accent);
+  border: 1px solid var(--cmv-accent-line);
+  margin-bottom: 8px;
+}
+.cmv-btn-outline:hover {
+  background: color-mix(in oklab, var(--cmv-accent) 18%, transparent);
+  box-shadow: 0 0 14px var(--cmv-accent-glow);
+}

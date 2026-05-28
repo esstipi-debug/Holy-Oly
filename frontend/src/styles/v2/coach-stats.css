@@ -1,0 +1,449 @@
+/* ============================================================
+   PEAK QUAL · HOLY OLY · COACH STATS DEL CLUB · V2 (dark)
+   ------------------------------------------------------------
+   Restyle in-place of the legacy COACH_STATS screen.
+   Renders as plain content INSIDE PhoneLayout (390×844 frame,
+   status bar + bottom nav provided by the layout — NO device
+   chrome here). HO accent = RED/AMBER (not cyan), matching
+   CoachDashV2.
+   All rules scoped under .cs-root — no global reset / no body.
+   ============================================================ */
+
+.cs-root {
+  min-height: 100%;
+  font-family: var(--font-body);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  padding: 16px 12px 96px;
+  /* subtle engine grid + top glow (red-tinted for HO) — scoped, not on body */
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(rgba(239,68,68,0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(239,68,68,0.022) 1px, transparent 1px),
+    radial-gradient(ellipse at 50% 0%, rgba(239,68,68,0.05), transparent 60%);
+  background-size: 40px 40px, 40px 40px, 100% 100%;
+}
+.cs-root *,
+.cs-root *::before,
+.cs-root *::after { box-sizing: border-box; }
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+.cs-header {
+  padding: 4px 4px 0;
+  margin-bottom: 4px;
+}
+.cs-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--engine-pulse);
+  text-transform: uppercase;
+}
+.cs-eyebrow .pip {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--engine-pulse);
+  box-shadow: 0 0 6px var(--engine-pulse);
+}
+.cs-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--text-hi);
+  letter-spacing: -0.02em;
+  margin-top: 6px;
+  line-height: 1.1;
+}
+.cs-sub {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-mid);
+  letter-spacing: 0.05em;
+  margin-top: 6px;
+}
+
+/* ============================================================
+   SECTION HEADS · matches CoachDashV2
+   ============================================================ */
+.cs-section {
+  margin-top: 18px;
+}
+.cs-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0 4px 8px;
+}
+.cs-section-head h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-hi);
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+.cs-section-head .meta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-lo);
+  letter-spacing: 0.15em;
+}
+
+/* ============================================================
+   HERO STATS GRID · 2 metric cards (tonelaje + PRs)
+   ============================================================ */
+.cs-hero-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.cs-stat-card {
+  position: relative;
+  background:
+    linear-gradient(135deg, color-mix(in oklab, var(--c) 10%, transparent), transparent 60%),
+    var(--surface-1);
+  border: 1px solid color-mix(in oklab, var(--c) 30%, transparent);
+  border-radius: 8px;
+  padding: 14px;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  overflow: hidden;
+  transition: transform 200ms, border-color 200ms, box-shadow 200ms;
+}
+.cs-stat-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in oklab, var(--c) 55%, transparent);
+  box-shadow: 0 0 18px color-mix(in oklab, var(--c) 30%, transparent);
+}
+.cs-stat-card .br {
+  position: absolute;
+  top: 0; left: 0;
+  width: 14px; height: 4px;
+  background: var(--c);
+  box-shadow: 0 0 6px var(--c);
+}
+.cs-stat-card .br-r { left: auto; right: 0; }
+.cs-stat-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--text-mid);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.cs-stat-label .ic { color: var(--text-lo); }
+.cs-stat-val {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 30px;
+  color: var(--c);
+  line-height: 1;
+  margin-top: 8px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+.cs-stat-val .unit {
+  font-size: 14px;
+  font-weight: 600;
+  color: color-mix(in oklab, var(--c) 75%, var(--text-mid));
+  margin-left: 1px;
+}
+.cs-stat-foot {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-lo);
+  letter-spacing: 0.06em;
+  margin-top: 4px;
+}
+
+/* ============================================================
+   ADHERENCIA · full-width bar card
+   ============================================================ */
+.cs-adh {
+  width: 100%;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
+  padding: 14px;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: transform 200ms, border-color 200ms;
+}
+.cs-adh:hover { transform: translateY(-2px); border-color: var(--border-hard); }
+.cs-adh-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.cs-adh-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--text-mid);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.cs-adh-pct {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--ac, var(--engine-oly));
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.cs-adh-track {
+  height: 6px;
+  background: var(--surface-3);
+  border-radius: 3px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+.cs-adh-fill {
+  height: 100%;
+  background: var(--ac, var(--engine-oly));
+  box-shadow: 0 0 8px var(--ac, var(--engine-oly));
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+
+/* ============================================================
+   DEVIATIONS · label only (DeviationsCard is a shared component,
+   left untouched — only the eyebrow above it is restyled)
+   ============================================================ */
+.cs-dev-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--engine-macro);
+  text-transform: uppercase;
+  margin: 0 4px 10px;
+}
+
+/* ============================================================
+   TOP PERFORMERS · ranked list
+   ============================================================ */
+.cs-perf-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.cs-perf {
+  position: relative;
+  width: 100%;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
+  padding: 11px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  overflow: hidden;
+  transition: transform 200ms, border-color 200ms, box-shadow 200ms;
+}
+.cs-perf:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in oklab, var(--rc) 50%, transparent);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+}
+.cs-perf::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 60% at 0% 0%,
+    color-mix(in oklab, var(--rc) 12%, transparent), transparent 55%);
+  pointer-events: none;
+}
+/* rank accent: gold / silver / bronze */
+.cs-perf[data-rank="0"] { --rc: var(--engine-belt); }
+.cs-perf[data-rank="1"] { --rc: var(--text-mid); }
+.cs-perf[data-rank="2"] { --rc: #92400E; }
+.cs-perf-rank {
+  position: relative;
+  z-index: 1;
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  background: var(--rc);
+  color: #07070F;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  box-shadow: 0 0 10px color-mix(in oklab, var(--rc) 45%, transparent);
+}
+.cs-perf-id {
+  flex: 1;
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+}
+.cs-perf-name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-hi);
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+.cs-perf-class {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--text-mid);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+.cs-perf-score {
+  position: relative;
+  z-index: 1;
+  text-align: right;
+  flex-shrink: 0;
+}
+.cs-perf-score .v {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--engine-macro);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.cs-perf-score .k {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-lo);
+  letter-spacing: 0.12em;
+  margin-top: 2px;
+}
+
+/* ============================================================
+   ATTENTION BANNER · injury count (red)
+   ============================================================ */
+.cs-attention {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  border-left: 2px solid var(--engine-pulse);
+  background: linear-gradient(90deg, rgba(239,68,68,0.08), transparent 70%);
+  border-radius: 0 6px 6px 0;
+  padding: 11px 12px;
+  margin-top: 18px;
+}
+.cs-attention .ic {
+  color: var(--engine-pulse);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.cs-attention-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 13px;
+  color: color-mix(in oklab, var(--engine-pulse) 70%, #fff);
+  letter-spacing: -0.01em;
+}
+.cs-attention-meta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-mid);
+  letter-spacing: 0.03em;
+  margin-top: 4px;
+  line-height: 1.3;
+}
+
+/* ============================================================
+   CTAs
+   ============================================================ */
+.cs-ctas {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 18px;
+}
+.cs-cta {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 8px;
+  padding: 14px 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 150ms, box-shadow 200ms, background 200ms;
+}
+.cs-cta:hover { transform: translateY(-2px); }
+/* viral · amber/gold tone */
+.cs-cta-viral {
+  background: linear-gradient(135deg, rgba(255,179,0,0.18), rgba(255,179,0,0.06));
+  border: 1px solid rgba(255,179,0,0.4);
+  color: var(--engine-macro);
+}
+.cs-cta-viral:hover { box-shadow: 0 0 18px rgba(255,179,0,0.35); }
+/* roster · primary red */
+.cs-cta-roster {
+  background: linear-gradient(135deg, var(--engine-pulse), color-mix(in oklab, var(--engine-pulse) 60%, #000));
+  border: 1px solid rgba(239,68,68,0.55);
+  color: #1A0606;
+}
+.cs-cta-roster:hover { box-shadow: 0 0 22px rgba(239,68,68,0.5); }
+.cs-cta .ic { flex-shrink: 0; }
+
+/* ============================================================
+   BOTTOM SHEET INNER · (BottomSheet shell is shared/untouched;
+   only the content markup this screen owns is styled here)
+   ============================================================ */
+.cs-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  color: var(--text);
+}
+.cs-sheet-block .lbl {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--engine-pulse);
+}
+.cs-sheet-block .lbl .pip {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--engine-pulse);
+  box-shadow: 0 0 5px var(--engine-pulse);
+}
+.cs-sheet-block p {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.5;
+  margin-top: 6px;
+}

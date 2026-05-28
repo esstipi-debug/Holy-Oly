@@ -3,6 +3,8 @@ import { useAthlete } from '../context/AthleteContext';
 import { useNav } from '../context/NavigationContext';
 import BottomSheet from '../components/BottomSheet';
 import DeviationsCard from '../components/DeviationsCard';
+import { PlateBadge, type PlateTier } from '../components/PlateBadge';
+import '../styles/v2/coach-stats.css';
 
 /**
  * Stats del club para HO Coach (reemplaza la vista atleta `PerformanceDeepDive`).
@@ -12,10 +14,43 @@ import DeviationsCard from '../components/DeviationsCard';
  * - PRs colectivos
  * - Top performers por OLY Index
  * - Atletas que requieren atención (HRV bajo, fatiga, lesión)
+ *
+ * V2 restyle (dark · HO red/amber). Misma lógica que la versión legacy:
+ * sólo cambia la presentación (markup + CSS scoped en .cs-root). Los
+ * componentes compartidos DeviationsCard y BottomSheet se mantienen
+ * intactos — sólo se reestiliza el markup propio de esta pantalla.
  */
 
 const olyScore = (a: { maxes: { snatch: number; body_weight: number } }) =>
   a.maxes.body_weight > 0 ? +(a.maxes.snatch / a.maxes.body_weight * 2.5).toFixed(1) : 0;
+
+/** OLY Index → tier disc (intensity proxy · halterofilia plates). */
+const scoreToTier = (score: number): PlateTier => {
+  if (score >= 4) return 'red';
+  if (score >= 3.2) return 'blue';
+  if (score >= 2.4) return 'yellow';
+  if (score >= 1.6) return 'green';
+  return 'white';
+};
+
+/* ---------- inline icons (stroke, currentColor · same pattern as CoachDashV2) ---------- */
+const ICONS: Record<string, React.ReactNode> = {
+  info:   <><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></>,
+  layers: <><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></>,
+  trophy: <><path d="M6 9a6 6 0 0 0 12 0V3H6z"/><path d="M6 5H3a2 2 0 0 0 0 4h3"/><path d="M18 5h3a2 2 0 0 1 0 4h-3"/><line x1="12" y1="15" x2="12" y2="21"/><line x1="8" y1="21" x2="16" y2="21"/></>,
+  warn:   <><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></>,
+  share:  <><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></>,
+  arrowR: <><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></>,
+};
+function Icon({ name, size = 14, stroke = 1.8, className = '' }: { name: string; size?: number; stroke?: number; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" strokeWidth={stroke}
+         strokeLinecap="round" strokeLinejoin="round" className={className}>
+      {ICONS[name]}
+    </svg>
+  );
+}
 
 interface InfoData {
   title: string;
@@ -79,203 +114,171 @@ const CoachStatsHO: React.FC = () => {
     };
   }, [allAthletes]);
 
-  return (
-    <div className="anim-fade-in" style={{ background: 'var(--bg)', minHeight: '100%', paddingBottom: 90 }}>
-      {/* HEADER */}
-      <div style={{ padding: '20px 20px 16px' }}>
-        <p style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase' }}>
-          Coach · Stats del Club
-        </p>
-        <h1 style={{ fontSize: 22, fontWeight: 900, color: 'var(--text)', marginTop: 4, letterSpacing: '-.02em' }}>
-          Performance del Club
-        </h1>
-        <p style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 6 }}>
-          {stats.totalAthletes} atletas · {stats.activeCount} activos esta semana
-        </p>
-      </div>
+  // adherencia accent token (≥85 verde · ≥70 amber · resto rojo)
+  const adhColor = stats.adherenciaPct >= 85
+    ? 'var(--engine-oly)'
+    : stats.adherenciaPct >= 70 ? 'var(--engine-macro)' : 'var(--engine-pulse)';
 
-      <div style={{ padding: '0 20px' }}>
-        {/* HERO STATS GRID */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
+  return (
+    <div className="cs-root anim-fade-in">
+      {/* HEADER */}
+      <header className="cs-header">
+        <p className="cs-eyebrow"><span className="pip" />Coach · Stats del Club</p>
+        <h1 className="cs-title">Performance del Club</h1>
+        <p className="cs-sub">{stats.totalAthletes} atletas · {stats.activeCount} activos esta semana</p>
+      </header>
+
+      {/* HERO STATS GRID */}
+      <div className="cs-section">
+        <div className="cs-hero-grid">
           {/* Tonelaje */}
           <button
             onClick={() => setActiveInfo(INFOS.tonelaje)}
-            className="btn-press"
-            style={{
-              padding: 14, borderRadius: 16,
-              background: 'linear-gradient(135deg, rgba(34,197,94,0.10), transparent)',
-              border: '1px solid rgba(34,197,94,0.25)',
-              cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
-            }}
+            className="cs-stat-card btn-press"
+            style={{ ['--c' as string]: 'var(--engine-oly)' }}
           >
-            <p className="type-caption" style={{ color: 'var(--text-secondary)' }}>
-              Tonelaje semanal ⓘ
+            <span className="br" /><span className="br br-r" />
+            <p className="cs-stat-label">
+              Tonelaje semanal <Icon name="info" size={11} className="ic" />
             </p>
-            <p className="type-mono" style={{ fontSize: 28, fontWeight: 900, color: 'var(--primary)', marginTop: 4 }}>
-              {(stats.tonelajeWeekKg / 1000).toFixed(1)}<span style={{ fontSize: 14 }}>k kg</span>
+            <p className="cs-stat-val">
+              {(stats.tonelajeWeekKg / 1000).toFixed(1)}<span className="unit">k kg</span>
             </p>
-            <p style={{ fontSize: 9, color: 'var(--text-secondary)', marginTop: 2 }}>del club</p>
+            <p className="cs-stat-foot">del club</p>
           </button>
 
           {/* PRs */}
           <button
             onClick={() => setActiveInfo(INFOS.prs)}
-            className="btn-press"
-            style={{
-              padding: 14, borderRadius: 16,
-              background: 'linear-gradient(135deg, rgba(245,158,11,0.10), transparent)',
-              border: '1px solid rgba(245,158,11,0.25)',
-              cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
-            }}
+            className="cs-stat-card btn-press"
+            style={{ ['--c' as string]: 'var(--engine-macro)' }}
           >
-            <p className="type-caption" style={{ color: 'var(--text-secondary)' }}>
-              PRs esta semana ⓘ
+            <span className="br" /><span className="br br-r" />
+            <p className="cs-stat-label">
+              PRs esta semana <Icon name="info" size={11} className="ic" />
             </p>
-            <p className="type-mono" style={{ fontSize: 28, fontWeight: 900, color: '#F59E0B', marginTop: 4 }}>
-              {stats.prsWeek}
-            </p>
-            <p style={{ fontSize: 9, color: 'var(--text-secondary)', marginTop: 2 }}>colectivos</p>
+            <p className="cs-stat-val">{stats.prsWeek}</p>
+            <p className="cs-stat-foot">colectivos</p>
           </button>
         </div>
+      </div>
 
-        {/* Adherencia */}
+      {/* ADHERENCIA */}
+      <div className="cs-section">
         <button
           onClick={() => setActiveInfo(INFOS.adherencia)}
-          className="btn-press"
-          style={{
-            width: '100%', padding: '14px 16px', borderRadius: 16,
-            background: 'var(--surface)', border: '1px solid var(--card-border)',
-            marginBottom: 16, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
-          }}
+          className="cs-adh btn-press"
+          style={{ ['--ac' as string]: adhColor }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <p className="type-caption" style={{ color: 'var(--text-secondary)' }}>
-              Adherencia del club ⓘ
+          <div className="cs-adh-top">
+            <p className="cs-adh-label">
+              Adherencia del club <Icon name="info" size={11} className="ic" />
             </p>
-            <p style={{
-              fontSize: 18, fontWeight: 900,
-              color: stats.adherenciaPct >= 85 ? '#22C55E' : stats.adherenciaPct >= 70 ? '#F59E0B' : '#EF4444',
-            }}>{stats.adherenciaPct}%</p>
+            <p className="cs-adh-pct">{stats.adherenciaPct}%</p>
           </div>
-          <div style={{ height: 6, background: 'var(--bg)', borderRadius: 3, marginTop: 8, overflow: 'hidden' }}>
-            <div style={{
-              height: '100%', width: `${stats.adherenciaPct}%`,
-              background: stats.adherenciaPct >= 85 ? '#22C55E' : stats.adherenciaPct >= 70 ? '#F59E0B' : '#EF4444',
-              transition: 'width .6s ease',
-            }} />
+          <div className="cs-adh-track">
+            <div className="cs-adh-fill" style={{ width: `${stats.adherenciaPct}%` }} />
           </div>
         </button>
+      </div>
 
-        {/* DESVÍOS DEL MACROCICLO · primer atleta del top como muestra */}
-        {stats.topPerformers.length > 0 && (
-          <>
-            <p className="type-caption" style={{ color: 'var(--text-secondary)', marginBottom: 10 }}>
-              Desvíos del macrociclo · {stats.topPerformers[0].name.split(' ')[0]}
-            </p>
-            <DeviationsCard
-              macroId={stats.topPerformers[0].macrocycle.program_id}
-              athleteId={stats.topPerformers[0].id}
-              weeks={4}
-            />
-          </>
-        )}
+      {/* DESVÍOS DEL MACROCICLO · primer atleta del top como muestra.
+          DeviationsCard es componente COMPARTIDO → se deja intacto. */}
+      {stats.topPerformers.length > 0 && (
+        <div className="cs-section">
+          <p className="cs-dev-label">
+            <Icon name="layers" size={12} />
+            Desvíos del macrociclo · {stats.topPerformers[0].name.split(' ')[0]}
+          </p>
+          <DeviationsCard
+            macroId={stats.topPerformers[0].macrocycle.program_id}
+            athleteId={stats.topPerformers[0].id}
+            weeks={4}
+          />
+        </div>
+      )}
 
-        {/* TOP PERFORMERS */}
-        <p className="type-caption" style={{ color: 'var(--text-secondary)', marginBottom: 10 }}>
-          Top performers por OLY Index
-        </p>
-        <div className="stagger" style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 18 }}>
+      {/* TOP PERFORMERS */}
+      <div className="cs-section">
+        <div className="cs-section-head">
+          <h3>Top performers</h3>
+          <span className="meta">OLY INDEX</span>
+        </div>
+        <div className="cs-perf-list stagger">
           {stats.topPerformers.map((a, i) => (
             <button
               key={a.id}
               onClick={() => { selectAthlete(a.id); navigate('ATHLETE_DETAIL'); }}
-              className="btn-press"
-              style={{
-                width: '100%', padding: '12px 14px', borderRadius: 12,
-                background: 'var(--surface)', border: '1px solid var(--card-border)',
-                display: 'flex', alignItems: 'center', gap: 12,
-                cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
-              }}
+              className="cs-perf btn-press"
+              data-rank={i}
             >
-              <div style={{
-                width: 30, height: 30, borderRadius: 10,
-                background: i === 0 ? '#F59E0B' : i === 1 ? '#94A3B8' : '#92400E',
-                color: '#07070F', fontWeight: 900, fontSize: 12,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>{i + 1}</div>
-              <div style={{ flex: 1 }}>
-                <p className="type-body-strong" style={{ color: 'var(--text)' }}>{a.name}</p>
-                <p className="type-caption" style={{ color: 'var(--text-secondary)' }}>{a.weight_class}</p>
+              <div className="cs-perf-rank">{i + 1}</div>
+              <div className="cs-perf-id">
+                <p className="cs-perf-name">{a.name}</p>
+                <p className="cs-perf-class">{a.weight_class}</p>
               </div>
-              <div style={{ textAlign: 'right' }}>
-                <p className="type-mono" style={{ fontSize: 16, fontWeight: 900, color: '#F59E0B' }}>
-                  {a.score.toFixed(1)}
-                </p>
-                <p style={{ fontSize: 9, color: 'var(--text-secondary)' }}>OLY</p>
+              <PlateBadge tier={scoreToTier(a.score)} size={34} />
+              <div className="cs-perf-score">
+                <p className="v">{a.score.toFixed(1)}</p>
+                <p className="k">OLY</p>
               </div>
             </button>
           ))}
         </div>
+      </div>
 
-        {/* ATENCIÓN */}
-        {stats.needsAttention > 0 && (
-          <div style={{
-            background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)',
-            borderRadius: 14, padding: '12px 14px', marginBottom: 18,
-          }}>
-            <p style={{ fontSize: 12, fontWeight: 800, color: '#f87171' }}>
-              ⚠ {stats.needsAttention} atleta{stats.needsAttention === 1 ? '' : 's'} con lesión activa
+      {/* ATENCIÓN */}
+      {stats.needsAttention > 0 && (
+        <div className="cs-attention">
+          <Icon name="warn" size={16} stroke={2} className="ic" />
+          <div>
+            <p className="cs-attention-title">
+              {stats.needsAttention} atleta{stats.needsAttention === 1 ? '' : 's'} con lesión activa
             </p>
-            <p style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 4 }}>
+            <p className="cs-attention-meta">
               Revisar desde el roster para ajustar carga o suspender ejercicios.
             </p>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* CTA → contenido viral */}
+      {/* CTAs */}
+      <div className="cs-ctas">
+        {/* → contenido viral */}
         <button
           onClick={() => navigate('COACH_VIRAL_TOOLS')}
-          className="btn-press"
-          style={{
-            width: '100%', padding: '14px 0', borderRadius: 14,
-            background: 'linear-gradient(135deg, rgba(245,197,24,0.18), rgba(245,197,24,0.06))',
-            border: '1px solid rgba(245,197,24,0.35)',
-            color: '#F5C518',
-            fontSize: 13, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase',
-            cursor: 'pointer', fontFamily: 'inherit',
-            marginBottom: 10,
-          }}
-        >📢 Generar contenido viral</button>
+          className="cs-cta cs-cta-viral btn-press"
+        >
+          <Icon name="share" size={15} stroke={2} className="ic" />
+          Generar contenido viral
+        </button>
 
-        {/* CTA → ir al roster */}
+        {/* → ir al roster */}
         <button
           onClick={() => navigate('COACH_DASH')}
-          className="btn-press"
-          style={{
-            width: '100%', padding: '14px 0', borderRadius: 14,
-            background: 'var(--cta-bg)', color: 'var(--cta-text)',
-            border: 'none', fontSize: 13, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase',
-            cursor: 'pointer', fontFamily: 'inherit',
-            boxShadow: 'var(--cta-shadow)',
-          }}
-        >Ver roster completo →</button>
+          className="cs-cta cs-cta-roster btn-press"
+        >
+          Ver roster completo
+          <Icon name="arrowR" size={15} stroke={2.2} className="ic" />
+        </button>
       </div>
 
-      {/* BottomSheet info */}
+      {/* BottomSheet info · componente COMPARTIDO → shell intacto, sólo
+          se reestiliza el contenido propio. */}
       <BottomSheet
         open={activeInfo !== null}
         onClose={() => setActiveInfo(null)}
         title={activeInfo?.title}
       >
         {activeInfo && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14, color: 'var(--text)' }}>
-            <div>
-              <p className="type-caption" style={{ color: 'var(--primary)' }}>¿Qué es?</p>
-              <p className="type-body" style={{ marginTop: 4 }}>{activeInfo.what}</p>
+          <div className="cs-sheet">
+            <div className="cs-sheet-block">
+              <p className="lbl"><span className="pip" />¿Qué es?</p>
+              <p>{activeInfo.what}</p>
             </div>
-            <div>
-              <p className="type-caption" style={{ color: 'var(--primary)' }}>¿Cómo se calcula?</p>
-              <p className="type-body" style={{ marginTop: 4 }}>{activeInfo.how}</p>
+            <div className="cs-sheet-block">
+              <p className="lbl"><span className="pip" />¿Cómo se calcula?</p>
+              <p>{activeInfo.how}</p>
             </div>
           </div>
         )}
