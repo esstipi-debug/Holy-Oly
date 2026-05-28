@@ -1,0 +1,300 @@
+/* ============================================================
+   PEAK QUAL · HORMONAL SETUP (Ciclo menstrual) · estilos V2
+   ------------------------------------------------------------
+   Engine 13 · setup + management de tracking hormonal. Dos vistas:
+   CONFIGURADO (fase actual + recomendaciones + reconfigurar/desactivar)
+   y FORMULARIO (opt-in disclaimer + fecha + largo de ciclo + CTA).
+   Se monta dentro de PhoneLayout (chrome + bottom nav) → no dibuja
+   chrome propio. Acento rosa (--engine-hormonal, identidad ciclo).
+
+   SCOPING · todo vive bajo `.horm-root`. Hereda tokens.css.
+   Colores por fase (menstruación/folicular/ovulación/lútea) vienen
+   de PHASE_COLORS y se inyectan por elemento via `--c` inline.
+   ============================================================ */
+
+.horm-root,
+.horm-root *,
+.horm-root *::before,
+.horm-root *::after { box-sizing: border-box; }
+
+.horm-root {
+  font-family: var(--font-body);
+  background: var(--bg);
+  height: 100%;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  --horm-accent: var(--engine-hormonal);
+}
+.horm-root h1,
+.horm-root h2,
+.horm-root p,
+.horm-root label,
+.horm-root button { margin: 0; }
+.horm-root button { padding: 0; }
+
+.horm-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-3) transparent;
+}
+.horm-scroll::-webkit-scrollbar { width: 4px; }
+.horm-scroll::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 2px; }
+
+/* ---------- Loading ---------- */
+.horm-loading {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+}
+
+/* ---------- Header ---------- */
+.horm-head { display: flex; align-items: center; gap: 12px; }
+.horm-back {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-sm);
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  color: var(--text-mid);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 180ms, border-color 180ms;
+}
+.horm-back:hover { color: var(--text-hi); border-color: var(--horm-accent); }
+.horm-head-text { display: flex; flex-direction: column; gap: 2px; }
+.horm-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--horm-accent);
+}
+.horm-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+  color: var(--text-hi);
+}
+
+/* ---------- Phase hero (vista configurado) ---------- */
+.horm-phase-hero {
+  text-align: center;
+  border-radius: var(--r-lg);
+  padding: 20px 18px;
+  background: linear-gradient(135deg, color-mix(in oklab, var(--c) 16%, transparent), transparent);
+  border: 1px solid color-mix(in oklab, var(--c) 40%, transparent);
+  box-shadow: 0 0 28px -8px color-mix(in oklab, var(--c) 45%, transparent);
+}
+.horm-phase-emoji { font-size: 46px; line-height: 1; margin-bottom: 8px; }
+.horm-phase-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--c);
+}
+.horm-phase-name {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-hi);
+  margin: 4px 0;
+}
+.horm-phase-meta { font-size: 11px; color: var(--text-mid); }
+.horm-phase-meta strong { color: var(--c); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* ---------- Section card ---------- */
+.horm-section {
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-lg);
+  padding: 14px;
+  box-shadow: var(--shadow-card);
+}
+.horm-sec-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+}
+
+/* ---------- Recommendation rows ---------- */
+.horm-rec-list { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+.horm-row { display: flex; justify-content: space-between; align-items: baseline; }
+.horm-row-label { font-size: 12px; color: var(--text-mid); }
+.horm-row-value {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--c, var(--text-hi));
+  text-transform: capitalize;
+  font-variant-numeric: tabular-nums;
+}
+.horm-rec-note {
+  font-size: 11px;
+  color: var(--text-mid);
+  margin-top: 12px;
+  line-height: 1.5;
+  font-style: italic;
+}
+.horm-rec-rest {
+  font-size: 10px;
+  color: var(--text-lo);
+  margin-top: 8px;
+  line-height: 1.4;
+}
+
+/* ---------- Action buttons (reconfigurar / desactivar) ---------- */
+.horm-actions { display: flex; gap: 8px; }
+.horm-btn-ghost {
+  flex: 1;
+  padding: 13px 0;
+  border-radius: var(--r-md);
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 180ms, color 180ms;
+}
+.horm-btn-ghost:hover { color: var(--text-hi); border-color: var(--horm-accent); }
+.horm-btn-danger {
+  flex: 1;
+  padding: 13px 0;
+  border-radius: var(--r-md);
+  background: rgba(239,68,68,0.10);
+  border: 1px solid rgba(239,68,68,0.30);
+  color: var(--engine-pulse);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 180ms;
+}
+.horm-btn-danger:hover:not(:disabled) { background: rgba(239,68,68,0.18); }
+.horm-btn-danger:disabled { cursor: wait; opacity: 0.6; }
+
+/* ---------- Disclaimer card (opt-in) ---------- */
+.horm-disclaimer {
+  border-radius: var(--r-lg);
+  padding: 14px 16px;
+  background: color-mix(in oklab, var(--horm-accent) 9%, transparent);
+  border: 1px solid color-mix(in oklab, var(--horm-accent) 28%, transparent);
+}
+.horm-disclaimer-lead {
+  font-size: 12px;
+  color: var(--text);
+  line-height: 1.5;
+}
+.horm-disclaimer-lead strong { color: var(--horm-accent); font-weight: 700; }
+.horm-disclaimer-priv {
+  font-size: 10px;
+  color: var(--text-mid);
+  margin-top: 8px;
+  line-height: 1.5;
+}
+.horm-disclaimer-priv strong { color: var(--text-hi); font-weight: 700; }
+
+/* ---------- Form fields ---------- */
+.horm-field { display: flex; flex-direction: column; gap: 6px; }
+.horm-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+}
+.horm-input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  color: var(--text-hi);
+  font-size: 14px;
+  font-family: var(--font-body);
+  transition: border-color 180ms;
+}
+.horm-input:focus {
+  outline: none;
+  border-color: color-mix(in oklab, var(--horm-accent) 55%, transparent);
+}
+.horm-hint { font-size: 10px; color: var(--text-lo); line-height: 1.4; }
+
+/* ---------- Range (cycle length) ---------- */
+.horm-range-row { display: flex; align-items: center; gap: 12px; }
+.horm-range {
+  flex: 1;
+  accent-color: var(--horm-accent);
+  cursor: pointer;
+}
+.horm-range-val {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-hi);
+  min-width: 50px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Error ---------- */
+.horm-error {
+  color: var(--engine-pulse);
+  font-size: 12px;
+  text-align: center;
+}
+
+/* ---------- Save CTA ---------- */
+.horm-save {
+  width: 100%;
+  padding: 14px 0;
+  border-radius: var(--r-md);
+  background: linear-gradient(135deg, var(--horm-accent), color-mix(in oklab, var(--horm-accent) 65%, #fff));
+  color: #1A0512;
+  border: none;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: var(--glow-pink);
+  transition: opacity 180ms;
+}
+.horm-save:disabled { cursor: wait; opacity: 0.55; box-shadow: none; }
+.horm-save[data-saving="true"] {
+  background: var(--surface-2);
+  color: var(--text-mid);
+  box-shadow: none;
+}
