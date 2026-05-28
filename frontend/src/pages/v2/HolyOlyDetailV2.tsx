@@ -9,110 +9,17 @@
  *  - scope CSS bajo .hd-root
  *  - mock MACRO (Ruso Clásico 16s) por ahora · backend pendiente
  */
-import { useState, type CSSProperties, type ReactElement } from 'react';
+import { useMemo, useState, type CSSProperties, type ReactElement } from 'react';
 import { useNav } from '../../context/NavigationContext';
 import { api } from '../../lib/api';
+import {
+  getMacroDetail,
+  type MacroData, type WeeklyEntry, type Mesocycle, type Day, type WeekTypical, type PhiloCard, type MacroFooter,
+} from '../../data/macroDetail';
 import '../../styles/v2/holy-oly-detail.css';
 
-// ============================================================
-// Types
-// ============================================================
-interface WeeklyEntry { w: number; imr: number; reps: number; meso: number; focus: string; current?: boolean }
-interface Mesocycle { idx: number; name: string; weeks: [number, number]; imrRange: string; focus: string; desc: string; color: string }
-interface Slot { slot: string; ex: string; pct: number; kg: number; base: string; plates: string }
-interface Day { d: string; type: 'vol'|'med'|'int'|'act'|'tec'|'rec'; name: string; dur: number; tonelaje: number; slots: Slot[]; rpe: string }
-interface WeekTypical { label: string; days: Day[] }
-interface UserState { isActive: boolean; currentWeek: number; pctComplete: number; role: 'athlete'|'coach'; has1RM: boolean }
-interface MacroData {
-  id: string; name: string; family: string; schoolColor: string;
-  duration: number; frequency: number;
-  intensity: number; volume: number; recovery: number; difficulty: number;
-  subtitle: string;
-  weekly: WeeklyEntry[];
-  mesocycles: Mesocycle[];
-  weekTypical: WeekTypical;
-  user: UserState;
-}
-
-// ============================================================
-// Mock data · Ruso Clásico 16s
-// API: GET /v1/macrocycles/ruso-clasico-16 + sessions
-// ============================================================
-const MACRO: MacroData = {
-  id: 'ruso-clasico-16',
-  name: 'RUSO CLÁSICO',
-  family: 'RUSO',
-  schoolColor: '#DC2626',
-  duration: 16,
-  frequency: 5,
-  intensity: 4,
-  volume: 5,
-  recovery: 2,
-  difficulty: 4,
-  subtitle: '16 semanas · 5 días/semana · Escuela soviética',
-  weekly: [
-    { w:1,  imr:65, reps:320, meso:1, focus:'Introducción · técnica' },
-    { w:2,  imr:68, reps:380, meso:1, focus:'Acumulación' },
-    { w:3,  imr:70, reps:420, meso:1, focus:'Choque · pico Mes 1' },
-    { w:4,  imr:60, reps:180, meso:1, focus:'Descarga' },
-    { w:5,  imr:72, reps:430, meso:2, focus:'Fuerza máx' },
-    { w:6,  imr:75, reps:460, meso:2, focus:'Acumulación 2' },
-    { w:7,  imr:78, reps:490, meso:2, focus:'Choque Mes 2', current: true },
-    { w:8,  imr:65, reps:200, meso:2, focus:'Descarga' },
-    { w:9,  imr:82, reps:440, meso:3, focus:'SPP · especificidad' },
-    { w:10, imr:85, reps:420, meso:3, focus:'Intensificación' },
-    { w:11, imr:88, reps:380, meso:3, focus:'Pico Mes 3' },
-    { w:12, imr:70, reps:160, meso:3, focus:'Descarga' },
-    { w:13, imr:90, reps:280, meso:4, focus:'Peaking · singles' },
-    { w:14, imr:92, reps:240, meso:4, focus:'Peaking 2' },
-    { w:15, imr:85, reps:160, meso:4, focus:'Taper' },
-    { w:16, imr:100, reps:120, meso:4, focus:'Test PR · 100%+' },
-  ],
-  mesocycles: [
-    { idx:1, name:'PREPARACIÓN GENERAL', weeks:[1,4], imrRange:'65-70%', focus:'Acondicionamiento + técnica',
-      desc:'Foco en variantes Muscle/Hang/Power + squat. Sienta la base aeróbica y técnica del macrociclo completo.',
-      color:'meso-1' },
-    { idx:2, name:'FUERZA / ACUMULACIÓN', weeks:[5,8], imrRange:'72-78%', focus:'Fuerza máxima + acumulación',
-      desc:'Acumula fuerza máxima en sentadillas y tirones para transferir a clásicos en Mes 3. Trabajo cuasi-isométrico en pulls.',
-      color:'meso-2' },
-    { idx:3, name:'SPP / INTENSIFICACIÓN', weeks:[9,12], imrRange:'82-88%', focus:'Especificidad clásicos',
-      desc:'Transferencia de la fuerza acumulada a Snatch y C&J completos. Singles y doubles en zona competitiva.',
-      color:'meso-3' },
-    { idx:4, name:'PEAKING / TEST', weeks:[13,16], imrRange:'85-100%+', focus:'Picos + test PR',
-      desc:'Taper progresivo · sesiones cortas de alta intensidad · test de PRs olímpicos en última semana.',
-      color:'meso-4' },
-  ],
-  weekTypical: {
-    label: 'Semana 7 · Choque Mes 2',
-    days: [
-      { d:'LUN', type:'vol', name:'VOL · Volumen', dur:95, tonelaje:4250,
-        slots:[
-          { slot:'ARRANQUE', ex:'Muscle Snatch · 4×4', pct:50, kg:46,  base:'1RM Sn 92kg',  plates:'1🟢 1🟡 1🔵 (×2)' },
-          { slot:'ENVIÓN',   ex:'Muscle Clean · 4×4',  pct:50, kg:57,  base:'1RM C&J 115kg', plates:'2🟢 1🟡 1🔵 (×2)' },
-          { slot:'FUERZA',   ex:'Back Squat · 5×6',    pct:65, kg:120, base:'1RM BS 185kg', plates:'2🔴 1🟡 (×2)' },
-        ], rpe:'6-7' },
-      { d:'MAR', type:'tec', name:'TEC · Técnica',   dur:75, tonelaje:2100,
-        slots:[
-          { slot:'TÉCNICA', ex:'Snatch tirón hasta rodilla · 5×3', pct:55, kg:50, base:'1RM Sn 92kg', plates:'1🟡 1🟢 (×2)' },
-        ], rpe:'5-6' },
-      { d:'MIÉ', type:'int', name:'INT · Intensidad', dur:90, tonelaje:3800,
-        slots:[
-          { slot:'ARRANQUE', ex:'Snatch · 5×2',        pct:82, kg:75, base:'1RM Sn 92kg',  plates:'1🔴 1🔵 1🟢 (×2)' },
-          { slot:'ENVIÓN',   ex:'Clean & Jerk · 5×1',  pct:85, kg:97, base:'1RM C&J 115kg', plates:'1🔴 1🔵 1🟡 (×2)' },
-        ], rpe:'8-9' },
-      { d:'JUE', type:'med', name:'MED · Mediano',   dur:80, tonelaje:3100,
-        slots:[
-          { slot:'ARRANQUE', ex:'Hang Snatch · 4×3',  pct:68, kg:62,  base:'1RM Sn 92kg',  plates:'1🔴 1🟢 (×2)' },
-          { slot:'FRONT SQ', ex:'Front Squat · 4×4',  pct:75, kg:115, base:'1RM FS 155kg', plates:'2🔴 (×2)' },
-        ], rpe:'7' },
-      { d:'VIE', type:'act', name:'ACT · Activación', dur:60, tonelaje:1450,
-        slots:[
-          { slot:'CLÁSICOS', ex:'C&J Power · 3×2', pct:60, kg:69, base:'1RM C&J 115kg', plates:'1🟡 1🟢 (×2)' },
-        ], rpe:'5' },
-    ],
-  },
-  user: { isActive: true, currentWeek: 7, pctComplete: 44, role: 'athlete', has1RM: true },
-};
+// Tipos (WeeklyEntry, Mesocycle, Day, WeekTypical, MacroData, etc.) + el detalle
+// rico por macro viven en ../../data/macroDetail. Acá solo se consumen.
 
 const DAY_TYPES = [
   { t:'vol', lbl:'VOL', full:'Volumen sub-máx · RPE 6-7' },
@@ -182,20 +89,12 @@ function Hero({ m, onBack }: { m: MacroData; onBack: () => void }) {
 // ============================================================
 // Philosophy
 // ============================================================
-function Philosophy() {
-  const cards = [
-    { name: 'Waviness · Ondulación', icon: 'wave' as const,
-      desc: <>Las cargas <strong>suben y bajan</strong> dentro de la misma semana. Día pesado · ligero · mediano. Permite estímulo sin acumular fatiga lineal.</> },
-    { name: 'GPP Extensa', icon: 'pyramid' as const,
-      desc: <><strong>Preparación general amplia</strong> antes de especificidad. Variantes no-clásicas (Hang, Muscle, Power) para base técnica.</> },
-    { name: 'Estructura 3:1', icon: 'pulse' as const,
-      desc: <>Tres semanas de <strong>carga progresiva</strong> + una de descarga. Probado en programas soviéticos desde los 70s.</> },
-  ];
+function Philosophy({ title, cards }: { title: string; cards: PhiloCard[] }) {
   return (
     <>
       <div className="hd-section-head">
-        <h3>¿Qué hace único al método ruso?</h3>
-        <span className="meta">3 principios · scroll →</span>
+        <h3>{title}</h3>
+        <span className="meta">{cards.length} principios · scroll →</span>
       </div>
       <div className="hd-philo">
         {cards.map((c, i) => (
@@ -247,7 +146,7 @@ function Chart({ weekly, currentWeek }: { weekly: WeeklyEntry[]; currentWeek: nu
   return (
     <div className="hd-chart-wrap">
       <div className="hd-section-head" style={{ marginBottom: 4 }}>
-        <h3>Intensidad &amp; Volumen · 16 semanas</h3>
+        <h3>Intensidad &amp; Volumen · {weekly.length} semanas</h3>
         <span className="meta">curva IMR · reps</span>
       </div>
       <svg className="hd-chart" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none"
@@ -462,7 +361,7 @@ function DayTypes() {
 // ============================================================
 // Footer Context
 // ============================================================
-function FooterContext() {
+function FooterContext({ footer }: { footer: MacroFooter }) {
   return (
     <>
       <div className="hd-section-head">
@@ -476,22 +375,20 @@ function FooterContext() {
             {['LR','JO','PT','CF','EG','TD','SL','JS'].map(a => <div key={a} className="av">{a}</div>)}
             <div className="more">+47</div>
           </div>
-          <div className="desc"><strong>Promedio · +6.2 kg Snatch</strong> tras 16 semanas (n=55).</div>
+          <div className="desc"><strong>Promedio · +6.2 kg Snatch</strong> tras el ciclo (n=55).</div>
           <button className="hd-fc-link">Ver testimonios →</button>
         </div>
         <div className="hd-fc">
           <div className="name">Origen histórico</div>
-          <div className="desc">
-            Codificado por <strong>Alexei Medvedev</strong> y refinado por la escuela soviética.
-            Base de prácticamente todos los sistemas modernos de halterofilia.
-          </div>
+          <div className="desc">{footer.origin}</div>
           <button className="hd-fc-link">Leer paper completo →</button>
         </div>
         <div className="hd-fc">
           <div className="name">Macrociclos similares</div>
           <div className="hd-fc-similar">
-            <div className="hd-fc-similar-chip"><strong>Coreano 5D</strong><span>12 sem · 5d</span></div>
-            <div className="hd-fc-similar-chip"><strong>Polaco Michalak</strong><span>12 sem · 5d</span></div>
+            {footer.similar.map((s, i) => (
+              <div key={i} className="hd-fc-similar-chip"><strong>{s.name}</strong><span>{s.meta}</span></div>
+            ))}
           </div>
         </div>
       </div>
@@ -611,15 +508,17 @@ function WeekPickerModal({
 // ============================================================
 export default function HolyOlyDetailV2() {
   const { back, navigate } = useNav();
-  const m = MACRO;
+  // Resuelve el macro elegido en el catálogo/asignación (sessionStorage) y genera
+  // su detalle rico (curva IMR, mesos, semana tipo, filosofía por escuela).
+  const m = useMemo(
+    () => getMacroDetail(typeof window !== 'undefined' ? sessionStorage.getItem('ho:selectedMacroId') : null),
+    [],
+  );
   const [openMeso, setOpenMeso] = useState<number | null>(2);
   const [drawerWeek, setDrawerWeek] = useState<number | null>(null);
   // DEMO toggle · permite ver la pantalla como coach (sino UI muestra CTA atleta)
   const [viewAsCoach, setViewAsCoach] = useState<boolean>(m.user.role === 'coach');
   const [wpOpen, setWpOpen] = useState<boolean>(false);
-
-  // ID que vino del catálogo (todavía no se usa · mock siempre Ruso)
-  // const macroId = typeof window !== 'undefined' ? sessionStorage.getItem('ho:selectedMacroId') : null;
 
   const goBackToCatalog = () => {
     try {
@@ -667,7 +566,7 @@ export default function HolyOlyDetailV2() {
       <div className="hd-scroll">
         <Hero m={m} onBack={goBackToCatalog}/>
         <div className="hd-body">
-          <Philosophy/>
+          <Philosophy title={m.philoTitle} cards={m.philosophy}/>
           <Chart weekly={m.weekly} currentWeek={m.user.isActive ? m.user.currentWeek : null}/>
           <Mesos
             mesos={m.mesocycles}
@@ -676,7 +575,7 @@ export default function HolyOlyDetailV2() {
             setOpen={setOpenMeso}
             openWeek={(w) => setDrawerWeek(w)}/>
           <DayTypes/>
-          <FooterContext/>
+          <FooterContext footer={m.footer}/>
         </div>
       </div>
 
