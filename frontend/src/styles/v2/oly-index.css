@@ -1,0 +1,415 @@
+/* ============================================================
+   PEAK QUAL · OLY INDEX (score + leaderboard) · estilos V2
+   ------------------------------------------------------------
+   Pantalla atleta · OLY Index global, desglose de rendimiento
+   y leaderboard del club. Se monta dentro de PhoneLayout
+   (chrome + bottom nav) → no dibuja chrome propio. Acento verde
+   (--engine-oly, identidad del score OLY). Los BottomSheet de
+   detalle (métrica / atleta) usan el componente compartido y se
+   restilizan con clases scopeadas.
+
+   SCOPING · todo vive bajo `.oly-root`. Hereda tokens.css.
+   Colores dinámicos por elemento via `--c` inline.
+   ============================================================ */
+
+.oly-root,
+.oly-root *,
+.oly-root *::before,
+.oly-root *::after { box-sizing: border-box; }
+
+.oly-root {
+  font-family: var(--font-body);
+  background: var(--bg);
+  height: 100%;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  --oly-accent: var(--engine-oly);
+}
+.oly-root h1,
+.oly-root p,
+.oly-root button { margin: 0; }
+.oly-root button { padding: 0; }
+
+.oly-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-3) transparent;
+}
+.oly-scroll::-webkit-scrollbar { width: 4px; }
+.oly-scroll::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 2px; }
+
+/* ---------- Header ---------- */
+.oly-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.oly-head-text { display: flex; flex-direction: column; gap: 2px; }
+.oly-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--oly-accent);
+}
+.oly-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  color: var(--text-hi);
+}
+.oly-info-btn {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border-radius: var(--r-full);
+  background: color-mix(in oklab, var(--oly-accent) 12%, transparent);
+  border: 1px solid color-mix(in oklab, var(--oly-accent) 35%, transparent);
+  color: var(--oly-accent);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 180ms;
+}
+.oly-info-btn:hover { background: color-mix(in oklab, var(--oly-accent) 20%, transparent); }
+
+/* ---------- Hero · score global (clickable) ---------- */
+.oly-hero {
+  width: 100%;
+  text-align: center;
+  background: linear-gradient(135deg, color-mix(in oklab, var(--oly-accent) 12%, transparent), transparent);
+  border: 1px solid color-mix(in oklab, var(--oly-accent) 30%, transparent);
+  border-radius: var(--r-lg);
+  padding: 22px 18px;
+  cursor: pointer;
+  box-shadow: 0 0 28px -8px color-mix(in oklab, var(--oly-accent) 40%, transparent);
+  transition: border-color 180ms, transform 150ms;
+}
+.oly-hero:hover { transform: translateY(-1px); border-color: color-mix(in oklab, var(--oly-accent) 55%, transparent); }
+.oly-hero-label {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--oly-accent);
+}
+.oly-hero-score {
+  font-family: var(--font-display);
+  font-size: 64px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--oly-accent);
+  font-variant-numeric: tabular-nums;
+  margin-top: 8px;
+}
+.oly-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  padding: 5px 14px;
+  border-radius: var(--r-full);
+  background: color-mix(in oklab, var(--oly-accent) 14%, transparent);
+  border: 1px solid color-mix(in oklab, var(--oly-accent) 40%, transparent);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--oly-accent);
+}
+.oly-hero-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid color-mix(in oklab, var(--oly-accent) 14%, transparent);
+}
+.oly-hero-stat-label {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+}
+.oly-hero-stat-value {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-hi);
+  font-variant-numeric: tabular-nums;
+  margin-top: 4px;
+}
+
+/* ---------- Section block ---------- */
+.oly-section { display: flex; flex-direction: column; gap: 12px; }
+.oly-sec-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  padding: 0 2px;
+}
+.oly-sec-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+}
+.oly-sec-meta {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-lo);
+  white-space: nowrap;
+}
+
+/* ---------- Breakdown rows (clickable) ---------- */
+.oly-metric {
+  width: 100%;
+  text-align: left;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+  transition: border-color 180ms, transform 150ms;
+}
+.oly-metric:hover { transform: translateY(-1px); border-color: color-mix(in oklab, var(--oly-accent) 45%, transparent); }
+.oly-metric-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.oly-metric-label { font-size: 12px; font-weight: 700; color: var(--text); }
+.oly-metric-right { display: flex; align-items: center; gap: 6px; }
+.oly-metric-score {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--oly-accent);
+  font-variant-numeric: tabular-nums;
+}
+.oly-metric-info { font-size: 9px; color: var(--text-lo); }
+.oly-bar { height: 6px; border-radius: 3px; background: var(--surface-3); overflow: hidden; }
+.oly-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--oly-accent);
+  transition: width 0.7s ease;
+}
+
+/* ---------- Leaderboard rows (clickable) ---------- */
+.oly-lb-list { display: flex; flex-direction: column; gap: 8px; }
+.oly-lb-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  padding: 10px 12px;
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+  transition: border-color 180ms, background 180ms, transform 150ms;
+}
+.oly-lb-row:hover { transform: translateY(-1px); }
+.oly-lb-row[data-me="true"] {
+  background: color-mix(in oklab, var(--oly-accent) 7%, var(--surface-1));
+  border-color: color-mix(in oklab, var(--oly-accent) 40%, transparent);
+}
+.oly-lb-rank {
+  flex-shrink: 0;
+  width: 30px; height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-sm);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  background: var(--surface-2);
+  border: 1px solid var(--border-soft);
+  color: var(--text-mid);
+}
+.oly-lb-rank[data-top="true"] {
+  background: color-mix(in oklab, var(--oly-accent) 18%, transparent);
+  border-color: color-mix(in oklab, var(--oly-accent) 45%, transparent);
+  color: var(--oly-accent);
+}
+.oly-lb-avatar {
+  flex-shrink: 0;
+  width: 38px; height: 38px;
+  border-radius: var(--r-full);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--c, var(--text-hi));
+  background: color-mix(in oklab, var(--c, var(--oly-accent)) 18%, transparent);
+  border: 1px solid color-mix(in oklab, var(--c, var(--oly-accent)) 45%, transparent);
+}
+.oly-lb-main { flex: 1; min-width: 0; }
+.oly-lb-name {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-hi);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.oly-lb-row[data-me="true"] .oly-lb-name { color: var(--oly-accent); }
+.oly-lb-level {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  margin-top: 2px;
+}
+.oly-lb-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.oly-lb-score {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-hi);
+  font-variant-numeric: tabular-nums;
+}
+.oly-lb-caret { font-size: 12px; color: var(--text-lo); }
+
+/* ============================================================
+   BottomSheet content (componente compartido provee el marco)
+   ============================================================ */
+.oly-sheet { display: flex; flex-direction: column; gap: 14px; color: var(--text); }
+.oly-sheet-block {}
+.oly-sheet-key {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--oly-accent);
+}
+.oly-sheet-key.muted { color: var(--text-mid); }
+.oly-sheet-text { font-size: 12px; line-height: 1.5; color: var(--text); margin-top: 4px; }
+.oly-sheet-callout {
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  padding: 10px 14px;
+}
+
+/* ---------- Athlete detail sheet ---------- */
+.oly-detail { color: var(--text); }
+.oly-detail-hero {
+  background: linear-gradient(135deg, color-mix(in oklab, var(--oly-accent) 12%, transparent), transparent);
+  border: 1px solid color-mix(in oklab, var(--oly-accent) 30%, transparent);
+  border-radius: var(--r-lg);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+.oly-detail-hero-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+}
+.oly-detail-hero-score {
+  font-family: var(--font-display);
+  font-size: 34px;
+  font-weight: 700;
+  color: var(--oly-accent);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  margin-top: 4px;
+}
+.oly-detail-hero-level {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text-mid);
+  margin-top: 6px;
+}
+.oly-detail-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  margin-bottom: 8px;
+}
+.oly-maxes { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.oly-max-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  padding: 10px 14px;
+}
+.oly-max-name { font-size: 12px; font-weight: 700; color: var(--text); }
+.oly-max-val {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--oly-accent);
+  font-variant-numeric: tabular-nums;
+}
+.oly-stats-grid {
+  display: flex;
+  justify-content: space-around;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+}
+.oly-stat { text-align: center; }
+.oly-stat-label {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+}
+.oly-stat-value {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--c, var(--text-hi));
+  font-variant-numeric: tabular-nums;
+  margin-top: 4px;
+}

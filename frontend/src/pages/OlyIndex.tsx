@@ -1,8 +1,20 @@
 import React, { useState } from 'react';
-import Card from '../components/Card';
-import Badge from '../components/Badge';
 import BottomSheet from '../components/BottomSheet';
 import { useAthlete } from '../context/AthleteContext';
+import '../styles/v2/oly-index.css';
+
+/**
+ * OlyIndex · score global del atleta + desglose de rendimiento + leaderboard.
+ * Estilo V2 dark "Macrociclos" · scoped bajo `.oly-root` · acento verde
+ * (--engine-oly, identidad del score OLY). Se monta dentro de PhoneLayout.
+ * Lógica intacta: todo el cálculo (olyScore, ranking, breakdown, consistencia)
+ * se preserva; solo cambia la presentación. Los BottomSheet de detalle usan
+ * el componente compartido y se restilizan con clases scopeadas.
+ *
+ *  1. Hero · score global (tap = ¿cómo se calcula?)
+ *  2. Análisis de rendimiento · 3 métricas (tap = info)
+ *  3. Leaderboard del club · cards (tap = detalle del atleta)
+ */
 
 const olyScore = (a: { maxes: { snatch: number; body_weight: number } }) =>
   a.maxes.body_weight > 0 ? +(a.maxes.snatch / a.maxes.body_weight * 2.5).toFixed(1) : 7.4;
@@ -10,7 +22,8 @@ const olyScore = (a: { maxes: { snatch: number; body_weight: number } }) =>
 const levelOf = (score: number) =>
   score >= 9 ? 'Elite' : score >= 7 ? 'Avanzado' : score >= 5 ? 'Intermedio' : 'Básico';
 
-const COLORS = ['bg-purple-600', 'bg-pink-600', 'bg-emerald-600', 'bg-amber-600', 'bg-cyan-600'];
+// Colores de avatar (hex · alineados a tokens V2, aplicados via `--c` inline)
+const COLORS = ['#A855F7', '#EC4899', '#22C55E', '#FFB300', '#56CCF2'];
 
 // ─── INFO de cada métrica ─────────────────────────────
 interface MetricInfo {
@@ -78,7 +91,7 @@ const OlyIndex: React.FC = () => {
         level: levelOf(myScore),
         score: myScore,
         initials: athlete.name.split(' ').slice(0, 2).map(n => n[0]).join(''),
-        color: 'bg-green-600',
+        color: '#22C55E',
         me: true,
       }];
 
@@ -97,119 +110,96 @@ const OlyIndex: React.FC = () => {
   ];
 
   return (
-    <div className="flex flex-col h-full bg-holy-bg overflow-hidden anim-fade-in">
-      <div className="px-6 py-6 flex-1 overflow-y-auto">
-        <header className="mb-8 flex items-center justify-between gap-3">
-          <h1 className="text-holy-text text-xl font-black">OLY Index</h1>
+    <div className="oly-root anim-fade-in">
+      <div className="oly-scroll">
+        {/* Header */}
+        <div className="oly-head">
+          <div className="oly-head-text">
+            <p className="oly-eyebrow">Tu rendimiento</p>
+            <h1 className="oly-title">OLY Index</h1>
+          </div>
           <button
+            className="oly-info-btn btn-press"
             onClick={() => setActiveInfo(METRIC_INFOS.global)}
-            className="btn-press"
-            style={{
-              padding: '4px 10px', borderRadius: 10,
-              background: 'rgba(245,158,11,0.10)', color: '#F59E0B',
-              border: '1px solid rgba(245,158,11,0.25)',
-              fontSize: 10, fontWeight: 800, cursor: 'pointer',
-              fontFamily: 'inherit',
-            }}
-          >ⓘ ¿Cómo se calcula?</button>
-        </header>
+          >
+            ⓘ ¿Cómo se calcula?
+          </button>
+        </div>
 
-        {/* Global Score Card · clickable */}
+        {/* Hero · score global · clickable */}
         <button
+          className="oly-hero btn-press"
           onClick={() => setActiveInfo(METRIC_INFOS.global)}
-          className="btn-press"
-          style={{ background: 'transparent', border: 'none', padding: 0, width: '100%', fontFamily: 'inherit', textAlign: 'inherit' }}
         >
-          <Card variant="solid" className="bg-gradient-to-br from-holy-gold/10 to-transparent border-holy-gold/30 text-center py-8 mb-8">
-            <p className="text-holy-text-secondary text-[10px] font-black uppercase tracking-[0.2em] mb-2">Tu Puntuación Global</p>
-            <div className="text-holy-gold text-6xl font-black italic tracking-tighter">{myScore}</div>
-            <Badge variant="gold" className="mt-4 px-4">TOP {pctTop}% DEL CLUB</Badge>
+          <p className="oly-hero-label">Tu puntuación global</p>
+          <div className="oly-hero-score">{myScore}</div>
+          <span className="oly-hero-badge">Top {pctTop}% del club</span>
 
-            <div className="grid grid-cols-2 gap-4 mt-8 pt-6 border-t border-holy-gold/10">
-              <div>
-                <p className="text-holy-text-secondary text-[9px] font-black uppercase">Ranking</p>
-                <p className="text-holy-text text-lg font-black">#{myRank} / {ranked.length}</p>
-              </div>
-              <div>
-                <p className="text-holy-text-secondary text-[9px] font-black uppercase">Nivel</p>
-                <p className="text-holy-text text-lg font-black italic">{levelOf(myScore).toUpperCase()}</p>
-              </div>
+          <div className="oly-hero-grid">
+            <div>
+              <p className="oly-hero-stat-label">Ranking</p>
+              <p className="oly-hero-stat-value">#{myRank} / {ranked.length}</p>
             </div>
-          </Card>
+            <div>
+              <p className="oly-hero-stat-label">Nivel</p>
+              <p className="oly-hero-stat-value">{levelOf(myScore)}</p>
+            </div>
+          </div>
         </button>
 
         {/* Breakdown · cada métrica clickable */}
-        <div className="space-y-6 mb-10">
-          <div className="flex justify-between items-center pl-1">
-            <h3 className="text-holy-text-secondary text-[10px] font-black uppercase tracking-widest">
-              Análisis de Rendimiento
-            </h3>
-            <span className="text-[9px] text-holy-text-secondary font-bold">
-              👆 Tocá para info
-            </span>
+        <div className="oly-section">
+          <div className="oly-sec-head">
+            <h3 className="oly-sec-title">Análisis de rendimiento</h3>
+            <span className="oly-sec-meta">Tocá para info</span>
           </div>
 
           {breakdown.map(item => (
             <button
               key={item.key}
+              className="oly-metric btn-press"
               onClick={() => setActiveInfo(item.info)}
-              className="btn-press w-full"
-              style={{ background: 'transparent', border: 'none', padding: 0, fontFamily: 'inherit', textAlign: 'left' }}
             >
-              <div className="space-y-2">
-                <div className="flex justify-between items-end">
-                  <span className="text-holy-text-secondary text-xs font-bold">{item.label}</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-holy-gold text-sm font-black">{item.score}</span>
-                    <span style={{ fontSize: 9, color: 'var(--text-secondary)' }}>ⓘ</span>
-                  </div>
-                </div>
-                <div className="h-1.5 w-full bg-holy-surface rounded-full overflow-hidden">
-                  <div className="h-full bg-holy-gold transition-all duration-700" style={{ width: item.percent }} />
-                </div>
+              <div className="oly-metric-head">
+                <span className="oly-metric-label">{item.label}</span>
+                <span className="oly-metric-right">
+                  <span className="oly-metric-score">{item.score}</span>
+                  <span className="oly-metric-info">ⓘ</span>
+                </span>
+              </div>
+              <div className="oly-bar">
+                <div className="oly-bar-fill" style={{ width: item.percent }} />
               </div>
             </button>
           ))}
         </div>
 
         {/* Leaderboard · cards clickables */}
-        <div className="space-y-4 mb-20">
-          <div className="flex justify-between items-center pl-1">
-            <h3 className="text-holy-text-secondary text-[10px] font-black uppercase tracking-widest">
-              Leaderboard Club
-            </h3>
-            <span className="text-[9px] text-holy-text-secondary font-bold">
-              {ranked.length} atletas
-            </span>
+        <div className="oly-section">
+          <div className="oly-sec-head">
+            <h3 className="oly-sec-title">Leaderboard club</h3>
+            <span className="oly-sec-meta">{ranked.length} atletas</span>
           </div>
-          <div className="space-y-2 stagger">
-            {leaderboards.map((user) => (
+          <div className="oly-lb-list">
+            {leaderboards.map(user => (
               <button
                 key={user.rank}
+                className="oly-lb-row btn-press"
+                data-me={user.me}
                 onClick={() => setActiveAthlete(user.fullAthlete)}
-                className="btn-press w-full"
-                style={{ background: 'transparent', border: 'none', padding: 0, fontFamily: 'inherit', textAlign: 'left' }}
               >
-                <Card
-                  variant="solid"
-                  padding="sm"
-                  className={`${user.me ? 'bg-holy-gold/5 border-holy-gold/20' : 'bg-holy-surface'} flex items-center gap-4`}
-                >
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs ${user.rank <= 3 ? 'bg-holy-gold text-holy-bg' : 'bg-holy-surface text-holy-text-secondary'}`}>
-                    {user.rank}
-                  </div>
-                  <div className={`w-10 h-10 rounded-full ${user.color} flex items-center justify-center text-holy-text text-xs font-black`}>
-                    {user.initials}
-                  </div>
-                  <div className="flex-1">
-                    <p className={`text-sm font-bold ${user.me ? 'text-holy-gold' : 'text-holy-text'}`}>{user.name}</p>
-                    <p className="text-holy-text-secondary text-[10px] uppercase font-bold">{user.level}</p>
-                  </div>
-                  <div className="text-right flex items-center gap-2">
-                    <p className="text-holy-text text-base font-black italic">{user.score}</p>
-                    <span className="text-holy-text-secondary text-[10px]">›</span>
-                  </div>
-                </Card>
+                <span className="oly-lb-rank" data-top={user.rank <= 3}>{user.rank}</span>
+                <span className="oly-lb-avatar" style={{ '--c': user.color } as React.CSSProperties}>
+                  {user.initials}
+                </span>
+                <span className="oly-lb-main">
+                  <p className="oly-lb-name">{user.name}</p>
+                  <p className="oly-lb-level">{user.level}</p>
+                </span>
+                <span className="oly-lb-right">
+                  <span className="oly-lb-score">{user.score}</span>
+                  <span className="oly-lb-caret">›</span>
+                </span>
               </button>
             ))}
           </div>
@@ -223,21 +213,18 @@ const OlyIndex: React.FC = () => {
         title={activeInfo?.title}
       >
         {activeInfo && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14, color: 'var(--text)' }}>
-            <div>
-              <p className="type-caption" style={{ color: '#F59E0B' }}>¿Qué mide?</p>
-              <p className="type-body" style={{ marginTop: 4 }}>{activeInfo.what}</p>
+          <div className="oly-sheet">
+            <div className="oly-sheet-block">
+              <p className="oly-sheet-key">¿Qué mide?</p>
+              <p className="oly-sheet-text">{activeInfo.what}</p>
             </div>
-            <div>
-              <p className="type-caption" style={{ color: '#F59E0B' }}>¿Cómo se calcula?</p>
-              <p className="type-body" style={{ marginTop: 4 }}>{activeInfo.how}</p>
+            <div className="oly-sheet-block">
+              <p className="oly-sheet-key">¿Cómo se calcula?</p>
+              <p className="oly-sheet-text">{activeInfo.how}</p>
             </div>
-            <div style={{
-              background: 'var(--surface)', border: '1px solid var(--card-border)',
-              borderRadius: 12, padding: '10px 14px',
-            }}>
-              <p className="type-caption" style={{ color: 'var(--text-secondary)' }}>Benchmark</p>
-              <p className="type-body" style={{ marginTop: 4 }}>{activeInfo.benchmark}</p>
+            <div className="oly-sheet-callout">
+              <p className="oly-sheet-key muted">Benchmark</p>
+              <p className="oly-sheet-text">{activeInfo.benchmark}</p>
             </div>
           </div>
         )}
@@ -250,64 +237,44 @@ const OlyIndex: React.FC = () => {
         title={activeAthlete?.name}
       >
         {activeAthlete && (
-          <div style={{ color: 'var(--text)' }}>
-            <div style={{
-              background: 'linear-gradient(135deg, rgba(245,158,11,0.10), transparent)',
-              border: '1px solid rgba(245,158,11,0.25)',
-              borderRadius: 14, padding: '14px 16px', marginBottom: 14,
-            }}>
-              <p className="type-caption" style={{ color: 'var(--text-secondary)' }}>OLY Index</p>
-              <p className="type-display type-mono" style={{ color: '#F59E0B', marginTop: 4 }}>
-                {olyScore(activeAthlete).toFixed(1)}
-              </p>
-              <p className="type-caption" style={{ color: 'var(--text-secondary)', marginTop: 4 }}>
-                {levelOf(olyScore(activeAthlete))}
-              </p>
+          <div className="oly-detail">
+            <div className="oly-detail-hero">
+              <p className="oly-detail-hero-label">OLY Index</p>
+              <p className="oly-detail-hero-score">{olyScore(activeAthlete).toFixed(1)}</p>
+              <p className="oly-detail-hero-level">{levelOf(olyScore(activeAthlete))}</p>
             </div>
 
-            <p className="type-caption" style={{ color: 'var(--text-secondary)', marginBottom: 8 }}>
-              Maxes
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 14 }}>
+            <p className="oly-detail-label">Maxes</p>
+            <div className="oly-maxes">
               {[
                 { label: 'Snatch', value: activeAthlete.maxes.snatch },
                 { label: 'Clean', value: activeAthlete.maxes.clean },
                 { label: 'Jerk', value: activeAthlete.maxes.jerk },
                 { label: 'Front Squat', value: activeAthlete.maxes.front_squat },
                 { label: 'Back Squat', value: activeAthlete.maxes.back_squat },
-              ].map(m => (
-                <div key={m.label} style={{
-                  background: 'var(--surface)', border: '1px solid var(--card-border)',
-                  borderRadius: 10, padding: '10px 14px',
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                }}>
-                  <span className="type-body-strong" style={{ color: 'var(--text)' }}>{m.label}</span>
-                  <span className="type-mono type-heading-sm" style={{ color: 'var(--primary)' }}>{m.value} kg</span>
+              ].map(mx => (
+                <div key={mx.label} className="oly-max-row">
+                  <span className="oly-max-name">{mx.label}</span>
+                  <span className="oly-max-val">{mx.value} kg</span>
                 </div>
               ))}
             </div>
 
-            <p className="type-caption" style={{ color: 'var(--text-secondary)', marginBottom: 8 }}>
-              Stats
-            </p>
-            <div style={{
-              background: 'var(--surface)', border: '1px solid var(--card-border)',
-              borderRadius: 10, padding: '10px 14px',
-              display: 'flex', justifyContent: 'space-around',
-            }}>
-              <div style={{ textAlign: 'center' }}>
-                <p className="type-caption" style={{ color: 'var(--text-secondary)' }}>Peso</p>
-                <p className="type-mono type-heading-sm" style={{ color: 'var(--text)', marginTop: 2 }}>{activeAthlete.maxes.body_weight} kg</p>
+            <p className="oly-detail-label">Stats</p>
+            <div className="oly-stats-grid">
+              <div className="oly-stat">
+                <p className="oly-stat-label">Peso</p>
+                <p className="oly-stat-value">{activeAthlete.maxes.body_weight} kg</p>
               </div>
-              <div style={{ textAlign: 'center' }}>
-                <p className="type-caption" style={{ color: 'var(--text-secondary)' }}>Total Oly</p>
-                <p className="type-mono type-heading-sm" style={{ color: '#F59E0B', marginTop: 2 }}>
+              <div className="oly-stat">
+                <p className="oly-stat-label">Total Oly</p>
+                <p className="oly-stat-value" style={{ '--c': '#22C55E' } as React.CSSProperties}>
                   {activeAthlete.maxes.snatch + activeAthlete.maxes.clean + activeAthlete.maxes.jerk} kg
                 </p>
               </div>
-              <div style={{ textAlign: 'center' }}>
-                <p className="type-caption" style={{ color: 'var(--text-secondary)' }}>Ratio S/C</p>
-                <p className="type-mono type-heading-sm" style={{ color: 'var(--text)', marginTop: 2 }}>
+              <div className="oly-stat">
+                <p className="oly-stat-label">Ratio S/C</p>
+                <p className="oly-stat-value">
                   {Math.round((activeAthlete.maxes.snatch / activeAthlete.maxes.clean) * 100)}%
                 </p>
               </div>

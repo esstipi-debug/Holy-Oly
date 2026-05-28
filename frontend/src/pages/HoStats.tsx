@@ -3,33 +3,35 @@ import { useNav } from '../context/NavigationContext';
 import { useAthlete } from '../context/AthleteContext';
 import Chart from '../components/social/Chart';
 import Heatmap365 from '../components/Heatmap365';
+import '../styles/v2/ho-stats.css';
 
 /**
  * HoStats · pantalla de números del atleta de halterofilia.
+ * Estilo V2 dark "Macrociclos" · scoped bajo `.hst-root` · acento ámbar
+ * (--engine-macro). Se monta dentro de PhoneLayout. Lógica intacta: todo
+ * el cálculo (volumen 14d, zonas, adherencia, macro, 1RM) se preserva;
+ * solo cambia la presentación. Los gráficos los dibuja <Chart>/<Heatmap365>.
  *
- * Análogo a VoltaStats pero con métricas específicas de oly lifting:
  *  1. Hero · Tonelaje semanal + intensidad media (%1RM)
- *  2. Volumen 14d (en kg, no toneladas)
- *  3. Ring zona principal de la semana
- *  4. Bars de distribución de intensidad (4 niveles)
- *  5. 1RM actuales (Snatch, C&J, Back/Front/OHS)
- *  6. Mesociclo · semana X de Y + adherencia
- *  7. Acceso al Skill Tree como chip secundario
+ *  2. Volumen 14d · 3. Ring zona principal · 4. Distribución de intensidad
+ *  5. Mesociclo · 6. Heatmaps · 7. 1RM + perfil de fuerza + ratios
  */
 
-const C = {
-  bg: '#07070F', surface: '#0F0F1C', surface2: '#161626', line: '#1E1E32',
-  text: '#EAEAF5', muted: '#94A3B8', dim: '#52527A',
-  gold: '#F5C518', goldDim: '#B8860B', amber: '#FFB300', red: '#FF3D00', green: '#22C55E',
-  primary: '#7C5CFF',
+// Colores de gráfico (hex · alineados a tokens V2, para canvas <Chart>)
+const CHART = {
+  gold: '#FFB300',   // engine-macro
+  green: '#22C55E',  // engine-oly
+  blue: '#56CCF2',
+  violet: '#A855F7', // engine-adapt
+  red: '#EF4444',    // engine-pulse
 };
 
 // 4 zonas canónicas de halterofilia clasificadas por %1RM
 const ZONES = [
-  { id: 'liviano', label: 'Liviano',  range: '<60%',  color: '#56CCF2', min: 0,   max: 60 },
-  { id: 'tecnico', label: 'Técnico',  range: '60-75%', color: '#22C55E', min: 60,  max: 75 },
-  { id: 'fuerza',  label: 'Fuerza',   range: '75-90%', color: '#F5C518', min: 75,  max: 90 },
-  { id: 'maximo',  label: 'Máximo',   range: '>90%',  color: '#FF3D00', min: 90,  max: 100 },
+  { id: 'liviano', label: 'Liviano',  range: '<60%',  color: CHART.blue,  min: 0,   max: 60 },
+  { id: 'tecnico', label: 'Técnico',  range: '60-75%', color: CHART.green, min: 60,  max: 75 },
+  { id: 'fuerza',  label: 'Fuerza',   range: '75-90%', color: CHART.gold,  min: 75,  max: 90 },
+  { id: 'maximo',  label: 'Máximo',   range: '>90%',  color: CHART.red,   min: 90,  max: 100 },
 ] as const;
 
 const HoStats: React.FC = () => {
@@ -87,314 +89,215 @@ const HoStats: React.FC = () => {
   const ohs = maxes ? Math.round(maxes.snatch * 1.02) : 0;
 
   const MAXES_LIST = maxes ? [
-    { name: 'Snatch',       value: maxes.snatch,     color: C.gold,  hint: 'Arranque' },
-    { name: 'Clean & Jerk', value: cleanAndJerk,     color: C.gold,  hint: 'Envión completo' },
-    { name: 'Back Squat',   value: maxes.back_squat, color: '#56CCF2', hint: 'Sentadilla trasera' },
-    { name: 'Front Squat',  value: maxes.front_squat,color: '#56CCF2', hint: 'Sentadilla frontal' },
-    { name: 'OHS',          value: ohs,              color: '#A855F7', hint: 'Overhead Squat (est.)' },
+    { name: 'Snatch',       value: maxes.snatch,     color: CHART.gold,   hint: 'Arranque' },
+    { name: 'Clean & Jerk', value: cleanAndJerk,     color: CHART.gold,   hint: 'Envión completo' },
+    { name: 'Back Squat',   value: maxes.back_squat, color: CHART.blue,   hint: 'Sentadilla trasera' },
+    { name: 'Front Squat',  value: maxes.front_squat,color: CHART.blue,   hint: 'Sentadilla frontal' },
+    { name: 'OHS',          value: ohs,              color: CHART.violet, hint: 'Overhead Squat (est.)' },
   ] : [];
 
+  const adherenceColor = adherencePct >= 80 ? CHART.green : adherencePct >= 50 ? CHART.gold : CHART.red;
+
   return (
-    <div className="anim-fade-in" style={{ background: C.bg, minHeight: '100%', color: C.text, paddingBottom: 100 }}>
-      {/* Header */}
-      <div style={{ padding: '14px 16px 8px' }}>
-        <p style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.12em', color: C.gold, textTransform: 'uppercase', margin: 0 }}>TUS NÚMEROS</p>
-        <h1 style={{ fontSize: 22, fontWeight: 900, letterSpacing: '-.02em', margin: '2px 0 0' }}>Tonelaje & 1RM</h1>
-      </div>
+    <div className="hst-root anim-fade-in">
+      <div className="hst-scroll">
+        {/* Header */}
+        <div className="hst-head">
+          <p className="hst-eyebrow">Tus números</p>
+          <h1 className="hst-title">Tonelaje & 1RM</h1>
+        </div>
 
-      {/* Tab chips */}
-      <div style={{ padding: '6px 16px 14px', display: 'flex', gap: 8 }}>
-        <Chip active={tab === 'volume'} onClick={() => setTab('volume')} label="Volumen" />
-        <Chip active={tab === 'maxes'}  onClick={() => setTab('maxes')}  label="1RM" />
-        <button
-          onClick={() => navigate('PROGRESSION')}
-          className="btn-press"
-          style={{
-            marginLeft: 'auto', padding: '6px 12px', borderRadius: 20,
-            background: 'rgba(124,92,255,0.12)', border: '1px solid rgba(124,92,255,0.35)',
-            color: '#A88BFF', fontSize: 11, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit',
-          }}
-        >Skills →</button>
-      </div>
+        {/* Tab chips */}
+        <div className="hst-tabs">
+          <button className="hst-chip btn-press" data-active={tab === 'volume'} onClick={() => setTab('volume')}>Volumen</button>
+          <button className="hst-chip btn-press" data-active={tab === 'maxes'} onClick={() => setTab('maxes')}>1RM</button>
+          <button className="hst-skills btn-press" onClick={() => navigate('PROGRESSION')}>Skills →</button>
+        </div>
 
-      {/* CTA · Leaderboard del club */}
-      <div style={{ padding: '0 16px 12px' }}>
-        <button
-          onClick={() => navigate('LEADERBOARD')}
-          className="btn-press"
-          style={{
-            width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '12px 14px', borderRadius: 14,
-            background: 'linear-gradient(135deg, rgba(245,197,24,0.10) 0%, rgba(245,197,24,0.02) 100%)',
-            border: '1px solid rgba(245,197,24,0.30)',
-            color: C.text, cursor: 'pointer', fontFamily: 'inherit',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontSize: 18 }}>🏆</span>
-            <div style={{ textAlign: 'left' }}>
-              <p style={{ fontSize: 12, fontWeight: 900, color: C.text, margin: 0 }}>Top 10 del club</p>
-              <p style={{ fontSize: 10, color: C.muted, margin: 0, marginTop: 2 }}>OLY Index · ranking semanal</p>
-            </div>
-          </div>
-          <span style={{ fontSize: 14, color: C.gold, fontWeight: 900 }}>→</span>
+        {/* CTA · Leaderboard del club */}
+        <button className="hst-lb btn-press" onClick={() => navigate('LEADERBOARD')}>
+          <span className="hst-lb-left">
+            <span className="hst-lb-icon">🏆</span>
+            <span>
+              <p className="hst-lb-title">Top 10 del club</p>
+              <p className="hst-lb-sub">OLY Index · ranking semanal</p>
+            </span>
+          </span>
+          <span className="hst-lb-arrow">→</span>
         </button>
-      </div>
 
-      {tab === 'volume' && (
-        <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-
-          {/* HERO · Tonelaje semanal + intensidad media */}
-          <div style={{
-            background: 'linear-gradient(135deg, rgba(245,197,24,0.10) 0%, rgba(245,197,24,0.02) 100%)',
-            border: '1px solid rgba(245,197,24,0.30)',
-            borderRadius: 20, padding: 18,
-            boxShadow: '0 0 28px rgba(245,197,24,0.08)',
-          }}>
-            <p style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.12em', color: C.gold, textTransform: 'uppercase' }}>
-              Esta semana
-            </p>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 4 }}>
-              <span style={{ fontSize: 38, fontWeight: 900, color: C.text, letterSpacing: '-.03em', fontStyle: 'italic' }}>
-                {weekVolume.toLocaleString('es')}
-              </span>
-              <span style={{ fontSize: 18, fontWeight: 700, color: C.gold }}>kg</span>
+        {tab === 'volume' && (
+          <div className="hst-panel">
+            {/* HERO · Tonelaje semanal + intensidad media */}
+            <div className="hst-hero">
+              <p className="hst-hero-label">Esta semana</p>
+              <div className="hst-hero-row">
+                <span className="hst-hero-num">{weekVolume.toLocaleString('es')}</span>
+                <span className="hst-hero-unit">kg</span>
+              </div>
+              <p className="hst-hero-sub">
+                Intensidad media: <strong>{avgIntensity}%</strong> · {sessionsCompleted}/{sessionsPlanned} sesiones
+              </p>
+              <div className="hst-delta" data-pos={deltaPct >= 0}>
+                {deltaPct >= 0 ? '▲' : '▼'} {Math.abs(deltaPct)}% vs semana anterior
+              </div>
             </div>
-            <p style={{ fontSize: 11, color: C.muted, marginTop: 4 }}>
-              Intensidad media: <strong style={{ color: C.text }}>{avgIntensity}%</strong> · {sessionsCompleted}/{sessionsPlanned} sesiones
-            </p>
-            <div style={{
-              marginTop: 10, padding: '6px 10px', display: 'inline-block',
-              borderRadius: 8, fontSize: 11, fontWeight: 800,
-              background: deltaPct >= 0 ? 'rgba(34,197,94,0.14)' : 'rgba(255,61,0,0.14)',
-              color: deltaPct >= 0 ? C.green : C.red,
-              border: `1px solid ${deltaPct >= 0 ? 'rgba(34,197,94,0.35)' : 'rgba(255,61,0,0.35)'}`,
-            }}>
-              {deltaPct >= 0 ? '▲' : '▼'} {Math.abs(deltaPct)}% vs semana anterior
-            </div>
-          </div>
 
-          {/* Volumen 14d */}
-          <Section title="Volumen 14 días" hint="Cada día = tu tonelaje total (kg × reps × sets)">
-            <Chart
-              data={{ kind: 'bars', values: volume14d, highlight: volume14d.length - 1 }}
-              color={C.gold} width={320} height={110} scheme="dark"
-            />
-          </Section>
-
-          {/* Ring zona principal + adherencia */}
-          <Section title="Zona principal de la semana" hint={`${dominantZone.label} · ${dominantZone.range} del 1RM`}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            {/* Volumen 14d */}
+            <Section title="Volumen 14 días" hint="Cada día = tu tonelaje total (kg × reps × sets)">
               <Chart
-                data={{ kind: 'ring', value: dominantZone.count, max: totalZoneCount, centerLabel: `${dominantZone.pct}%` }}
-                color={dominantZone.color}
-                width={100} height={100} scheme="dark"
+                data={{ kind: 'bars', values: volume14d, highlight: volume14d.length - 1 }}
+                color={CHART.gold} width={320} height={110} scheme="dark"
               />
-              <div style={{ flex: 1 }}>
-                <Mini label="Zona dominante" value={dominantZone.label} color={dominantZone.color} />
-                <Mini label="Sesiones en zona" value={`${dominantZone.count}/${totalZoneCount}`} color={C.text} />
-                <Mini label="Adherencia" value={`${adherencePct}%`} color={adherencePct >= 80 ? C.green : adherencePct >= 50 ? C.amber : C.red} />
-              </div>
-            </div>
-          </Section>
-
-          {/* Distribución de intensidad · 4 zonas */}
-          <Section title="Distribución de intensidad" hint="Sesiones por zona de %1RM esta semana">
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {zonePct.map(z => (
-                <div key={z.id}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: C.text }}>
-                      {z.label} <span style={{ color: C.dim, fontWeight: 600 }}>· {z.range}</span>
-                    </span>
-                    <span style={{ fontSize: 11, fontWeight: 800, color: z.color }}>{z.pct}%</span>
-                  </div>
-                  <div style={{ height: 6, borderRadius: 3, background: C.line, overflow: 'hidden' }}>
-                    <div style={{
-                      height: '100%', width: `${z.pct}%`, background: z.color,
-                      transition: 'width .6s ease', borderRadius: 3,
-                    }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Section>
-
-          {/* Mesociclo */}
-          {macro && (
-            <Section title="Mesociclo" hint={macro.focus}>
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 14,
-                marginBottom: 10,
-              }}>
-                <div style={{
-                  width: 48, height: 48, borderRadius: 12,
-                  background: 'rgba(245,197,24,0.14)',
-                  border: '1px solid rgba(245,197,24,0.35)',
-                  display: 'flex', flexDirection: 'column',
-                  alignItems: 'center', justifyContent: 'center',
-                }}>
-                  <span style={{ fontSize: 16, fontWeight: 900, color: C.gold, fontStyle: 'italic', lineHeight: 1 }}>{macro.week}</span>
-                  <span style={{ fontSize: 7, fontWeight: 800, color: C.gold, letterSpacing: '.08em', marginTop: 2 }}>SEM</span>
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontSize: 13, fontWeight: 900, color: C.text, margin: 0 }}>{macro.program_name}</p>
-                  <p style={{ fontSize: 10, color: C.muted, margin: '2px 0 0' }}>
-                    Semana {macro.week} de {macro.total_weeks} · Día {macro.day}
-                  </p>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <p style={{ fontSize: 18, fontWeight: 900, color: C.gold, margin: 0, fontStyle: 'italic' }}>{macroProgress}%</p>
-                  <p style={{ fontSize: 9, color: C.dim, margin: '2px 0 0', letterSpacing: '.08em' }}>PROGRESO</p>
-                </div>
-              </div>
-              <div style={{ height: 6, borderRadius: 3, background: C.line, overflow: 'hidden' }}>
-                <div style={{
-                  height: '100%', width: `${macroProgress}%`,
-                  background: `linear-gradient(90deg, ${C.gold}, ${C.goldDim})`,
-                  transition: 'width .6s ease', borderRadius: 3,
-                }} />
-              </div>
             </Section>
-          )}
 
-          {/* Heatmap 14d intensidad */}
-          <Section title="Intensidad últimas 2 semanas" hint="Días con mayor carga brillan más">
-            <Chart
-              data={{ kind: 'heatmap14', days: volume14d.map((v, i) => ({
-                date: `d-${13 - i}`,
-                intensity: v > 100 ? Math.min(v / Math.max(...volume14d), 1) : 0,
-              })) }}
-              color={C.gold} width={320} height={50} scheme="dark"
-            />
-          </Section>
-
-          {/* Heatmap 365 anual */}
-          <Heatmap365 sessions={athlete?.sessions_last_7 ?? []} />
-
-        </div>
-      )}
-
-      {tab === 'maxes' && (
-        <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {/* TOTAL Sinclair */}
-          <div style={{
-            background: 'linear-gradient(135deg, rgba(245,197,24,0.10), rgba(245,197,24,0.02))',
-            border: '1px solid rgba(245,197,24,0.30)',
-            borderRadius: 18, padding: 16,
-          }}>
-            <p style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.12em', color: C.gold, textTransform: 'uppercase', margin: 0 }}>
-              TOTAL OLÍMPICO
-            </p>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 4 }}>
-              <span style={{ fontSize: 34, fontWeight: 900, color: C.text, letterSpacing: '-.03em', fontStyle: 'italic' }}>
-                {total}
-              </span>
-              <span style={{ fontSize: 16, fontWeight: 700, color: C.gold }}>kg</span>
-            </div>
-            <p style={{ fontSize: 11, color: C.muted, marginTop: 4 }}>
-              Snatch {maxes?.snatch ?? 0} + C&J {cleanAndJerk} · {athlete?.weight_class ?? '—'}
-            </p>
-          </div>
-
-          <Section title="1RM actuales" hint="Tus máximos vigentes registrados">
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {MAXES_LIST.map(m => (
-                <div key={m.name} style={{
-                  display: 'flex', alignItems: 'center', gap: 12,
-                  padding: '10px 12px', borderRadius: 12,
-                  background: 'rgba(255,255,255,0.02)',
-                  border: '1px solid rgba(255,255,255,0.05)',
-                }}>
-                  <div style={{
-                    width: 36, height: 36, borderRadius: 10,
-                    background: `${m.color}22`,
-                    border: `1px solid ${m.color}55`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 14, fontWeight: 900, color: m.color, fontStyle: 'italic',
-                  }}>{m.name.charAt(0)}</div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontSize: 14, fontWeight: 900, color: C.text, margin: 0 }}>{m.name}</p>
-                    <p style={{ fontSize: 10, color: C.muted, margin: '2px 0 0' }}>{m.hint}</p>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <p style={{ fontSize: 18, fontWeight: 900, color: C.text, margin: 0, fontStyle: 'italic' }}>
-                      {m.value}<span style={{ fontSize: 11, color: C.muted, marginLeft: 3 }}>kg</span>
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Section>
-
-          {maxes && (
-            <Section title="Perfil de fuerza" hint="Tu polígono real (oro) vs perfil ideal de élite (gris)">
-              {/* Polígono compara ratios reales del atleta contra valores ideales IWF
-                  · Snatch ~80% del C&J · C&J ~80% del Squat Back · Squat Front ~110% del C&J */}
-              <div style={{ display: 'flex', justifyContent: 'center' }}>
+            {/* Ring zona principal + adherencia */}
+            <Section title="Zona principal de la semana" hint={`${dominantZone.label} · ${dominantZone.range} del 1RM`}>
+              <div className="hst-ring-row">
                 <Chart
-                  data={{
-                    kind: 'radar',
-                    axes: [
-                      { label: 'Snatch',  value: Math.round((maxes.snatch / cleanAndJerk) * 100),     ideal: 80,  max: 100 },
-                      { label: 'C&J',     value: Math.round((cleanAndJerk / maxes.back_squat) * 100), ideal: 80,  max: 100 },
-                      { label: 'Sq Back', value: 100,                                                   ideal: 100, max: 100 },
-                      { label: 'Sq Front',value: Math.round((maxes.front_squat / maxes.back_squat) * 100), ideal: 90, max: 100 },
-                    ],
-                  }}
-                  color={C.gold} width={280} height={280} scheme="dark"
+                  data={{ kind: 'ring', value: dominantZone.count, max: totalZoneCount, centerLabel: `${dominantZone.pct}%` }}
+                  color={dominantZone.color}
+                  width={100} height={100} scheme="dark"
                 />
+                <div className="hst-ring-meta">
+                  <Mini label="Zona dominante" value={dominantZone.label} color={dominantZone.color} />
+                  <Mini label="Sesiones en zona" value={`${dominantZone.count}/${totalZoneCount}`} />
+                  <Mini label="Adherencia" value={`${adherencePct}%`} color={adherenceColor} />
+                </div>
               </div>
             </Section>
-          )}
 
-          {maxes && (
-            <Section title="Ratios técnicos" hint="Indicadores de balance entre levantamientos">
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <Mini label="Snatch / C&J" value={`${Math.round((maxes.snatch / cleanAndJerk) * 100)}%`} color={C.gold} />
-                <Mini label="C&J / Back Squat" value={`${Math.round((cleanAndJerk / maxes.back_squat) * 100)}%`} color="#56CCF2" />
-                <Mini label="Front / Back Squat" value={`${Math.round((maxes.front_squat / maxes.back_squat) * 100)}%`} color="#56CCF2" />
-                <Mini label="Total / Peso corporal" value={`${(total / maxes.body_weight).toFixed(2)}×`} color={C.green} />
-              </div>
+            {/* Distribución de intensidad · 4 zonas */}
+            <Section title="Distribución de intensidad" hint="Sesiones por zona de %1RM esta semana">
+              {zonePct.map(z => (
+                <div key={z.id} className="hst-zone">
+                  <div className="hst-zone-head">
+                    <span className="hst-zone-name">
+                      {z.label} <span className="hst-zone-range">· {z.range}</span>
+                    </span>
+                    <span className="hst-zone-pct" style={{ '--c': z.color } as React.CSSProperties}>{z.pct}%</span>
+                  </div>
+                  <div className="hst-bar">
+                    <div className="hst-bar-fill" style={{ width: `${z.pct}%`, '--c': z.color } as React.CSSProperties} />
+                  </div>
+                </div>
+              ))}
             </Section>
-          )}
-        </div>
-      )}
+
+            {/* Mesociclo */}
+            {macro && (
+              <Section title="Mesociclo" hint={macro.focus}>
+                <div className="hst-meso-row">
+                  <div className="hst-meso-badge">
+                    <span className="hst-meso-week">{macro.week}</span>
+                    <span className="hst-meso-week-label">SEM</span>
+                  </div>
+                  <div className="hst-meso-main">
+                    <p className="hst-meso-name">{macro.program_name}</p>
+                    <p className="hst-meso-sub">Semana {macro.week} de {macro.total_weeks} · Día {macro.day}</p>
+                  </div>
+                  <div className="hst-meso-prog">
+                    <p className="hst-meso-pct">{macroProgress}%</p>
+                    <p className="hst-meso-pct-label">PROGRESO</p>
+                  </div>
+                </div>
+                <div className="hst-bar">
+                  <div className="hst-bar-fill meso" style={{ width: `${macroProgress}%` }} />
+                </div>
+              </Section>
+            )}
+
+            {/* Heatmap 14d intensidad */}
+            <Section title="Intensidad últimas 2 semanas" hint="Días con mayor carga brillan más">
+              <Chart
+                data={{ kind: 'heatmap14', days: volume14d.map((v, i) => ({
+                  date: `d-${13 - i}`,
+                  intensity: v > 100 ? Math.min(v / Math.max(...volume14d), 1) : 0,
+                })) }}
+                color={CHART.gold} width={320} height={50} scheme="dark"
+              />
+            </Section>
+
+            {/* Heatmap 365 anual */}
+            <Heatmap365 sessions={athlete?.sessions_last_7 ?? []} />
+          </div>
+        )}
+
+        {tab === 'maxes' && (
+          <div className="hst-panel">
+            {/* TOTAL olímpico */}
+            <div className="hst-hero">
+              <p className="hst-hero-label">Total olímpico</p>
+              <div className="hst-hero-row">
+                <span className="hst-hero-num">{total}</span>
+                <span className="hst-hero-unit">kg</span>
+              </div>
+              <p className="hst-hero-sub">
+                Snatch {maxes?.snatch ?? 0} + C&J {cleanAndJerk} · {athlete?.weight_class ?? '—'}
+              </p>
+            </div>
+
+            <Section title="1RM actuales" hint="Tus máximos vigentes registrados">
+              {MAXES_LIST.map(m => (
+                <div key={m.name} className="hst-max">
+                  <div className="hst-max-icon" style={{ '--c': m.color } as React.CSSProperties}>{m.name.charAt(0)}</div>
+                  <div className="hst-max-main">
+                    <p className="hst-max-name">{m.name}</p>
+                    <p className="hst-max-hint">{m.hint}</p>
+                  </div>
+                  <p className="hst-max-val">{m.value}<span>kg</span></p>
+                </div>
+              ))}
+            </Section>
+
+            {maxes && (
+              <Section title="Perfil de fuerza" hint="Tu polígono real (oro) vs perfil ideal de élite (gris)">
+                {/* Polígono compara ratios reales del atleta contra valores ideales IWF
+                    · Snatch ~80% del C&J · C&J ~80% del Squat Back · Squat Front ~110% del C&J */}
+                <div className="hst-radar-wrap">
+                  <Chart
+                    data={{
+                      kind: 'radar',
+                      axes: [
+                        { label: 'Snatch',  value: Math.round((maxes.snatch / cleanAndJerk) * 100),     ideal: 80,  max: 100 },
+                        { label: 'C&J',     value: Math.round((cleanAndJerk / maxes.back_squat) * 100), ideal: 80,  max: 100 },
+                        { label: 'Sq Back', value: 100,                                                   ideal: 100, max: 100 },
+                        { label: 'Sq Front',value: Math.round((maxes.front_squat / maxes.back_squat) * 100), ideal: 90, max: 100 },
+                      ],
+                    }}
+                    color={CHART.gold} width={280} height={280} scheme="dark"
+                  />
+                </div>
+              </Section>
+            )}
+
+            {maxes && (
+              <Section title="Ratios técnicos" hint="Indicadores de balance entre levantamientos">
+                <Mini label="Snatch / C&J" value={`${Math.round((maxes.snatch / cleanAndJerk) * 100)}%`} color={CHART.gold} />
+                <Mini label="C&J / Back Squat" value={`${Math.round((cleanAndJerk / maxes.back_squat) * 100)}%`} color={CHART.blue} />
+                <Mini label="Front / Back Squat" value={`${Math.round((maxes.front_squat / maxes.back_squat) * 100)}%`} color={CHART.blue} />
+                <Mini label="Total / Peso corporal" value={`${(total / maxes.body_weight).toFixed(2)}×`} color={CHART.green} />
+              </Section>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
 
-const Chip: React.FC<{ active: boolean; onClick: () => void; label: string }> = ({ active, onClick, label }) => (
-  <button
-    onClick={onClick}
-    className="btn-press"
-    style={{
-      padding: '6px 14px', borderRadius: 20,
-      background: active ? 'rgba(245,197,24,0.15)' : 'transparent',
-      border: `1px solid ${active ? 'rgba(245,197,24,0.45)' : 'rgba(255,255,255,0.10)'}`,
-      color: active ? C.gold : C.muted,
-      fontSize: 11, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit',
-      letterSpacing: '.04em', textTransform: 'uppercase',
-    }}
-  >{label}</button>
-);
-
 const Section: React.FC<{ title: string; hint?: string; children: React.ReactNode }> = ({ title, hint, children }) => (
-  <div style={{
-    background: C.surface, border: `1px solid ${C.line}`,
-    borderRadius: 18, padding: 14,
-  }}>
-    <p style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.1em', color: C.muted, textTransform: 'uppercase', margin: 0 }}>{title}</p>
-    {hint && <p style={{ fontSize: 10, color: C.dim, margin: '2px 0 10px' }}>{hint}</p>}
-    {!hint && <div style={{ height: 8 }} />}
-    {children}
+  <div className="hst-section">
+    <p className="hst-sec-title">{title}</p>
+    {hint && <p className="hst-sec-hint">{hint}</p>}
+    <div className="hst-sec-body">{children}</div>
   </div>
 );
 
-const Mini: React.FC<{ label: string; value: string; color: string }> = ({ label, value, color }) => (
-  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-    <span style={{ fontSize: 11, color: C.muted }}>{label}</span>
-    <span style={{ fontSize: 12, fontWeight: 800, color }}>{value}</span>
+const Mini: React.FC<{ label: string; value: string; color?: string }> = ({ label, value, color }) => (
+  <div className="hst-mini">
+    <span className="hst-mini-label">{label}</span>
+    <span className="hst-mini-value" style={color ? ({ '--c': color } as React.CSSProperties) : undefined}>{value}</span>
   </div>
 );
 

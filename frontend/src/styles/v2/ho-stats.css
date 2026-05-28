@@ -1,0 +1,274 @@
+/* ============================================================
+   PEAK QUAL · HO STATS (Tonelaje & 1RM) · estilos V2
+   ------------------------------------------------------------
+   Pantalla atleta · números de halterofilia (volumen + 1RM).
+   Se monta dentro de PhoneLayout (chrome + bottom nav) → no
+   dibuja chrome propio. Acento ámbar (--engine-macro, identidad
+   HO). Los gráficos los dibuja <Chart>/<Heatmap365> (canvas/svg)
+   con colores hex alineados a tokens, pasados por props.
+
+   SCOPING · todo vive bajo `.hst-root`. Hereda tokens.css.
+   Colores dinámicos por elemento via `--c` inline.
+   ============================================================ */
+
+.hst-root,
+.hst-root *,
+.hst-root *::before,
+.hst-root *::after { box-sizing: border-box; }
+
+.hst-root {
+  font-family: var(--font-body);
+  background: var(--bg);
+  height: 100%;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  --hst-accent: var(--engine-macro);
+}
+.hst-root h1,
+.hst-root p,
+.hst-root button { margin: 0; }
+.hst-root button { padding: 0; }
+
+.hst-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-3) transparent;
+}
+.hst-scroll::-webkit-scrollbar { width: 4px; }
+.hst-scroll::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 2px; }
+
+/* ---------- Header ---------- */
+.hst-head { display: flex; flex-direction: column; gap: 2px; }
+.hst-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--hst-accent);
+}
+.hst-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  color: var(--text-hi);
+}
+
+/* ---------- Tabs ---------- */
+.hst-tabs { display: flex; gap: 8px; align-items: center; }
+.hst-chip {
+  padding: 6px 14px;
+  border-radius: var(--r-full);
+  background: transparent;
+  border: 1px solid var(--border-soft);
+  color: var(--text-mid);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 180ms, color 180ms, border-color 180ms;
+}
+.hst-chip:hover { color: var(--text-hi); border-color: var(--hst-accent); }
+.hst-chip[data-active="true"] {
+  background: color-mix(in oklab, var(--hst-accent) 15%, transparent);
+  border-color: color-mix(in oklab, var(--hst-accent) 45%, transparent);
+  color: var(--hst-accent);
+}
+.hst-skills {
+  margin-left: auto;
+  padding: 6px 12px;
+  border-radius: var(--r-full);
+  background: color-mix(in oklab, var(--engine-adapt) 12%, transparent);
+  border: 1px solid color-mix(in oklab, var(--engine-adapt) 35%, transparent);
+  color: var(--engine-adapt);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 180ms;
+}
+.hst-skills:hover { background: color-mix(in oklab, var(--engine-adapt) 20%, transparent); }
+
+/* ---------- Leaderboard CTA ---------- */
+.hst-lb {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  background: linear-gradient(135deg, color-mix(in oklab, var(--hst-accent) 10%, transparent), transparent);
+  border: 1px solid color-mix(in oklab, var(--hst-accent) 30%, transparent);
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 180ms, transform 150ms;
+}
+.hst-lb:hover { transform: translateY(-1px); border-color: color-mix(in oklab, var(--hst-accent) 55%, transparent); }
+.hst-lb-left { display: flex; align-items: center; gap: 10px; }
+.hst-lb-icon { font-size: 18px; line-height: 1; }
+.hst-lb-title { font-family: var(--font-display); font-size: 13px; font-weight: 700; color: var(--text-hi); text-align: left; }
+.hst-lb-sub { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.04em; color: var(--text-mid); margin-top: 2px; text-align: left; }
+.hst-lb-arrow { font-size: 14px; color: var(--hst-accent); font-weight: 700; }
+
+/* ---------- Tab panel ---------- */
+.hst-panel { display: flex; flex-direction: column; gap: 12px; }
+
+/* ---------- Hero ---------- */
+.hst-hero {
+  background: linear-gradient(135deg, color-mix(in oklab, var(--hst-accent) 10%, transparent), transparent);
+  border: 1px solid color-mix(in oklab, var(--hst-accent) 30%, transparent);
+  border-radius: var(--r-lg);
+  padding: 18px;
+  box-shadow: 0 0 28px -8px color-mix(in oklab, var(--hst-accent) 40%, transparent);
+}
+.hst-hero-label {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--hst-accent);
+}
+.hst-hero-row { display: flex; align-items: baseline; gap: 8px; margin-top: 5px; }
+.hst-hero-num {
+  font-family: var(--font-display);
+  font-size: 38px;
+  font-weight: 700;
+  color: var(--text-hi);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.hst-hero-unit { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--hst-accent); }
+.hst-hero-sub { font-size: 11px; color: var(--text-mid); margin-top: 5px; }
+.hst-hero-sub strong { color: var(--text-hi); font-weight: 700; }
+.hst-delta {
+  margin-top: 10px;
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: var(--r-sm);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.hst-delta[data-pos="true"] {
+  background: rgba(34,197,94,0.14);
+  color: var(--engine-oly);
+  border: 1px solid rgba(34,197,94,0.35);
+}
+.hst-delta[data-pos="false"] {
+  background: rgba(239,68,68,0.14);
+  color: var(--engine-pulse);
+  border: 1px solid rgba(239,68,68,0.35);
+}
+
+/* ---------- Section ---------- */
+.hst-section {
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-lg);
+  padding: 14px;
+  box-shadow: var(--shadow-card);
+}
+.hst-sec-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+}
+.hst-sec-hint { font-size: 10px; color: var(--text-lo); margin-top: 2px; }
+.hst-sec-body { margin-top: 10px; }
+
+/* ---------- Ring row ---------- */
+.hst-ring-row { display: flex; align-items: center; gap: 16px; }
+.hst-ring-meta { flex: 1; }
+
+/* ---------- Mini rows ---------- */
+.hst-mini { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
+.hst-mini:last-child { margin-bottom: 0; }
+.hst-mini-label { font-size: 11px; color: var(--text-mid); }
+.hst-mini-value { font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: var(--c, var(--text-hi)); font-variant-numeric: tabular-nums; }
+
+/* ---------- Zone distribution bars ---------- */
+.hst-zone { margin-bottom: 8px; }
+.hst-zone:last-child { margin-bottom: 0; }
+.hst-zone-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+.hst-zone-name { font-size: 11px; font-weight: 700; color: var(--text); }
+.hst-zone-range { color: var(--text-lo); font-weight: 600; }
+.hst-zone-pct { font-family: var(--font-mono); font-size: 11px; font-weight: 800; color: var(--c); font-variant-numeric: tabular-nums; }
+.hst-bar { height: 6px; border-radius: 3px; background: var(--surface-3); overflow: hidden; }
+.hst-bar-fill { height: 100%; border-radius: 3px; background: var(--c, var(--hst-accent)); transition: width 0.6s ease; }
+
+/* ---------- Mesociclo ---------- */
+.hst-meso-row { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
+.hst-meso-badge {
+  width: 48px; height: 48px;
+  border-radius: var(--r-md);
+  background: color-mix(in oklab, var(--hst-accent) 14%, transparent);
+  border: 1px solid color-mix(in oklab, var(--hst-accent) 35%, transparent);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.hst-meso-week { font-family: var(--font-display); font-size: 16px; font-weight: 700; color: var(--hst-accent); line-height: 1; }
+.hst-meso-week-label { font-family: var(--font-mono); font-size: 7px; font-weight: 700; letter-spacing: 0.08em; color: var(--hst-accent); margin-top: 2px; }
+.hst-meso-main { flex: 1; min-width: 0; }
+.hst-meso-name { font-family: var(--font-display); font-size: 13px; font-weight: 700; color: var(--text-hi); }
+.hst-meso-sub { font-family: var(--font-mono); font-size: 9.5px; color: var(--text-mid); margin-top: 2px; }
+.hst-meso-prog { text-align: right; }
+.hst-meso-pct { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--hst-accent); }
+.hst-meso-pct-label { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.08em; color: var(--text-lo); margin-top: 2px; }
+.hst-bar-fill.meso { background: linear-gradient(90deg, var(--engine-macro), var(--engine-belt)); }
+
+/* ---------- 1RM list ---------- */
+.hst-max {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  border: 1px solid var(--border-soft);
+  margin-bottom: 8px;
+}
+.hst-max:last-child { margin-bottom: 0; }
+.hst-max-icon {
+  width: 36px; height: 36px;
+  border-radius: var(--r-sm);
+  background: color-mix(in oklab, var(--c) 16%, transparent);
+  border: 1px solid color-mix(in oklab, var(--c) 40%, transparent);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--c);
+  flex-shrink: 0;
+}
+.hst-max-main { flex: 1; min-width: 0; }
+.hst-max-name { font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--text-hi); }
+.hst-max-hint { font-size: 10px; color: var(--text-mid); margin-top: 2px; }
+.hst-max-val { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--text-hi); font-variant-numeric: tabular-nums; }
+.hst-max-val span { font-family: var(--font-mono); font-size: 11px; font-weight: 600; color: var(--text-mid); margin-left: 3px; }
+
+/* ---------- Radar centering ---------- */
+.hst-radar-wrap { display: flex; justify-content: center; }
