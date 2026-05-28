@@ -27,12 +27,13 @@ Todo buildea verde (`npm run build`, tsc -b) y está en `origin` → Render rede
 - **Wave B coach** (`afc9cdb`): SkillEvaluationPanel, SkillFocusAssign, **SessionHistoryList** (JSX convertido a `.shl-*`, disco PlateBadge por tier, chip RPE `data-level`). Cluster AthleteTrainingView **100% V2**.
 - **Stats atleta** (`7132ffd` + `b4d94a2`): SessionSchedule (`.ssch-*`), PulseHub (`.plh-*`), KnowledgePills (`.kp-*`), HoStats (`.hst-*`), OlyIndex (`.oly-*`), PerformanceDeepDive (`.pdd-*`). Las 6 en V2.
 - **Social + perfil** (`f8e3226` + `1776d1d` + `6664538`): Leaderboard (`.lb-*`, product-aware), SocialCardsGallery (`.scg-*`), SocialCard (`.soc-*`, solo chrome — las cards virales `components/social/*Card` NO se tocaron), Profile (`.prof-*`), PreMium (`.prem-*`), BeltCeremony (`.belt-*`, immersive), HormonalSetup (`.horm-*`), BaselineAssessment (`.base-*`) + LogTestSheet (inline-token-swap). Las 8 en V2.
+- **Demo HO** (`c979a8f`): entrada demo determinística por cuadrante (LoginV3 + LandingV3) — desbloquea ver TODO HO en Render. Cómo acceder: ver "FALTA PARA HO 100%" abajo.
 
 > Patrón usado: cada pantalla scopea bajo una clase root `.xxx-root`, hereda `tokens.css`, se monta en PhoneLayout (sin chrome propio), colores dinámicos via `--c` inline. Las big stats usan `<Chart>`/`<Heatmap365>` con colores hex alineados a tokens. `BottomSheet` es `position:fixed` pero **renderiza inline** (no portal) → el contenido hereda el accent del root de página.
 
 ## ⏳ FALTA PARA HO 100%
-- **Demo HO** (ver Gotchas) — **el item bloqueante ahora**. Todas las pantallas HO de atleta migradas NO se pueden ver en el preview de Render porque el usuario demo es de Volta y no hay demo HO. Crear atleta (+coach) demo Holy Oly + entrada desbloquea QA end-to-end real.
-- **QA visual** de lo migrado una vez exista el demo HO (sólo se verificó `npm run build` verde, no click-through en browser por el gap del demo).
+- ✅ **Demo HO** — HECHO (commit `c979a8f`). Entrada determinística por cuadrante. **Cómo verlo en Render:** abrir `https://peakqual-v2.onrender.com/` → footer **"Modo demo · QA"** → en el Login tocar **Atleta HO** o **Coach HO** (o Volta) → aterriza en ese cuadrante; los pills arriba (HO/VOL · ATL/COACH) roamean todo. Atajo: `…/?demo=1&p=ho`. El dato HO demo es Matías + roster (atletas en `data/athletes.ts`). Los 401 a `holy-oly-3.onrender.com` son esperados (token demo no es JWT) → fallback a mock por diseño.
+- **QA visual** de lo migrado: ahora SÍ se puede (entrar por Demo HO). Falta el click-through humano pantalla por pantalla (sólo verifiqué `npm run build` verde + render del coach dash + HoStats en dev).
 - (Opcional) Help/support bot in-app (extender WISE) — **decisión Boss 2026-05-28: dejarlo anotado**, foco en HO.
 - (Opcional) Unificar disco a PlateBadge en CoachDashV2 (hoy usa `<plate-3d>` vía @ts-nocheck).
 
@@ -43,7 +44,7 @@ Todo buildea verde (`npm run build`, tsc -b) y está en `origin` → Render rede
 ## ⚠️ GOTCHAS (no tropezar de nuevo)
 1. **`npm run build` (tsc -b) es más estricto que `npx tsc --noEmit`** (atrapa unused vars con noUnusedLocals). SIEMPRE verificar con `npm run build`, no solo tsc --noEmit.
 2. **Discos:** usar el componente React `{ PlateBadge }` de `src/components/PlateBadge.tsx` (tier = 'white'|'green'|'yellow'|'blue'|'red', size = number). **NO** usar el custom element crudo `<plate-3d>` (no tiene tipo JSX → rompe `tsc -b`). Excepción: CoachDashV2 usa `<plate-3d>` (anda vía `@ts-nocheck` + `import '../lib/web-components'`) — se podría unificar a PlateBadge después.
-3. **Usuario demo es de VOLTA** (CrossFit Palermo). Forzar `product:current=holy-oly` en preview se "corrige" solo al producto del atleta demo. **No hay atleta/coach demo HO** → no se puede demostrar HO end-to-end. Pendiente: crear un demo HO (seed/usuario + entrada). Claves localStorage: `user`, `token`, `demoMode`, `product:current`, `role:current`; `isAuthenticated = !!user`.
+3. **Demo HO — RESUELTO** (`c979a8f`). Antes: forzar `product:current=holy-oly` no alcanzaba porque `enterDemoMode()` no seteaba product/role y `ProductContext`/`RoleContext` sólo leen storage al init (de ahí la "auto-corrección"). Ahora la entrada demo usa los setters `useProduct().setProduct`/`useRole().setRole` (reactivos) + `enterDemoMode()`. El dato HO ya existía (`AthleteContext`: demoMode+holy-oly → `roster.find(a => a.product !== 'volta')` = Matías). Claves localStorage: `user`, `token`, `demoMode`, `product:current`, `role:current`; `isAuthenticated = !!user`.
 4. **Chrome propio:** algunas V2 lazy (AtletaHomeV2, CoachDashV2, CheckinV2, SkillTreeV2) traían su propio marco de teléfono (status bar / bottom nav). Al wirearlas como pantalla real hay que **quitarles ese chrome** (PhoneLayout ya lo provee) y scopear su CSS (sin resets globales). Ya hecho para las wireadas.
 5. **App.tsx es el punto de colisión** del routing — serializar ediciones ahí (un solo editor a la vez).
 6. **Agentes y worktree:** instruir SIEMPRE `cd` al worktree + `git rev-parse` verify + rutas absolutas. Un agente editó `hungry-tesla` por error.
@@ -60,12 +61,11 @@ Todo buildea verde (`npm run build`, tsc -b) y está en `origin` → Render rede
 - **NO hay link desplegado** de esta rama. Render sirve `main` (viejo). Para link compartible: deploy de preview en Render (necesita dashboard del Boss) o merge a main (NO recomendado hasta cerrar HO).
 
 ## ▶️ PRÓXIMOS PASOS (orden sugerido)
-1. **Demo HO**: crear atleta/coach demo Holy Oly (seed/usuario mock + entrada) para QA end-to-end real. Es lo que falta para poder VER en Render todo lo migrado (gotcha #3). Claves localStorage: `user`, `token`, `demoMode`, `product:current`, `role:current`.
-2. **QA visual** de las 17 pantallas migradas (Wave B + 6 Stats + 8 Social/perfil) una vez exista el demo HO.
-3. **Volta** (fuera de foco hasta cerrar HO): VoltaWodSummary, VoltaStats, VoltaCoachDash, VoltaCoachWod, VoltaCoachTools, LogWodResult.
-4. (Opcional) Help/support bot (WISE) · unificar disco PlateBadge en CoachDashV2.
+1. **QA visual** humano de las 17 pantallas migradas (Wave B + 6 Stats + 8 Social/perfil) entrando por Demo HO en Render (ver arriba cómo). Anotar lo que se vea raro.
+2. **Volta** (fuera de foco hasta cerrar HO): VoltaWodSummary, VoltaStats, VoltaCoachDash, VoltaCoachWod, VoltaCoachTools, LogWodResult.
+3. (Opcional) Help/support bot (WISE) · unificar disco PlateBadge en CoachDashV2.
 
-> Pantallas HO de atleta/coach: **migración a V2 COMPLETA** salvo Demo HO.
+> Pantallas HO de atleta/coach: **migración a V2 COMPLETA**. Demo HO: **HECHO**. HO al 100% salvo QA visual humano.
 
 ## 📌 Decisiones del Boss (vigentes)
 - Estrategia: **migrar + borrar por pantalla** (no borrar todo, no partir de cero).
