@@ -13,7 +13,7 @@
   color: var(--text);
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  min-height: 100%;
   width: 100%;
 }
 .cd-root *,
@@ -68,6 +68,7 @@
   letter-spacing: 0.01em;
 }
 .cd-root .cd-h-x {
+  position: relative;
   width: 32px; height: 32px;
   background: var(--surface-2);
   border: 1px solid var(--border-soft);
@@ -76,6 +77,12 @@
   cursor: pointer;
   color: var(--text-mid);
   flex-shrink: 0;
+}
+/* Tap area 44x44 sin agrandar el botón visual (Apple HIG) */
+.cd-root .cd-h-x::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
 }
 .cd-root .cd-h-x:hover { color: var(--text-hi); }
 

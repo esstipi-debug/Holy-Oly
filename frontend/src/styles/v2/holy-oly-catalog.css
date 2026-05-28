@@ -23,7 +23,7 @@
   -webkit-font-smoothing: antialiased;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  min-height: 100%;
   width: 100%;
 }
 .hc-root *,
@@ -74,6 +74,10 @@
   overflow: hidden;
 }
 .hc-view-toggle button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
   background: transparent;
   border: 0;
   padding: 5px 8px;
@@ -137,6 +141,7 @@
 .hc-chips::-webkit-scrollbar { display: none; }
 .hc-chip {
   flex-shrink: 0;
+  min-height: 36px;
   padding: 5px 10px;
   background: var(--surface-1);
   border: 1px solid var(--border-soft);

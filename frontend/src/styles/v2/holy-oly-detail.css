@@ -18,7 +18,7 @@
   -webkit-font-smoothing: antialiased;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  min-height: 100%;
   width: 100%;
 }
 .hd-root *,
@@ -83,7 +83,10 @@
 .hd-back {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
+  min-height: 44px;
+  min-width: 44px;
   padding: 5px 9px 5px 5px;
   background: rgba(0,0,0,0.4);
   border: 1px solid var(--border-soft);
@@ -99,6 +102,7 @@
 }
 .hd-back:hover { color: var(--text-hi); }
 .hd-kebab {
+  position: relative;
   width: 32px; height: 32px;
   background: rgba(0,0,0,0.4);
   border: 1px solid var(--border-soft);
@@ -107,6 +111,12 @@
   cursor: pointer;
   display: grid; place-items: center;
   backdrop-filter: blur(6px);
+}
+/* Tap area 44x44 sin agrandar el botón visual (Apple HIG) */
+.hd-kebab::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
 }
 .hd-fam-badge {
   position: relative;
@@ -475,6 +485,7 @@
   align-items: center;
   gap: 4px;
   align-self: flex-start;
+  min-height: 44px;
   background: transparent;
   border: 1px solid var(--c);
   color: var(--c);
@@ -543,6 +554,7 @@
   letter-spacing: -0.01em;
 }
 .hd-drawer-close {
+  position: relative;
   width: 28px; height: 28px;
   background: var(--surface-2);
   border: 1px solid var(--border-soft);
@@ -550,6 +562,12 @@
   color: var(--text-mid);
   cursor: pointer;
   display: grid; place-items: center;
+}
+/* Tap area 44x44 sin agrandar el botón visual (Apple HIG) */
+.hd-drawer-close::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
 }
 .hd-drawer-days {
   display: flex;
@@ -891,6 +909,10 @@
    WEEK PICKER MODAL · coach selecciona desde qué semana arranca
    ============================================================ */
 .hd-role-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
   background: transparent;
   border: 1px solid var(--border-soft);
   color: var(--text-mid);

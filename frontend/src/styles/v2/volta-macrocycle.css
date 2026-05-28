@@ -16,7 +16,7 @@
   color: var(--text);
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  min-height: 100%;
   width: 100%;
 }
 .vm-root *,
@@ -91,6 +91,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  min-height: 40px;
   padding: 6px 9px;
   background: rgba(255,255,255,0.04);
   border: 1px solid var(--border-soft);
@@ -397,6 +398,7 @@
   color: #0a1a00;
   border: 0;
   border-radius: 8px;
+  min-height: 40px;
   padding: 9px 14px;
   display: inline-flex;
   align-items: center;
