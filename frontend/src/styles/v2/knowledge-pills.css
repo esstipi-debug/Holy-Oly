@@ -1,0 +1,223 @@
+/* ============================================================
+   PEAK QUAL · KNOWLEDGE PILLS · estilos V2
+   ------------------------------------------------------------
+   Pantalla atleta · reader inmersivo tipo "stories" con píldoras
+   de conocimiento técnico (+XP). Pantalla full-bleed: progress
+   bars arriba, tap zones laterales, contenido abajo, footer con
+   CTA. Se monta dentro de PhoneLayout (el bottom nav queda por
+   debajo del footer). Acento violeta (--engine-adapt · aprender).
+   Backdrop con tokens (sin imagen externa).
+
+   SCOPING · todo vive bajo `.kp-root`. Hereda tokens.css.
+   ============================================================ */
+
+.kp-root,
+.kp-root *,
+.kp-root *::before,
+.kp-root *::after { box-sizing: border-box; }
+
+.kp-root {
+  position: relative;
+  height: 100%;
+  min-height: 100%;
+  overflow: hidden;
+  font-family: var(--font-body);
+  background: var(--bg-deep);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  --kp-accent: var(--engine-adapt);
+}
+.kp-root h1,
+.kp-root p,
+.kp-root button { margin: 0; }
+.kp-root button { padding: 0; }
+
+/* ---------- Backdrop (tokens, sin imagen externa) ---------- */
+.kp-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse at 50% 115%, color-mix(in oklab, var(--kp-accent) 28%, transparent), transparent 60%),
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(180deg, var(--surface-1), var(--bg-deep));
+  background-size: 100% 100%, 38px 38px, 38px 38px, 100% 100%;
+}
+.kp-backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(5,5,16,0.4) 0%, rgba(5,5,16,0.1) 40%, rgba(5,5,16,0.85) 100%);
+}
+
+/* ---------- Progress bars ---------- */
+.kp-progress {
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  gap: 6px;
+  z-index: 40;
+}
+.kp-bar {
+  height: 3px;
+  flex: 1;
+  background: rgba(255,255,255,0.18);
+  border-radius: var(--r-full);
+  overflow: hidden;
+}
+.kp-bar-fill {
+  height: 100%;
+  width: 0;
+  background: var(--kp-accent);
+  box-shadow: 0 0 6px var(--kp-accent);
+  border-radius: var(--r-full);
+  transition: width 500ms ease;
+}
+.kp-bar[data-state="done"] .kp-bar-fill,
+.kp-bar[data-state="active"] .kp-bar-fill { width: 100%; }
+
+/* ---------- Tap zones ---------- */
+.kp-tap {
+  position: absolute;
+  top: 0;
+  bottom: 120px;
+  width: 33%;
+  z-index: 10;
+  background: transparent;
+  border: none;
+}
+.kp-tap-left { left: 0; }
+.kp-tap-right { right: 0; cursor: pointer; }
+
+/* ---------- Content ---------- */
+.kp-content {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 24px 24px 168px;
+}
+.kp-pill-badge {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--kp-accent);
+  background: color-mix(in oklab, var(--kp-accent) 14%, transparent);
+  border: 1px solid color-mix(in oklab, var(--kp-accent) 40%, transparent);
+  border-radius: var(--r-full);
+  padding: 5px 12px;
+  margin-bottom: 16px;
+}
+.kp-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: var(--text-hi);
+  margin-bottom: 16px;
+}
+.kp-body {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--text);
+  margin-bottom: 22px;
+  max-width: 90%;
+}
+.kp-reward {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: color-mix(in oklab, var(--surface-1) 80%, transparent);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  padding: 12px 16px;
+  backdrop-filter: blur(8px);
+}
+.kp-reward-xp {
+  flex-shrink: 0;
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--kp-accent);
+  background: color-mix(in oklab, var(--kp-accent) 16%, transparent);
+  border: 1px solid color-mix(in oklab, var(--kp-accent) 35%, transparent);
+}
+.kp-reward-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-hi);
+}
+.kp-reward-sub {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-mid);
+  margin-top: 3px;
+}
+
+/* ---------- Footer ---------- */
+.kp-footer {
+  position: absolute;
+  bottom: 20px;
+  left: 24px;
+  right: 24px;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.kp-next {
+  width: 100%;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  color: #14081f;
+  background: var(--kp-accent);
+  border: none;
+  border-radius: var(--r-md);
+  padding: 15px;
+  box-shadow: 0 0 26px -4px var(--kp-accent);
+  transition: transform 150ms, box-shadow 200ms;
+}
+.kp-next:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 34px -2px var(--kp-accent);
+}
+.kp-close {
+  width: 100%;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-lo);
+  background: transparent;
+  border: none;
+  transition: color 180ms;
+}
+.kp-close:hover { color: var(--text-mid); }

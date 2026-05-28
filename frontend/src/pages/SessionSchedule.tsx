@@ -1,9 +1,14 @@
 import React from 'react';
-import Card from '../components/Card';
-import Button from '../components/Button';
-import Badge from '../components/Badge';
 import { useNav } from '../context/NavigationContext';
 import { useAthlete } from '../context/AthleteContext';
+import '../styles/v2/session-schedule.css';
+
+/**
+ * SessionSchedule · planificación semanal del macrociclo del atleta.
+ * Estilo V2 dark "Macrociclos" · scoped bajo `.ssch-root` · acento ámbar.
+ * Se monta dentro de PhoneLayout (chrome + bottom nav). Lógica intacta:
+ * cálculo de semana (lunes→domingo), status por día y filtro de próximas.
+ */
 
 const DAY_LABELS = ['DOM', 'LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB'];
 const MONTH_LABELS = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
@@ -34,65 +39,57 @@ const SessionSchedule: React.FC = () => {
       label,
     };
   });
+  const upcoming = days.filter(d => d.status === 'PENDING' || d.status === 'ACTIVE');
 
   return (
-    <div className="flex flex-col h-full bg-holy-bg">
-      <div className="px-6 py-8 flex-1 overflow-y-auto">
-        <header className="mb-8 flex items-center gap-3">
-           
-           <div>
-              <h1 className="text-holy-text text-2xl font-black">Planificación</h1>
-              <p className="text-holy-primary text-[10px] font-black uppercase mt-1">Semana {macroWeek} · {macroLabel}</p>
-           </div>
+    <div className="ssch-root">
+      <div className="ssch-scroll">
+        <header className="ssch-head">
+          <h1 className="ssch-title">Planificación</h1>
+          <p className="ssch-eyebrow"><span className="pip" />Semana {macroWeek} · {macroLabel}</p>
         </header>
 
-        {/* Calendar Strip */}
-        <div className="flex justify-between items-center mb-10 overflow-x-auto pb-4 scroll-x-no-bar">
-           {days.map((d, i) => (
-             <div key={i} className="flex flex-col items-center gap-2 min-w-[50px]">
-                <p className="text-holy-text-secondary text-[9px] font-black uppercase">{d.day}</p>
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm border-2 transition-all ${
-                  d.status === 'ACTIVE' ? 'bg-holy-primary border-holy-primary text-holy-text shadow-lg shadow-holy-primary/20' : 
-                  d.status === 'DONE' ? 'bg-holy-surface/50 border-holy-surface2 text-holy-text-secondary' :
-                  'bg-holy-surface border-holy-surface text-holy-text-secondary'
-                }`}>
-                   {d.date}
-                </div>
-                {d.status === 'ACTIVE' && <div className="w-1 h-1 rounded-full bg-holy-primary" />}
-             </div>
-           ))}
+        {/* Calendar strip */}
+        <div className="ssch-week">
+          {days.map((d, i) => (
+            <div key={i} className="ssch-daycell" data-status={d.status}>
+              <p className="ssch-dow">{d.day}</p>
+              <div className="ssch-daynum">{d.date}</div>
+              {d.status === 'ACTIVE' && <span className="ssch-dot" />}
+            </div>
+          ))}
         </div>
 
-        {/* Detailed List */}
-        <div className="space-y-4 mb-6">
-           <h3 className="text-holy-text-secondary text-[10px] font-black uppercase tracking-widest pl-1">Próximas Sesiones</h3>
-           {days.filter(d => d.status === 'PENDING' || d.status === 'ACTIVE').map((d, i) => (
-             <Card key={i} variant={d.status === 'ACTIVE' ? 'glass' : 'solid'} className={`${d.status === 'ACTIVE' ? 'border-holy-primary/30' : ''} cursor-pointer`} onClick={() => navigate('WARMUP')}>
-                <div className="flex justify-between items-center">
-                   <div className="flex items-center gap-4">
-                      <div className={`w-2 h-10 rounded-full ${d.label === 'Rest Day' ? 'bg-holy-surface' : 'bg-holy-primary'}`} />
-                      <div>
-                         <p className="text-holy-text text-sm font-bold">{d.label}</p>
-                         <p className="text-holy-text-secondary text-[10px] uppercase font-bold">{d.day} {d.date} {d.month} · {SESSION_TIMES[i]}</p>
-                      </div>
-                   </div>
-                   {d.label !== 'Rest Day' ? (
-                     <Badge variant="info">LOG</Badge>
-                   ) : (
-                     <span className="text-lg">💤</span>
-                   )}
+        {/* Detailed list */}
+        <h3 className="ssch-sec-label">Próximas sesiones</h3>
+        <div className="ssch-list">
+          {upcoming.map((d, i) => {
+            const isRest = d.label === 'Rest Day';
+            return (
+              <button
+                key={i}
+                className="ssch-session btn-press"
+                data-active={d.status === 'ACTIVE'}
+                data-rest={isRest}
+                onClick={() => navigate('WARMUP')}
+              >
+                <div className="ssch-session-main">
+                  <p className="ssch-session-title">{d.label}</p>
+                  <p className="ssch-session-meta">{d.day} {d.date} {d.month} · {SESSION_TIMES[i]}</p>
                 </div>
-             </Card>
-           ))}
+                {isRest ? (
+                  <span className="ssch-rest-emoji">💤</span>
+                ) : (
+                  <span className="ssch-log">Log</span>
+                )}
+              </button>
+            );
+          })}
         </div>
 
-        <div className="px-1 pb-6">
-           <Button
-             fullWidth variant="secondary" size="lg"
-             className="border-holy-primary/20 text-holy-primary font-black italic"
-             onClick={() => navigate('PROFILE')}
-           >SOLICITAR REPROGRAMACIÓN</Button>
-        </div>
+        <button className="ssch-cta btn-press" onClick={() => navigate('PROFILE')}>
+          Solicitar reprogramación
+        </button>
       </div>
     </div>
   );

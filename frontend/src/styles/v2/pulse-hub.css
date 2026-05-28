@@ -1,0 +1,278 @@
+/* ============================================================
+   PEAK QUAL · PULSE HUB · estilos V2
+   ------------------------------------------------------------
+   Pantalla atleta · feed social en vivo: reto del club + feed
+   de actividad reciente. Se monta dentro de PhoneLayout (chrome
+   + bottom nav) → no dibuja chrome propio. Acento rojo
+   (--engine-pulse) por la identidad "pulse" / latido en vivo.
+
+   SCOPING · todo vive bajo `.plh-root`. Hereda tokens.css.
+   ============================================================ */
+
+.plh-root,
+.plh-root *,
+.plh-root *::before,
+.plh-root *::after { box-sizing: border-box; }
+
+.plh-root {
+  font-family: var(--font-body);
+  background: var(--bg);
+  height: 100%;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  --plh-accent: var(--engine-pulse);
+}
+.plh-root h1,
+.plh-root h3,
+.plh-root h4,
+.plh-root p,
+.plh-root button { margin: 0; }
+.plh-root button { padding: 0; }
+
+.plh-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px 16px 24px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-3) transparent;
+}
+.plh-scroll::-webkit-scrollbar { width: 4px; }
+.plh-scroll::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 2px; }
+
+/* ---------- Header ---------- */
+.plh-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.plh-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  color: var(--text-hi);
+  line-height: 1;
+}
+.plh-online {
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--plh-accent);
+}
+.plh-online .live-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--plh-accent);
+  box-shadow: 0 0 8px var(--plh-accent);
+  position: relative;
+}
+.plh-online .live-dot::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: var(--plh-accent);
+  opacity: 0.4;
+  animation: plhPulse 1.8s ease-in-out infinite;
+}
+@keyframes plhPulse {
+  0%, 100% { transform: scale(1); opacity: 0.4; }
+  50%      { transform: scale(1.6); opacity: 0; }
+}
+.plh-radar {
+  flex-shrink: 0;
+  width: 42px; height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 18px;
+  background: color-mix(in oklab, var(--plh-accent) 10%, transparent);
+  border: 1px solid color-mix(in oklab, var(--plh-accent) 30%, transparent);
+  animation: plhBreath 2.4s ease-in-out infinite;
+}
+@keyframes plhBreath {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--plh-accent) 30%, transparent); }
+  50%      { box-shadow: 0 0 0 6px color-mix(in oklab, var(--plh-accent) 0%, transparent); }
+}
+
+/* ---------- Section label ---------- */
+.plh-sec-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-lo);
+  margin: 0 2px 10px;
+}
+
+/* ---------- Live challenge ---------- */
+.plh-challenge {
+  margin-bottom: 28px;
+  background: var(--surface-1);
+  border: 1px solid color-mix(in oklab, var(--plh-accent) 30%, transparent);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+.plh-ch-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  background: color-mix(in oklab, var(--plh-accent) 9%, transparent);
+  border-bottom: 1px solid color-mix(in oklab, var(--plh-accent) 20%, transparent);
+}
+.plh-ch-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text-hi);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.plh-ch-window {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--plh-accent);
+  margin-top: 3px;
+}
+.plh-ch-timer {
+  flex-shrink: 0;
+  text-align: right;
+}
+.plh-ch-count {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--text-hi);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.plh-ch-count-label {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-lo);
+  margin-top: 3px;
+}
+.plh-ch-body {
+  padding: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.plh-avatars { display: flex; }
+.plh-avatars .av {
+  width: 32px; height: 32px;
+  margin-left: -10px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 800;
+  color: var(--text-hi);
+  background: var(--surface-3);
+  border: 2px solid var(--bg);
+}
+.plh-avatars .av:first-child { margin-left: 0; }
+.plh-avatars .av.more {
+  background: var(--plh-accent);
+  color: #1a0606;
+}
+.plh-join {
+  flex-shrink: 0;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #1a0606;
+  background: var(--plh-accent);
+  border: none;
+  border-radius: var(--r-full);
+  padding: 9px 16px;
+  box-shadow: 0 0 18px -4px var(--plh-accent);
+  transition: transform 150ms, box-shadow 200ms;
+}
+.plh-join:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 24px -2px var(--plh-accent);
+}
+
+/* ---------- Activity feed ---------- */
+.plh-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.plh-post {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  padding: 11px 13px;
+  box-shadow: var(--shadow-card);
+}
+.plh-post-av {
+  flex-shrink: 0;
+  width: 38px; height: 38px;
+  border-radius: var(--r-md);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 13px;
+  color: #fff;
+  background: var(--av, var(--surface-3));
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+.plh-post-body { flex: 1; min-width: 0; }
+.plh-post-text {
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--text-hi);
+  font-weight: 700;
+}
+.plh-post-text .act {
+  color: var(--text-mid);
+  font-weight: 400;
+}
+.plh-post-time {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-lo);
+  margin-top: 3px;
+}
+.plh-post-clap {
+  flex-shrink: 0;
+  font-size: 17px;
+  line-height: 1;
+}

@@ -1,9 +1,13 @@
 import React from 'react';
-import Card from '../components/Card';
-import Badge from '../components/Badge';
-import Button from '../components/Button';
 import { useNav } from '../context/NavigationContext';
 import { useAthlete } from '../context/AthleteContext';
+import '../styles/v2/pulse-hub.css';
+
+/**
+ * PulseHub · feed social en vivo del club (reto del día + actividad reciente).
+ * Estilo V2 dark · scoped bajo `.plh-root` · acento rojo (--engine-pulse).
+ * Se monta dentro de PhoneLayout. Lógica intacta: feed derivado de allAthletes.
+ */
 
 const ACTIONS = [
   'completó complejo Arrancada (3+1)',
@@ -13,7 +17,8 @@ const ACTIONS = [
   'pasó a Cinturón Púrpura',
 ];
 const TIMES = ['2m', '15m', '1h', '3h', '5h'];
-const COLORS = ['bg-indigo-500', 'bg-pink-500', 'bg-amber-500', 'bg-emerald-500', 'bg-violet-500'];
+// Colores de avatar (hex · antes Tailwind bg-*-500)
+const COLORS = ['#6366F1', '#EC4899', '#F59E0B', '#10B981', '#8B5CF6'];
 
 const PulseHub: React.FC = () => {
   const { navigate } = useNav();
@@ -25,67 +30,63 @@ const PulseHub: React.FC = () => {
     time: TIMES[i % TIMES.length],
     color: COLORS[i % COLORS.length],
   }));
+
   return (
-    <div className="flex flex-col h-full bg-holy-bg">
-      <div className="px-6 py-8 flex-1 overflow-y-auto">
-        <header className="flex justify-between items-center mb-8 pt-10">
-           <div>
-              <h1 className="text-holy-text text-2xl font-black italic tracking-tighter">PULSE HUB</h1>
-              <Badge variant="danger" dot>{others.length} Atletas Online</Badge>
-           </div>
-           <div className="w-10 h-10 rounded-full bg-holy-primary/10 border border-holy-primary/20 flex items-center justify-center animate-pulse">
-              <span className="text-holy-primary text-lg">📡</span>
-           </div>
+    <div className="plh-root">
+      <div className="plh-scroll">
+        <header className="plh-head">
+          <div>
+            <h1 className="plh-title">Pulse Hub</h1>
+            <span className="plh-online"><span className="live-dot" />{others.length} atletas online</span>
+          </div>
+          <div className="plh-radar">📡</div>
         </header>
 
-        {/* Live Challenges */}
-        <section className="space-y-4 mb-10">
-           <h3 className="text-holy-text-secondary text-[10px] font-black uppercase tracking-widest pl-1">Retos del Club · Halterofilia</h3>
-           <Card variant="glass" padding="none" className="border-holy-primary/30 overflow-hidden">
-              <div className="bg-holy-primary/10 p-5 border-b border-holy-primary/20 flex justify-between items-center gap-3">
-                 <div className="min-w-0 flex-1 overflow-hidden">
-                    <h4 className="text-holy-text text-base font-black truncate">MAX SNATCH DEL DÍA</h4>
-                    <p className="text-holy-primary text-[10px] font-bold uppercase truncate">Ventana: 12:00 PM – 18:00</p>
-                 </div>
-                 <div className="text-right flex-shrink-0">
-                    <p className="text-holy-text text-lg font-black tabular-nums">14:25</p>
-                    <p className="text-holy-text-secondary text-[8px] font-bold">PARA CIERRE</p>
-                 </div>
+        {/* Live challenge */}
+        <section>
+          <h3 className="plh-sec-label">Retos del club · Halterofilia</h3>
+          <div className="plh-challenge">
+            <div className="plh-ch-head">
+              <div style={{ minWidth: 0 }}>
+                <h4 className="plh-ch-name">Max Snatch del día</h4>
+                <p className="plh-ch-window">Ventana: 12:00 PM – 18:00</p>
               </div>
-              <div className="p-5 flex justify-between items-center">
-                 <div className="flex -space-x-3">
-                    {[1,2,3,4].map(x => <div key={x} className="w-8 h-8 rounded-full bg-holy-surface border-2 border-holy-bg flex items-center justify-center text-[8px] font-black text-holy-text">U{x}</div>)}
-                    <div className="w-8 h-8 rounded-full bg-holy-primary border-2 border-holy-bg flex items-center justify-center text-[8px] font-black text-holy-text">+4</div>
-                 </div>
-                 <Button variant="primary" size="sm" onClick={() => navigate('SESSION')}>UNIRSE AL PULSE</Button>
+              <div className="plh-ch-timer">
+                <p className="plh-ch-count">14:25</p>
+                <p className="plh-ch-count-label">para cierre</p>
               </div>
-           </Card>
+            </div>
+            <div className="plh-ch-body">
+              <div className="plh-avatars">
+                {[1, 2, 3, 4].map(x => <div key={x} className="av">U{x}</div>)}
+                <div className="av more">+4</div>
+              </div>
+              <button className="plh-join btn-press" onClick={() => navigate('SESSION')}>Unirse al pulse</button>
+            </div>
+          </div>
         </section>
 
-        {/* Global Shoutouts / Feed */}
-        <section className="space-y-4 mb-20">
-           <h3 className="text-holy-text-secondary text-[10px] font-black uppercase tracking-widest pl-1">Actividad Reciente</h3>
-           <div className="space-y-3">
-             {feed.map((post, i) => (
-               <Card key={i} variant="solid" padding="sm" className="bg-white/[0.02]">
-                  <div className="flex gap-4 items-center">
-                     <div className={`w-10 h-10 rounded-2xl ${post.color} flex items-center justify-center text-holy-text font-black text-xs shadow-lg shadow-black/40`}>
-                        {post.user[0]}
-                     </div>
-                     <div className="flex-1">
-                        <p className="text-holy-text text-xs font-bold leading-tight">
-                          {post.user} <span className="text-holy-text-secondary font-normal">{post.action}</span>
-                        </p>
-                        <p className="text-holy-text-secondary text-[9px] font-bold uppercase mt-1">{post.time} AGO</p>
-                     </div>
-                     <span className="text-lg">👏</span>
-                  </div>
-               </Card>
-             ))}
-           </div>
+        {/* Activity feed */}
+        <section>
+          <h3 className="plh-sec-label">Actividad reciente</h3>
+          <div className="plh-feed">
+            {feed.map((post, i) => (
+              <div key={i} className="plh-post">
+                <div className="plh-post-av" style={{ '--av': post.color } as React.CSSProperties}>
+                  {post.user[0]}
+                </div>
+                <div className="plh-post-body">
+                  <p className="plh-post-text">
+                    {post.user} <span className="act">{post.action}</span>
+                  </p>
+                  <p className="plh-post-time">{post.time} ago</p>
+                </div>
+                <span className="plh-post-clap">👏</span>
+              </div>
+            ))}
+          </div>
         </section>
       </div>
-
     </div>
   );
 };
