@@ -22,6 +22,8 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactElement } from 'react';
 import { useNav, type View } from '../../context/NavigationContext';
 import { useAuth } from '../../context/AuthContext';
+import { useProduct } from '../../context/ProductContext';
+import { useRole } from '../../context/RoleContext';
 import '../../styles/v2/login.css';
 
 // ============================================================
@@ -205,6 +207,8 @@ interface LoginV3Props {
 export default function LoginV3({ onSuccess }: LoginV3Props = {}) {
   const { navigate } = useNav();
   const { login, enterDemoMode, backendAlive } = useAuth();
+  const { setProduct } = useProduct();
+  const { setRole } = useRole();
 
   const [productId] = useState<ProductId>(readCurrentProduct());
   const product = PRODUCTS[productId];
@@ -302,9 +306,19 @@ export default function LoginV3({ onSuccess }: LoginV3Props = {}) {
     }
   };
 
-  const enterDemo = () => {
+  // Entrada demo determinística por cuadrante. Usa los setters de contexto
+  // (ProductContext/RoleContext) para que useProduct()/useRole() se actualicen
+  // reactivamente — escribir localStorage crudo NO bastaría (esos contextos solo
+  // leen storage al init). Luego enterDemoMode() habilita demoMode + user mock y
+  // navegamos directo al home del cuadrante (NO a DEMO_HUB).
+  const enterDemoQuadrant = (p: 'holy-oly' | 'volta', r: 'atleta' | 'coach') => {
+    setProduct(p);
+    setRole(r);
     enterDemoMode();
-    goAfterSuccess();
+    const home: View = p === 'volta'
+      ? (r === 'coach' ? 'VOLTA_COACH' : 'VOLTA_HOME')
+      : (r === 'coach' ? 'COACH_DASH' : 'HOME');
+    navigate(home);
   };
 
   const ctaDisabled = loading || !email || !password;
@@ -402,13 +416,41 @@ export default function LoginV3({ onSuccess }: LoginV3Props = {}) {
           <section className="lg-demo" aria-label="Modo demo">
             <div className="lg-demo-divider">
               <span className="lg-demo-bar"/>
-              <span className="lg-demo-or">o</span>
+              <span className="lg-demo-or">demo · QA</span>
               <span className="lg-demo-bar"/>
             </div>
-            <button type="button" className="lg-demo-cta" onClick={enterDemo}>
-              Entrar en modo Demo
-              <span className="lg-demo-hint">sin backend · datos mock</span>
-            </button>
+            <p style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-mid, #94A3B8)', margin: '0 0 10px' }}>
+              Entrá con datos mock · elegí cuadrante
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              {([
+                { p: 'holy-oly', r: 'atleta', label: '🏋️ Atleta HO',  c: '#FFB300' },
+                { p: 'holy-oly', r: 'coach',  label: '📋 Coach HO',   c: '#FFB300' },
+                { p: 'volta',    r: 'atleta', label: '⚡ Atleta Volta', c: '#00E5FF' },
+                { p: 'volta',    r: 'coach',  label: '📋 Coach Volta', c: '#00E5FF' },
+              ] as const).map(q => (
+                <button
+                  key={`${q.p}-${q.r}`}
+                  type="button"
+                  className="btn-press"
+                  onClick={() => enterDemoQuadrant(q.p, q.r)}
+                  style={{
+                    padding: '12px 10px',
+                    borderRadius: 12,
+                    background: `color-mix(in oklab, ${q.c} 12%, transparent)`,
+                    border: `1px solid color-mix(in oklab, ${q.c} 40%, transparent)`,
+                    color: q.c,
+                    fontFamily: 'inherit',
+                    fontSize: 12,
+                    fontWeight: 800,
+                    letterSpacing: '.02em',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {q.label}
+                </button>
+              ))}
+            </div>
           </section>
         )}
 

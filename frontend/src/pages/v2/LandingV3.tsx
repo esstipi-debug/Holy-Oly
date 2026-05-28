@@ -247,11 +247,14 @@ function PreviewToast({ product, onClose }: { product: ProductCard | null; onClo
 // ============================================================
 // Footer secundario + legal
 // ============================================================
-function Footer({ onLogin }: { onLogin: () => void }) {
+function Footer({ onLogin, onDemo }: { onLogin: () => void; onDemo: () => void }) {
   return (
     <footer className="lp-footer">
       <button type="button" className="lp-login-link" onClick={onLogin}>
         Ya tenés cuenta · <span>iniciar sesión</span>
+      </button>
+      <button type="button" className="lp-login-link" onClick={onDemo} style={{ marginTop: 8 }}>
+        Modo demo · <span>QA sin cuenta</span>
       </button>
       <div className="lp-legal">
         <a href="#privacy" onClick={(e) => e.preventDefault()}>Privacidad</a>
@@ -288,7 +291,21 @@ export default function LandingV3() {
 
   const handleSelect = (id: ProductId) => {
     try {
-      localStorage.setItem('product:current', id);
+      // product:current espera 'holy-oly' | 'volta' — NO el id corto 'ho'.
+      // (antes guardaba 'ho', que caía al default por no matchear en readProduct)
+      localStorage.setItem('product:current', id === 'volta' ? 'volta' : 'holy-oly');
+    } catch {
+      /* ignore */
+    }
+    goLogin();
+  };
+
+  // Entrada a modo demo/QA sin necesidad de `?demo=1` en la URL: habilita el
+  // gate y manda al login, donde aparecen los botones por cuadrante (HO/Volta).
+  const goDemo = () => {
+    try {
+      localStorage.setItem('app:demo_mode', '1');
+      localStorage.setItem('product:current', 'holy-oly');
     } catch {
       /* ignore */
     }
@@ -323,7 +340,7 @@ export default function LandingV3() {
             ))}
           </div>
         </section>
-        <Footer onLogin={goLogin}/>
+        <Footer onLogin={goLogin} onDemo={goDemo}/>
       </div>
       <PreviewToast product={preview} onClose={() => setPreview(null)}/>
     </div>
