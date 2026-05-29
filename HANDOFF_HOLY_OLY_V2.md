@@ -33,22 +33,23 @@ Que Holy Oly quede **100% operativo y demostrable**. Estado al cierre 2026-05-29
 ## 📋 PROMPT DE ARRANQUE — copiar/pegar tal cual en la sesión nueva
 
 ```text
-Misión: seguir completando Holy Oly (ya está demostrable; quedan pendientes secundarios + Volta).
+Misión: Holy Oly (halterofilia) está COMPLETO como demo y demostrable punta a punta. NO faltan pantallas. Decidir CON EL BOSS el próximo track (A evolución demo→real / B Volta / C polish) antes de construir.
 
-Trabajás en el worktree C:/Users/Gamer/Desktop/Holy Oly 001/.claude/worktrees/compassionate-rhodes-7d48f8, branch feat/api-first-refactor. Verificá `git rev-parse --abbrev-ref HEAD` ANTES de tocar nada (puede que el harness te abra otro worktree → si no estás en compassionate-rhodes, operá ahí con rutas absolutas). Leé HANDOFF_HOLY_OLY_V2.md ENTERO.
+Trabajás en el worktree C:/Users/Gamer/Desktop/Holy Oly 001/.claude/worktrees/compassionate-rhodes-7d48f8, branch feat/api-first-refactor. Verificá `git rev-parse --abbrev-ref HEAD` ANTES de tocar nada (el harness puede abrirte otro worktree → si no estás en compassionate-rhodes, operá ahí con rutas absolutas). Leé HANDOFF_HOLY_OLY_V2.md ENTERO.
 
 Reglas duras:
 - NO inventar macrociclos ni data. Fuente real: macrocycles/RAW_SOURCES/ → frontend/src/data/macrocycles.ts (canónico) + macroSources.ts (detalle). Si falta una fuente, pedila.
-- Build SIEMPRE: `cd frontend && npm run build` (tsc -b, atrapa unused). Commitear por ola y pushear (Render auto-deploya peakqual-v2).
-- Demo: https://peakqual-v2.onrender.com/?demo=1 (arranca fresco) → "Modo demo · QA" → cuadrante. Local: `cd frontend && npm run dev` → :5173.
-- Verificá en preview lo que toques (no solo build).
+- Build SIEMPRE: `cd frontend && npm run build` (tsc -b atrapa unused). Commit por ola y push (Render auto-deploya peakqual-v2).
+- Demo corre OFFLINE: token 'demo' → /v1/* da 401 → usa mocks (data/athletes.ts) y escribe en sessionStorage (ho:macroOverrides, ho:competitions, ho:weighins, ho:addedAthletes). NO hay DB.
+- Verificá en preview lo que toques (no solo build). Demo: https://peakqual-v2.onrender.com/?demo=1 → footer "Modo demo · QA" → cuadrante. Local: `cd frontend && npm run dev` → :5173 (gotcha #10 si el dev server arranca en otro worktree: ruta corta 8.3).
 
-Pendientes priorizados (ver §PENDIENTE del handoff):
-1) Persistir la transición/asignación de macro en el demo (hoy TransitionSheet confirma sin mutar el roster → falta un setter en AthleteContext).
-2) Revisión paso a paso de Coach HO con el Boss (qué hace/muestra cada botón/sección).
-3) Calendario de competencias + picos (visión "administrador de macrociclos").
-4) Volta (pantallas legacy).
-Avance por ola, mostrá progreso, sin inventar data.
+Estado: pendientes #1/#2/#3 del traspaso anterior CERRADOS + recomendador de macros client-side (atleta Freddy Perdomo) + skin mujer (coral/violeta, auto por género del atleta, discos intactos) + fix UX asignar (WISE abre el week-picker directo).
+
+Próximos tracks (preguntá al Boss cuál; ver §PENDIENTE):
+A) EVOLUCIÓN demo→producto real (lo que el Boss venía preguntando): auth real (JWT contra el backend holy-oly-3.onrender.com) + persistir los writes contra backend/DB en vez de sessionStorage + roster por cuenta. Primer eslabón sugerido: login real + cablear la asignación de macro a la DB (POST /v1/macrocycles/assign + /v1/macrocycles/generate YA EXISTEN; con JWT persisten). Competencias/pesajes/macro-override hoy son sessionStorage → faltan endpoints en el backend.
+B) VOLTA (otro producto · CrossFit, legacy): VoltaWodSummary, VoltaStats, VoltaCoachDash, VoltaCoachWod, VoltaCoachTools, LogWodResult.
+C) Polish HO menor: insight inline+drawer en wellness (②)/desvíos (④); reconciliar duraciones catálogo↔RAW_SOURCES (cubano-novicio 8 vs 16 sem).
+Avance por ola, mostrá progreso, sin inventar data. Usá brainstorming antes de cada feature nueva.
 ```
 
 ---
@@ -183,7 +184,7 @@ Estilo V2 dark "Macrociclos". Cada pantalla scopeada bajo `.xxx-root`, hereda `t
 
 ## 📜 COMMITS DE REFERENCIA
 
-**Sesión 2 · 2026-05-29 (continuación, desde `3e4a498`):** `df282be` persistir macro · `e7e95a9`+`2bc334c` spec/plan competencias · `c37a331`+`d6b8822` calendario+picos+home atleta · `68ed1a7`+`4833028`+`861e4dd` peso corporal (spec/plan/coach/home) · `db273f7` walkthrough Coach HO · `cbd3363` fixes (CoachMacroView real + NewAthlete persist + ajustes) · `47ee063`+`66d2ae0`+`c779150` recomendador + Freddy · `91abaf9` skin mujer.
+**Sesión 2 · 2026-05-29 (continuación, desde `3e4a498`):** `df282be` persistir macro · `e7e95a9`+`2bc334c` spec/plan competencias · `c37a331`+`d6b8822` calendario+picos+home atleta · `68ed1a7`+`4833028`+`861e4dd` peso corporal (spec/plan/coach/home) · `db273f7` walkthrough Coach HO · `cbd3363` fixes (CoachMacroView real + NewAthlete persist + ajustes) · `47ee063`+`66d2ae0`+`c779150` recomendador + Freddy · `91abaf9` skin mujer · `b6ff82b` handoff sesión 2 · `8becbad` fix UX asignar (WISE → week-picker directo).
 
 **Sesión 2026-05-29 (`feat/api-first-refactor`, desde `09117d5`):**
 `7ca493e` ola 1 demo realista · `23e1b2c` roster scope · `79db88c` ola 2 IMR por ejercicio · `a010bd7` ola 3a IMR vs banda+insight · `0fe3a08` ola 3b bandeja · `e1b7749` ola 3c readiness insight · `3860b70` ola 3d ACWR · `f8f7424` ola 5 seed backend · `1bc422b` ola 4 fidelidad macros · `dbd7434` ola 6 planificación 2-3d+transición · `926f0c7` ola 7 UX · `3b2d7c5` carga semanal cyan · `42ab33f` fix nav (macros sin salida + skill tree + token + mapa) · `34cc413` fix nav secundarios · `753cf05`+`5fe409e` docs(handoff).
