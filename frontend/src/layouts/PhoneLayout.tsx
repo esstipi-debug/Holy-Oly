@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNav } from '../context/NavigationContext';
 import SessionSlotBadge from '../components/SessionSlotBadge';
 
@@ -118,24 +118,39 @@ const PhoneLayout: React.FC<PhoneLayoutProps> = ({
   const now = new Date();
   const time = now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
 
+  // En teléfonos reales (viewport angosto) la app llena la pantalla, sin el
+  // marco/mockup de teléfono (que en un celular parece "simulador"). En
+  // desktop/tablet se conserva el mockup 390×844 para mostrar/vender.
+  const [fullscreen, setFullscreen] = useState<boolean>(
+    () => typeof window !== 'undefined' && window.matchMedia('(max-width: 480px)').matches
+  );
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 480px)');
+    const onChange = () => setFullscreen(mq.matches);
+    onChange();
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-4"
-      style={{ background: '#0D0D18' }}
+      className="min-h-screen flex items-center justify-center"
+      style={{ background: '#0D0D18', padding: fullscreen ? 0 : 16 }}
     >
       <div
         className="relative flex flex-col"
         style={{
-          width: 390,
-          height: 844,
+          width: fullscreen ? '100%' : 390,
+          height: fullscreen ? '100dvh' : 844,
           background: 'var(--bg)',
-          borderRadius: 44,
-          border: '2px solid #2a2a3a',
+          borderRadius: fullscreen ? 0 : 44,
+          border: fullscreen ? 'none' : '2px solid #2a2a3a',
           overflow: 'hidden',
-          boxShadow: '0 0 80px rgba(99,102,241,0.15), 0 0 0 1px #1e1e30, 0 40px 80px rgba(0,0,0,0.6)',
+          boxShadow: fullscreen ? 'none' : '0 0 80px rgba(99,102,241,0.15), 0 0 0 1px #1e1e30, 0 40px 80px rgba(0,0,0,0.6)',
         }}
       >
-        {/* Status Bar */}
+        {/* Status Bar · solo en el mockup (desktop). En fullscreen el browser/OS ya muestra la suya. */}
+        {!fullscreen && (
         <div
           className="flex items-center justify-between px-7 flex-shrink-0"
           style={{ height: 44, background: 'var(--bg)' }}
@@ -169,6 +184,7 @@ const PhoneLayout: React.FC<PhoneLayoutProps> = ({
             </div>
           </div>
         </div>
+        )}
 
         {/* Header bar reservada cuando hay back — evita que el botón pise el contenido */}
         {showBack && canGoBack && (
