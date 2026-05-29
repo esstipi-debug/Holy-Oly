@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { AthleteProvider } from './context/AthleteContext';
+import { AthleteProvider, useAthlete } from './context/AthleteContext';
 import { CompetitionProvider } from './context/CompetitionContext';
 import { BodyweightProvider } from './context/BodyweightContext';
 import { NavigationProvider, useNav } from './context/NavigationContext';
@@ -243,6 +243,7 @@ function AppInner() {
   const { product } = useProduct();
   const { role } = useRole();
   const { isAuthenticated } = useAuth();
+  const { athlete, selectedAthlete } = useAthlete();
   const [devNavOpen, setDevNavOpen] = useState<boolean>(() => localStorage.getItem('devNav:open') === '1');
   const toggleDevNav = () => {
     const next = !devNavOpen;
@@ -275,6 +276,18 @@ function AppInner() {
     if (currentView === 'LOGIN' || currentView === 'REGISTER') return;
     try { localStorage.setItem(`nav:last:${product}:${role}`, currentView); } catch { /* ignore */ }
   }, [currentView, product, role, isAuthenticated]);
+
+  // Skin mujer: auto por género del atleta en foco (atleta = persona · coach =
+  // selectedAthlete en vistas centradas en un atleta). Re-tinta accents/glows vía
+  // [data-skin="women"]; los discos (--tier-*) y el fondo del theme no se tocan.
+  const focusAthlete = role === 'coach'
+    ? ((currentView === 'ATHLETE_DETAIL' || currentView === 'ASSIGN_MACRO') ? selectedAthlete : null)
+    : athlete;
+  const skin = focusAthlete?.gender === 'F' ? 'women' : 'default';
+  useEffect(() => {
+    if (skin === 'women') document.documentElement.setAttribute('data-skin', 'women');
+    else document.documentElement.removeAttribute('data-skin');
+  }, [skin]);
 
   const isPublic = PUBLIC_VIEWS.has(currentView);
   // Vistas fullscreen ceremoniales: ocultan nav inferior + switcher para experiencia inmersiva

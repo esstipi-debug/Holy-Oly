@@ -66,3 +66,17 @@
   --glow-red:   0 0 24px rgba(239,68,68,0.35);
   --shadow-card: 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04);
 }
+
+/* ============================================================
+   SKIN MUJER · auto por género del atleta en foco (App.tsx setea
+   [data-skin="women"] en <html>). Re-tinta SOLO accents primarios + glows.
+   NO toca --tier-* (discos = marca) ni --bg/--text (ThemeProvider).
+   Paleta: coral + violeta.
+   ============================================================ */
+[data-skin="women"] {
+  --engine-stress: #FF7E6B;                          /* primario: cyan → coral */
+  --engine-macro:  #A78BFA;                          /* macro: amber → violeta */
+  --border-hard:   rgba(255,126,107,0.35);           /* borde acentuado coral */
+  --glow-cyan:     0 0 24px rgba(255,126,107,0.25);  /* glow coral */
+  --glow-amber:    0 0 24px rgba(167,139,250,0.30);  /* glow violeta */
+}
