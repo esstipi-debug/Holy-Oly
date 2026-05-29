@@ -10,6 +10,7 @@
  * Las filosofías por familia son las reales de cada escuela de halterofilia.
  */
 import { MACROCYCLES } from './macrocycles';
+import { MACRO_SOURCES } from './macroSources';
 
 // ── Tipos (compartidos con HolyOlyDetailV2) ──────────────────────────────────
 export interface WeeklyEntry { w: number; imr: number; reps: number; meso: number; focus: string; current?: boolean }
@@ -338,7 +339,18 @@ export function getMacroDetail(id: string | null): MacroData {
   const weeks = parseWeeks(base.duration);
   const freq = parseFreq(base.frequency);
   const fam = FAMILY[base.family] ?? FAMILY_FALLBACK;
+  const src = MACRO_SOURCES[base.id];
   const weekly = genWeekly(weeks, base.intensity, base.volume);
+  // Fidelidad: override de la curva IMR con la real de RAW_SOURCES (macroSources)
+  // donde exista; el resto (reps/meso/foco) queda paramétrico.
+  if (src && src.imrByWeek.length) {
+    weekly.forEach((w, i) => { if (i < src.imrByWeek.length) w.imr = src.imrByWeek[i]; });
+  }
+  const mesocycles = genMesos(weekly);
+  // Override nombre/objetivo de mesos con los reales si la fuente da los 4 (1:1 con cuartiles).
+  if (src && src.mesos.length === 4) {
+    mesocycles.forEach((m, i) => { m.name = src.mesos[i].name.toUpperCase(); m.desc = src.mesos[i].objetivo; });
+  }
   return {
     id: base.id,
     name: base.name.toUpperCase(),
@@ -354,9 +366,9 @@ export function getMacroDetail(id: string | null): MacroData {
     philoTitle: fam.title,
     philosophy: fam.cards,
     weekly,
-    mesocycles: genMesos(weekly),
+    mesocycles,
     weekTypical: genWeekTypical(freq, base.family, base.intensity),
-    footer: { origin: fam.origin, similar: similarOf(base.id, base.family) },
+    footer: { origin: src?.filosofia ? `${src.filosofia} · ${fam.origin}` : fam.origin, similar: similarOf(base.id, base.family) },
     // Vista de PREVIEW del catálogo: no es el macro activo del atleta → sin banner de progreso.
     user: { isActive: false, currentWeek: 0, pctComplete: 0, role: 'athlete', has1RM: true },
   };
