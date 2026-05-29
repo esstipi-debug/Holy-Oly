@@ -6,6 +6,7 @@ import { useCompetitions } from '../context/CompetitionContext';
 import { MACROCYCLES, type Macrocycle } from '../data/macrocycles';
 import { buildMacroAssignment } from '../data/macroDetail';
 import { nextCompetition, planToward, toDate } from '../data/competitions';
+import { recommendMacros } from '../data/macroRecommender';
 import { PlateBadge, type PlateTier } from '../components/PlateBadge';
 import { api } from '../lib/api';
 import {
@@ -285,7 +286,7 @@ const AssignMacrocycle: React.FC = () => {
     (async () => {
       const res = await trySuggestMacrosFor(target.id);
       if (cancelled) return;
-      setSuggestions(res);
+      setSuggestions(res ?? recommendMacros(target));
       setSuggestionsLoading(false);
     })();
     return () => { cancelled = true; };

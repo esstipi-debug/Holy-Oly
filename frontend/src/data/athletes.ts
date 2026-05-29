@@ -18,6 +18,8 @@ export interface AthleteMaxes {
   back_squat: number;
   front_squat: number;
   body_weight: number;
+  snatch_pull?: number;   // halón de arranque (opcional · no todos lo registran)
+  clean_pull?: number;    // halón de envión (opcional)
 }
 
 export interface CFBenchmark {
@@ -377,6 +379,26 @@ export const athletes: AthleteProfile[] = [
       { date: '2026-05-04', load: 2050, rpe_reported: 7, rpe_expected: 7, sleep_hours: 7.5, soreness: 4, motivation: 8, life_stress: 3, completed: true,  notes: 'AMRAP 15 · DU + Wall ball + T2B' },
       { date: '2026-05-05', load: 0,    rpe_reported: 0, rpe_expected: 0, sleep_hours: 7.5, soreness: 3, motivation: 9, life_stress: 2, completed: false, notes: 'WOD del día pendiente · Cindy' },
     ],
+  },
+  {
+    id: 'ath_freddy',
+    email: 'freddy.perdomo@demo.com',
+    password: '',
+    name: 'Freddy Perdomo',
+    age: 0,
+    gender: 'M',
+    weight_class: '—',
+    club: 'Sin asignar',
+    province: 'Sin asignar',
+    coach_id: 'coach_001',
+    role: 'athlete',
+    subscription: 'FREE',
+    macrocycle: { program_id: '', program_name: 'Sin asignar', week: 0, day: 0, total_weeks: 0, focus: 'Por definir' },
+    maxes: { snatch: 127, clean: 165, jerk: 165, back_squat: 230, front_squat: 0, body_weight: 0, snatch_pull: 130, clean_pull: 170 },
+    injuries: [],
+    sessions_last_7: [],
+    prior_fitness: 50,
+    prior_fatigue: 30,
   },
 ];
 
