@@ -4,6 +4,7 @@ import {
   availableTargetFreqs, affineMacros, suggestStartWeek, macroFreq,
   type AffineMacro,
 } from '../../data/macroTransition';
+import { planToward } from '../../data/competitions';
 
 /**
  * TransitionSheet · asistente de transición de días/semana (decisión del Boss:
@@ -21,12 +22,14 @@ interface Props {
   currentTotal: number;
   /** Confirma la transición: el padre persiste el macro nuevo en el atleta. */
   onApply?: (programId: string, startWeek: number) => void;
+  /** ISO date de la próxima competencia objetivo (si hay) → alinea la semana sugerida al pico. */
+  nextCompetitionDate?: string;
 }
 
 const ACCENT = 'var(--engine-stress)';
 
 const TransitionSheet: React.FC<Props> = ({
-  open, onClose, athleteName, currentProgramId, currentProgramName, currentWeek, currentTotal, onApply,
+  open, onClose, athleteName, currentProgramId, currentProgramName, currentWeek, currentTotal, onApply, nextCompetitionDate,
 }) => {
   const curFreq = macroFreq(currentProgramId);
   const freqs = useMemo(() => availableTargetFreqs(currentProgramId), [currentProgramId]);
@@ -47,7 +50,8 @@ const TransitionSheet: React.FC<Props> = ({
   const close = () => { onClose(); setTimeout(reset, 250); };
   const pickMacro = (a: AffineMacro) => {
     setPicked(a);
-    setStartWeek(suggestStartWeek(currentWeek, currentTotal, a.weeks));
+    const aligned = nextCompetitionDate ? planToward(a.weeks, nextCompetitionDate, new Date()).suggestedStartWeek : null;
+    setStartWeek(aligned ?? suggestStartWeek(currentWeek, currentTotal, a.weeks));
     setMode('continue');
   };
 
@@ -140,6 +144,11 @@ const TransitionSheet: React.FC<Props> = ({
                   ? `Sugerido por su progreso actual (${Math.round((currentWeek / currentTotal) * 100)}% del macro).`
                   : 'Base limpia desde la semana 1.'}
               </p>
+              {nextCompetitionDate && (
+                <p style={{ fontSize: 10, color: ACCENT, fontWeight: 700, textAlign: 'center', marginTop: 6 }}>
+                  🏆 S{effectiveWeek} alinea el pico a tu próxima competencia.
+                </p>
+              )}
               <button
                 onClick={() => { onApply?.(picked.macro.id, effectiveWeek); setApplied(true); }}
                 style={cta(ACCENT, true)}

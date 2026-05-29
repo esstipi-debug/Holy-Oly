@@ -2,8 +2,10 @@ import React, { useState, useMemo, useEffect, type CSSProperties } from 'react';
 import { useNav } from '../context/NavigationContext';
 import { useAthlete } from '../context/AthleteContext';
 import { useProduct } from '../context/ProductContext';
+import { useCompetitions } from '../context/CompetitionContext';
 import { MACROCYCLES, type Macrocycle } from '../data/macrocycles';
 import { buildMacroAssignment } from '../data/macroDetail';
+import { nextCompetition, planToward, toDate } from '../data/competitions';
 import { PlateBadge, type PlateTier } from '../components/PlateBadge';
 import { api } from '../lib/api';
 import {
@@ -72,7 +74,7 @@ const START_REASONS: { id: string; label: string }[] = [
 // Scopeado bajo .am-root vía clases .am-wp-*.
 // ============================================================
 function WeekPickerModal({
-  open, onClose, macroName, totalWeeks, accent, submitting, onConfirm,
+  open, onClose, macroName, totalWeeks, accent, submitting, onConfirm, suggestedWeek, suggestionHint,
 }: {
   open: boolean;
   onClose: () => void;
@@ -81,6 +83,8 @@ function WeekPickerModal({
   accent: string;
   submitting: boolean;
   onConfirm: (startWeek: number, reason: string) => void;
+  suggestedWeek?: number;
+  suggestionHint?: string;
 }) {
   const [selectedWeek, setSelectedWeek] = useState<number>(1);
   const [reason, setReason] = useState<string>('beginning');
@@ -88,10 +92,10 @@ function WeekPickerModal({
   // Reset a S1 cada vez que se abre con otro macro (cambia el total).
   useEffect(() => {
     if (open) {
-      setSelectedWeek(1);
-      setReason('beginning');
+      setSelectedWeek(suggestedWeek && suggestedWeek >= 1 && suggestedWeek <= totalWeeks ? suggestedWeek : 1);
+      setReason(suggestedWeek ? 'previous_program' : 'beginning');
     }
-  }, [open, totalWeeks]);
+  }, [open, totalWeeks, suggestedWeek]);
 
   if (!open) return null;
 
@@ -119,6 +123,7 @@ function WeekPickerModal({
           <span className="am-wp-tag">Asignar macrociclo</span>
           <h2 id="am-wp-title">{macroName}</h2>
           <p className="am-wp-sub">¿Desde qué semana arranca este atleta?</p>
+          {suggestionHint && <p className="am-wp-sub" style={{ color: accent, fontWeight: 700 }}>🏆 {suggestionHint}</p>}
         </div>
 
         <div className="am-wp-weeks-scroll scroll-x-no-bar">
@@ -235,6 +240,7 @@ const AssignMacrocycle: React.FC = () => {
   const { navigate } = useNav();
   const { selectedAthlete, athlete: currentAthlete, updateMacro } = useAthlete();
   const { product } = useProduct();
+  const { competitions } = useCompetitions();
   const target = selectedAthlete ?? currentAthlete;
 
   const [selected, setSelected] = useState<string | null>(null);
@@ -332,6 +338,14 @@ const AssignMacrocycle: React.FC = () => {
   const initials = target ? target.name.split(' ').slice(0, 2).map(n => n[0]).join('') : '';
   const selectedMacro = selected ? macrosForProduct.find(m => m.id === selected) : null;
   const selectedWeeks = selectedMacro ? parseWeeks(selectedMacro.duration) : 0;
+
+  // Competition-aware: si el atleta tiene una competencia próxima, sugerir la semana
+  // de arranque para que el pico (última semana del macro) caiga en la fecha.
+  const targetComp = target ? nextCompetition(competitions, target.id, new Date()) : null;
+  const plan = (targetComp && selectedWeeks > 0) ? planToward(selectedWeeks, targetComp.date, new Date()) : null;
+  const compHint = (targetComp && plan)
+    ? `Para picar en ${targetComp.name} (${toDate(targetComp.date).toLocaleDateString('es-AR', { day: '2-digit', month: 'short' })}): S${plan.suggestedStartWeek}`
+    : undefined;
 
   // Abrir el detalle completo del macrociclo (filosofía · mesos · chart por semana).
   // HolyOlyDetailV2 lo lee desde sessionStorage['ho:selectedMacroId'] (mismo contrato
@@ -649,6 +663,8 @@ const AssignMacrocycle: React.FC = () => {
           accent={selectedMacro.color}
           submitting={assigning}
           onConfirm={handleAssign}
+          suggestedWeek={plan?.suggestedStartWeek}
+          suggestionHint={compHint}
         />
       )}
     </div>

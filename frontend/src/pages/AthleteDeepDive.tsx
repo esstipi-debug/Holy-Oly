@@ -15,6 +15,8 @@ import ImrBandChart from '../components/coach/ImrBandChart';
 import AcwrGauge from '../components/coach/AcwrGauge';
 import TransitionSheet from '../components/coach/TransitionSheet';
 import CompetitionsCard from '../components/coach/CompetitionsCard';
+import { useCompetitions } from '../context/CompetitionContext';
+import { nextCompetition } from '../data/competitions';
 
 /** Readiness (0-10) → tier disc (halterofilia plates). Same semantics as CoachStatsHO. */
 const readinessToTier = (r: number): PlateTier => {
@@ -30,6 +32,8 @@ const AthleteDeepDive: React.FC = () => {
   const { product } = useProduct();
   const { selectedAthlete, athlete: currentAthlete, updateMacro } = useAthlete();
   const a = selectedAthlete ?? currentAthlete;
+  const { competitions } = useCompetitions();
+  const nextComp = a ? nextCompetition(competitions, a.id, new Date()) : null;
   const { stress: athleteStress, loading: stressLoading } = useAthleteStress(a);
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState('');
@@ -338,6 +342,7 @@ const AthleteDeepDive: React.FC = () => {
         currentWeek={a.macrocycle.week}
         currentTotal={a.macrocycle.total_weeks}
         onApply={(programId, startWeek) => updateMacro(a.id, buildMacroAssignment(programId, startWeek))}
+        nextCompetitionDate={nextComp?.date}
       />
 
       {/* FEEDBACK MODAL */}
