@@ -84,7 +84,8 @@ const BLOCK_TITLE: Record<string, string> = {
 };
 
 export default function DemoHubV2() {
-  const { navigate } = useNav();
+  const { navigate, back, canGoBack } = useNav();
+  const onBack = () => (canGoBack ? back() : navigate('LANDING_V3'));
 
   const grouped = ITEMS.reduce<Record<string, DemoItem[]>>((acc, it) => {
     const k = it.block || 'otros';
@@ -100,6 +101,8 @@ export default function DemoHubV2() {
   return (
     <div className="dh-root">
       <header className="dh-header">
+        <button onClick={onBack} aria-label="Salir del demo"
+                style={{ alignSelf: 'flex-start', background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', color: 'var(--text-secondary, #9aa)', borderRadius: 8, padding: '4px 10px', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit', marginBottom: 10 }}>‹ Salir</button>
         <div className="dh-tag">PEAK QUAL · DEMO HUB</div>
         <h1>UI Migration Status</h1>
         <p className="dh-sub">

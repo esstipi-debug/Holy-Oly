@@ -155,7 +155,7 @@ function Icon({ name, size = 14, stroke = 1.7, style, className }: {
 // ============================================================
 // ZONE A · HEADER
 // ============================================================
-function Header({ data, source }: { data: MacrocycleData; source: 'backend' | 'fallback' }) {
+function Header({ data, source, onPlan }: { data: MacrocycleData; source: 'backend' | 'fallback'; onPlan: () => void }) {
   return (
     <header className="vm-header" role="banner">
       <div className="vm-h-top">
@@ -174,7 +174,7 @@ function Header({ data, source }: { data: MacrocycleData; source: 'backend' | 'f
             </div>
           </div>
         </div>
-        <button className="vm-h-drawer" aria-label="Ver plan completo">
+        <button className="vm-h-drawer" aria-label="Ver plan completo" onClick={onPlan}>
           PLAN ✦
         </button>
       </div>
@@ -204,7 +204,7 @@ function Header({ data, source }: { data: MacrocycleData; source: 'backend' | 'f
 // ============================================================
 // ZONE B · HERO CARD
 // ============================================================
-function HeroCard({ data, onLongPress }: { data: MacrocycleData; onLongPress?: () => void }) {
+function HeroCard({ data, onLongPress, onWod }: { data: MacrocycleData; onLongPress?: () => void; onWod?: () => void }) {
   const block = data.blocks[data.currentBlockIndex];
   const { kpis, nextSession } = data;
   const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -283,7 +283,7 @@ function HeroCard({ data, onLongPress }: { data: MacrocycleData; onLongPress?: (
             <div className="vm-next-title">{nextSession.title}</div>
             <div className="vm-next-when">{nextSession.when} · {nextSession.type}</div>
           </div>
-          <button className="vm-cta-wod" aria-label="Ver detalle WOD">
+          <button className="vm-cta-wod" aria-label="Ver detalle WOD" onClick={onWod}>
             VER WOD <Icon name="arrowR" size={12} stroke={2.2}/>
           </button>
         </div>
@@ -508,9 +508,9 @@ export default function VoltaMacrocycleV2() {
     <div className="vm-root">
       <button onClick={onBack} aria-label="Volver"
               style={{ position: 'absolute', top: 10, left: 10, zIndex: 20, width: 34, height: 34, borderRadius: 10, background: 'rgba(0,0,0,0.45)', border: '1px solid rgba(255,255,255,0.14)', color: '#fff', fontSize: 22, lineHeight: 1, cursor: 'pointer', fontFamily: 'inherit' }}>‹</button>
-      <Header data={data} source={source}/>
+      <Header data={data} source={source} onPlan={() => setModalOpen(true)}/>
       <div className="vm-scroll">
-        <HeroCard data={data} onLongPress={() => setModalOpen(true)}/>
+        <HeroCard data={data} onLongPress={() => setModalOpen(true)} onWod={() => navigate('VOLTA_PREWOD')}/>
         <Timeline
           blocks={data.blocks}
           currentIdx={data.currentBlockIndex}

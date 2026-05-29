@@ -59,8 +59,8 @@ function Hero({ m, onBack }: { m: MacroData; onBack: () => void }) {
   return (
     <section className="hd-hero" style={{ ['--c-school' as string]: m.schoolColor } as CSSProperties}>
       <div className="hd-hero-top">
-        <button className="hd-back" aria-label="Volver al catálogo" onClick={onBack}>
-          <Icon name="back" size={12}/> CATÁLOGO
+        <button className="hd-back" aria-label="Volver" onClick={onBack}>
+          <Icon name="back" size={12}/> VOLVER
         </button>
         <button className="hd-kebab" aria-label="Menú">
           <Icon name="more" size={14}/>
@@ -507,7 +507,7 @@ function WeekPickerModal({
 // Main
 // ============================================================
 export default function HolyOlyDetailV2() {
-  const { back, navigate } = useNav();
+  const { back, navigate, canGoBack } = useNav();
   // Resuelve el macro elegido en el catálogo/asignación (sessionStorage) y genera
   // su detalle rico (curva IMR, mesos, semana tipo, filosofía por escuela).
   const m = useMemo(
@@ -520,13 +520,9 @@ export default function HolyOlyDetailV2() {
   const [viewAsCoach, setViewAsCoach] = useState<boolean>(m.user.role === 'coach');
   const [wpOpen, setWpOpen] = useState<boolean>(false);
 
-  const goBackToCatalog = () => {
-    try {
-      navigate('HO_MACRO_CATALOG');
-    } catch {
-      back();
-    }
-  };
+  // Volver a DONDE vino (stack) — ej. desde AssignMacrocycle sin sacar al coach de
+  // su contexto; si no hay historial (deep-link) cae al catálogo.
+  const goBackToCatalog = () => (canGoBack ? back() : navigate('HO_MACRO_CATALOG'));
 
   const onCtaClick = () => {
     if (viewAsCoach) {
