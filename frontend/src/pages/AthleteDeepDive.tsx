@@ -11,6 +11,7 @@ import { useAthleteStress, fallbackReadiness } from '../hooks/useAthleteStress';
 import { deriveRmStatus } from '../data/derive';
 import { readinessInsight, SEVERITY_COLOR } from '../data/insight';
 import ImrBandChart from '../components/coach/ImrBandChart';
+import AcwrGauge from '../components/coach/AcwrGauge';
 
 /** Readiness (0-10) → tier disc (halterofilia plates). Same semantics as CoachStatsHO. */
 const readinessToTier = (r: number): PlateTier => {
@@ -82,6 +83,14 @@ const AthleteDeepDive: React.FC = () => {
   const maxLoad = Math.max(...loads, 1);
   const hasLoadData = a.sessions_last_7.length > 0 && totalLoad > 0;
   const days = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+
+  // ACWR (agudo:crónico) desde loads reales: aguda = media de las últimas 3
+  // sesiones completadas, crónica = media de la ventana. Zona segura 0.8-1.3.
+  const completedLoads = completed.map(s => s.load);
+  const acuteArr = completedLoads.slice(-3);
+  const acute = acuteArr.length ? acuteArr.reduce((s, v) => s + v, 0) / acuteArr.length : 0;
+  const chronic = completedLoads.length ? completedLoads.reduce((s, v) => s + v, 0) / completedLoads.length : 0;
+  const acwr = chronic > 0 ? acute / chronic : 1;
 
   // RM por lift · 1:1 con a.maxes (sin duplicar C&J). Cambio/fecha del último
   // test derivados de forma determinística del 1RM real + id (data/derive.ts).
@@ -237,7 +246,10 @@ const AthleteDeepDive: React.FC = () => {
         </div>
       </div>
 
-      {/* ① IMR vs banda de fase · gráfico estrella del coach (spec §4.1) */}
+      {/* ③ ACWR · riesgo de lesión (spec §4.1③) */}
+      <AcwrGauge acwr={acwr} />
+
+      {/* ① IMR vs banda de fase · gráfico estrella del coach (spec §4.1①) */}
       <ImrBandChart athleteId={a.id} programId={a.macrocycle.program_id} currentWeek={a.macrocycle.week} />
 
       {/* ENTRENAMIENTO · vista del coach sobre lo que entrena el atleta */}
