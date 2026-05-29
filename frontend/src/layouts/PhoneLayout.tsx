@@ -118,14 +118,17 @@ const PhoneLayout: React.FC<PhoneLayoutProps> = ({
   const now = new Date();
   const time = now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
 
-  // En teléfonos reales (viewport angosto) la app llena la pantalla, sin el
-  // marco/mockup de teléfono (que en un celular parece "simulador"). En
-  // desktop/tablet se conserva el mockup 390×844 para mostrar/vender.
+  // Fullscreen en cualquier dispositivo táctil (pointer: coarse) o viewport ≤820px:
+  // la app llena la pantalla sin el marco/mockup (que en un celular parece
+  // "simulador"). Cubre todos los teléfonos sin importar el device-pixel-ratio
+  // (ej. 1080p @ DPR 2.0 = 540px CSS, que un breakpoint de 480 no atrapaba).
+  // En desktop (mouse, ancho) se conserva el mockup 390×844 para mostrar/vender.
+  const FULLSCREEN_MQ = '(max-width: 820px), (pointer: coarse)';
   const [fullscreen, setFullscreen] = useState<boolean>(
-    () => typeof window !== 'undefined' && window.matchMedia('(max-width: 480px)').matches
+    () => typeof window !== 'undefined' && window.matchMedia(FULLSCREEN_MQ).matches
   );
   useEffect(() => {
-    const mq = window.matchMedia('(max-width: 480px)');
+    const mq = window.matchMedia(FULLSCREEN_MQ);
     const onChange = () => setFullscreen(mq.matches);
     onChange();
     mq.addEventListener('change', onChange);
