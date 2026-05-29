@@ -9,6 +9,7 @@ import WeeklyAnalysisCharts from '../components/WeeklyAnalysisCharts';
 import { PlateBadge, type PlateTier } from '../components/PlateBadge';
 import { useAthleteStress, fallbackReadiness } from '../hooks/useAthleteStress';
 import { deriveRmStatus } from '../data/derive';
+import ImrBandChart from '../components/coach/ImrBandChart';
 
 /** Readiness (0-10) → tier disc (halterofilia plates). Same semantics as CoachStatsHO. */
 const readinessToTier = (r: number): PlateTier => {
@@ -220,6 +221,9 @@ const AthleteDeepDive: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* ① IMR vs banda de fase · gráfico estrella del coach (spec §4.1) */}
+      <ImrBandChart athleteId={a.id} programId={a.macrocycle.program_id} currentWeek={a.macrocycle.week} />
 
       {/* ENTRENAMIENTO · vista del coach sobre lo que entrena el atleta */}
       <div className="add-section">
