@@ -15,6 +15,7 @@ import ImrBandChart from '../components/coach/ImrBandChart';
 import AcwrGauge from '../components/coach/AcwrGauge';
 import TransitionSheet from '../components/coach/TransitionSheet';
 import CompetitionsCard from '../components/coach/CompetitionsCard';
+import BodyweightCard from '../components/coach/BodyweightCard';
 import { useCompetitions } from '../context/CompetitionContext';
 import { nextCompetition } from '../data/competitions';
 
@@ -218,6 +219,9 @@ const AthleteDeepDive: React.FC = () => {
 
       {/* COMPETENCIAS OBJETIVO · planificador de picos (Approach C) */}
       <CompetitionsCard athlete={a} onPlan={() => navigate('ASSIGN_MACRO')} />
+
+      {/* PESO · CATEGORÍA · make-weight atado a la competencia */}
+      <BodyweightCard athlete={a} nextComp={nextComp} />
 
       {/* CARGA SEMANAL */}
       <div className="add-section">

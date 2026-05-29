@@ -3,6 +3,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AthleteProvider } from './context/AthleteContext';
 import { CompetitionProvider } from './context/CompetitionContext';
+import { BodyweightProvider } from './context/BodyweightContext';
 import { NavigationProvider, useNav } from './context/NavigationContext';
 import { ProductProvider, useProduct } from './context/ProductContext';
 import { RoleProvider, useRole } from './context/RoleContext';
@@ -519,15 +520,17 @@ function App() {
       <AuthProvider>
         <AthleteProvider>
           <CompetitionProvider>
-            <ProductProvider>
-              <RoleProvider>
-                <NavigationProvider>
-                  <ToastProvider>
-                    <AppInner />
-                  </ToastProvider>
-                </NavigationProvider>
-              </RoleProvider>
-            </ProductProvider>
+            <BodyweightProvider>
+              <ProductProvider>
+                <RoleProvider>
+                  <NavigationProvider>
+                    <ToastProvider>
+                      <AppInner />
+                    </ToastProvider>
+                  </NavigationProvider>
+                </RoleProvider>
+              </ProductProvider>
+            </BodyweightProvider>
           </CompetitionProvider>
         </AthleteProvider>
       </AuthProvider>
