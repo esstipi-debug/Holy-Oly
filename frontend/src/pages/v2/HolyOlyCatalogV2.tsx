@@ -353,7 +353,13 @@ export default function HolyOlyCatalogV2() {
       try {
         const res = await api.get<ApiResponse>('/v1/macrocycles');
         if (cancelled) return;
-        const list = (res?.programs ?? []).map(apiToMacro);
+        // El catálogo es canónico (data/macrocycles.ts · RAW_SOURCES). El backend
+        // tiene un seed EQUIVOCADO (escuelas Iraní/Turco/Japonés/Europeo que NO son
+        // las originales) con ids que el detalle no reconoce → si los usáramos, el
+        // tap caería al primer macro (Búlgaro 6D). Solo aceptamos del backend los
+        // macros cuyo id exista en la fuente canónica (hoy: ninguno → se ignora).
+        const list = (res?.programs ?? []).map(apiToMacro)
+          .filter(m => MACROCYCLES.some(x => x.id === m.id));
         if (list.length > 0) {
           setPrograms(list);
           setSource('backend');
