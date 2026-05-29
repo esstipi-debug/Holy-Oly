@@ -1,7 +1,7 @@
 # HANDOFF · Holy Oly
 
 > Documento único de traspaso. Leer entero antes de tocar nada.
-> Última actualización: cierre sesión **2026-05-29** · branch `feat/api-first-refactor` (todo pusheado, working tree limpio salvo 2 dirs untracked de design-drops).
+> Última actualización: **2026-05-29 (sesión 2 · continuación)** · branch `feat/api-first-refactor` (todo pusheado). Pendientes #1/#2/#3 del traspaso anterior **CERRADOS** + recomendador de macros + skin mujer. Queda Volta + polish.
 
 ---
 
@@ -19,7 +19,14 @@ Que Holy Oly quede **100% operativo y demostrable**. Estado al cierre 2026-05-29
 8. **UX coach** (cartas lead-Readiness, stats explicables, gráficos lindos) → **HECHO**.
 9. **Auditoría de navegación** (dead-ends, skill tree mal ubicado, error demo) → **HECHO**.
 
-**HO está demostrable de punta a punta.** Lo que falta es secundario/Volta — ver §PENDIENTE.
+### Sesión 2 (2026-05-29 · continuación)
+10. **Persistir transición/asignación de macro** (`AthleteContext.updateMacro` + override sessionStorage) → **HECHO**.
+11. **Admin de macrociclos**: calendario de competencias + planificador de picos (Approach C: la comp ancla el pico, el week-picker sugiere semana) + tracking de peso corporal/categoría con "hacer el peso" → **HECHO**.
+12. **Walkthrough Coach HO** + 3 fixes: CoachMacroView pasa a roster REAL (era mock) y sin botones stub · NewAthlete persiste · ⚙️ ajustes cableado → **HECHO**.
+13. **Recomendador de macrociclos client-side** (scoring nivel + debilidades, llena el panel WISE en demo) + atleta **Freddy Perdomo** (1RM reales) → **HECHO**.
+14. **Skin mujer** (paleta coral+violeta, auto por género del atleta, discos intactos, coach+atleta) → **HECHO**.
+
+**HO está demostrable de punta a punta y los pendientes #1/#2/#3 del traspaso anterior están CERRADOS.** Lo que falta es secundario + Volta — ver §PENDIENTE.
 
 ---
 
@@ -121,14 +128,14 @@ Estilo V2 dark "Macrociclos". Cada pantalla scopeada bajo `.xxx-root`, hereda `t
 
 ## ▶️ PENDIENTE (prioridad sugerida)
 
-1. **Persistir transición/asignación de macro en el demo.** Hoy `TransitionSheet` y `AssignMacrocycle` confirman sin mutar el roster estático (`data/athletes.ts`). Falta un setter en `AthleteContext` (ej. `updateMacro(athleteId, programId, week)`) + override en sessionStorage para que el cambio se vea reflejado en el atleta.
-2. **Revisión paso a paso de Coach HO** con el Boss: recorrer cada botón/sección y confirmar qué hace/muestra (quedó a medias en sesiones previas).
-3. **Visión "administrador de macrociclos"** (brief del Boss): lo más faltante es el **calendario de competencias + picos/objetivos** y el **tracking de peso corporal** (categoría de peso). El resto (periodización, riesgo de carga ACWR, IMR vs fase, plan-vs-real, wellness) ya existe.
-4. **Volta** (pantallas legacy aún por migrar/pulir): VoltaWodSummary, VoltaStats, VoltaCoachDash, VoltaCoachWod, VoltaCoachTools, LogWodResult. (Los macros Volta ya tienen back; PLAN/VER WOD wireados.)
-5. Polish menor del loop: insight inline+drawer más profundo en wellness (②) y desvíos (④); atar más fuerte plan-vs-real a la bandeja.
-6. Reconciliar duraciones catálogo↔RAW_SOURCES (ej. cubano-novicio 8 vs 16 sem).
-7. ¿Más macros de Colombia / más planillas 2d? → conseguir fuente real primero.
-8. Help/support bot (extender WISE): dejado anotado, no prioridad.
+> **#1 (persistir macro), #2 (walkthrough Coach HO + fixes) y #3 (admin de macrociclos: calendario + picos + peso) — CERRADOS en sesión 2.** Quedan:
+
+1. **Volta** (pantallas legacy aún por migrar/pulir): VoltaWodSummary, VoltaStats, VoltaCoachDash, VoltaCoachWod, VoltaCoachTools, LogWodResult. (Macros Volta ya con back; PLAN/VER WOD wireados.) **Es lo único grande que falta para "todo el producto"; HO ya está completo.**
+2. Polish menor del loop: insight inline+drawer más profundo en wellness (②) y desvíos (④); atar más fuerte plan-vs-real a la bandeja.
+3. Reconciliar duraciones catálogo↔RAW_SOURCES (ej. cubano-novicio 8 vs 16 sem).
+4. ¿Más macros de Colombia / más planillas 2d? → conseguir fuente real primero.
+5. Help/support bot (extender WISE): dejado anotado, no prioridad.
+6. **Menores nuevos (sesión 2):** la skin mujer del lado **rol-atleta** sólo se ve con persona mujer (en demo la persona es Matías/M → demostrable coach-side abriendo a **Luciana** o **Daniela**). Freddy Perdomo sin peso/edad/front-squat (categoría '—'). Nivel del recomendador = heurístico por total absoluto (refinable con bodyweight/Sinclair). El suggester real del backend (`/v1/macros/suggest`) sigue siendo la fuente con JWT; el client-side es el fallback de demo.
 
 ---
 
@@ -151,9 +158,10 @@ Estilo V2 dark "Macrociclos". Cada pantalla scopeada bajo `.xxx-root`, hereda `t
 
 - **Macros:** `macrocycles/RAW_SOURCES/` (fuente) · `data/macrocycles.ts` (canónico) · `data/macroSources.ts` (detalle real ← RAW_SOURCES) · `data/macroDetail.ts` (generador, `getMacroDetail` + `getWeekPlan`, prefiere macroSources) · `data/macroTransition.ts` (afines + week picker) · `data/sessionDetail.ts` (detalle por ejercicio + IMR) · `data/derive.ts` (PR history / RM determinísticos).
 - **Coach HO loop:** `data/insight.ts` · `data/imrBand.ts` · `data/coachInbox.ts` · `components/coach/` (ImrBandChart, AcwrGauge, NotificationsSheet, MetricsInfoSheet, TransitionSheet) · plan en `docs/superpowers/plans/2026-05-29-coach-ho-loop.md` · spec en `docs/superpowers/specs/2026-05-28-coach-ho-design.md`.
+- **Admin macrociclos + recomendador + skin (sesión 2):** `data/competitions.ts` + `context/CompetitionContext.tsx` (calendario · `planToward`/`alignment`) · `data/bodyweight.ts` + `context/BodyweightContext.tsx` (peso · `makeWeight`) · `data/macroRecommender.ts` (scoring client-side, llena WISE como fallback) · `components/coach/` (CompetitionsCard, AddCompetitionSheet, BodyweightCard, AddWeighInSheet) · skin mujer = `[data-skin="women"]` en `styles/v2/tokens.css` + `AppInner` (App.tsx) setea el attr por género del atleta en foco · walkthrough en `docs/superpowers/COACH_HO_WALKTHROUGH.md` · specs/plans `docs/superpowers/{specs,plans}/2026-05-29-*` (competition-peak-planner · bodyweight-tracking · macro-recommender · women-skin).
 - **Atletas/roster demo:** `data/athletes.ts`.
 - **Routing:** `App.tsx` `renderView()` + `PUBLIC_VIEWS`/`HOME_VIEWS`/`NAV_MAP_*`/`ATHLETE_ONLY`/`COACH_ONLY` · `context/NavigationContext.tsx` (stack, navigate/back/canGoBack, union `View`, `VALID_VIEWS`) · `layouts/PhoneLayout.tsx` (bottom nav + back).
-- **Contexts:** Auth (demoMode/user/token) · Product (`product:current`) · Role (`role:current`) · Athlete (roster + selectedAthlete). Orden: Auth > Athlete > Product > Role > Navigation.
+- **Contexts:** Auth (demoMode/user/token) · Athlete (roster + selectedAthlete + `updateMacro` + addAthlete persistente) · Competition (`ho:competitions`) · Bodyweight (`ho:weighins`) · Product (`product:current`) · Role (`role:current`). Orden: Auth > Athlete > Competition > Bodyweight > Product > Role > Navigation.
 - **Coach screens:** `pages/v2/CoachDashV2.tsx` · `pages/AthleteDeepDive.tsx` (+ `components/AthleteTrainingView.tsx`) · `pages/AssignMacrocycle.tsx` · `pages/v2/HolyOlyCatalogV2.tsx` / `HolyOlyDetailV2.tsx` / `HolyOlyMacrocycleV2.tsx`.
 - **lib:** `lib/api.ts` (cliente + demo-401 benigno).
 
@@ -174,6 +182,8 @@ Estilo V2 dark "Macrociclos". Cada pantalla scopeada bajo `.xxx-root`, hereda `t
 ---
 
 ## 📜 COMMITS DE REFERENCIA
+
+**Sesión 2 · 2026-05-29 (continuación, desde `3e4a498`):** `df282be` persistir macro · `e7e95a9`+`2bc334c` spec/plan competencias · `c37a331`+`d6b8822` calendario+picos+home atleta · `68ed1a7`+`4833028`+`861e4dd` peso corporal (spec/plan/coach/home) · `db273f7` walkthrough Coach HO · `cbd3363` fixes (CoachMacroView real + NewAthlete persist + ajustes) · `47ee063`+`66d2ae0`+`c779150` recomendador + Freddy · `91abaf9` skin mujer.
 
 **Sesión 2026-05-29 (`feat/api-first-refactor`, desde `09117d5`):**
 `7ca493e` ola 1 demo realista · `23e1b2c` roster scope · `79db88c` ola 2 IMR por ejercicio · `a010bd7` ola 3a IMR vs banda+insight · `0fe3a08` ola 3b bandeja · `e1b7749` ola 3c readiness insight · `3860b70` ola 3d ACWR · `f8f7424` ola 5 seed backend · `1bc422b` ola 4 fidelidad macros · `dbd7434` ola 6 planificación 2-3d+transición · `926f0c7` ola 7 UX · `3b2d7c5` carga semanal cyan · `42ab33f` fix nav (macros sin salida + skill tree + token + mapa) · `34cc413` fix nav secundarios · `753cf05`+`5fe409e` docs(handoff).
