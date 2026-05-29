@@ -3,6 +3,55 @@
 > Para iniciar una sesión nueva y continuar. Leer esto primero.
 > Generado al cierre de la sesión anterior.
 
+---
+
+# 🟢 SESIÓN 2026-05-28/29 · Demo + Coach HO spec + macros (LEER PRIMERO)
+
+> Continuación. La migración V2 de pantallas (abajo) ya está completa. Esto es lo nuevo.
+> Todo en `feat/api-first-refactor`, pusheado. Demo local: `cd frontend && npm run dev` → :5173.
+
+## Entrada demo (operativa · commit `c979a8f`)
+- `peakqual-v2.onrender.com` → footer **"Modo demo · QA"** → cuadrante (Atleta HO / Coach HO / Volta). Pills arriba (HO/VOL·ATL/COACH) roamean. Atajo: `?demo=1&p=ho`.
+- **Demo corre OFFLINE**: el token `'demo'` no es JWT → todo `/v1/*` da **401 → fallback a mock**. Por diseño. (El backend `holy-oly-3.onrender.com` está VIVO pero solo tiene auth + 23 macros con seed equivocado + engine; NO tiene roster de coach ni detalle rico → la vista coach es mock de frontend.)
+
+## Spec de Coach HO (diseño aprobado · NO implementado)
+- `docs/superpowers/specs/2026-05-28-coach-ho-design.md` (commit `4209178`).
+- El **motor del loop** (macrociclo = PLANTILLA; atleta auto-aplica completar/modificar/fallar/cancelar; coach revisa post-hoc: confirmar/revertir/re-modificar; IMR; notificaciones) + los **4 gráficos del coach** (IMR vs banda de fase · wellness · ACWR · plan vs real). Falta IMPLEMENTAR.
+
+## 🏋️ Macrociclos · LA FUENTE REAL (crítico — no inventar)
+- **Fuente canónica: `macrocycles/RAW_SOURCES/`** (1 .txt por macro). `frontend/src/data/macrocycles.ts` (`MACROCYCLES`) se extrae de ahí = el catálogo REAL.
+- HO reales: Búlgaro 6D · Colombiano 5D · Coreano 5D/6D · Chino 5D · **5×Cubano** · 4×Híbrido · Polaco 4D/5D · Ruso 5D · Ucraniano 3D/4D · **USA (escuela + 4 perfiles)**. Total 24.
+- **USA = 1 escuela con 4 perfiles** (Principiante·Intermedio·Avanzado·Master 40+), de `RAW_SOURCES/USA/USA_SCHOOL_COMPLETE.md` (agregados `67bf438`). Catalyst/Cal Strength/Mash son las *fuentes* que la alimentan, NO macros del catálogo.
+- **Colombia = solo 1** en la fuente. Para más → conseguir la fuente real (no inventar).
+- ⚠️ **El backend tiene un SEED EQUIVOCADO** (`backend/migrations/017_macrocycle_templates.sql`): escuelas **Iraní/Turco/Japonés/Europeo** que NO son las originales. El frontend lo IGNORA (el catálogo filtra ids que no están en la fuente). **TODO: corregir el seed del backend a RAW_SOURCES.**
+
+## Demo realista (B) · hecho esta sesión
+- **Detalle de macro POR MACRO** (`data/macroDetail.ts` · commit `5d3e3ee`): genera curva IMR / 4 mesos / semana-tipo + filosofía por escuela desde los params del macro. Antes mostraba SIEMPRE Ruso Clásico hardcodeado.
+- **Catálogo unificado** a `MACROCYCLES` → catálogo ↔ detalle ↔ asignar usan los MISMOS ids.
+- Fix **"varios macros llevan a Búlgaro 6D"** (`67bf438`).
+
+## QA fixes coach (commit `2157952`)
+- Alerta **RESOLVER → ATHLETE_DETAIL** (ventana de entrenamiento, no asignar-macro).
+- Roster cards con **métricas de engine/hoy** (RDY·SUE·CNS·REC·MOT·CRG) en vez de ratings FIFA.
+- AssignMacrocycle: **"Ver detalle"** por card.
+
+## ⏳ ABIERTO / próximos pasos
+1. **Demo realista (B) · seguir las olas:** secciones placeholder restantes → Coach Dash (Week WODs + Inventory atados al roster/macro) · Deep Dive (cambios de RM coherentes) · Pulse feed · Knowledge Pills · Session Schedule · PR history. Y el **detalle de sesión POR EJERCICIO** (tonelaje/reps por lift) para IMR real.
+2. **Fidelidad del detalle de macro:** hoy filosofía/mesos son parametrizados por escuela; se pueden **parsear los .txt de `RAW_SOURCES`** para el contenido exacto por macro.
+3. **Corregir el seed de macros del backend** (`017_macrocycle_templates.sql` → RAW_SOURCES). Hoy Iraní/Turco/etc. están mal.
+4. **Implementar el loop de Coach HO** (spec arriba): modelo sesión/estados, opciones del atleta, aprobar/notificar.
+5. **Revisión paso a paso de Coach HO** con el Boss — quedó a medias (qué hace/muestra cada botón/sección).
+6. ¿Más macros de Colombia? → conseguir la fuente real primero.
+
+## 📌 Decisiones del Boss (esta sesión)
+- Demo: **B (realista para mostrar)** — enriquecer mocks, no depender del backend.
+- Loop coach: **ágil** (atleta auto-aplica, coach revisa post-hoc) · granularidad **flexible** (dato por ejercicio, vistas sesión/ejercicio) · los **4 gráficos**.
+- Carta: **disco olímpico = logo/tier**; nombre del sistema parqueado; en la card del coach liderar Readiness, no OVR.
+- Macros: **fieles a RAW_SOURCES, NO inventar.**
+- Help/support bot: dejarlo anotado (no prioridad).
+
+---
+
 ## ⚠️ DÓNDE TRABAJAR (crítico)
 - **Worktree:** `C:/Users/Gamer/Desktop/Holy Oly 001/.claude/worktrees/compassionate-rhodes-7d48f8`
 - **Branch:** `feat/api-first-refactor` (pusheado a `origin` · github.com/esstipi-debug/Holy-Oly)
