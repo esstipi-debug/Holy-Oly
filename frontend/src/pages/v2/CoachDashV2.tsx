@@ -14,6 +14,8 @@ import { useAuth } from '../../context/AuthContext';
 import { useAthlete } from '../../context/AthleteContext';
 import { useRosterStress, fallbackReadiness } from '../../hooks/useAthleteStress';
 import { getWeekPlan } from '../../data/macroDetail';
+import NotificationsSheet from '../../components/coach/NotificationsSheet';
+import { pendingCount } from '../../data/coachInbox';
 import type { AthleteProfile } from '../../data/athletes';
 
 /* ---------- Lucide icons ---------- */
@@ -149,7 +151,7 @@ function initialsOf(name: string) {
    COMPONENTS
    ============================================================ */
 
-function Header({ coachName, count }: { coachName: string; count: number }) {
+function Header({ coachName, count, pending, onBell }: { coachName: string; count: number; pending: number; onBell: () => void }) {
   return (
     <header className="cd-header">
       <div className="cd-header-left">
@@ -163,7 +165,7 @@ function Header({ coachName, count }: { coachName: string; count: number }) {
         </span>
       </div>
       <div className="cd-h-right">
-        <button className="cd-h-btn" aria-label="Notificaciones"><Icon name="bell" size={18}/><span className="dot"/></button>
+        <button className="cd-h-btn" aria-label="Notificaciones" onClick={onBell}><Icon name="bell" size={18}/>{pending > 0 && <span className="dot"/>}</button>
         <button className="cd-h-btn" aria-label="Ajustes"><Icon name="settings" size={18}/></button>
       </div>
     </header>
@@ -436,6 +438,8 @@ function CoachDashV2() {
   const { allAthletes, selectAthlete } = useAthlete();
   const { stressByAthlete } = useRosterStress(allAthletes);
   const [filter, setFilter] = useState<'red' | 'amber' | 'green' | null>(null);
+  const [inboxOpen, setInboxOpen] = useState(false);
+  const pending = useMemo(() => pendingCount(allAthletes), [allAthletes, inboxOpen]);
 
   // Enrich real roster with engine readiness + derived V2 card fields.
   const cards = useMemo(() => allAthletes.map(a => {
@@ -500,7 +504,7 @@ function CoachDashV2() {
 
   return (
     <div className="coach-frame">
-      <Header coachName={coachName} count={cards.length}/>
+      <Header coachName={coachName} count={cards.length} pending={pending} onBell={() => setInboxOpen(true)}/>
 
       <div className="cd-section">
         <div className="cd-section-head">
@@ -557,6 +561,13 @@ function CoachDashV2() {
       </div>
 
       <ActionsFab onAction={(view) => navigate(view)}/>
+
+      <NotificationsSheet
+        open={inboxOpen}
+        onClose={() => setInboxOpen(false)}
+        roster={allAthletes}
+        onOpenAthlete={openDetail}
+      />
     </div>
   );
 }
