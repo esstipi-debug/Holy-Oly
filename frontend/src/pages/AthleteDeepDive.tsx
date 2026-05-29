@@ -12,6 +12,7 @@ import { deriveRmStatus } from '../data/derive';
 import { readinessInsight, SEVERITY_COLOR } from '../data/insight';
 import ImrBandChart from '../components/coach/ImrBandChart';
 import AcwrGauge from '../components/coach/AcwrGauge';
+import TransitionSheet from '../components/coach/TransitionSheet';
 
 /** Readiness (0-10) → tier disc (halterofilia plates). Same semantics as CoachStatsHO. */
 const readinessToTier = (r: number): PlateTier => {
@@ -31,6 +32,7 @@ const AthleteDeepDive: React.FC = () => {
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState('');
   const [feedbackSent, setFeedbackSent] = useState(false);
+  const [showTransition, setShowTransition] = useState(false);
 
   const sendFeedback = () => {
     if (!feedbackMsg.trim()) return;
@@ -190,6 +192,7 @@ const AthleteDeepDive: React.FC = () => {
       <div className="add-section">
         <div className="add-section-head">
           <h3>Macrociclo activo</h3>
+          <button className="add-link-btn" onClick={() => setShowTransition(true)}>Cambiar días →</button>
         </div>
         <div className="add-card">
           <div className="add-macro-row">
@@ -319,6 +322,17 @@ const AthleteDeepDive: React.FC = () => {
           Enviar feedback
         </button>
       </div>
+
+      {/* TRANSICIÓN DE DÍAS · asistente (macro afín + week picker) */}
+      <TransitionSheet
+        open={showTransition}
+        onClose={() => setShowTransition(false)}
+        athleteName={a.name}
+        currentProgramId={a.macrocycle.program_id}
+        currentProgramName={a.macrocycle.program_name}
+        currentWeek={a.macrocycle.week}
+        currentTotal={a.macrocycle.total_weeks}
+      />
 
       {/* FEEDBACK MODAL */}
       {showFeedback && (

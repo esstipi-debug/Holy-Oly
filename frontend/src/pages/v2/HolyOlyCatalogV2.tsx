@@ -182,6 +182,24 @@ function FilterChips({ families, active, toggle }: { families: Family[]; active:
   );
 }
 
+/* Filtro por días/semana · surface las planillas de 2-3 días (≤3d en verde). */
+function FreqChips({ freqs, active, set }: { freqs: number[]; active: number | null; set: (f: number | null) => void }) {
+  return (
+    <div className="hc-chips" role="tablist" style={{ marginTop: 6 }}>
+      <div className="hc-chip" data-all="true" data-active={active === null} onClick={() => set(null)}>Días: todos</div>
+      {freqs.map(f => (
+        <div key={f}
+             className="hc-chip"
+             data-active={active === f}
+             style={{ ['--cc' as string]: f <= 3 ? '#22C55E' : f >= 6 ? '#EF4444' : 'var(--engine-stress)' } as CSSProperties}
+             onClick={() => set(active === f ? null : f)}>
+          <span className="dot"/>{f}d/sem
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function StatBar({ label, value, k }: { label: string; value: number; k: string }) {
   return (
     <div className="hc-card-bar" data-k={k}>
@@ -340,6 +358,7 @@ export default function HolyOlyCatalogV2() {
   const { navigate, back } = useNav();
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [activeFamilies, setActive] = useState<string[]>([]);
+  const [activeFreq, setActiveFreq] = useState<number | null>(null);
   const [query, setQuery] = useState('');
   const [programs, setPrograms] = useState<Macro[]>(FALLBACK_MACROCYCLES);
   const [loading, setLoading] = useState(true);
@@ -379,9 +398,15 @@ export default function HolyOlyCatalogV2() {
     setActive(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   };
 
+  const freqs = useMemo(
+    () => Array.from(new Set(programs.map(p => p.freq))).sort((a, b) => a - b),
+    [programs],
+  );
+
   const filtered = useMemo(() => {
     return programs.filter(m => {
       if (activeFamilies.length > 0 && !activeFamilies.includes(m.family)) return false;
+      if (activeFreq != null && m.freq !== activeFreq) return false;
       if (query) {
         const q = query.toLowerCase();
         return m.name.toLowerCase().includes(q)
@@ -391,7 +416,7 @@ export default function HolyOlyCatalogV2() {
       }
       return true;
     });
-  }, [activeFamilies, query, programs]);
+  }, [activeFamilies, activeFreq, query, programs]);
 
   const openDetail = (id: string) => {
     try { sessionStorage.setItem('ho:selectedMacroId', id); } catch { /* ignore */ }
@@ -432,16 +457,17 @@ export default function HolyOlyCatalogV2() {
           </div>
         </div>
         <FilterChips families={FAMILIES} active={activeFamilies} toggle={toggleFamily}/>
+        <FreqChips freqs={freqs} active={activeFreq} set={setActiveFreq}/>
       </header>
 
       <div className="hc-scroll">
-        {activeFamilies.length === 0 && !query && view === 'grid' && (
+        {activeFamilies.length === 0 && activeFreq == null && !query && view === 'grid' && (
           <Recommended ids={RECOMMENDED} programs={programs} onTap={openDetail}/>
         )}
 
         <div>
           <div className="hc-section-head" style={{marginBottom: 6}}>
-            <h3>{activeFamilies.length ? 'Filtrados' : 'Catálogo completo'}</h3>
+            <h3>{(activeFamilies.length || activeFreq != null) ? 'Filtrados' : 'Catálogo completo'}</h3>
             <span className="meta">{filtered.length} macros</span>
           </div>
           {filtered.length === 0 ? (
