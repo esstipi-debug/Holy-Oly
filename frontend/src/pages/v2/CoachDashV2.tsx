@@ -15,6 +15,7 @@ import { useAthlete } from '../../context/AthleteContext';
 import { useRosterStress, fallbackReadiness } from '../../hooks/useAthleteStress';
 import { getWeekPlan } from '../../data/macroDetail';
 import NotificationsSheet from '../../components/coach/NotificationsSheet';
+import MetricsInfoSheet from '../../components/coach/MetricsInfoSheet';
 import { pendingCount } from '../../data/coachInbox';
 import type { AthleteProfile } from '../../data/athletes';
 
@@ -274,17 +275,22 @@ function MacroHero({ macro, programCount, onAssign }) {
   );
 }
 
-function AthleteCard({ a, onClick }) {
+/* Palabra completa de cada métrica de estado (el ? abre cómo se construye). */
+const STAT_LABELS = { RDY: 'Readiness', SUE: 'Sueño', CNS: 'SNC', REC: 'Recuperación', MOT: 'Ánimo', CRG: 'Carga' };
+
+function AthleteCard({ a, onClick, onInfo }) {
   const tColor = TIER_COLOR[a.tier];
+  // Lidera el ESTADO DE HOY (Readiness), no el OVR (al coach no se lo gamifica · decisión Boss).
+  const rdy = a.stats.RDY;
   return (
     <div className="athlete" data-status={a.status} onClick={onClick}>
       <span className="status-dot"/>
       <div className="athlete-rank">
-        <div className="athlete-ovr-lbl">OVR</div>
-        <div className="athlete-ovr">{a.ovr}</div>
+        <div className="athlete-ovr-lbl">RDY HOY</div>
+        <div className="athlete-ovr" style={{ color: 'var(--ac)' }}>{rdy}</div>
         <div className="athlete-tier-row">
-          <plate-3d tier={a.tier} size="32"/>
-          <div className="athlete-tier-name" style={{ '--tc': tColor }}>T{a.tier}</div>
+          <plate-3d tier={a.tier} size="20"/>
+          <div className="athlete-tier-name" style={{ '--tc': tColor }}>OVR {a.ovr} · T{a.tier}</div>
         </div>
       </div>
       <div className="athlete-id">
@@ -296,28 +302,36 @@ function AthleteCard({ a, onClick }) {
         <div className="athlete-note">{a.note}</div>
       </div>
       <div className="athlete-stats">
-        {Object.entries(a.stats).map(([k, v]) => {
-          const glow = v >= 85 ? 'high' : v <= 40 ? 'low' : null;
-          return (
-            <div key={k} className="stat" data-glow={glow}>
-              <span className="k">{k}</span>
-              <span className="v">{v}</span>
-              <div className="bar"><div className="fill" style={{ width: `${v}%` }}/></div>
-            </div>
-          );
-        })}
+        <div className="athlete-stats-head">
+          <span>Estado hoy</span>
+          <button className="stat-info" onClick={(e) => { e.stopPropagation(); onInfo(); }} aria-label="Cómo se calcula cada dato">?</button>
+        </div>
+        <div className="athlete-stats-grid">
+          {Object.entries(a.stats).map(([k, v]) => {
+            const glow = v >= 85 ? 'high' : v <= 40 ? 'low' : null;
+            return (
+              <div key={k} className="stat" data-glow={glow}>
+                <span className="k">{STAT_LABELS[k] || k}</span>
+                <div className="stat-row">
+                  <div className="bar"><div className="fill" style={{ width: `${v}%` }}/></div>
+                  <span className="v">{v}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
 }
 
-function Roster({ list, onOpen }) {
+function Roster({ list, onOpen, onInfo }) {
   if (list.length === 0) {
     return <div className="cd-roster-empty">No hay atletas en este filtro.</div>;
   }
   return (
     <div className="cd-roster-grid">
-      {list.map(a => <AthleteCard key={a.id} a={a} onClick={() => onOpen(a.id)}/>)}
+      {list.map(a => <AthleteCard key={a.id} a={a} onClick={() => onOpen(a.id)} onInfo={onInfo}/>)}
     </div>
   );
 }
@@ -439,6 +453,7 @@ function CoachDashV2() {
   const { stressByAthlete } = useRosterStress(allAthletes);
   const [filter, setFilter] = useState<'red' | 'amber' | 'green' | null>(null);
   const [inboxOpen, setInboxOpen] = useState(false);
+  const [metricsOpen, setMetricsOpen] = useState(false);
   const pending = useMemo(() => pendingCount(allAthletes), [allAthletes, inboxOpen]);
 
   // Enrich real roster with engine readiness + derived V2 card fields.
@@ -541,7 +556,7 @@ function CoachDashV2() {
                             onClick={() => setFilter(null)}>· LIMPIAR</span>}
           </span>
         </div>
-        <Roster list={list} onOpen={openDetail}/>
+        <Roster list={list} onOpen={openDetail} onInfo={() => setMetricsOpen(true)}/>
       </div>
 
       <div className="cd-section">
@@ -568,6 +583,8 @@ function CoachDashV2() {
         roster={allAthletes}
         onOpenAthlete={openDetail}
       />
+
+      <MetricsInfoSheet open={metricsOpen} onClose={() => setMetricsOpen(false)}/>
     </div>
   );
 }
