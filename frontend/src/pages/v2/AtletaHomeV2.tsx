@@ -9,6 +9,9 @@ import '../../styles/v2/atleta-home.css';
 import { useAthlete } from '../../context/AthleteContext';
 import { useCompetitions } from '../../context/CompetitionContext';
 import { nextCompetition, weeksBetween, toDate } from '../../data/competitions';
+import { useBodyweight } from '../../context/BodyweightContext';
+import { latestWeight, makeWeight } from '../../data/bodyweight';
+import AddWeighInSheet from '../../components/coach/AddWeighInSheet';
 import { useNav } from '../../context/NavigationContext';
 import { progressionApi } from '../../lib/progression';
 import { getPendingForToday } from '../../lib/plannedSessions';
@@ -353,6 +356,7 @@ const FOCUS_LABEL = (focus) => (focus || 'STRENGTH').toString().toUpperCase();
 function App() {
   const { athlete, stress, stressLoading } = useAthlete();
   const { competitions } = useCompetitions();
+  const { weighIns, addWeighIn } = useBodyweight();
   const { navigate } = useNav();
 
   // Estado backend de progresión (cinturón + racha + oly index) · graceful fallback.
@@ -361,6 +365,7 @@ function App() {
   const [olyApi, setOlyApi] = useState(null);
   // Estado hormonal (engine 13) · sólo se intenta para atletas femeninas · opt-in.
   const [hormonal, setHormonal] = useState(null);
+  const [logOpen, setLogOpen] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -387,6 +392,8 @@ function App() {
   const { macrocycle, maxes } = athlete;
   const nextComp = nextCompetition(competitions, athlete.id, new Date());
   const compWeeksAway = nextComp ? Math.max(0, weeksBetween(new Date(), toDate(nextComp.date))) : undefined;
+  const bw = makeWeight(athlete, nextComp, latestWeight(weighIns, athlete), new Date());
+  const BW_COLOR = { under: '#22C55E', on: '#FBBF24', over: '#EF4444', 'no-class': 'var(--text-secondary)' };
   const firstName = (athlete.name.split(' ')[0] || '').toUpperCase();
   const initial = firstName[0] || '·';
 
@@ -501,6 +508,17 @@ function App() {
               />
             )}
           </div>
+          {/* PESO · CATEGORÍA */}
+          <div className="ah-row-2">
+            <Card onClick={() => setLogOpen(true)} style={{ gridColumn: '1 / -1' }}>
+              <div className="ah-eyebrow">PESO · CATEGORÍA</div>
+              <div className="ah-macro-title">{bw.current.toFixed(1)} kg · {athlete.weight_class}</div>
+              <div className="ah-macro-foot">
+                <span style={{ color: BW_COLOR[bw.status] }}>{bw.message}</span>
+                <span className="next">＋ registrar</span>
+              </div>
+            </Card>
+          </div>
           {/* ROW 3 - CTA */}
           <TodayCTA
             eyebrow={ctaEyebrow} title={ctaTitle} foot={ctaFoot}
@@ -510,6 +528,9 @@ function App() {
           <HeatmapCard activeLabel={heatActive} xpLabel={heatXp} onClick={() => navigate('HO_STATS')}/>
           {/* ROW 5 - quests */}
           <Quests/>
+          {/* SHEET · registrar pesaje */}
+          <AddWeighInSheet open={logOpen} onClose={() => setLogOpen(false)} athleteName={athlete.name} defaultKg={bw.current}
+            onSave={(input) => addWeighIn({ athleteId: athlete.id, ...input })} />
         </div>
       </div>
     </div>
