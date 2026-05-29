@@ -9,10 +9,12 @@
 
 Que Holy Oly quede **100% operativo y demostrable**:
 1. Todas las pantallas en V2 → **HECHO**.
-2. **Demo realista** que se pueda mostrar/vender sin depender del backend → **en curso** (foco actual).
-3. **Loop de Coach HO** (spec diseñado) → **pendiente de implementar**.
+2. **Demo realista** sin depender del backend → **HECHO** (sesión 2026-05-29: 8 pantallas atadas a roster/macro real).
+3. **Loop de Coach HO** (spec) → **HECHO** (IMR vs banda + insight + bandeja 🔔 + revisión del coach + ACWR; lado-atleta fuera de alcance per spec §8).
 
-Volta es después.
+Extra hecho 2026-05-29: detalle de sesión POR EJERCICIO + IMR real (quilla) · fidelidad de macros (curva IMR/mesos reales de RAW_SOURCES) · seed del backend corregido a escuelas reales.
+
+**Falta:** Volta (pantallas legacy) · polish menor (insight más profundo en wellness/desvíos · reconciliar duraciones catálogo↔RAW_SOURCES, ej. cubano-novicio 8 vs 16 sem).
 
 ---
 
@@ -89,19 +91,21 @@ Estilo V2 dark "Macrociclos" (FIFA/Strava). Cada pantalla scopeada bajo `.xxx-ro
 
 ---
 
-## ▶️ PRÓXIMOS PASOS (orden sugerido)
+## ▶️ PRÓXIMOS PASOS
 
-1. **Demo realista — seguir las olas:** secciones placeholder restantes →
-   - Coach Dash: **Week WODs** + **Inventory** (atarlos al roster/macro real, hoy son strips fijos).
-   - Athlete Deep Dive: **cambios de RM** coherentes (hoy "+2kg" fijos).
-   - Pulse feed · Knowledge Pills · Session Schedule · PR history (hoy mock fijo).
-2. **Detalle de sesión POR EJERCICIO** (tonelaje/reps por lift) → necesario para **IMR real** (gap base del spec).
-3. **Fidelidad del detalle de macro:** parsear los .txt de `RAW_SOURCES` para el contenido exacto por macro (hoy filosofía/mesos son parametrizados por escuela).
-4. **Implementar el loop de Coach HO** (spec): modelo sesión/estados, opciones del atleta, aprobar/notificar, los 4 gráficos.
-5. **Corregir el seed de macros del backend** (`017_macrocycle_templates.sql` → RAW_SOURCES).
-6. **Revisión paso a paso de Coach HO** con el Boss (quedó a medias: qué hace/muestra cada botón/sección).
-7. ¿Más macros de Colombia? → conseguir fuente real primero.
-8. **Volta** (recién al cerrar HO): VoltaWodSummary, VoltaStats, VoltaCoachDash, VoltaCoachWod, VoltaCoachTools, LogWodResult (aún legacy).
+**HECHO (sesión 2026-05-29 · commits `7ca493e`→`1bc422b`):**
+1. ✅ Demo realista — Week WODs + Inventory + RM + Pulse + Pills + Schedule + PR history atados a roster/macro real.
+2. ✅ Detalle de sesión POR EJERCICIO + IMR real (`data/sessionDetail.ts`).
+3. ✅ Fidelidad del detalle de macro (`data/macroSources.ts` ← RAW_SOURCES: curva IMR + mesos reales).
+4. ✅ Loop de Coach HO (IMR vs banda + insight + bandeja 🔔 + revisión confirmar/revertir + ACWR).
+5. ✅ Seed del backend corregido (escuelas reales, 24 macros canónicos).
+
+**PENDIENTE:**
+6. **Revisión paso a paso de Coach HO** con el Boss (qué hace/muestra cada botón/sección).
+7. Polish menor del loop: insight inline+drawer más profundo en wellness (②) y desvíos (④); atar más fuerte plan-vs-real a la bandeja.
+8. Reconciliar duraciones catálogo↔RAW_SOURCES (ej. cubano-novicio: catálogo 8 sem vs fuente 16).
+9. ¿Más macros de Colombia? → conseguir fuente real primero.
+10. **Volta** (recién al cerrar HO): VoltaWodSummary, VoltaStats, VoltaCoachDash, VoltaCoachWod, VoltaCoachTools, LogWodResult (aún legacy).
 
 ---
 
@@ -120,7 +124,8 @@ Estilo V2 dark "Macrociclos" (FIFA/Strava). Cada pantalla scopeada bajo `.xxx-ro
 
 ## 🧭 ARCHIVOS CLAVE
 
-- **Macros:** `macrocycles/RAW_SOURCES/` (fuente) · `frontend/src/data/macrocycles.ts` (canónico) · `frontend/src/data/macroDetail.ts` (generador del detalle).
+- **Macros:** `macrocycles/RAW_SOURCES/` (fuente) · `frontend/src/data/macrocycles.ts` (canónico) · `frontend/src/data/macroSources.ts` (detalle REAL: curva IMR/mesos/filosofía ← RAW_SOURCES) · `frontend/src/data/macroDetail.ts` (generador, prefiere macroSources) · `frontend/src/data/sessionDetail.ts` (detalle por ejercicio + IMR) · `frontend/src/data/derive.ts` (PR history / RM determinísticos).
+- **Coach HO loop:** `frontend/src/data/insight.ts` (motor de lectura) · `frontend/src/data/imrBand.ts` (banda por fase) · `frontend/src/data/coachInbox.ts` (bandeja) · `frontend/src/components/coach/` (ImrBandChart, AcwrGauge, NotificationsSheet) · plan en `docs/superpowers/plans/2026-05-29-coach-ho-loop.md`.
 - **Atletas/roster demo:** `frontend/src/data/athletes.ts`.
 - **Routing:** `frontend/src/App.tsx` `renderView()` (PUBLIC → `if product==='volta' {switch} else {switch HO}`) · `src/context/NavigationContext.tsx` (union `View`, `VALID_VIEWS`). Listas: `PUBLIC_VIEWS`, `NAV_MAP_HO/VOLTA`, `ATHLETE_ONLY`/`COACH_ONLY`.
 - **Contexts:** Auth (demoMode/user/token) · Product (`product:current`) · Role (`role:current`) · Athlete (roster + selectedAthlete). Orden: Auth > Athlete > Product > Role > Navigation.
