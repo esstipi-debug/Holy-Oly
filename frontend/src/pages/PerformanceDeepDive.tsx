@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import BottomSheet from '../components/BottomSheet';
 import { useAthlete } from '../context/AthleteContext';
-import { derivePrHistory, cjMax } from '../data/derive';
+import { derivePrHistory, cjMax, seeded } from '../data/derive';
+import { getAthleteWeek, weekTonnage, weekImr } from '../data/sessionDetail';
+import { getMacroDetail } from '../data/macroDetail';
 import '../styles/v2/performance-deep-dive.css';
 
 /**
@@ -34,62 +36,14 @@ interface RangeData {
   details: DayDetail[];
 }
 
-const WEEK_DETAILS: DayDetail[] = [
-  { label: 'L', fullLabel: 'Lunes', intensity: 40, exercises: [
-    { name: 'Sentadilla Frontal', sets: '4×6', load: '90kg', tonelajeKg: 2160 },
-    { name: 'Sentadilla Atrás', sets: '3×4', load: '100kg', tonelajeKg: 1200 },
-  ], notes: 'Sesión de volumen liviano post-descanso.' },
-  { label: 'M', fullLabel: 'Martes', intensity: 75, exercises: [
-    { name: 'Arrancada', sets: '5×2', load: '85kg', tonelajeKg: 850 },
-    { name: 'Snatch Pull', sets: '4×3', load: '105kg', tonelajeKg: 1260 },
-  ] },
-  { label: 'X', fullLabel: 'Miércoles', intensity: 60, exercises: [
-    { name: 'Cargada Hang', sets: '4×3', load: '85kg', tonelajeKg: 1020 },
-    { name: 'Jerk de soporte', sets: '4×2', load: '100kg', tonelajeKg: 800 },
-  ], notes: 'Foco técnico, controles de catch.' },
-  { label: 'J', fullLabel: 'Jueves', intensity: 85, exercises: [
-    { name: 'Arrancada', sets: '3×1', load: '105kg', tonelajeKg: 315 },
-    { name: 'Sentadilla Frontal', sets: '5×3', load: '120kg', tonelajeKg: 1800 },
-  ], prFlag: true, notes: 'PR en Front Squat (+5kg) 🏆' },
-  { label: 'V', fullLabel: 'Viernes', intensity: 95, exercises: [
-    { name: 'Cargada + Envión', sets: '4×1+1', load: '130kg', tonelajeKg: 1040 },
-    { name: 'Sentadilla Atrás', sets: '3×2', load: '150kg', tonelajeKg: 900 },
-  ], notes: 'Día más exigente. Eficiencia técnica alta.' },
-  { label: 'S', fullLabel: 'Sábado', intensity: 70, exercises: [
-    { name: 'Arrancada Power', sets: '4×2', load: '80kg', tonelajeKg: 640 },
-    { name: 'Push Press', sets: '4×4', load: '75kg', tonelajeKg: 1200 },
-  ] },
-  { label: 'D', fullLabel: 'Domingo', intensity: 50, exercises: [
-    { name: 'Movilidad', sets: '15 min', load: '—', tonelajeKg: 0 },
-    { name: 'Técnica barra vacía', sets: '5×5', load: '20kg', tonelajeKg: 500 },
-  ], notes: 'Descanso activo.' },
-];
-
-const RANGE_DATA: Record<Range, RangeData> = {
-  W: {
-    volume: '14.2k', trend: '▲ 12% vs semana pasada',
-    bars: WEEK_DETAILS.map(d => d.intensity),
-    labels: WEEK_DETAILS.map(d => d.label),
-    details: WEEK_DETAILS,
-  },
-  M: {
-    volume: '58.7k', trend: '▲ 8% vs mes pasado',
-    bars: [60, 70, 85, 78], labels: ['Sem1', 'Sem2', 'Sem3', 'Sem4'],
-    details: ['Sem1','Sem2','Sem3','Sem4'].map((l, i) => ({
-      label: l, fullLabel: `Semana ${i+1}`, intensity: [60, 70, 85, 78][i],
-      exercises: [{ name: 'Promedio semanal', sets: '—', load: '—', tonelajeKg: 14000 + i*200 }],
-    })),
-  },
-  Y: {
-    volume: '684k', trend: '▲ 34% vs año pasado',
-    bars: [50, 55, 62, 70, 75, 80, 85, 78, 82, 88, 90, 86],
-    labels: ['E','F','M','A','M','J','J','A','S','O','N','D'],
-    details: ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'].map((m, i) => ({
-      label: m[0], fullLabel: m, intensity: [50, 55, 62, 70, 75, 80, 85, 78, 82, 88, 90, 86][i],
-      exercises: [{ name: 'Promedio mensual', sets: '—', load: '—', tonelajeKg: 50000 + i*3000 }],
-    })),
-  },
-};
+// Etiquetas de día/mes. Los datos REALES (intensidad = IMR, tonelaje, ejercicios)
+// se derivan POR ATLETA en el componente vía getAthleteWeek + getMacroDetail
+// (ver useMemo `rangeData`). Ya no hay sesiones hardcodeadas.
+const DAY_LETTER = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+const DAY_FULL = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+const MONTH_LETTER = ['E', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
+const MONTH_FULL = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+const fmtK = (kg: number) => (kg >= 1000 ? `${(kg / 1000).toFixed(1)}k` : `${Math.round(kg)}`);
 
 // ─── METRIC INFO POPOVERS ────────────────────────────────
 interface MetricInfo {
@@ -162,7 +116,74 @@ const PerformanceDeepDive: React.FC = () => {
   const [activeInfo, setActiveInfo] = useState<MetricInfo | null>(null);
   const [activeLift, setActiveLift] = useState<'snatch' | 'cj' | null>(null);
 
-  const data = RANGE_DATA[range];
+  // Datos por rango derivados del atleta real (sesiones por ejercicio + IMR).
+  const rangeData = useMemo<Record<Range, RangeData>>(() => {
+    const empty: RangeData = { volume: '—', trend: '', bars: [], labels: [], details: [] };
+    if (!athlete) return { W: empty, M: empty, Y: empty };
+
+    // ── W · semana real, por ejercicio, IMR por día ──
+    const week = getAthleteWeek(athlete);
+    const wDetails: DayDetail[] = week.map((s, i) => ({
+      label: DAY_LETTER[i],
+      fullLabel: DAY_FULL[i],
+      intensity: s.imr,
+      exercises: s.rest
+        ? [{ name: 'Descanso', sets: '—', load: '—', tonelajeKg: 0 }]
+        : s.exercises.map(e => ({ name: e.movement, sets: `${e.sets}×${e.reps}`, load: `${e.kg}kg`, tonelajeKg: e.tonnage })),
+      notes: s.rest ? 'Día de descanso' : `${s.label} · ${s.dur}min · RPE ${s.rpe}`,
+    }));
+    // Marca el día de mayor IMR como el más exigente de la semana.
+    let peak = -1, peakV = -1;
+    week.forEach((s, i) => { if (!s.rest && s.imr > peakV) { peakV = s.imr; peak = i; } });
+    if (peak >= 0) wDetails[peak] = { ...wDetails[peak], prFlag: true, notes: `${wDetails[peak].notes} · día más intenso` };
+
+    const wTon = weekTonnage(week);
+    const W: RangeData = {
+      volume: fmtK(wTon),
+      trend: `IMR medio ${weekImr(week)}% · Sem ${athlete.macrocycle.week}/${athlete.macrocycle.total_weeks}`,
+      bars: wDetails.map(d => d.intensity),
+      labels: wDetails.map(d => d.label),
+      details: wDetails,
+    };
+
+    // ── M · curva semanal REAL del macro (fase), ventana hasta la semana actual ──
+    const macro = getMacroDetail(athlete.macrocycle?.program_id ?? null);
+    const cur = Math.max(1, Math.min(macro.weekly.length, athlete.macrocycle.week));
+    const window = macro.weekly.slice(Math.max(0, cur - 6), Math.max(cur, 1));
+    const totalWeekReps = week.reduce((s, d) => s + d.totalReps, 0) || 1;
+    const M: RangeData = {
+      volume: fmtK(wTon * Math.max(1, window.length)),
+      trend: `Fase actual · ${macro.weekly[cur - 1]?.focus ?? ''}`,
+      bars: window.map(w => w.imr),
+      labels: window.map(w => `S${w.w}`),
+      details: window.map(w => ({
+        label: `S${w.w}`,
+        fullLabel: `Semana ${w.w} · ${w.focus}`,
+        intensity: w.imr,
+        exercises: [{ name: w.focus, sets: `${w.reps} reps`, load: `${w.imr}% IMR`, tonelajeKg: Math.round(wTon * (w.reps / totalWeekReps)) }],
+      })),
+    };
+
+    // ── Y · progresión anual determinística (sin fuente real → tendencia ilustrativa) ──
+    const r = seeded(`${athlete.id}:year`);
+    const yBars = Array.from({ length: 12 }, (_, i) => Math.round(56 + i * 2.4 + (r() - 0.5) * 8));
+    const Y: RangeData = {
+      volume: fmtK(wTon * 44),
+      trend: 'Progresión · 12 meses',
+      bars: yBars,
+      labels: MONTH_LETTER,
+      details: yBars.map((v, i) => ({
+        label: MONTH_LETTER[i],
+        fullLabel: MONTH_FULL[i],
+        intensity: v,
+        exercises: [{ name: 'Promedio mensual', sets: '—', load: `${v}% IMR`, tonelajeKg: Math.round(wTon * 4 * (v / 70)) }],
+      })),
+    };
+
+    return { W, M, Y };
+  }, [athlete]);
+
+  const data = rangeData[range];
   const athleteId = athlete?.id ?? 'demo';
   const snatchBest = athlete?.maxes.snatch ?? 112;
   const cjBest = athlete ? cjMax(athlete.maxes.clean, athlete.maxes.jerk) : 145;
@@ -271,7 +292,7 @@ const PerformanceDeepDive: React.FC = () => {
         {selectedDay && (
           <div className="pdd-sheet">
             {selectedDay.prFlag && (
-              <div className="pdd-pr-banner">🏆 Día con PR registrado</div>
+              <div className="pdd-pr-banner">🏆 Día más intenso de la semana</div>
             )}
 
             <div className="pdd-ex-list">

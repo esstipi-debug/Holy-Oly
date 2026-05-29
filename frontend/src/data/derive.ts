@@ -23,6 +23,10 @@ function seedOf(s: string): number {
   }
   return h >>> 0;
 }
+/** PRNG determinístico [0,1) sembrado por un string. Reusable (jitter realista, etc.). */
+export function seeded(key: string): () => number {
+  return rng(seedOf(key));
+}
 /** mulberry32 — generador pseudoaleatorio determinístico [0,1). */
 function rng(seed: number): () => number {
   let a = seed >>> 0;
