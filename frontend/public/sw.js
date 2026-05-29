@@ -11,8 +11,38 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
+const SHELL_CACHE = 'ho-shell-v1';
+
 self.addEventListener('activate', (event) => {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil(
+    Promise.all([
+      self.clients.claim(),
+      caches.keys().then((keys) =>
+        Promise.all(keys.filter((k) => k !== SHELL_CACHE).map((k) => caches.delete(k)))
+      ),
+    ])
+  );
+});
+
+// Network-first para GET same-origin: online SIEMPRE sirve fresco (sin caches
+// viejos trabados durante la iteración de UI), offline cae al cache (app shell).
+// La API (cross-origin: holy-oly-3, fonts) y los POST pasan directo, sin tocar SW.
+self.addEventListener('fetch', (event) => {
+  const req = event.request;
+  if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+  if (url.origin !== self.location.origin) return;
+  event.respondWith(
+    fetch(req)
+      .then((res) => {
+        if (res && res.status === 200) {
+          const copy = res.clone();
+          caches.open(SHELL_CACHE).then((c) => c.put(req, copy)).catch(() => {});
+        }
+        return res;
+      })
+      .catch(() => caches.match(req).then((c) => c || caches.match('/')))
+  );
 });
 
 self.addEventListener('push', (event) => {

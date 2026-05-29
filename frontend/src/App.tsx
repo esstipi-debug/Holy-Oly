@@ -8,6 +8,7 @@ import { NavigationProvider, useNav } from './context/NavigationContext';
 import { ProductProvider, useProduct } from './context/ProductContext';
 import { RoleProvider, useRole } from './context/RoleContext';
 import { ToastProvider } from './components/Toast';
+import InstallPrompt from './components/InstallPrompt';
 import PhoneLayout, { type NavTab } from './layouts/PhoneLayout';
 import ActiveSession from './pages/ActiveSession';
 import WarmupGenerator from './pages/WarmupGenerator';
@@ -443,6 +444,8 @@ function AppInner() {
         {!isPublic && !isImmersive && showSwitcher && <ProductRoleSwitcher />}
         {renderView()}
       </PhoneLayout>
+
+      <InstallPrompt />
 
       {/* Dev sidebar — solo cuando autenticado y en DEV */}
       {import.meta.env.DEV && !isPublic && (
