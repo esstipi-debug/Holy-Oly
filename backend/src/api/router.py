@@ -308,7 +308,7 @@ async def get_week_sessions(program_id: str, week: int):
         # Return template (would come from DB in production)
         template = MacrocycleEngine.SESSION_TEMPLATES.get(
             program_id,
-            MacrocycleEngine.SESSION_TEMPLATES["russian_classic"]
+            MacrocycleEngine.SESSION_TEMPLATES["ruso-5d"]
         )
         return {"program_id": program_id, "week": week, "sessions": template}
     except Exception as e:

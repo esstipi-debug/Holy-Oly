@@ -91,8 +91,8 @@ GOAL_FOCUS_MAP: dict[str, set[str]] = {
     "pre_competition": {"Peaking", "Power"},
 }
 
-# Schools que tienen carga técnica fuerte por arquetipo
-TECHNICAL_SCHOOLS = {"Chinese", "European", "Japanese"}
+# Schools que tienen carga técnica fuerte por arquetipo (escuelas reales)
+TECHNICAL_SCHOOLS = {"Chinese", "Korean", "Cuban"}
 
 
 # ---------------------------------------------------------------------------

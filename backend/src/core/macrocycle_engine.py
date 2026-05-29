@@ -1,7 +1,8 @@
 """
 03. Macrocycle Engine
 
-Manages 23 standardized training programs from 9 weightlifting schools.
+Manages 24 canonical training programs from 10 weightlifting schools
+(mirror of frontend/src/data/macrocycles.ts · source: macrocycles/RAW_SOURCES/).
 Creates athlete-specific sessions based on their 1RMs.
 """
 
@@ -11,16 +12,19 @@ from datetime import datetime, timedelta
 from enum import Enum
 
 
+# Escuelas REALES (fuente: macrocycles/RAW_SOURCES/ · espejo de frontend/src/data/macrocycles.ts).
+# Se eliminaron las ficticias (Iranian/European/Japanese/Turkish) que no existen en la fuente.
 class MacrocycleSchool(Enum):
     BULGARIAN = "Bulgarian"
-    RUSSIAN = "Russian"
+    KOREAN = "Korean"
     CHINESE = "Chinese"
-    AMERICAN = "American"
-    IRANIAN = "Iranian"
-    EUROPEAN = "European"
-    JAPANESE = "Japanese"
+    CUBAN = "Cuban"
+    POLISH = "Polish"
+    RUSSIAN = "Russian"
     UKRAINIAN = "Ukrainian"
-    TURKISH = "Turkish"
+    COLOMBIAN = "Colombian"
+    HYBRID = "Hybrid"
+    USA = "USA"
 
 
 class MacrocycleFocus(Enum):
@@ -123,137 +127,144 @@ class GeneratedSession:
 class MacrocycleEngine:
     """Macrocycle Engine implementation"""
     
-    # 23 canonical programs
+    # 24 programas canónicos · espejo de frontend/src/data/macrocycles.ts (RAW_SOURCES).
+    # ids, escuela, semanas, frecuencia e intensidad alineados a la fuente real.
     PROGRAMS = {
-        # Bulgarian
-        "bulgarian_hf": MacrocycleDefinition(
-            id="bulgarian_hf", name="High Frequency Pure Oly",
-            school="Bulgarian", duration_weeks=8, focus_type="Power",
-            difficulty_level=5, description="Daily singles, daily maxes", sessions_per_week=6
+        # Búlgaro
+        "bulgaro-6d": MacrocycleDefinition(
+            id="bulgaro-6d", name="Búlgaro 6D",
+            school="Bulgarian", duration_weeks=12, focus_type="Power",
+            difficulty_level=5, description="Daily Max. Especificidad máxima, intensidad extrema.", sessions_per_week=6
         ),
-        "bulgarian_heavy": MacrocycleDefinition(
-            id="bulgarian_heavy", name="Bulgarian Heavy",
-            school="Bulgarian", duration_weeks=12, focus_type="Strength",
-            difficulty_level=5, description="Extreme frequency + loads", sessions_per_week=6
+        # Coreano
+        "coreano-5d": MacrocycleDefinition(
+            id="coreano-5d", name="Coreano 5D",
+            school="Korean", duration_weeks=12, focus_type="Strength",
+            difficulty_level=4, description="Estructura rígida, fuerza posicional, volumen de tirones.", sessions_per_week=5
         ),
-        "bulgarian_strength": MacrocycleDefinition(
-            id="bulgarian_strength", name="Bulgarian Strength Block",
-            school="Bulgarian", duration_weeks=6, focus_type="Strength",
-            difficulty_level=4, description="Lower frequency, higher intensity", sessions_per_week=4
+        "coreano-6d": MacrocycleDefinition(
+            id="coreano-6d", name="Coreano 6D",
+            school="Korean", duration_weeks=12, focus_type="Strength",
+            difficulty_level=4, description="Coreano de alta densidad, más volumen en 6 días.", sessions_per_week=6
         ),
-        # Russian
-        "russian_classic": MacrocycleDefinition(
-            id="russian_classic", name="Russian Classic Periodization",
-            school="Russian", duration_weeks=12, focus_type="Strength",
-            difficulty_level=4, description="Hypertrophy → Strength → Power", sessions_per_week=5
+        # Chino
+        "chino-5d": MacrocycleDefinition(
+            id="chino-5d", name="Chino 5D",
+            school="Chinese", duration_weeks=4, focus_type="Hypertrophy",
+            difficulty_level=4, description="Fuerza-técnica + culturismo funcional. Pulls y squats.", sessions_per_week=5
         ),
-        "russian_speed": MacrocycleDefinition(
-            id="russian_speed", name="Russian Strength-Speed Block",
-            school="Russian", duration_weeks=8, focus_type="Power",
-            difficulty_level=4, description="Speed under load", sessions_per_week=5
+        # Cubano
+        "cubano-novicio-2d": MacrocycleDefinition(
+            id="cubano-novicio-2d", name="Cubano Novicio 2D",
+            school="Cuban", duration_weeks=8, focus_type="Technical",
+            difficulty_level=2, description="Iniciación, 2 sesiones, foco técnico.", sessions_per_week=2
         ),
-        "russian_chains": MacrocycleDefinition(
-            id="russian_chains", name="Russian Heavy Chains",
-            school="Russian", duration_weeks=10, focus_type="Strength",
-            difficulty_level=4, description="Wave loading with chains/bands", sessions_per_week=5
+        "cubano-novicio-3d": MacrocycleDefinition(
+            id="cubano-novicio-3d", name="Cubano Novicio 3D",
+            school="Cuban", duration_weeks=8, focus_type="Technical",
+            difficulty_level=2, description="Volumen lun · técnico mié · intensidad vie.", sessions_per_week=3
         ),
-        "russian_comp": MacrocycleDefinition(
-            id="russian_comp", name="Russian Competition Prep",
-            school="Russian", duration_weeks=4, focus_type="Peaking",
-            difficulty_level=5, description="Peaking taper", sessions_per_week=3
+        "cubano-int-5d": MacrocycleDefinition(
+            id="cubano-int-5d", name="Cubano Intermedio 5D",
+            school="Cuban", duration_weeks=12, focus_type="Strength",
+            difficulty_level=3, description="Estructura clásica con base técnica establecida.", sessions_per_week=5
         ),
-        # Chinese
-        "chinese_extensive": MacrocycleDefinition(
-            id="chinese_extensive", name="Chinese Extensive",
-            school="Chinese", duration_weeks=16, focus_type="Hypertrophy",
-            difficulty_level=3, description="High volume, moderate intensity", sessions_per_week=5
+        "cubano-avanzado-5d": MacrocycleDefinition(
+            id="cubano-avanzado-5d", name="Cubano Avanzado 5D",
+            school="Cuban", duration_weeks=12, focus_type="Strength",
+            difficulty_level=4, description="Mayor capacidad de trabajo, volumen alto.", sessions_per_week=5
         ),
-        "chinese_comp": MacrocycleDefinition(
-            id="chinese_comp", name="Chinese Competition Phase",
-            school="Chinese", duration_weeks=6, focus_type="Peaking",
-            difficulty_level=4, description="Peaking focus", sessions_per_week=4
+        "cubano-competidor": MacrocycleDefinition(
+            id="cubano-competidor", name="Cubano Competidor",
+            school="Cuban", duration_weeks=16, focus_type="Peaking",
+            difficulty_level=5, description="Salida competitiva: acumulación → realización.", sessions_per_week=5
         ),
-        "chinese_youth": MacrocycleDefinition(
-            id="chinese_youth", name="Chinese Youth Development",
-            school="Chinese", duration_weeks=12, focus_type="Technical",
-            difficulty_level=2, description="Foundation building", sessions_per_week=4
+        # Polaco
+        "polaco-4d": MacrocycleDefinition(
+            id="polaco-4d", name="Polaco 4D",
+            school="Polish", duration_weeks=6, focus_type="Peaking",
+            difficulty_level=4, description="Ciclo corto de choque, picos frecuentes.", sessions_per_week=4
         ),
-        # American
-        "american_hybrid": MacrocycleDefinition(
-            id="american_hybrid", name="American Hybrid Complex",
-            school="American", duration_weeks=10, focus_type="Power",
-            difficulty_level=3, description="Oly + strength + CrossFit transfer", sessions_per_week=4
+        "polaco-5d": MacrocycleDefinition(
+            id="polaco-5d", name="Polaco 5D",
+            school="Polish", duration_weeks=6, focus_type="Peaking",
+            difficulty_level=4, description="Series cortas (1-3), mucho pull desde bloques.", sessions_per_week=5
         ),
-        "american_strength": MacrocycleDefinition(
-            id="american_strength", name="American Strength Bias",
-            school="American", duration_weeks=8, focus_type="Strength",
-            difficulty_level=3, description="Heavy squats + pulls", sessions_per_week=4
+        # Ruso
+        "ruso-5d": MacrocycleDefinition(
+            id="ruso-5d", name="Ruso 5D",
+            school="Russian", duration_weeks=16, focus_type="Strength",
+            difficulty_level=3, description="Waviness: ondulación diaria + semanal. GPP extensa.", sessions_per_week=5
         ),
-        # Iranian
-        "iranian_volume": MacrocycleDefinition(
-            id="iranian_volume", name="Iranian High Volume",
-            school="Iranian", duration_weeks=14, focus_type="Hypertrophy",
-            difficulty_level=4, description="~20+ exercises per session", sessions_per_week=5
+        # Ucraniano
+        "ucraniano-3d": MacrocycleDefinition(
+            id="ucraniano-3d", name="Ucraniano 3D",
+            school="Ukrainian", duration_weeks=12, focus_type="Power",
+            difficulty_level=4, description="Alta densidad pura, EMOM-heavy.", sessions_per_week=3
         ),
-        "iranian_comp": MacrocycleDefinition(
-            id="iranian_comp", name="Iranian Competition Block",
-            school="Iranian", duration_weeks=5, focus_type="Peaking",
-            difficulty_level=5, description="72h taper to peak", sessions_per_week=4
+        "ucraniano-4d": MacrocycleDefinition(
+            id="ucraniano-4d", name="Ucraniano 4D",
+            school="Ukrainian", duration_weeks=12, focus_type="Strength",
+            difficulty_level=4, description="Estándar, más volumen accesorio.", sessions_per_week=4
         ),
-        # European
-        "european_tech": MacrocycleDefinition(
-            id="european_tech", name="European Technical Focus",
-            school="European", duration_weeks=10, focus_type="Technical",
-            difficulty_level=3, description="Technique refinement", sessions_per_week=4
+        # Colombiano
+        "colombiano-5d": MacrocycleDefinition(
+            id="colombiano-5d", name="Colombiano 5D",
+            school="Colombian", duration_weeks=12, focus_type="Power",
+            difficulty_level=4, description="Prioridad al C&J. Ondulación constante.", sessions_per_week=5
         ),
-        "european_waves": MacrocycleDefinition(
-            id="european_waves", name="European Periodized Waves",
-            school="European", duration_weeks=12, focus_type="Power",
-            difficulty_level=4, description="3-week waves, undulating", sessions_per_week=4
+        # Híbrido
+        "hibrido-3d": MacrocycleDefinition(
+            id="hibrido-3d", name="Híbrido Moderno 3D",
+            school="Hybrid", duration_weeks=12, focus_type="Strength",
+            difficulty_level=3, description="Alta densidad por sesión, compuestos grandes.", sessions_per_week=3
         ),
-        "european_enduro": MacrocycleDefinition(
-            id="european_enduro", name="European Endurance-Strength Hybrid",
-            school="European", duration_weeks=9, focus_type="Strength",
-            difficulty_level=3, description="WL + conditioning", sessions_per_week=5
+        "hibrido-4d": MacrocycleDefinition(
+            id="hibrido-4d", name="Híbrido Moderno 4D",
+            school="Hybrid", duration_weeks=12, focus_type="Strength",
+            difficulty_level=3, description="Block periodization: hipertrofia + fuerza + EMOM.", sessions_per_week=4
         ),
-        # Japanese
-        "japanese_precision": MacrocycleDefinition(
-            id="japanese_precision", name="Japanese Precision OLY",
-            school="Japanese", duration_weeks=10, focus_type="Technical",
-            difficulty_level=4, description="Position work + technical fidelity", sessions_per_week=4
+        "hibrido-5d": MacrocycleDefinition(
+            id="hibrido-5d", name="Híbrido Moderno 5D",
+            school="Hybrid", duration_weeks=12, focus_type="Power",
+            difficulty_level=4, description="Acumulación → Transmutación → Realización.", sessions_per_week=5
         ),
-        "japanese_enduro": MacrocycleDefinition(
-            id="japanese_enduro", name="Japanese Strength Endurance",
-            school="Japanese", duration_weeks=12, focus_type="Strength",
-            difficulty_level=3, description="High reps (5-6) at 85%+", sessions_per_week=4
+        "hibrido-block": MacrocycleDefinition(
+            id="hibrido-block", name="Híbrido Modular (BLOCK)",
+            school="Hybrid", duration_weeks=12, focus_type="Strength",
+            difficulty_level=4, description="Bloques concentrados con ondulación semanal.", sessions_per_week=4
         ),
-        # Ukrainian
-        "ukrainian_freq": MacrocycleDefinition(
-            id="ukrainian_freq", name="Ukrainian Extreme Frequency",
-            school="Ukrainian", duration_weeks=6, focus_type="Power",
-            difficulty_level=5, description="10+ sessions/week", sessions_per_week=10
+        # USA
+        "usa-school": MacrocycleDefinition(
+            id="usa-school", name="USA Weightlifting",
+            school="USA", duration_weeks=12, focus_type="Power",
+            difficulty_level=3, description="Periodización lineal americana. Balance volumen/intensidad.", sessions_per_week=5
         ),
-        "ukrainian_strength": MacrocycleDefinition(
-            id="ukrainian_strength", name="Ukrainian Strength Block",
-            school="Ukrainian", duration_weeks=8, focus_type="Strength",
-            difficulty_level=4, description="3×/week with heavy squats", sessions_per_week=3
+        "usa-principiante": MacrocycleDefinition(
+            id="usa-principiante", name="USA Principiante",
+            school="USA", duration_weeks=16, focus_type="Technical",
+            difficulty_level=2, description="Lineal 16 sem: prep anatómica → fuerza base → integración.", sessions_per_week=4
         ),
-        # Turkish
-        "turkish_volume": MacrocycleDefinition(
-            id="turkish_volume", name="Turkish Volume Progression",
-            school="Turkish", duration_weeks=14, focus_type="Hypertrophy",
-            difficulty_level=3, description="Slow volume increase", sessions_per_week=4
+        "usa-intermedio": MacrocycleDefinition(
+            id="usa-intermedio", name="USA Intermedio",
+            school="USA", duration_weeks=16, focus_type="Strength",
+            difficulty_level=4, description="Bloques ondulantes: acumulación → transmutación → realización.", sessions_per_week=5
         ),
-        "turkish_speed": MacrocycleDefinition(
-            id="turkish_speed", name="Turkish Speed-Strength",
-            school="Turkish", duration_weeks=7, focus_type="Power",
-            difficulty_level=4, description="Explosive + technical", sessions_per_week=4
+        "usa-avanzado": MacrocycleDefinition(
+            id="usa-avanzado", name="USA Avanzado",
+            school="USA", duration_weeks=8, focus_type="Peaking",
+            difficulty_level=5, description="Peaking 8 sem pre-competencia: choque neural → tapering.", sessions_per_week=5
+        ),
+        "usa-master": MacrocycleDefinition(
+            id="usa-master", name="USA Master 40+",
+            school="USA", duration_weeks=12, focus_type="Strength",
+            difficulty_level=3, description="Adaptado a máster: estabilidad articular → fuerza preservada.", sessions_per_week=3
         ),
     }
     
     # Simplified session templates per program
     SESSION_TEMPLATES = {
-        "russian_classic": [
+        "ruso-5d": [
             {"day": "Monday", "theme": "Snatch Focus + Squat", "exercises": [
                 {"name": "Snatch", "sets": 5, "reps": 3, "intensity": 0.70, "rpe": 8},
                 {"name": "Clean", "sets": 4, "reps": 4, "intensity": 0.69, "rpe": 7.5},
@@ -326,7 +337,7 @@ class MacrocycleEngine:
             return []
         
         # Get template for program (simplified)
-        template_days = cls.SESSION_TEMPLATES.get(program_id, cls.SESSION_TEMPLATES["russian_classic"])
+        template_days = cls.SESSION_TEMPLATES.get(program_id, cls.SESSION_TEMPLATES["ruso-5d"])
         
         sessions = []
         base_date = datetime.strptime(start_date, "%Y-%m-%d")

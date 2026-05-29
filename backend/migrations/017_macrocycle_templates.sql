@@ -13,8 +13,10 @@ CREATE TABLE IF NOT EXISTS macrocycle_templates (
     program_id      VARCHAR(64) UNIQUE NOT NULL,    -- 'russian_classic', 'bulgarian_intensity', 'cf_open_prep'
     name            VARCHAR(160) NOT NULL,
     school          VARCHAR(32) NOT NULL CHECK (school IN (
-                      'bulgarian', 'russian', 'chinese', 'american', 'iranian',
-                      'european', 'japanese', 'ukrainian', 'turkish',
+                      -- Escuelas HO reales (RAW_SOURCES · espejo de macrocycles.ts)
+                      'bulgarian', 'korean', 'chinese', 'cuban', 'polish',
+                      'russian', 'ukrainian', 'colombian', 'hybrid', 'usa',
+                      -- Volta / Axon
                       'crossfit', 'hyrox', 'custom'
                     )),
     product         VARCHAR(16) NOT NULL DEFAULT 'holy-oly'

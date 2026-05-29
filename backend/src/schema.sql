@@ -406,31 +406,32 @@ INSERT INTO exercises (id, name, family, position, complexity, cns_demand, descr
 ('e-snatch-press', 'Snatch Press', 'snatch', 'press', 6, 6, 'Snatch press - strict')
 ON CONFLICT (id) DO NOTHING;
 
--- Macrocycles (23 programs)
+-- Macrocycles (24 programas canónicos · espejo de macrocycles.ts / RAW_SOURCES)
 INSERT INTO macrocycles (id, name, school, duration_weeks, focus_type, difficulty_level, sessions_per_week) VALUES
-('bulgarian_hf', 'High Frequency Pure Oly', 'Bulgarian', 8, 'Power', 5, 6),
-('bulgarian_heavy', 'Bulgarian Heavy', 'Bulgarian', 12, 'Strength', 5, 6),
-('bulgarian_strength', 'Bulgarian Strength Block', 'Bulgarian', 6, 'Strength', 4, 4),
-('russian_classic', 'Russian Classic Periodization', 'Russian', 12, 'Strength', 4, 5),
-('russian_speed', 'Russian Strength-Speed Block', 'Russian', 8, 'Power', 4, 5),
-('russian_chains', 'Russian Heavy Chains', 'Russian', 10, 'Strength', 4, 5),
-('russian_comp', 'Russian Competition Prep', 'Russian', 4, 'Peaking', 5, 3),
-('chinese_extensive', 'Chinese Extensive', 'Chinese', 16, 'Hypertrophy', 3, 5),
-('chinese_comp', 'Chinese Competition Phase', 'Chinese', 6, 'Peaking', 4, 4),
-('chinese_youth', 'Chinese Youth Development', 'Chinese', 12, 'Technical', 2, 4),
-('american_hybrid', 'American Hybrid Complex', 'American', 10, 'Power', 3, 4),
-('american_strength', 'American Strength Bias', 'American', 8, 'Strength', 3, 4),
-('iranian_volume', 'Iranian High Volume', 'Iranian', 14, 'Hypertrophy', 4, 5),
-('iranian_comp', 'Iranian Competition Block', 'Iranian', 5, 'Peaking', 5, 4),
-('european_tech', 'European Technical Focus', 'European', 10, 'Technical', 3, 4),
-('european_waves', 'European Periodized Waves', 'European', 12, 'Power', 4, 4),
-('european_enduro', 'European Endurance-Strength Hybrid', 'European', 9, 'Strength', 3, 5),
-('japanese_precision', 'Japanese Precision OLY', 'Japanese', 10, 'Technical', 4, 4),
-('japanese_enduro', 'Japanese Strength Endurance', 'Japanese', 12, 'Strength', 3, 4),
-('ukrainian_freq', 'Ukrainian Extreme Frequency', 'Ukrainian', 6, 'Power', 5, 10),
-('ukrainian_strength', 'Ukrainian Strength Block', 'Ukrainian', 8, 'Strength', 4, 3),
-('turkish_volume', 'Turkish Volume Progression', 'Turkish', 14, 'Hypertrophy', 3, 4),
-('turkish_speed', 'Turkish Speed-Strength', 'Turkish', 7, 'Power', 4, 4)
+('bulgaro-6d', 'Búlgaro 6D', 'Bulgarian', 12, 'Power', 5, 6),
+('coreano-5d', 'Coreano 5D', 'Korean', 12, 'Strength', 4, 5),
+('coreano-6d', 'Coreano 6D', 'Korean', 12, 'Strength', 4, 6),
+('chino-5d', 'Chino 5D', 'Chinese', 4, 'Hypertrophy', 4, 5),
+('cubano-novicio-2d', 'Cubano Novicio 2D', 'Cuban', 8, 'Technical', 2, 2),
+('cubano-novicio-3d', 'Cubano Novicio 3D', 'Cuban', 8, 'Technical', 2, 3),
+('cubano-int-5d', 'Cubano Intermedio 5D', 'Cuban', 12, 'Strength', 3, 5),
+('cubano-avanzado-5d', 'Cubano Avanzado 5D', 'Cuban', 12, 'Strength', 4, 5),
+('cubano-competidor', 'Cubano Competidor', 'Cuban', 16, 'Peaking', 5, 5),
+('polaco-4d', 'Polaco 4D', 'Polish', 6, 'Peaking', 4, 4),
+('polaco-5d', 'Polaco 5D', 'Polish', 6, 'Peaking', 4, 5),
+('ruso-5d', 'Ruso 5D', 'Russian', 16, 'Strength', 3, 5),
+('ucraniano-3d', 'Ucraniano 3D', 'Ukrainian', 12, 'Power', 4, 3),
+('ucraniano-4d', 'Ucraniano 4D', 'Ukrainian', 12, 'Strength', 4, 4),
+('colombiano-5d', 'Colombiano 5D', 'Colombian', 12, 'Power', 4, 5),
+('hibrido-3d', 'Híbrido Moderno 3D', 'Hybrid', 12, 'Strength', 3, 3),
+('hibrido-4d', 'Híbrido Moderno 4D', 'Hybrid', 12, 'Strength', 3, 4),
+('hibrido-5d', 'Híbrido Moderno 5D', 'Hybrid', 12, 'Power', 4, 5),
+('hibrido-block', 'Híbrido Modular (BLOCK)', 'Hybrid', 12, 'Strength', 4, 4),
+('usa-school', 'USA Weightlifting', 'USA', 12, 'Power', 3, 5),
+('usa-principiante', 'USA Principiante', 'USA', 16, 'Technical', 2, 4),
+('usa-intermedio', 'USA Intermedio', 'USA', 16, 'Strength', 4, 5),
+('usa-avanzado', 'USA Avanzado', 'USA', 8, 'Peaking', 5, 5),
+('usa-master', 'USA Master 40+', 'USA', 12, 'Strength', 3, 3)
 ON CONFLICT (id) DO NOTHING;
 
 -- ============== LIFESTYLE LOGS ==============
