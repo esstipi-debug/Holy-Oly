@@ -32,6 +32,7 @@ class Settings(BaseSettings):
     GOOGLE_PROJECT_ID: str = "liftai-evolved-strength"
     GOOGLE_LOCATION: str = "us-central1"
     GOOGLE_API_KEY: str = ""
+    GOOGLE_CLIENT_ID: str = ""  # OAuth Web Client ID para Google Sign-In (login/registro)
     
     # Logging
     LOG_LEVEL: str = "INFO"

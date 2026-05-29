@@ -368,3 +368,65 @@ async def register(payload: RegisterPayload, request: Request):
             "trial_ends_at": str(user.get("trial_ends_at")) if user.get("trial_ends_at") else None,
         },
     }
+
+
+class GoogleAuthPayload(BaseModel):
+    # id_token (JWT) que devuelve Google Identity Services en `response.credential`
+    credential: str
+
+
+@auth_router.post("/google")
+async def google_auth(payload: GoogleAuthPayload):
+    """
+    Login/registro con Google. Recibe el id_token de Google Identity Services,
+    lo verifica contra Google (firma + audiencia + expiración), y crea-o-loguea
+    al usuario en la DB. Devuelve token + user con la misma forma que /login.
+
+    Requiere la env var GOOGLE_CLIENT_ID (el OAuth Web Client ID). Mientras no
+    esté seteada, responde 503 y el botón de Google queda oculto en el front.
+    """
+    import os
+    import secrets
+    from ...db import users_repo
+
+    client_id = os.getenv("GOOGLE_CLIENT_ID", "").strip()
+    if not client_id:
+        raise HTTPException(status_code=503, detail="Google sign-in no configurado (falta GOOGLE_CLIENT_ID)")
+
+    # Verificar el id_token contra Google.
+    try:
+        from google.oauth2 import id_token as google_id_token
+        from google.auth.transport import requests as google_requests
+        idinfo = google_id_token.verify_oauth2_token(
+            payload.credential, google_requests.Request(), client_id
+        )
+    except Exception as e:  # token inválido / expirado / audiencia equivocada
+        raise HTTPException(status_code=401, detail=f"Token de Google inválido: {str(e)[:120]}")
+
+    email = (idinfo.get("email") or "").lower().strip()
+    if not email or not idinfo.get("email_verified", False):
+        raise HTTPException(status_code=401, detail="El email de Google no está verificado")
+    name = (idinfo.get("name") or email.split("@")[0]).strip()
+
+    # Login si ya existe, registro si no (sin password · solo Google).
+    existing = await users_repo.find_by_email(email)
+    if existing:
+        user_id = str(existing["id"])
+        role = existing.get("role", "athlete")
+    else:
+        created = await users_repo.create_user(
+            email=email,
+            name=name,
+            password_hash=get_password_hash(secrets.token_urlsafe(32)),  # password aleatoria inutilizable
+            role="athlete",
+            product="holy-oly",
+        )
+        user_id = str(created["id"])
+        role = "athlete"
+
+    access_token = create_access_token(data={"sub": user_id, "email": email, "role": role})
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": {"id": user_id, "email": email, "name": name, "role": role},
+    }
