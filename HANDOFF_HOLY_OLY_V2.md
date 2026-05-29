@@ -1,7 +1,32 @@
-# HANDOFF · Migración Holy Oly → V2 (estilo "Macrociclos")
+# HANDOFF · Holy Oly
 
 > Para iniciar una sesión nueva y continuar. Leer esto primero.
-> Generado al cierre de la sesión anterior.
+
+## 🎯 MISIÓN: COMPLETAR HOLY OLY
+Que Holy Oly quede **100% operativo y demostrable**: todas las pantallas en V2 (hecho) + **demo realista** que se pueda mostrar/vender sin depender del backend + el **loop de Coach HO** del spec. Volta es después.
+
+## 📋 PROMPT DE ARRANQUE — copiar/pegar tal cual en la sesión nueva
+
+```text
+Misión: COMPLETAR HOLY OLY (que quede 100% operativo y demostrable).
+
+Trabajás en el worktree C:/Users/Gamer/Desktop/Holy Oly 001/.claude/worktrees/compassionate-rhodes-7d48f8, branch feat/api-first-refactor. Verificá `git rev-parse --abbrev-ref HEAD` ANTES de tocar nada. Leé HANDOFF_HOLY_OLY_V2.md ENTERO (sobre todo la sección "SESIÓN 2026-05-28/29").
+
+Estado: las pantallas HO ya están migradas a V2. Foco ahora: el "demo realista" (B) y después implementar el loop de Coach HO (spec en docs/superpowers/specs/2026-05-28-coach-ho-design.md).
+
+Reglas duras:
+- NO inventar macrociclos. La fuente real es macrocycles/RAW_SOURCES/ y frontend/src/data/macrocycles.ts se extrae de ahí. El seed del backend (backend/migrations/017_macrocycle_templates.sql) está MAL (escuelas Iraní/Turco/Japonés/Europeo que NO son originales) → ignorar/corregir, no usar.
+- Build SIEMPRE con `cd frontend && npm run build` (tsc -b, atrapa unused). Commitear por ola y pushear (Render auto-deploya peakqual-v2).
+- Demo para verificar: https://peakqual-v2.onrender.com/?demo=1 (arranca fresco) → "Modo demo · QA" → elegí cuadrante. Local: `cd frontend && npm run dev` → :5173.
+
+Empezá por (orden sugerido):
+1) Demo realista (B): secciones placeholder del Coach Dash (Week WODs + Inventory atados al roster/macro) y Athlete Deep Dive (cambios de RM coherentes); luego Pulse feed, Knowledge Pills, Session Schedule, PR history.
+2) Detalle de sesión POR EJERCICIO (tonelaje/reps por lift) → para IMR real.
+3) Implementar el loop de Coach HO del spec (estados de sesión, opciones del atleta, aprobar/notificar).
+Mostrá avance por ola. NO inventar data: si falta una fuente, pedila.
+```
+
+> Generado al cierre de la sesión 2026-05-28/29.
 
 ---
 

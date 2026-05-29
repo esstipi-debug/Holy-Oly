@@ -67,6 +67,18 @@ async function bootstrap() {
   const demoMode = params.get('demo') === '1';
   localStorage.setItem('app:demo_mode', demoMode ? '1' : '0');
 
+  // QA: `?demo=1` (sin auto) arranca SIEMPRE fresco — limpia cualquier sesión vieja
+  // para que la entrada de demo (Landing → "Modo demo" · Login → cuadrantes) se vea
+  // aunque hubiera quedado un user/token de un demo anterior.
+  if (demoMode && params.get('auto') !== '1') {
+    try {
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+      localStorage.removeItem('demoMode');
+      localStorage.removeItem('nav:currentView');
+    } catch { /* ignore */ }
+  }
+
   if (demoMode && params.get('auto') === '1') {
     const ok = await autoDemoLogin();
     if (ok) {
