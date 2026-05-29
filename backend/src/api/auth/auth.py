@@ -389,7 +389,8 @@ async def google_auth(payload: GoogleAuthPayload):
     import secrets
     from ...db import users_repo
 
-    client_id = os.getenv("GOOGLE_CLIENT_ID", "").strip()
+    # Client ID público (va en el front igual). Override por env GOOGLE_CLIENT_ID si hace falta.
+    client_id = os.getenv("GOOGLE_CLIENT_ID", "").strip() or "576946246697-7c4u4g1uu802qh7pjm8iiij0srh82t6o.apps.googleusercontent.com"
     if not client_id:
         raise HTTPException(status_code=503, detail="Google sign-in no configurado (falta GOOGLE_CLIENT_ID)")
 

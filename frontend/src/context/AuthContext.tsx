@@ -1,11 +1,12 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
-import { loginRequest, registerRequest, fetchMe, checkBackendAlive, type AuthUser } from '../lib/api';
+import { loginRequest, registerRequest, googleAuthRequest, fetchMe, checkBackendAlive, type AuthUser } from '../lib/api';
 
 interface AuthContextType {
   user: AuthUser | null;
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string, role: 'atleta' | 'coach', product: 'holy-oly' | 'volta') => Promise<void>;
+  loginWithGoogle: (credential: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
   backendAlive: boolean | null;
@@ -93,6 +94,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setDemoMode(false);
   }, []);
 
+  const loginWithGoogle = useCallback(async (credential: string) => {
+    const data = await googleAuthRequest(credential);
+    localStorage.setItem('token', data.access_token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    localStorage.removeItem('demoMode');
+    setToken(data.access_token);
+    setUser(data.user);
+    setDemoMode(false);
+  }, []);
+
   const logout = useCallback(() => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -114,7 +125,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider value={{
       user, token,
-      login, register,
+      login, register, loginWithGoogle,
       logout,
       isAuthenticated: !!user,
       backendAlive,

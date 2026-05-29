@@ -119,6 +119,21 @@ export async function registerRequest(
   return res.json() as Promise<{ access_token: string; token_type: string; user: AuthUser }>;
 }
 
+export async function googleAuthRequest(credential: string) {
+  const res = await fetch(`${API_URL}/v1/auth/google`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ credential }),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: 'Error con Google' }));
+    throw new Error(typeof err.detail === 'string' ? err.detail : 'Error con Google');
+  }
+
+  return res.json() as Promise<{ access_token: string; token_type: string; user: AuthUser }>;
+}
+
 export async function fetchMe(): Promise<AuthUser> {
   return request<AuthUser>('/v1/auth/me');
 }

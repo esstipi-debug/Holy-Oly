@@ -22,6 +22,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactElement } from 'react';
 import { useNav, type View } from '../../context/NavigationContext';
 import { useAuth } from '../../context/AuthContext';
+import GoogleSignInButton from '../../components/GoogleSignInButton';
 import { useProduct } from '../../context/ProductContext';
 import { useRole } from '../../context/RoleContext';
 import '../../styles/v2/login.css';
@@ -411,6 +412,8 @@ export default function LoginV3({ onSuccess }: LoginV3Props = {}) {
             </div>
           </div>
         </section>
+
+        <GoogleSignInButton onAuthed={goAfterSuccess} />
 
         {demoAllowed && (
           <section className="lg-demo" aria-label="Modo demo">
