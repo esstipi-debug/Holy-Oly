@@ -16,6 +16,29 @@ function readProduct(): 'holy-oly' | 'volta' {
   return 'holy-oly';
 }
 
+// ─── Persistencia de asignaciones de macro (demo) ───
+// El roster base es estático (data/athletes.ts). Cuando el coach asigna o transiciona
+// un macro, guardamos el override por atleta en sessionStorage para que el cambio
+// sobreviva navegación/reload dentro de la sesión demo y se refleje en el atleta.
+const MACRO_OVERRIDES_KEY = 'ho:macroOverrides';
+type MacroShape = AthleteProfile['macrocycle'];
+
+function readMacroOverrides(): Record<string, MacroShape> {
+  try {
+    const raw = sessionStorage.getItem(MACRO_OVERRIDES_KEY);
+    if (raw) return JSON.parse(raw) as Record<string, MacroShape>;
+  } catch { /* ignore */ }
+  return {};
+}
+function writeMacroOverrides(o: Record<string, MacroShape>) {
+  try { sessionStorage.setItem(MACRO_OVERRIDES_KEY, JSON.stringify(o)); } catch { /* ignore */ }
+}
+function rosterWithOverrides(base: AthleteProfile[]): AthleteProfile[] {
+  const o = readMacroOverrides();
+  if (!Object.keys(o).length) return base;
+  return base.map(a => (o[a.id] ? { ...a, macrocycle: o[a.id] } : a));
+}
+
 interface StressResult {
   fitness: number;
   fatigue: number;
@@ -56,6 +79,8 @@ interface AthleteContextType {
   selectedAthlete: AthleteProfile | null;
   selectAthlete: (id: string) => void;
   addAthlete: (input: NewAthleteInput) => AthleteProfile;
+  /** Asigna/transiciona el macrociclo activo de un atleta (persiste en la sesión demo). */
+  updateMacro: (athleteId: string, macro: AthleteProfile['macrocycle']) => void;
 }
 
 export interface NewAthleteInput {
@@ -175,7 +200,7 @@ export function AthleteProvider({ children }: { children: ReactNode }) {
   const [stressLoading, setStressLoading] = useState(false);
   const [adaptation, setAdaptation] = useState<AdaptationResult | null>(null);
   const [adaptationLoading, setAdaptationLoading] = useState(false);
-  const [roster, setRoster] = useState<AthleteProfile[]>(athletes);
+  const [roster, setRoster] = useState<AthleteProfile[]>(() => rosterWithOverrides(athletes));
 
   // Resolución de perfil:
   // 1. demoMode + product=='volta' → primer atleta Volta (perfil CrossFit con benchmarks/skills)
@@ -231,6 +256,13 @@ export function AthleteProvider({ children }: { children: ReactNode }) {
     };
     setRoster(prev => [...prev, profile]);
     return profile;
+  };
+
+  const updateMacro = (athleteId: string, macro: AthleteProfile['macrocycle']) => {
+    setRoster(prev => prev.map(a => (a.id === athleteId ? { ...a, macrocycle: macro } : a)));
+    const o = readMacroOverrides();
+    o[athleteId] = macro;
+    writeMacroOverrides(o);
   };
 
   useEffect(() => {
@@ -299,7 +331,7 @@ export function AthleteProvider({ children }: { children: ReactNode }) {
   }, [athlete?.id]);
 
   return (
-    <AthleteContext.Provider value={{ athlete, stress, stressLoading, adaptation, adaptationLoading, allAthletes: productRoster, selectedAthlete, selectAthlete, addAthlete }}>
+    <AthleteContext.Provider value={{ athlete, stress, stressLoading, adaptation, adaptationLoading, allAthletes: productRoster, selectedAthlete, selectAthlete, addAthlete, updateMacro }}>
       {children}
     </AthleteContext.Provider>
   );

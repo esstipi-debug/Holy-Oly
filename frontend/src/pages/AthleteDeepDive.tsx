@@ -9,6 +9,7 @@ import WeeklyAnalysisCharts from '../components/WeeklyAnalysisCharts';
 import { PlateBadge, type PlateTier } from '../components/PlateBadge';
 import { useAthleteStress, fallbackReadiness } from '../hooks/useAthleteStress';
 import { deriveRmStatus } from '../data/derive';
+import { buildMacroAssignment } from '../data/macroDetail';
 import { readinessInsight, SEVERITY_COLOR } from '../data/insight';
 import ImrBandChart from '../components/coach/ImrBandChart';
 import AcwrGauge from '../components/coach/AcwrGauge';
@@ -26,7 +27,7 @@ const readinessToTier = (r: number): PlateTier => {
 const AthleteDeepDive: React.FC = () => {
   const { navigate } = useNav();
   const { product } = useProduct();
-  const { selectedAthlete, athlete: currentAthlete } = useAthlete();
+  const { selectedAthlete, athlete: currentAthlete, updateMacro } = useAthlete();
   const a = selectedAthlete ?? currentAthlete;
   const { stress: athleteStress, loading: stressLoading } = useAthleteStress(a);
   const [showFeedback, setShowFeedback] = useState(false);
@@ -332,6 +333,7 @@ const AthleteDeepDive: React.FC = () => {
         currentProgramName={a.macrocycle.program_name}
         currentWeek={a.macrocycle.week}
         currentTotal={a.macrocycle.total_weeks}
+        onApply={(programId, startWeek) => updateMacro(a.id, buildMacroAssignment(programId, startWeek))}
       />
 
       {/* FEEDBACK MODAL */}

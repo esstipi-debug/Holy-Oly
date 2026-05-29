@@ -373,3 +373,40 @@ export function getMacroDetail(id: string | null): MacroData {
     user: { isActive: false, currentWeek: 0, pctComplete: 0, role: 'athlete', has1RM: true },
   };
 }
+
+/** Forma del macrociclo activo de un atleta (== AthleteProfile['macrocycle']). */
+export interface MacroAssignment {
+  program_id: string;
+  program_name: string;
+  week: number;
+  day: number;
+  total_weeks: number;
+  focus: string;
+}
+
+/**
+ * Construye el macrociclo activo de un atleta a partir de un programa + semana de
+ * arranque. NO inventa: nombre/duración salen del catálogo canónico y el foco de
+ * la curva semanal real (getMacroDetail → weekly[w].focus, override RAW_SOURCES).
+ * `fallback` cubre macros remotos no presentes en MACROCYCLES (nombre/semanas que
+ * ya trae la UI). Día arranca en 1 (inicio de la semana asignada).
+ */
+export function buildMacroAssignment(
+  programId: string,
+  startWeek: number,
+  fallback?: { name?: string; totalWeeks?: number },
+): MacroAssignment {
+  const macro = MACROCYCLES.find(m => m.id === programId);
+  const detail = getMacroDetail(programId);
+  const total = Math.max(1, fallback?.totalWeeks ?? detail.duration);
+  const week = Math.max(1, Math.min(total, Math.round(startWeek) || 1));
+  const entry = detail.weekly[Math.min(week, detail.weekly.length) - 1];
+  return {
+    program_id: programId,
+    program_name: macro?.name ?? fallback?.name ?? detail.name,
+    week,
+    day: 1,
+    total_weeks: total,
+    focus: entry?.focus ?? 'Por definir',
+  };
+}

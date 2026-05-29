@@ -19,12 +19,14 @@ interface Props {
   currentProgramName: string;
   currentWeek: number;
   currentTotal: number;
+  /** Confirma la transición: el padre persiste el macro nuevo en el atleta. */
+  onApply?: (programId: string, startWeek: number) => void;
 }
 
 const ACCENT = 'var(--engine-stress)';
 
 const TransitionSheet: React.FC<Props> = ({
-  open, onClose, athleteName, currentProgramId, currentProgramName, currentWeek, currentTotal,
+  open, onClose, athleteName, currentProgramId, currentProgramName, currentWeek, currentTotal, onApply,
 }) => {
   const curFreq = macroFreq(currentProgramId);
   const freqs = useMemo(() => availableTargetFreqs(currentProgramId), [currentProgramId]);
@@ -138,7 +140,10 @@ const TransitionSheet: React.FC<Props> = ({
                   ? `Sugerido por su progreso actual (${Math.round((currentWeek / currentTotal) * 100)}% del macro).`
                   : 'Base limpia desde la semana 1.'}
               </p>
-              <button onClick={() => setApplied(true)} style={cta(ACCENT, true)}>
+              <button
+                onClick={() => { onApply?.(picked.macro.id, effectiveWeek); setApplied(true); }}
+                style={cta(ACCENT, true)}
+              >
                 Asignar {picked.macro.name} · {targetFreq}d desde S{effectiveWeek}
               </button>
             </div>

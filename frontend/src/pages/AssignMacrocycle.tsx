@@ -3,6 +3,7 @@ import { useNav } from '../context/NavigationContext';
 import { useAthlete } from '../context/AthleteContext';
 import { useProduct } from '../context/ProductContext';
 import { MACROCYCLES, type Macrocycle } from '../data/macrocycles';
+import { buildMacroAssignment } from '../data/macroDetail';
 import { PlateBadge, type PlateTier } from '../components/PlateBadge';
 import { api } from '../lib/api';
 import {
@@ -232,7 +233,7 @@ type FocusFilter = 'TODOS' | string;
 
 const AssignMacrocycle: React.FC = () => {
   const { navigate } = useNav();
-  const { selectedAthlete, athlete: currentAthlete } = useAthlete();
+  const { selectedAthlete, athlete: currentAthlete, updateMacro } = useAthlete();
   const { product } = useProduct();
   const target = selectedAthlete ?? currentAthlete;
 
@@ -359,6 +360,12 @@ const AssignMacrocycle: React.FC = () => {
     }
     setAssigning(true);
     setAssignError(null);
+    // Persistir local (demo): el macro nuevo se refleja en el atleta aunque el
+    // backend no esté (en demo el POST da 401 benigno). Optimista: una sola vez.
+    updateMacro(target.id, buildMacroAssignment(selectedMacro.id, startWeek, {
+      name: selectedMacro.name,
+      totalWeeks: selectedWeeks,
+    }));
     try {
       await api.post('/v1/macrocycles/assign', {
         athlete_id: target.id,
