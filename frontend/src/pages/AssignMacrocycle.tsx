@@ -499,6 +499,7 @@ const AssignMacrocycle: React.FC = () => {
                                 e.stopPropagation();
                                 setSelected(sug.macro_id);
                                 setShowFullList(false);
+                                setWeekPickerOpen(true);   // abre directo el week-picker (sin tener que buscar el Confirmar)
                               }}
                             >
                               Asignar este macro
