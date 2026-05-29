@@ -296,7 +296,7 @@ export function getMacroDetail(id: string | null): MacroData {
     volume: base.volume,
     recovery: clamp(6 - base.intensity, 1, 5),
     difficulty: base.intensity,
-    subtitle: `${weeks} semanas · ${freq} días/semana · Escuela ${base.family.toLowerCase()}`,
+    subtitle: `${weeks} semanas · ${freq} días/semana · Escuela ${base.family}`,
     philoTitle: fam.title,
     philosophy: fam.cards,
     weekly,

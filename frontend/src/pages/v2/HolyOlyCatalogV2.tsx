@@ -12,6 +12,7 @@
 import { useState, useMemo, useEffect, type CSSProperties, type ReactElement } from 'react';
 import { useNav } from '../../context/NavigationContext';
 import { api } from '../../lib/api';
+import { MACROCYCLES } from '../../data/macrocycles';
 import '../../styles/v2/holy-oly-catalog.css';
 
 // ============================================================
@@ -76,43 +77,34 @@ interface Macro {
   doneCount?: number;
 }
 
-// Fallback estático si el backend no responde (offline · sin token · 5xx).
-// La app priorizá GET /v1/macrocycles en runtime.
-const FALLBACK_MACROCYCLES: Macro[] = [
-  // RUSO (4)
-  { id:'ruso-clasico-16',  name:'Ruso Clásico',         family:'ruso',     dur:16, freq:5, int:4, vol:5, rec:2, reps:'500-650', tagline:'Variabilidad · waviness · GPP', bestFor:'Atletas pacientes que valoran fundamentos sólidos · ciclo largo' },
-  { id:'ruso-12s',         name:'Ruso 12 sem',          family:'ruso',     dur:12, freq:4, int:4, vol:4, rec:3, reps:'380-480', tagline:'Versión condensada · base ondulada', bestFor:'Intermedio · objetivo 3-4 meses pre-meet' },
-  { id:'medvedev-base',    name:'Medvedev Base',        family:'ruso',     dur:20, freq:5, int:5, vol:5, rec:2, reps:'620-780', tagline:'Texto soviético original · clásico estricto', bestFor:'Avanzado · base soviética purista' },
-  { id:'roman-8s',         name:'Roman 8',              family:'ruso',     dur:8,  freq:4, int:4, vol:4, rec:3, reps:'260-340', tagline:'Bloque corto · pre-competencia', bestFor:'Atleta intermedio · 8 semanas focalizadas' },
-  // BÚLGARO (3)
-  { id:'bulgaro-pureza',   name:'Búlgaro Pureza',       family:'bulgaro',  dur:8,  freq:6, int:5, vol:3, rec:1, reps:'180-240', tagline:'Daily max · Abadjiev puro', bestFor:'Avanzado · SNC adaptado · sin lesiones recientes', status:'active' },
-  { id:'bulgaro-mod',      name:'Búlgaro Modificado',   family:'bulgaro',  dur:10, freq:5, int:5, vol:3, rec:2, reps:'240-300', tagline:'Daily max adaptado · ventana intensidad', bestFor:'Intermedio-avanzado · primera exposición a daily max' },
-  { id:'abadjiev-8s',      name:'Abadjiev 8s',          family:'bulgaro',  dur:8,  freq:6, int:5, vol:3, rec:1, reps:'200-260', tagline:'Pico de intensidad · pre-meet', bestFor:'Pre-competencia · alta tolerancia CNS' },
-  // CUBANO (3)
-  { id:'cubano-tecnica',   name:'Cubano Técnica',       family:'cubano',   dur:8,  freq:4, int:3, vol:4, rec:4, reps:'280-340', tagline:'Foco técnico · variantes amplias', bestFor:'Principiante a intermedio · pulir clásicos' },
-  { id:'cubano-clasico',   name:'Cubano Clásico 12',    family:'cubano',   dur:12, freq:4, int:3, vol:4, rec:4, reps:'400-500', tagline:'Variantes amplias · ondulación suave', bestFor:'Reentrada o atleta nuevo · 3 meses base' },
-  { id:'pedrosa',          name:'Pedrosa',              family:'cubano',   dur:14, freq:5, int:4, vol:4, rec:3, reps:'480-600', tagline:'Cubano avanzado · sistema híbrido', bestFor:'Intermedio-avanzado caribeño' },
-  // COREANO (3)
-  { id:'coreano-5d',       name:'Coreano 5D',           family:'coreano',  dur:12, freq:5, int:4, vol:5, rec:2, reps:'520-640', tagline:'Disciplina + tirones largos', bestFor:'Atleta serio · alta carga de tirones', status:'done', doneCount:1 },
-  { id:'coreano-6d',       name:'Coreano 6D',           family:'coreano',  dur:16, freq:6, int:5, vol:5, rec:1, reps:'700-880', tagline:'Full-time · disciplina coreana', bestFor:'Atleta full-time · alta capacidad recuperación' },
-  { id:'jang-mi-ran',      name:'Jang Mi-Ran',          family:'coreano',  dur:20, freq:6, int:5, vol:5, rec:1, reps:'880-1080', tagline:'Pirámide olímpica · referencia oro', bestFor:'Atleta de elite · pre-mundial' },
-  // CHINO (3)
-  { id:'chino-pulls',      name:'Chino Pulls',          family:'chino',    dur:12, freq:5, int:4, vol:5, rec:2, reps:'540-680', tagline:'Tirones + culturismo · base estructural', bestFor:'Corrección de debilidades · pulls altos' },
-  { id:'lu-xiaojun',       name:'Lu Xiaojun',           family:'chino',    dur:16, freq:5, int:5, vol:4, rec:2, reps:'620-780', tagline:'Avanzado clásico · refinamiento', bestFor:'Avanzado · técnica refinada' },
-  { id:'chino-tianjin',    name:'Tianjin',              family:'chino',    dur:20, freq:6, int:5, vol:5, rec:1, reps:'880-1100', tagline:'Programa institucional chino', bestFor:'Elite institucional · alta carga' },
-  // POLACO (2)
-  { id:'polaco-michalak',  name:'Polaco Michalak',      family:'polaco',   dur:12, freq:5, int:4, vol:4, rec:3, reps:'440-560', tagline:'Block periodization · bloques limpios', bestFor:'Competidor enfocado · estructura por bloque' },
-  { id:'polaco-peak-8',    name:'Polaco Peaking 8',     family:'polaco',   dur:8,  freq:4, int:5, vol:3, rec:3, reps:'200-260', tagline:'Pre-competencia · taper inteligente', bestFor:'8 sem pre-meet · taper agresivo' },
-  // UCRANIANO (1)
-  { id:'slobodyanyuk',     name:'Slobodyanyuk',         family:'ucraniano',dur:14, freq:5, int:4, vol:4, rec:3, reps:'480-600', tagline:'Tirones largos · escuela ucraniana', bestFor:'Intermedio-avanzado · foco tirones' },
-  // COLOMBIANO (1)
-  { id:'colombiano-torres',name:'Colombiano Torres',    family:'colombiano',dur:12,freq:5, int:4, vol:4, rec:3, reps:'460-580', tagline:'Adaptación latina · clima cálido', bestFor:'Latam · ambiente cálido · trabajo aeróbico extra' },
-  // HÍBRIDO (2)
-  { id:'ruso-polaco',      name:'Híbrido Ruso/Polaco',  family:'hibrido',  dur:14, freq:5, int:4, vol:4, rec:3, reps:'480-620', tagline:'Volumen ruso + bloques polacos', bestFor:'Atleta que combina volumen y especificidad' },
-  { id:'bulgaro-cubano',   name:'Híbrido Bulgaro/Cubano',family:'hibrido', dur:10, freq:5, int:5, vol:4, rec:2, reps:'320-400', tagline:'Daily max + técnica cubana', bestFor:'Avanzado · técnica fina + alta intensidad' },
-  // USA (1)
-  { id:'uwf-cosp',         name:'USA UWF-COSP',         family:'usa',      dur:12, freq:5, int:4, vol:4, rec:3, reps:'460-580', tagline:'Olympic Training Center · sistema americano', bestFor:'Atletas USAW · sistema federación' },
-];
+// Fallback offline (sin backend / 401). Se DERIVA de la fuente canónica
+// data/macrocycles.ts para que catálogo, detalle y asignación usen los MISMOS
+// ids → coherencia: tap en el catálogo abre el detalle correcto del macro.
+const FAMILY_ID: Record<string, string> = {
+  'Ruso': 'ruso', 'Búlgaro': 'bulgaro', 'Coreano': 'coreano', 'Chino': 'chino',
+  'Cubano': 'cubano', 'Polaco': 'polaco', 'Ucraniano': 'ucraniano',
+  'Colombiano': 'colombiano', 'Híbrido': 'hibrido', 'USA': 'usa',
+};
+const numFrom = (s: string, def: number) => {
+  const m = s.match(/\d+/);
+  return m ? parseInt(m[0], 10) : def;
+};
+function macrocyclesToCards(): Macro[] {
+  return MACROCYCLES.filter(m => m.product === 'holy-oly').map(m => ({
+    id: m.id,
+    name: m.name,
+    family: FAMILY_ID[m.family] ?? m.family.toLowerCase(),
+    dur: numFrom(m.duration, 12),
+    freq: numFrom(m.frequency, 5),
+    int: m.intensity,
+    vol: m.volume,
+    rec: Math.max(1, Math.min(5, 6 - m.intensity)),
+    reps: `${m.volume * 100}-${m.volume * 120}`,
+    tagline: m.desc,
+    bestFor: m.bestFor ?? '',
+  }));
+}
+const FALLBACK_MACROCYCLES: Macro[] = macrocyclesToCards();
 
 interface Family { id: string; name: string; c: string; }
 const FAMILIES: Family[] = [
@@ -129,11 +121,11 @@ const FAMILIES: Family[] = [
   { id:'usa',        name:'USA',        c:'#6366F1' },
 ];
 
-const RECOMMENDED = ['polaco-peak-8', 'cubano-clasico', 'ruso-12s'];
+const RECOMMENDED = ['ruso-5d', 'cubano-int-5d', 'usa-catalyst'];
 const RECO_REASON: Record<string, string> = {
-  'polaco-peak-8':  'Tu última fase fue volumen alto · este enfoca taper',
-  'cubano-clasico': 'Recomendado · balance técnica + volumen moderado',
-  'ruso-12s':       'Base sólida · 12 sem antes del próximo meet',
+  'ruso-5d':       'Base sólida · ciclo largo con waviness antes del próximo meet',
+  'cubano-int-5d': 'Balance técnica + volumen moderado',
+  'usa-catalyst':  'Progresión estructurada · sistema bien documentado',
 };
 
 const FAMILY_LABEL: Record<string, string> = {
