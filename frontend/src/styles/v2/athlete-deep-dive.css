@@ -386,11 +386,12 @@
   transition: height .6s ease;
 }
 .add-load-bar[data-done="true"] {
-  background: linear-gradient(180deg, var(--engine-pulse), rgba(239,68,68,0.3));
-  box-shadow: 0 0 8px rgba(239,68,68,0.25);
+  background: linear-gradient(180deg, var(--engine-stress), color-mix(in oklab, var(--engine-stress) 22%, transparent));
+  box-shadow: 0 0 10px color-mix(in oklab, var(--engine-stress) 30%, transparent);
 }
 .add-load-bar[data-done="false"] {
-  background: var(--surface-3);
+  background: repeating-linear-gradient(135deg, var(--surface-3) 0 4px, transparent 4px 8px);
+  opacity: 0.7;
 }
 .add-load-days {
   display: flex;
