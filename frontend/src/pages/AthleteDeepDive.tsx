@@ -14,6 +14,7 @@ import { readinessInsight, SEVERITY_COLOR } from '../data/insight';
 import ImrBandChart from '../components/coach/ImrBandChart';
 import AcwrGauge from '../components/coach/AcwrGauge';
 import TransitionSheet from '../components/coach/TransitionSheet';
+import CompetitionsCard from '../components/coach/CompetitionsCard';
 
 /** Readiness (0-10) → tier disc (halterofilia plates). Same semantics as CoachStatsHO. */
 const readinessToTier = (r: number): PlateTier => {
@@ -210,6 +211,9 @@ const AthleteDeepDive: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* COMPETENCIAS OBJETIVO · planificador de picos (Approach C) */}
+      <CompetitionsCard athlete={a} onPlan={() => navigate('ASSIGN_MACRO')} />
 
       {/* CARGA SEMANAL */}
       <div className="add-section">

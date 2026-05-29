@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AthleteProvider } from './context/AthleteContext';
+import { CompetitionProvider } from './context/CompetitionContext';
 import { NavigationProvider, useNav } from './context/NavigationContext';
 import { ProductProvider, useProduct } from './context/ProductContext';
 import { RoleProvider, useRole } from './context/RoleContext';
@@ -517,15 +518,17 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <AthleteProvider>
-          <ProductProvider>
-            <RoleProvider>
-              <NavigationProvider>
-                <ToastProvider>
-                  <AppInner />
-                </ToastProvider>
-              </NavigationProvider>
-            </RoleProvider>
-          </ProductProvider>
+          <CompetitionProvider>
+            <ProductProvider>
+              <RoleProvider>
+                <NavigationProvider>
+                  <ToastProvider>
+                    <AppInner />
+                  </ToastProvider>
+                </NavigationProvider>
+              </RoleProvider>
+            </ProductProvider>
+          </CompetitionProvider>
         </AthleteProvider>
       </AuthProvider>
     </ThemeProvider>
