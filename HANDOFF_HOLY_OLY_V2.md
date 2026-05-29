@@ -93,19 +93,22 @@ Estilo V2 dark "Macrociclos" (FIFA/Strava). Cada pantalla scopeada bajo `.xxx-ro
 
 ## ▶️ PRÓXIMOS PASOS
 
-**HECHO (sesión 2026-05-29 · commits `7ca493e`→`1bc422b`):**
+**HECHO (sesión 2026-05-29 · commits `7ca493e`→`3b2d7c5`):**
 1. ✅ Demo realista — Week WODs + Inventory + RM + Pulse + Pills + Schedule + PR history atados a roster/macro real.
 2. ✅ Detalle de sesión POR EJERCICIO + IMR real (`data/sessionDetail.ts`).
 3. ✅ Fidelidad del detalle de macro (`data/macroSources.ts` ← RAW_SOURCES: curva IMR + mesos reales).
 4. ✅ Loop de Coach HO (IMR vs banda + insight + bandeja 🔔 + revisión confirmar/revertir + ACWR).
 5. ✅ Seed del backend corregido (escuelas reales, 24 macros canónicos).
+6. ✅ Planificación 2-3 días: filtro por días/sem en el catálogo (surface las planillas 2-3d) + **asistente de transición de días** (`macroTransition.ts` + `TransitionSheet`: macro afín + week picker continuar/reiniciar).
+7. ✅ UX coach: cartas lideran con Readiness (OVR/tier secundario) · stats en palabras completas + "?" → `MetricsInfoSheet` (cómo se calcula cada dato) · gráfico IMR vs banda en SVG + carga semanal cohesiva (cyan).
 
 **PENDIENTE:**
-6. **Revisión paso a paso de Coach HO** con el Boss (qué hace/muestra cada botón/sección).
-7. Polish menor del loop: insight inline+drawer más profundo en wellness (②) y desvíos (④); atar más fuerte plan-vs-real a la bandeja.
-8. Reconciliar duraciones catálogo↔RAW_SOURCES (ej. cubano-novicio: catálogo 8 sem vs fuente 16).
-9. ¿Más macros de Colombia? → conseguir fuente real primero.
-10. **Volta** (recién al cerrar HO): VoltaWodSummary, VoltaStats, VoltaCoachDash, VoltaCoachWod, VoltaCoachTools, LogWodResult (aún legacy).
+8. **Revisión paso a paso de Coach HO** con el Boss (qué hace/muestra cada botón/sección).
+9. Persistir la transición/asignación en el demo (hoy `TransitionSheet` confirma sin mutar el roster estático).
+10. Polish menor: insight inline+drawer en wellness (②) y desvíos (④); reconciliar duraciones catálogo↔RAW_SOURCES (ej. cubano-novicio 8 vs 16 sem).
+11. **Visión "administrador de macrociclos"** (brief del Boss): calendario de competencias + picos/objetivos, perfil del atleta (nivel/categoría), datos de estilo de vida (peso corporal, sueño, estrés) y cumplimiento (plan vs ejecutado), análisis post-competición. Mucho ya existe parcial (engine wellness, desvíos, IMR); falta el calendario/competencias y el tracking de peso corporal.
+12. ¿Más macros de Colombia / más planillas 2d? → conseguir fuente real primero (no inventar).
+13. **Volta** (recién al cerrar HO): VoltaWodSummary, VoltaStats, VoltaCoachDash, VoltaCoachWod, VoltaCoachTools, LogWodResult (aún legacy).
 
 ---
 
