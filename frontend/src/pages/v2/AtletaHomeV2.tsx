@@ -7,6 +7,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import '../../styles/v2/atleta-home.css';
 import { useAthlete } from '../../context/AthleteContext';
+import { useCompetitions } from '../../context/CompetitionContext';
+import { nextCompetition, weeksBetween, toDate } from '../../data/competitions';
 import { useNav } from '../../context/NavigationContext';
 import { progressionApi } from '../../lib/progression';
 import { getPendingForToday } from '../../lib/plannedSessions';
@@ -200,10 +202,12 @@ function TierCard({ tier = '3', name = 'AZUL', pct = 73 }) {
 }
 
 /* ---------- Macrocycle ---------- */
-function MacroCard({ current = 4, total = 12, peakAt = 8, title = 'Macrociclo', fullWidth = false, onClick }) {
+function MacroCard({ current = 4, total = 12, peakAt = 8, title = 'Macrociclo', fullWidth = false, onClick, compName, compWeeksAway }) {
   const safeTotal = total > 0 ? total : 12;
   const safeCurrent = Math.min(current, safeTotal);
-  const weeksToPeak = Math.max(0, peakAt - safeCurrent);
+  const hasComp = compName != null && compWeeksAway != null;
+  const flagWeek = hasComp ? Math.min(safeTotal, safeCurrent + compWeeksAway) : peakAt;
+  const weeksToPeak = hasComp ? compWeeksAway : Math.max(0, peakAt - safeCurrent);
   return (
     <Card onClick={onClick} style={fullWidth ? { gridColumn: '1 / -1' } : undefined}>
       <div className="ah-eyebrow">
@@ -214,17 +218,17 @@ function MacroCard({ current = 4, total = 12, peakAt = 8, title = 'Macrociclo', 
         {Array.from({length: safeTotal}, (_, i) => {
           const w = i + 1;
           const isPast = w <= safeCurrent;
-          const isPeak = w === peakAt;
+          const isPeak = w === flagWeek;
           return (
             <div key={w}
                  className={`tick ${isPast ? 'on' : ''} ${isPeak ? 'peak' : ''}`}/>
           );
         })}
-        <span className="flag" style={{ left: `${((peakAt - 0.5) / safeTotal) * 100}%` }}/>
+        <span className="flag" style={{ left: `${((flagWeek - 0.5) / safeTotal) * 100}%` }}/>
       </div>
       <div className="ah-macro-foot">
         <span>{Math.round((safeCurrent / safeTotal) * 100)}% completado</span>
-        <span className="next">{weeksToPeak > 0 ? `↗ pico en ${weeksToPeak} sem` : '↗ fase pico'}</span>
+        <span className="next">{hasComp ? `🏆 ${compName} en ${weeksToPeak} sem` : (weeksToPeak > 0 ? `↗ pico en ${weeksToPeak} sem` : '↗ fase pico')}</span>
       </div>
     </Card>
   );
@@ -348,6 +352,7 @@ const FOCUS_LABEL = (focus) => (focus || 'STRENGTH').toString().toUpperCase();
 /* ---------- Main App ---------- */
 function App() {
   const { athlete, stress, stressLoading } = useAthlete();
+  const { competitions } = useCompetitions();
   const { navigate } = useNav();
 
   // Estado backend de progresión (cinturón + racha + oly index) · graceful fallback.
@@ -380,6 +385,8 @@ function App() {
   if (!athlete) return null;
 
   const { macrocycle, maxes } = athlete;
+  const nextComp = nextCompetition(competitions, athlete.id, new Date());
+  const compWeeksAway = nextComp ? Math.max(0, weeksBetween(new Date(), toDate(nextComp.date))) : undefined;
   const firstName = (athlete.name.split(' ')[0] || '').toUpperCase();
   const initial = firstName[0] || '·';
 
@@ -483,6 +490,7 @@ function App() {
           <div className="ah-row-2">
             <MacroCard
               current={macroWeek} total={macroTotal} peakAt={macroPeak}
+              compName={nextComp?.name} compWeeksAway={compWeeksAway}
               title={macroTitle} fullWidth={!hormonal}
               onClick={() => navigate('HO_MACRO_ATHLETE')}
             />
