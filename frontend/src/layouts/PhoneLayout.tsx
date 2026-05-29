@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNav } from '../context/NavigationContext';
 import SessionSlotBadge from '../components/SessionSlotBadge';
 
@@ -118,22 +118,12 @@ const PhoneLayout: React.FC<PhoneLayoutProps> = ({
   const now = new Date();
   const time = now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
 
-  // Fullscreen en cualquier dispositivo táctil (pointer: coarse) o viewport ≤820px:
-  // la app llena la pantalla sin el marco/mockup (que en un celular parece
-  // "simulador"). Cubre todos los teléfonos sin importar el device-pixel-ratio
-  // (ej. 1080p @ DPR 2.0 = 540px CSS, que un breakpoint de 480 no atrapaba).
-  // En desktop (mouse, ancho) se conserva el mockup 390×844 para mostrar/vender.
-  const FULLSCREEN_MQ = '(max-width: 820px), (pointer: coarse)';
-  const [fullscreen, setFullscreen] = useState<boolean>(
-    () => typeof window !== 'undefined' && window.matchMedia(FULLSCREEN_MQ).matches
-  );
-  useEffect(() => {
-    const mq = window.matchMedia(FULLSCREEN_MQ);
-    const onChange = () => setFullscreen(mq.matches);
-    onChange();
-    mq.addEventListener('change', onChange);
-    return () => mq.removeEventListener('change', onChange);
-  }, []);
+  // La app SIEMPRE ocupa la pantalla (sin marco/mockup de teléfono). Se adapta a
+  // cualquier pantalla: en teléfonos llena todo el ancho; en pantallas anchas
+  // (tablet/desktop) el contenido queda en una columna centrada (maxWidth),
+  // full-height. El contenido está diseñado para ancho de teléfono, por eso se
+  // cap para no estirarse feo en monitores grandes.
+  const fullscreen = true;
 
   return (
     <div
@@ -143,13 +133,11 @@ const PhoneLayout: React.FC<PhoneLayoutProps> = ({
       <div
         className="relative flex flex-col"
         style={{
-          width: fullscreen ? '100%' : 390,
-          height: fullscreen ? '100dvh' : 844,
+          width: '100%',
+          maxWidth: 540,
+          height: '100dvh',
           background: 'var(--bg)',
-          borderRadius: fullscreen ? 0 : 44,
-          border: fullscreen ? 'none' : '2px solid #2a2a3a',
           overflow: 'hidden',
-          boxShadow: fullscreen ? 'none' : '0 0 80px rgba(99,102,241,0.15), 0 0 0 1px #1e1e30, 0 40px 80px rgba(0,0,0,0.6)',
         }}
       >
         {/* Status Bar · solo en el mockup (desktop). En fullscreen el browser/OS ya muestra la suya. */}
