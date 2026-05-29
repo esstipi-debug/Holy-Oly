@@ -253,17 +253,71 @@ function dayFromType(d: string, type: Day['type'], intensity: number): Day {
   }
 }
 
-function genWeekTypical(freq: number, family: string, intensity: number): WeekTypical {
-  // Patrón de tipos de día por escuela.
-  const pattern: Day['type'][] = family === 'Búlgaro'
+/** Patrón de tipos de día por escuela (compartido entre la semana tipo y el plan semanal). */
+function familyDayPattern(family: string): Day['type'][] {
+  return family === 'Búlgaro'
     ? ['int', 'int', 'int', 'int', 'int', 'int']
     : family === 'Polaco'
     ? ['int', 'tec', 'int', 'med', 'int', 'act']
     : family === 'Cubano'
     ? ['vol', 'tec', 'med', 'tec', 'act', 'rec']
     : ['vol', 'tec', 'int', 'med', 'act', 'rec'];   // ruso/clásico por defecto
+}
+
+function genWeekTypical(freq: number, family: string, intensity: number): WeekTypical {
+  const pattern = familyDayPattern(family);
   const days = Array.from({ length: freq }, (_, i) => dayFromType(DOW[i], pattern[i % pattern.length], intensity));
   return { label: 'Semana tipo · bloque de fuerza', days };
+}
+
+// ── Plan semanal de 7 días (Lun→Dom) derivado del macro ──────────────────────
+// Atado a la escuela real (patrón de tipos) + frecuencia real (cuántos días entrena).
+// Lo consumen Coach Dash (Week WODs del macro dominante) y Session Schedule
+// (semana del macro del atleta). NO inventa: deriva de los params del macro.
+export interface WeekPlanDay {
+  dow: string;                    // 'LUN'…'DOM' (Lun-first)
+  type: Day['type'] | 'rest';
+  label: string;                  // corto: 'Intensidad'
+  name: string;                   // largo: 'Intensidad · Clásicos'
+  intensity: number;              // 0 (rest) … 5
+  rest: boolean;
+}
+
+const TYPE_META: Record<string, { label: string; name: string; intensity: number }> = {
+  int:  { label: 'Intensidad',   name: 'Intensidad · Clásicos',  intensity: 5 },
+  med:  { label: 'Fuerza',       name: 'Mediano · Fuerza',       intensity: 3 },
+  vol:  { label: 'Volumen',      name: 'Volumen · Base',         intensity: 4 },
+  tec:  { label: 'Técnica',      name: 'Técnica · Drills',       intensity: 2 },
+  act:  { label: 'Activación',   name: 'Activación · Potencia',  intensity: 3 },
+  rec:  { label: 'Recuperación', name: 'Recuperación',           intensity: 1 },
+  rest: { label: 'Descanso',     name: 'Descanso',               intensity: 0 },
+};
+
+// Qué días de la semana (índice Lun=0) son de entrenamiento según la frecuencia.
+const TRAIN_DAYS: Record<number, number[]> = {
+  2: [0, 3],
+  3: [0, 2, 4],
+  4: [0, 1, 3, 4],
+  5: [0, 1, 2, 3, 4],
+  6: [0, 1, 2, 3, 4, 5],
+};
+const DOW_MON = ['LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB', 'DOM'];
+
+/** Resuelve el plan semanal (7 días) del macro por id. Cae al primer macro HO si el id no existe. */
+export function getWeekPlan(id: string | null): WeekPlanDay[] {
+  const base = (id ? MACROCYCLES.find(m => m.id === id) : null)
+    ?? MACROCYCLES.find(m => m.product === 'holy-oly')
+    ?? MACROCYCLES[0];
+  const freq = parseFreq(base.frequency);
+  const pattern = familyDayPattern(base.family);
+  const trainIdx = TRAIN_DAYS[freq] ?? TRAIN_DAYS[5];
+  let p = 0;
+  return Array.from({ length: 7 }, (_, i) => {
+    const isTrain = trainIdx.includes(i);
+    const type: WeekPlanDay['type'] = isTrain ? pattern[p++ % pattern.length] : 'rest';
+    const meta = TYPE_META[type];
+    return { dow: DOW_MON[i], type, label: meta.label, name: meta.name, intensity: meta.intensity, rest: !isTrain };
+  });
 }
 
 // ── Resolver + ensamblar ─────────────────────────────────────────────────────

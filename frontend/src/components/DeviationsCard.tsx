@@ -15,7 +15,7 @@ import BottomSheet from './BottomSheet';
  * completa de desvíos semana por semana (expected vs actual).
  *
  * Props:
- *   - macroId    · id del macrociclo (ej. 'russian_classic')
+ *   - macroId    · id del macrociclo (ej. 'ruso-5d')
  *   - athleteId  · UUID del atleta (omitir si current_user = atleta · backend default)
  *   - weeks      · ventana de análisis · default 4
  *

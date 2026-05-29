@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNav } from '../context/NavigationContext';
 import { useAthlete } from '../context/AthleteContext';
+import type { AthleteProfile } from '../data/athletes';
 import '../styles/v2/pulse-hub.css';
 
 /**
@@ -9,16 +10,23 @@ import '../styles/v2/pulse-hub.css';
  * Se monta dentro de PhoneLayout. Lógica intacta: feed derivado de allAthletes.
  */
 
-const ACTIONS = [
-  'completó complejo Arrancada (3+1)',
-  'alcanzó PR en Snatch (+2kg)',
-  'inició sesión: Prep. Campeonato',
-  'logró 12 días de racha',
-  'pasó a Cinturón Púrpura',
-];
 const TIMES = ['2m', '15m', '1h', '3h', '5h'];
 // Colores de avatar (hex · antes Tailwind bg-*-500)
 const COLORS = ['#6366F1', '#EC4899', '#F59E0B', '#10B981', '#8B5CF6'];
+
+const initialsOf = (name: string) => name.split(' ').slice(0, 2).map(n => n[0] ?? '').join('').toUpperCase();
+
+// Acción del feed derivada de señales REALES del atleta (última sesión con nota /
+// racha de completadas / sesión más pesada / semana de su macro). No inventa.
+function feedAction(a: AthleteProfile): string {
+  const done = a.sessions_last_7.filter(s => s.completed);
+  const lastDone = [...a.sessions_last_7].reverse().find(s => s.completed);
+  if (lastDone?.notes) return `registró · ${lastDone.notes}`;
+  if (done.length >= 4) return `racha de ${done.length} sesiones · ${a.macrocycle.focus}`;
+  const heaviest = done.reduce<typeof done[number] | undefined>((m, s) => (s.load > (m?.load ?? 0) ? s : m), undefined);
+  if (heaviest?.load) return `sesión pesada · ${(heaviest.load / 1000).toFixed(1)}k de carga`;
+  return `Sem ${a.macrocycle.week} · ${a.macrocycle.program_name}`;
+}
 
 const PulseHub: React.FC = () => {
   const { navigate } = useNav();
@@ -26,7 +34,7 @@ const PulseHub: React.FC = () => {
   const others = allAthletes.filter(a => a.id !== athlete?.id).slice(0, 5);
   const feed = others.map((a, i) => ({
     user: `${a.name.split(' ')[0]} ${a.name.split(' ')[1]?.[0] ?? ''}.`,
-    action: ACTIONS[i % ACTIONS.length],
+    action: feedAction(a),
     time: TIMES[i % TIMES.length],
     color: COLORS[i % COLORS.length],
   }));
@@ -58,8 +66,8 @@ const PulseHub: React.FC = () => {
             </div>
             <div className="plh-ch-body">
               <div className="plh-avatars">
-                {[1, 2, 3, 4].map(x => <div key={x} className="av">U{x}</div>)}
-                <div className="av more">+4</div>
+                {others.slice(0, 4).map((a, x) => <div key={x} className="av">{initialsOf(a.name)}</div>)}
+                {others.length > 4 && <div className="av more">+{others.length - 4}</div>}
               </div>
               <button className="plh-join btn-press" onClick={() => navigate('SESSION')}>Unirse al pulse</button>
             </div>

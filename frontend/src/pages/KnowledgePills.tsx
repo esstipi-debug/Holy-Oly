@@ -30,6 +30,41 @@ const PILLS: Pill[] = [
     body: 'Bloqueo activo con escápulas elevadas y cabeza neutra. Si te falta movilidad torácica, ningún snatch va a ser estable.',
     xp: 50,
   },
+  {
+    title: 'El primer tirón es paciente',
+    body: 'Del piso a la rodilla la barra sube despacio y constante, hombros por delante de la barra. Apurar el primer tirón arruina la posición para el segundo.',
+    xp: 50,
+  },
+  {
+    title: 'Barra pegada al cuerpo',
+    body: 'En tirones y cargadas la barra roza muslo y cadera. Cuanto más cerca de tu centro de masa, menos brazo de palanca y más eficiente el levantamiento.',
+    xp: 60,
+  },
+  {
+    title: 'El "dip & drive" del envión',
+    body: 'El dip es corto, vertical y con el torso erguido. Si las rodillas se van adelante o el pecho cae, la barra sale del eje y el jerk se va al frente.',
+    xp: 60,
+  },
+  {
+    title: 'Recepción agresiva, no pasiva',
+    body: 'No esperás a que la barra baje: te metés activamente debajo. La velocidad para meterte (turnover) define cuánto podés levantar, no solo tu fuerza.',
+    xp: 60,
+  },
+  {
+    title: 'Qué es la IMR y por qué importa',
+    body: 'Intensidad Media Relativa = peso medio levantado ÷ tu 1RM. Es la brújula de la periodización: la misma IMR significa cosas distintas según la fase del macrociclo.',
+    xp: 70,
+  },
+  {
+    title: 'El deload no es debilidad',
+    body: 'Bajar carga ~40% cada 3-4 semanas deja que la fatiga caiga y la forma suba. Los PRs aparecen DESPUÉS de la descarga, no durante la acumulación.',
+    xp: 70,
+  },
+  {
+    title: 'Dormís para levantar',
+    body: 'El SNC se recupera con sueño. Menos de 7h baja readiness y velocidad de barra al día siguiente: el mejor accesorio de fuerza es la almohada.',
+    xp: 70,
+  },
 ];
 
 const KnowledgePills: React.FC = () => {

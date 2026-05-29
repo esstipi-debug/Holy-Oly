@@ -128,11 +128,11 @@ export const athletes: AthleteProfile[] = [
     role: 'athlete',
     subscription: 'PRO',
     macrocycle: {
-      program_id: 'russian_classic',
-      program_name: 'Ruso Clásico 12 semanas',
+      program_id: 'ruso-5d',
+      program_name: 'Ruso 5D',
       week: 4,
       day: 3,
-      total_weeks: 12,
+      total_weeks: 16,
       focus: 'Fuerza-Técnica',
     },
     maxes: {
@@ -170,11 +170,11 @@ export const athletes: AthleteProfile[] = [
     role: 'athlete',
     subscription: 'PRO',
     macrocycle: {
-      program_id: 'chinese_technical',
-      program_name: 'Chino Técnico 16 semanas',
+      program_id: 'chino-5d',
+      program_name: 'Chino 5D',
       week: 2,
       day: 1,
-      total_weeks: 16,
+      total_weeks: 4,
       focus: 'Técnica-Velocidad',
     },
     maxes: {
@@ -211,11 +211,11 @@ export const athletes: AthleteProfile[] = [
     role: 'athlete',
     subscription: 'ELITE',
     macrocycle: {
-      program_id: 'bulgarian_intensity',
-      program_name: 'Búlgaro Intensidad 8 semanas',
+      program_id: 'bulgaro-6d',
+      program_name: 'Búlgaro 6D',
       week: 6,
       day: 5,
-      total_weeks: 8,
+      total_weeks: 12,
       focus: 'Pico de Fuerza',
     },
     maxes: {
@@ -253,11 +253,11 @@ export const athletes: AthleteProfile[] = [
     role: 'athlete',
     subscription: 'PRO',
     macrocycle: {
-      program_id: 'chinese_technical',
-      program_name: 'Chino Técnico 16 semanas',
-      week: 8,
+      program_id: 'chino-5d',
+      program_name: 'Chino 5D',
+      week: 3,
       day: 2,
-      total_weeks: 16,
+      total_weeks: 4,
       focus: 'Técnica-Velocidad',
     },
     maxes: {
@@ -294,8 +294,8 @@ export const athletes: AthleteProfile[] = [
     role: 'athlete',
     subscription: 'FREE',
     macrocycle: {
-      program_id: 'american_performance',
-      program_name: 'Americano Performance 10 semanas',
+      program_id: 'usa-school',
+      program_name: 'USA Weightlifting',
       week: 1,
       day: 1,
       total_weeks: 10,
@@ -337,11 +337,11 @@ export const athletes: AthleteProfile[] = [
     product: 'volta',
     subscription: 'PRO',
     macrocycle: {
-      program_id: 'cf_open_prep_q2',
+      program_id: 'cf-open-prep',
       program_name: 'CF Open Prep · Q2',
       week: 5,
       day: 4,
-      total_weeks: 10,
+      total_weeks: 12,
       focus: 'Engine-Gymnastics',
     },
     maxes: {

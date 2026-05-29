@@ -13,6 +13,7 @@ import { useNav } from '../../context/NavigationContext';
 import { useAuth } from '../../context/AuthContext';
 import { useAthlete } from '../../context/AthleteContext';
 import { useRosterStress, fallbackReadiness } from '../../hooks/useAthleteStress';
+import { getWeekPlan } from '../../data/macroDetail';
 import type { AthleteProfile } from '../../data/athletes';
 
 /* ---------- Lucide icons ---------- */
@@ -319,70 +320,73 @@ function Roster({ list, onOpen }) {
   );
 }
 
-/* Week WODs · NO real per-day WOD schedule source exists for the HO coach yet.
-   Kept as a sensible default strip; the "today" marker tracks the real weekday. */
-function WeekWods() {
-  const DAYS = ['DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB'];
+/* Week WODs · derivado del macro dominante del roster (getWeekPlan): los tipos
+   de día y su intensidad salen de la escuela + frecuencia reales del macro
+   (Búlgaro = todo intensidad, Cubano = técnica-heavy, etc.). El marcador "hoy"
+   sigue el día real de la semana. */
+function WeekWods({ programId }: { programId?: string | null }) {
+  const plan = getWeekPlan(programId ?? null);
   const today = new Date();
-  const todayDow = today.getDay();
-  const week = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(today);
-    d.setDate(today.getDate() - todayDow + i + 1); // Mon-first
-    const dow = d.getDay();
-    const types = ['Strength','Técnica','Potencia','Endurance','Strength','Open WOD','Rest'];
-    return {
-      d: DAYS[dow],
-      n: d.getDate(),
-      type: types[i],
-      intensity: [4,5,2,3,4,3,0][i],
-      today: d.toDateString() === today.toDateString(),
-      rest: i === 6,
-    };
-  });
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - ((today.getDay() + 6) % 7)); // Lun-first
   return (
     <div className="cd-week">
-      {week.map((day, i) => (
-        <div key={i} className="day-chip" data-today={day.today} data-rest={day.rest}>
-          <div className="day-name">{day.d}</div>
-          <div className="day-num">{day.n}</div>
-          <div className="day-type">{day.type}</div>
-          {!day.rest && (
-            <div className="day-int">
-              {[1,2,3,4,5].map(j => (
-                <span key={j} className={`b ${j <= day.intensity ? 'on' : ''}`}/>
-              ))}
-            </div>
-          )}
-        </div>
-      ))}
+      {plan.map((day, i) => {
+        const d = new Date(monday);
+        d.setDate(monday.getDate() + i);
+        const isToday = d.toDateString() === today.toDateString();
+        return (
+          <div key={i} className="day-chip" data-today={isToday} data-rest={day.rest}>
+            <div className="day-name">{day.dow}</div>
+            <div className="day-num">{d.getDate()}</div>
+            <div className="day-type">{day.label}</div>
+            {!day.rest && (
+              <div className="day-int">
+                {[1,2,3,4,5].map(j => (
+                  <span key={j} className={`b ${j <= day.intensity ? 'on' : ''}`}/>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
 
-/* Inventory · NO real equipment-inventory source exists yet → default strip. */
-const INVENTORY = [
-  { icon:'barbell', name:'Barras OLY',  v:12,  total:12,  status:'green'  },
-  { icon:'weight',  name:'Bumpers',     v:480, total:600, status:'cyan'   },
-  { icon:'kettle',  name:'Kettlebells', v:18,  total:24,  status:'cyan'   },
-  { icon:'pkg',     name:'Boxes',       v:8,   total:10,  status:'cyan'   },
-  { icon:'rower',   name:'Rowers',      v:4,   total:6,   status:'amber'  },
-  { icon:'barbell', name:'Pull-up bars',v:6,   total:6,   status:'green'  },
+/* Inventory · OCUPACIÓN del box HOY derivada del roster: cuántos atletas entrenan
+   hoy (según el plan semanal de SU macro) marca el equipamiento en uso. La
+   CAPACIDAD es config del box (no hay censo de equipamiento real → default
+   razonable; si se quiere exacto, es una fuente a conseguir). La ocupación SÍ
+   se mueve con el roster/macro real. */
+const BOX_EQUIPMENT = [
+  { icon:'barbell', name:'Barras OLY',  cap:12,  per:(n:number) => n },                // 1 barra / atleta
+  { icon:'pkg',     name:'Plataformas', cap:8,   per:(n:number) => n },                // 1 plataforma / atleta
+  { icon:'weight',  name:'Bumpers (kg)',cap:600, per:(n:number) => n * 90 },           // ~90 kg discos / atleta
+  { icon:'wrench',  name:'Racks',       cap:6,   per:(n:number) => Math.ceil(n / 2) }, // 1 rack / 2 atletas
+  { icon:'kettle',  name:'Accesorios',  cap:24,  per:(n:number) => n * 2 },            // KB / bandas / accesorios
 ];
 
-function InventoryStrip() {
+function InventoryStrip({ roster }: { roster: AthleteProfile[] }) {
+  const todayMonIdx = (new Date().getDay() + 6) % 7; // Lun=0 … Dom=6
+  const trainingToday = roster.filter(
+    a => !getWeekPlan(a.macrocycle?.program_id ?? null)[todayMonIdx].rest,
+  ).length;
   return (
     <div className="cd-inv">
-      {INVENTORY.map((it, i) => {
-        const pct = Math.round((it.v / it.total) * 100);
+      {BOX_EQUIPMENT.map((it, i) => {
+        const inUse = Math.min(it.cap, it.per(trainingToday));
+        const pct = Math.round((inUse / it.cap) * 100);
+        const status = pct >= 85 ? 'amber' : pct >= 50 ? 'cyan' : 'green';
         return (
-          <div key={i} className="inv-card" data-status={it.status}>
+          <div key={i} className="inv-card" data-status={status}>
             <div className="inv-name">
               <Icon name={it.icon} size={12} stroke={1.8} className="ic"/>
               {it.name}
             </div>
             <div>
               <div className="inv-val">
-                {it.v}<span className="total">/{it.total}</span>
+                {inUse}<span className="total">/{it.cap}</span>
               </div>
               <div className="inv-pct">{pct}%</div>
             </div>
@@ -539,17 +543,17 @@ function CoachDashV2() {
       <div className="cd-section">
         <div className="cd-section-head">
           <h3>Week WODs</h3>
-          <span className="meta">7 días</span>
+          <span className="meta">7 días · {macro.program_name}</span>
         </div>
-        <WeekWods/>
+        <WeekWods programId={(macro as { program_id?: string }).program_id ?? null}/>
       </div>
 
       <div className="cd-section">
         <div className="cd-section-head">
           <h3>Inventory</h3>
-          <span className="meta">6 ítems</span>
+          <span className="meta">ocupación hoy</span>
         </div>
-        <InventoryStrip/>
+        <InventoryStrip roster={allAthletes}/>
       </div>
 
       <ActionsFab onAction={(view) => navigate(view)}/>

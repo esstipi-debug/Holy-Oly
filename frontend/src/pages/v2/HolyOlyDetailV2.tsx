@@ -544,8 +544,8 @@ export default function HolyOlyDetailV2() {
     // Lee el id del atleta logueado · sessionStorage del LoginV3 lo guardó en 'user'.
     let athleteId = '';
     try { athleteId = JSON.parse(localStorage.getItem('user') || '{}').id ?? ''; } catch { /* ignore */ }
-    // El catalog guarda el id backend en sessionStorage · sino usa 'russian_classic' default.
-    let programId = 'russian_classic';
+    // El catalog guarda el id canónico en sessionStorage · sino usa 'ruso-5d' default.
+    let programId = 'ruso-5d';
     try { programId = sessionStorage.getItem('ho:selectedMacroId') || programId; } catch { /* ignore */ }
     try {
       await api.post('/v1/macrocycles/assign', {

@@ -8,6 +8,7 @@ import DeviationsCard from '../components/DeviationsCard';
 import WeeklyAnalysisCharts from '../components/WeeklyAnalysisCharts';
 import { PlateBadge, type PlateTier } from '../components/PlateBadge';
 import { useAthleteStress, fallbackReadiness } from '../hooks/useAthleteStress';
+import { deriveRmStatus } from '../data/derive';
 
 /** Readiness (0-10) → tier disc (halterofilia plates). Same semantics as CoachStatsHO. */
 const readinessToTier = (r: number): PlateTier => {
@@ -80,13 +81,18 @@ const AthleteDeepDive: React.FC = () => {
   const hasLoadData = a.sessions_last_7.length > 0 && totalLoad > 0;
   const days = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
 
+  // RM por lift · 1:1 con a.maxes (sin duplicar C&J). Cambio/fecha del último
+  // test derivados de forma determinística del 1RM real + id (data/derive.ts).
   const rmList = [
-    { lift: 'Arrancada',         rm: `${a.maxes.snatch} kg`,      change: '+2kg', date: '5d' },
-    { lift: 'Clean & Jerk',      rm: `${a.maxes.clean + a.maxes.jerk - a.maxes.clean} kg`, change: '+5kg', date: '2d' },
-    { lift: 'Cargada',           rm: `${a.maxes.clean} kg`,       change: '+3kg', date: '1w' },
-    { lift: 'Sentadilla Atrás',  rm: `${a.maxes.back_squat} kg`,  change: '0kg',  date: '1w' },
-    { lift: 'Sentadilla Frontal',rm: `${a.maxes.front_squat} kg`, change: '+1kg', date: '4d' },
-  ];
+    { lift: 'Arrancada',          key: 'snatch',      kg: a.maxes.snatch },
+    { lift: 'Cargada',            key: 'clean',       kg: a.maxes.clean },
+    { lift: 'Envión',             key: 'jerk',        kg: a.maxes.jerk },
+    { lift: 'Sentadilla Atrás',   key: 'back_squat',  kg: a.maxes.back_squat },
+    { lift: 'Sentadilla Frontal', key: 'front_squat', kg: a.maxes.front_squat },
+  ].map(({ lift, key, kg }) => {
+    const st = deriveRmStatus(a.id, key, kg);
+    return { lift, rm: `${kg} kg`, change: st.change, date: st.date };
+  });
 
   const initials = a.name.split(' ').slice(0, 2).map(n => n[0]).join('');
 

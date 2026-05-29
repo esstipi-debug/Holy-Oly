@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import BottomSheet from '../components/BottomSheet';
 import { useAthlete } from '../context/AthleteContext';
+import { derivePrHistory, cjMax } from '../data/derive';
 import '../styles/v2/performance-deep-dive.css';
 
 /**
@@ -154,22 +155,6 @@ const InfoButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
   <button onClick={onClick} className="pdd-info btn-press" aria-label="Más info">ⓘ</button>
 );
 
-// ─── PR HISTORY MOCK ─────────────────────────────────────
-const SNATCH_HISTORY = [
-  { date: '24 may', kg: 112, delta: '+2' },
-  { date: '12 may', kg: 110, delta: '+3' },
-  { date: '02 may', kg: 107, delta: '+2' },
-  { date: '18 abr', kg: 105, delta: '+0' },
-  { date: '01 abr', kg: 105, delta: '+5' },
-];
-
-const CJ_HISTORY = [
-  { date: '23 may', kg: 145, delta: '+5' },
-  { date: '08 may', kg: 140, delta: '+2' },
-  { date: '21 abr', kg: 138, delta: '+3' },
-  { date: '04 abr', kg: 135, delta: '+5' },
-];
-
 const PerformanceDeepDive: React.FC = () => {
   const { athlete } = useAthlete();
   const [range, setRange] = useState<Range>('W');
@@ -178,9 +163,13 @@ const PerformanceDeepDive: React.FC = () => {
   const [activeLift, setActiveLift] = useState<'snatch' | 'cj' | null>(null);
 
   const data = RANGE_DATA[range];
+  const athleteId = athlete?.id ?? 'demo';
   const snatchBest = athlete?.maxes.snatch ?? 112;
-  const cjBest = athlete ? (athlete.maxes.clean + athlete.maxes.jerk - athlete.maxes.clean) : 145;
+  const cjBest = athlete ? cjMax(athlete.maxes.clean, athlete.maxes.jerk) : 145;
   const sRatio = athlete ? Math.round((athlete.maxes.snatch / athlete.maxes.clean) * 100) : 78;
+  // Histórico de PRs por lift, derivado del 1RM real del atleta (data/derive.ts).
+  const snatchHistory = derivePrHistory(athleteId, 'snatch', snatchBest);
+  const cjHistory = derivePrHistory(athleteId, 'cj', cjBest);
 
   const selectedDay = selectedBar !== null ? data.details[selectedBar] : null;
 
@@ -368,15 +357,15 @@ const PerformanceDeepDive: React.FC = () => {
 
             <p className="pdd-pr-listlabel">Últimos PRs</p>
             <div className="pdd-pr-list">
-              {(activeLift === 'snatch' ? SNATCH_HISTORY : CJ_HISTORY).map((pr, i) => (
+              {(activeLift === 'snatch' ? snatchHistory : cjHistory).map((pr, i) => (
                 <div key={i} className="pdd-pr-row">
                   <span className="pdd-pr-date">{pr.date}</span>
                   <div className="pdd-pr-right">
                     <span className="pdd-pr-kg">{pr.kg} kg</span>
                     <span
                       className="pdd-pr-delta"
-                      data-pos={pr.delta.startsWith('+') && pr.delta !== '+0'}
-                    >{pr.delta}kg</span>
+                      data-pos={pr.delta > 0}
+                    >+{pr.delta}kg</span>
                   </div>
                 </div>
               ))}
