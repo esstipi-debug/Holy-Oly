@@ -9,6 +9,7 @@ import WeeklyAnalysisCharts from '../components/WeeklyAnalysisCharts';
 import { PlateBadge, type PlateTier } from '../components/PlateBadge';
 import { useAthleteStress, fallbackReadiness } from '../hooks/useAthleteStress';
 import { deriveRmStatus } from '../data/derive';
+import { readinessInsight, SEVERITY_COLOR } from '../data/insight';
 import ImrBandChart from '../components/coach/ImrBandChart';
 
 /** Readiness (0-10) → tier disc (halterofilia plates). Same semantics as CoachStatsHO. */
@@ -161,6 +162,20 @@ const AthleteDeepDive: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* LECTURA · insight de readiness (spec §2.5 · 1 línea coloreada por severidad) */}
+      {(() => {
+        const ins = readinessInsight(readiness);
+        return (
+          <div style={{
+            margin: '0 0 16px', padding: '9px 12px', borderRadius: 10,
+            background: 'var(--surface)', border: `1px solid ${SEVERITY_COLOR[ins.severity]}40`,
+            fontSize: 11, fontWeight: 600, color: SEVERITY_COLOR[ins.severity], lineHeight: 1.4,
+          }}>
+            <span style={{ color: '#F5C518' }}>✦ </span>{ins.text}
+          </div>
+        );
+      })()}
 
       {/* MACRO INFO */}
       <div className="add-section">
