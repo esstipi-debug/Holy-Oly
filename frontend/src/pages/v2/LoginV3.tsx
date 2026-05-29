@@ -424,10 +424,8 @@ export default function LoginV3({ onSuccess }: LoginV3Props = {}) {
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
               {([
-                { p: 'holy-oly', r: 'atleta', label: '🏋️ Atleta HO',  c: '#FFB300' },
-                { p: 'holy-oly', r: 'coach',  label: '📋 Coach HO',   c: '#FFB300' },
-                { p: 'volta',    r: 'atleta', label: '⚡ Atleta Volta', c: '#00E5FF' },
-                { p: 'volta',    r: 'coach',  label: '📋 Coach Volta', c: '#00E5FF' },
+                { p: 'holy-oly', r: 'atleta', label: '🏋️ Atleta HO', c: '#FFB300' },
+                { p: 'holy-oly', r: 'coach',  label: '📋 Coach HO',  c: '#FFB300' },
               ] as const).map(q => (
                 <button
                   key={`${q.p}-${q.r}`}

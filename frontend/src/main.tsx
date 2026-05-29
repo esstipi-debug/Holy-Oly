@@ -25,10 +25,9 @@ function readParams() {
   }
 }
 
-function syncProductLocal(params: URLSearchParams) {
-  const p = params.get('p');
-  if (p === 'ho') localStorage.setItem('product:current', 'holy-oly');
-  else if (p === 'volta') localStorage.setItem('product:current', 'volta');
+function syncProductLocal() {
+  // Repo HO standalone: el producto es siempre 'holy-oly' (Volta vive en su propio repo).
+  localStorage.setItem('product:current', 'holy-oly');
 }
 
 async function autoDemoLogin(): Promise<boolean> {
@@ -63,7 +62,7 @@ async function autoDemoLogin(): Promise<boolean> {
 
 async function bootstrap() {
   const params = readParams();
-  syncProductLocal(params);
+  syncProductLocal();
   const demoMode = params.get('demo') === '1';
   localStorage.setItem('app:demo_mode', demoMode ? '1' : '0');
 
