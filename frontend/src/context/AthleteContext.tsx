@@ -39,6 +39,20 @@ function rosterWithOverrides(base: AthleteProfile[]): AthleteProfile[] {
   return base.map(a => (o[a.id] ? { ...a, macrocycle: o[a.id] } : a));
 }
 
+// Atletas creados en el demo (NewAthlete) → persisten en sessionStorage para
+// sobrevivir navegación/reload, igual que los overrides de macro.
+const ADDED_ATHLETES_KEY = 'ho:addedAthletes';
+function readAddedAthletes(): AthleteProfile[] {
+  try {
+    const raw = sessionStorage.getItem(ADDED_ATHLETES_KEY);
+    if (raw) return JSON.parse(raw) as AthleteProfile[];
+  } catch { /* ignore */ }
+  return [];
+}
+function writeAddedAthletes(list: AthleteProfile[]) {
+  try { sessionStorage.setItem(ADDED_ATHLETES_KEY, JSON.stringify(list)); } catch { /* ignore */ }
+}
+
 interface StressResult {
   fitness: number;
   fatigue: number;
@@ -200,7 +214,7 @@ export function AthleteProvider({ children }: { children: ReactNode }) {
   const [stressLoading, setStressLoading] = useState(false);
   const [adaptation, setAdaptation] = useState<AdaptationResult | null>(null);
   const [adaptationLoading, setAdaptationLoading] = useState(false);
-  const [roster, setRoster] = useState<AthleteProfile[]>(() => rosterWithOverrides(athletes));
+  const [roster, setRoster] = useState<AthleteProfile[]>(() => rosterWithOverrides([...athletes, ...readAddedAthletes()]));
 
   // Resolución de perfil:
   // 1. demoMode + product=='volta' → primer atleta Volta (perfil CrossFit con benchmarks/skills)
@@ -254,6 +268,7 @@ export function AthleteProvider({ children }: { children: ReactNode }) {
       prior_fatigue: 30,
       subscription: 'FREE',
     };
+    writeAddedAthletes([...readAddedAthletes(), profile]);
     setRoster(prev => [...prev, profile]);
     return profile;
   };

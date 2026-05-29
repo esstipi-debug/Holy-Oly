@@ -152,7 +152,7 @@ function initialsOf(name: string) {
    COMPONENTS
    ============================================================ */
 
-function Header({ coachName, count, pending, onBell }: { coachName: string; count: number; pending: number; onBell: () => void }) {
+function Header({ coachName, count, pending, onBell, onSettings }: { coachName: string; count: number; pending: number; onBell: () => void; onSettings: () => void }) {
   return (
     <header className="cd-header">
       <div className="cd-header-left">
@@ -167,7 +167,7 @@ function Header({ coachName, count, pending, onBell }: { coachName: string; coun
       </div>
       <div className="cd-h-right">
         <button className="cd-h-btn" aria-label="Notificaciones" onClick={onBell}><Icon name="bell" size={18}/>{pending > 0 && <span className="dot"/>}</button>
-        <button className="cd-h-btn" aria-label="Ajustes"><Icon name="settings" size={18}/></button>
+        <button className="cd-h-btn" aria-label="Ajustes" onClick={onSettings}><Icon name="settings" size={18}/></button>
       </div>
     </header>
   );
@@ -519,7 +519,7 @@ function CoachDashV2() {
 
   return (
     <div className="coach-frame">
-      <Header coachName={coachName} count={cards.length} pending={pending} onBell={() => setInboxOpen(true)}/>
+      <Header coachName={coachName} count={cards.length} pending={pending} onBell={() => setInboxOpen(true)} onSettings={() => navigate('PROFILE')}/>
 
       <div className="cd-section">
         <div className="cd-section-head">

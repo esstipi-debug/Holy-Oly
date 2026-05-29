@@ -2,20 +2,20 @@ import React, { useMemo, useState } from 'react';
 import { useNav } from '../context/NavigationContext';
 import { useProduct } from '../context/ProductContext';
 import { useAthlete } from '../context/AthleteContext';
-import Chart from '../components/social/Chart';
 import { PlateBadge, type PlateTier } from '../components/PlateBadge';
+import { MACROCYCLES } from '../data/macrocycles';
+import { phaseOfWeek } from '../data/competitions';
 import '../styles/v2/coach-macro-view.css';
 
 /**
  * CoachMacroView
- * Vista friendly del macrociclo para coach (HO y VOL).
- * Distinta de VoltaCoachTools tab='macro' (eval cuantitativa).
- * Aquí prioriza: timeline visual, distribución del roster por fase,
- * alertas accionables y pulse general del club/box.
+ * Vista friendly del macrociclo para coach (HO y VOL): timeline visual, distribución
+ * del roster por fase, alertas accionables y pulse del club.
  *
- * Restyle V2 (dark) IN PLACE · solo presentación. Toda la lógica
- * (hooks, data reads, navigate, handlers) se preserva intacta.
- * Estilos en src/styles/v2/coach-macro-view.css scoped bajo .cmv-root.
+ * Toda la data sale del roster REAL (AthleteContext.allAthletes, ya scopeado por
+ * producto) — NO mock. El macro mostrado es el dominante del roster; la distribución,
+ * alertas y pulse se derivan de los atletas reales (fase por semana, adherencia por
+ * sesiones, lesiones). Estilos scoped bajo .cmv-root.
  */
 
 type Phase = 'ACUM' | 'INTENS' | 'REAL' | 'DELOAD' | 'TEST';
@@ -26,37 +26,29 @@ interface WeekCell {
   marker?: '🔻' | '🏆' | '⭐';
 }
 
+type RosterStatus = 'on-track' | 'ahead' | 'behind' | 'deload';
 interface RosterItem {
   id: string;
   name: string;
   initials: string;
   phase: Phase;
-  status: 'on-track' | 'ahead' | 'behind' | 'deload';
+  status: RosterStatus;
   adherence: number;
 }
 
 interface AlertItem {
   id: string;
   athleteName: string;
-  athleteId?: string;
+  athleteId: string;
   message: string;
   level: 'red' | 'green' | 'amber';
 }
 
-const ROSTER: RosterItem[] = [
-  { id: 'm1', name: 'Marco Torres',   initials: 'MT', phase: 'INTENS', status: 'behind',   adherence: 64 },
-  { id: 'm2', name: 'Lucía Ramos',    initials: 'LR', phase: 'REAL',   status: 'ahead',    adherence: 88 },
-  { id: 'm3', name: 'Diego Suárez',   initials: 'DS', phase: 'ACUM',   status: 'on-track', adherence: 72 },
-  { id: 'm4', name: 'Camila Vega',    initials: 'CV', phase: 'REAL',   status: 'on-track', adherence: 94 },
-  { id: 'm5', name: 'Pablo Iglesias', initials: 'PI', phase: 'DELOAD', status: 'deload',   adherence: 38 },
-  { id: 'm6', name: 'Sofía Méndez',   initials: 'SM', phase: 'INTENS', status: 'on-track', adherence: 76 },
-];
-
-const STATUS_META: Record<RosterItem['status'], { label: string }> = {
+const STATUS_META: Record<RosterStatus, { label: string }> = {
   'on-track': { label: 'Adherido' },
   'ahead':    { label: 'Adelantado' },
   'behind':   { label: 'Atrasado' },
-  'deload':   { label: 'Deload forzado' },
+  'deload':   { label: 'Carga reducida' },
 };
 
 const PHASE_META: Record<Phase, { label: string; volume: string; intensity: string }> = {
@@ -67,9 +59,7 @@ const PHASE_META: Record<Phase, { label: string; volume: string; intensity: stri
   TEST:   { label: 'Test / Pico',     volume: '30-45% del plan',   intensity: '95-105% 1RM' },
 };
 
-// Fase → tier de disco (mapeo por intensidad creciente):
-//   ACUM (60-75%) → verde · INTENS (75-87%) → amarillo · REAL (85-95%) → azul
-//   TEST (95-105%) → rojo · DELOAD (descarga) → blanco
+// Fase → tier de disco (intensidad creciente).
 const PHASE_TIER: Record<Phase, PlateTier> = {
   ACUM:   'green',
   INTENS: 'yellow',
@@ -78,9 +68,17 @@ const PHASE_TIER: Record<Phase, PlateTier> = {
   DELOAD: 'white',
 };
 
-// Sparkline mock: volumen semanal del club (toneladas)
-const CLUB_VOLUME_HO = [62, 71, 78, 84, 90, 88, 94, 92, 86, 78, 70, 58];
-const CLUB_VOLUME_VOL = [12, 14, 15, 16, 18, 17, 16];
+const initialsOf = (name: string) => name.split(' ').slice(0, 2).map(n => n[0] || '').join('').toUpperCase();
+const adherenceOf = (a: { sessions_last_7: { completed: boolean }[] }) => {
+  const planned = a.sessions_last_7.length;
+  if (!planned) return 0;
+  return Math.round((a.sessions_last_7.filter(s => s.completed).length / planned) * 100);
+};
+// phaseOfWeek (competitions) puede devolver 'POST' (post-macro) → lo tratamos como TEST (cierre).
+const toCmvPhase = (week: number, total: number): Phase => {
+  const p = phaseOfWeek(week, total);
+  return p === 'POST' ? 'TEST' : p;
+};
 
 const CoachMacroView: React.FC = () => {
   const { navigate, back } = useNav();
@@ -89,45 +87,40 @@ const CoachMacroView: React.FC = () => {
 
   const isVolta = product === 'volta';
 
-  // Color para el componente compartido <Chart /> (SVG inline · recibe string JS,
-  // no lee CSS vars). El resto de la pantalla usa tokens via --cmv-accent.
-  const chartAccent = isVolta ? '#00E5FF' : '#FFB300';
+  // Macro DOMINANTE del roster real (programa más usado), normalizado al shape que usa la vista.
+  const macro = useMemo(() => {
+    const withProgram = allAthletes.filter(a => a.macrocycle?.program_id);
+    const freq: Record<string, number> = {};
+    withProgram.forEach(a => { freq[a.macrocycle.program_id] = (freq[a.macrocycle.program_id] || 0) + 1; });
+    const topId = Object.entries(freq).sort((x, y) => y[1] - x[1])[0]?.[0];
+    const top = withProgram.find(a => a.macrocycle.program_id === topId);
+    const school = topId ? (MACROCYCLES.find(m => m.id === topId)?.family ?? 'Escuela') : '—';
+    const totalWeeks = Math.max(1, top?.macrocycle.total_weeks ?? 12);
+    return {
+      program: top?.macrocycle.program_name ?? 'Sin macrociclo activo',
+      school,
+      totalWeeks,
+      currentWeek: Math.max(1, Math.min(totalWeeks, top?.macrocycle.week ?? 1)),
+    };
+  }, [allAthletes]);
 
-  // Macrociclo según producto
-  const macro = isVolta
-    ? { program: 'CrossFit Open Prep', school: 'Q2', totalWeeks: 8, currentWeek: 4 }
-    : { program: 'Ruso Clásico',        school: 'Escuela Rusa', totalWeeks: 12, currentWeek: 4 };
-
-  // Build timeline cells
+  // Timeline de fases (cuartiles + deload ~2/3 + test final + pico penúltima).
   const weeks: WeekCell[] = useMemo(() => {
     const total = macro.totalWeeks;
     const out: WeekCell[] = [];
-    // Phase distribution: ACUM (40%) · INTENS (30%) · REAL (20%) · DELOAD/TEST sprinkled
-    for (let i = 1; i <= total; i++) {
-      let phase: Phase = 'ACUM';
-      const pct = i / total;
-      if (pct <= 0.4) phase = 'ACUM';
-      else if (pct <= 0.7) phase = 'INTENS';
-      else if (pct < 0.95) phase = 'REAL';
-      else phase = 'TEST';
-      out.push({ n: i, phase });
-    }
-    // Deload markers cada ~4 semanas
+    for (let i = 1; i <= total; i++) out.push({ n: i, phase: toCmvPhase(i, total) });
     const deloadWeek = Math.min(total, Math.round(total * 0.67));
     if (out[deloadWeek - 1]) { out[deloadWeek - 1].phase = 'DELOAD'; out[deloadWeek - 1].marker = '🔻'; }
-    // Test week final
     if (out[total - 1]) { out[total - 1].marker = '🏆'; out[total - 1].phase = 'TEST'; }
-    // Pico planificado: penúltima
     if (out[total - 2]) out[total - 2].marker = '⭐';
     return out;
   }, [macro.totalWeeks]);
 
   const [selectedWeek, setSelectedWeek] = useState<number>(macro.currentWeek);
-  const selectedCell = weeks[selectedWeek - 1] ?? weeks[macro.currentWeek - 1];
+  const selectedCell = weeks[selectedWeek - 1] ?? weeks[macro.currentWeek - 1] ?? weeks[0];
   const currentPhase = weeks[macro.currentWeek - 1]?.phase ?? 'ACUM';
   const phaseInfo = PHASE_META[currentPhase];
 
-  // Tiempo restante en la fase actual
   const weeksLeftInPhase = useMemo(() => {
     let count = 0;
     for (let i = macro.currentWeek - 1; i < weeks.length; i++) {
@@ -143,39 +136,48 @@ const CoachMacroView: React.FC = () => {
     return null;
   }, [weeks, macro.currentWeek, currentPhase]);
 
-  // Distribución del roster
-  const rosterByStatus = useMemo(() => {
-    const groups: Record<RosterItem['status'], RosterItem[]> = {
-      'on-track': [], ahead: [], behind: [], deload: [],
+  // Distribución del roster REAL: fase por su semana, status por adherencia/lesión.
+  const rosterItems: RosterItem[] = useMemo(() => allAthletes.map(a => {
+    const adherence = adherenceOf(a);
+    const injured = !!(a.injuries && a.injuries.length);
+    const status: RosterStatus = injured ? 'deload' : adherence >= 90 ? 'ahead' : adherence < 60 ? 'behind' : 'on-track';
+    return {
+      id: a.id,
+      name: a.name,
+      initials: initialsOf(a.name),
+      phase: toCmvPhase(a.macrocycle.week, Math.max(1, a.macrocycle.total_weeks || macro.totalWeeks)),
+      status,
+      adherence,
     };
-    ROSTER.forEach(r => groups[r.status].push(r));
+  }), [allAthletes, macro.totalWeeks]);
+
+  const rosterByStatus = useMemo(() => {
+    const groups: Record<RosterStatus, RosterItem[]> = { 'on-track': [], ahead: [], behind: [], deload: [] };
+    rosterItems.forEach(r => groups[r.status].push(r));
     return groups;
-  }, []);
+  }, [rosterItems]);
 
-  const avgAdherence = Math.round(ROSTER.reduce((a, b) => a + b.adherence, 0) / ROSTER.length);
+  const avgAdherence = rosterItems.length
+    ? Math.round(rosterItems.reduce((a, b) => a + b.adherence, 0) / rosterItems.length)
+    : 0;
+  const injuredCount = allAthletes.filter(a => a.injuries && a.injuries.length).length;
 
-  // Alerts list
-  const alerts: AlertItem[] = [
-    { id: 'a1', athleteName: 'Pablo Iglesias', message: 'HRV bajo 3 días · sugerencia deload', level: 'red' },
-    { id: 'a2', athleteName: 'Lucía Ramos',    message: `lista para test de PR ${isVolta ? 'Fran' : 'Snatch'}`, level: 'green' },
-    { id: 'a3', athleteName: 'Marco Torres',   message: 'desvío -25% del plan semanal', level: 'amber' },
-  ];
+  // Alertas REALES: lesión (rojo) o adherencia baja (amber).
+  const alerts: AlertItem[] = useMemo(() => {
+    const out: AlertItem[] = [];
+    allAthletes.forEach(a => {
+      if (a.injuries && a.injuries.length) {
+        out.push({ id: `${a.id}-inj`, athleteName: a.name, athleteId: a.id, message: a.injuries[0], level: 'red' });
+      } else if (adherenceOf(a) < 60) {
+        out.push({ id: `${a.id}-adh`, athleteName: a.name, athleteId: a.id, message: `Adherencia ${adherenceOf(a)}% · revisar plan`, level: 'amber' });
+      }
+    });
+    return out.slice(0, 6);
+  }, [allAthletes]);
 
-  const openAlert = (_a: AlertItem) => {
-    // Linkea al primer atleta real disponible para abrir AthleteDeepDive con data válida.
-    const real = allAthletes[0];
-    if (real) selectAthlete(real.id);
+  const openAlert = (a: AlertItem) => {
+    selectAthlete(a.athleteId);
     navigate('ATHLETE_DETAIL');
-  };
-
-  const handleMarkDeload = () => {
-    // Stub: visualmente marcaríamos la semana seleccionada como deload.
-    // Sin persistencia por ahora.
-    alert(`Semana ${selectedWeek} marcada para deload (stub).`);
-  };
-
-  const handleExport = () => {
-    alert('Exportar review semanal (stub).');
   };
 
   const deloadWeekNum = Math.round(macro.totalWeeks * 0.67);
@@ -237,14 +239,6 @@ const CoachMacroView: React.FC = () => {
             Vol: {PHASE_META[selectedCell.phase].volume} · Int: {PHASE_META[selectedCell.phase].intensity}
           </p>
         </div>
-        <div className="cmv-wd-chart">
-          <Chart
-            data={{ kind: 'sparkline', values: (isVolta ? CLUB_VOLUME_VOL : CLUB_VOLUME_HO).slice(0, macro.totalWeeks) }}
-            color={chartAccent}
-            width={110}
-            height={42}
-          />
-        </div>
       </div>
 
       {/* FASE ACTUAL */}
@@ -276,11 +270,11 @@ const CoachMacroView: React.FC = () => {
       </div>
 
       {/* DISTRIBUCIÓN DEL ROSTER POR ESTADO */}
-      <SectionTitle right={`${ROSTER.length} atletas`}>
+      <SectionTitle right={`${rosterItems.length} atletas`}>
         Distribución del roster
       </SectionTitle>
       <div className="cmv-card">
-        {(['on-track','ahead','behind','deload'] as RosterItem['status'][]).map(st => {
+        {(['on-track','ahead','behind','deload'] as RosterStatus[]).map(st => {
           const meta = STATUS_META[st];
           const group = rosterByStatus[st];
           if (group.length === 0) return null;
@@ -295,14 +289,15 @@ const CoachMacroView: React.FC = () => {
               </div>
               <div className="cmv-roster-chips">
                 {group.map(a => (
-                  <div
+                  <button
                     key={a.id}
                     className={`cmv-chip cmv-status-${st}`}
-                    title={`${a.name} · ${PHASE_META[a.phase].label}`}
+                    title={`${a.name} · ${PHASE_META[a.phase].label} · adherencia ${a.adherence}%`}
+                    onClick={() => { selectAthlete(a.id); navigate('ATHLETE_DETAIL'); }}
                   >
                     <span className="ava">{a.initials}</span>
                     <span className="nm">{a.name.split(' ')[0]}</span>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
@@ -313,6 +308,7 @@ const CoachMacroView: React.FC = () => {
       {/* ALERTAS */}
       <SectionTitle>Alertas del macrociclo</SectionTitle>
       <div className="cmv-alerts">
+        {alerts.length === 0 && <div className="cmv-card" style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Sin alertas · roster estable.</div>}
         {alerts.map(al => (
           <button
             key={al.id}
@@ -333,9 +329,8 @@ const CoachMacroView: React.FC = () => {
       <SectionTitle>Pulse del macro</SectionTitle>
       <div className="cmv-pulse">
         <PulseCard value={`${avgAdherence}%`} label="Adherencia promedio" />
-        <PulseCard value="12" label="PRs colectivos" />
-        <PulseCard value="0" label="Lesiones reportadas" tone="green" />
-        <PulseCard value="1" label="V-Form rojo · Pablo I." tone="red" />
+        <PulseCard value={`${rosterItems.length}`} label="Atletas en el macro" />
+        <PulseCard value={`${injuredCount}`} label="Lesiones activas" tone={injuredCount > 0 ? 'red' : 'green'} />
         <div className="cmv-deload-card">
           <div>
             <p className="lbl">Próximo deload</p>
@@ -345,18 +340,12 @@ const CoachMacroView: React.FC = () => {
         </div>
       </div>
 
-      {/* CTAs */}
+      {/* CTA */}
       <div className="cmv-cta-row">
-        <button onClick={handleMarkDeload} className="cmv-btn cmv-btn-ghost">
-          Marcar deload
-        </button>
         <button onClick={() => navigate('ASSIGN_MACRO')} className="cmv-btn cmv-btn-primary">
           Cambiar programa
         </button>
       </div>
-      <button onClick={handleExport} className="cmv-btn cmv-btn-outline">
-        Exportar review semanal
-      </button>
     </div>
   );
 };
