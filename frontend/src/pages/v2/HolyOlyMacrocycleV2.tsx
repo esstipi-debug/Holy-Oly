@@ -178,10 +178,12 @@ function describePlates(plates: string[] | undefined, oneRm: number): string {
 // ============================================================
 // ZONE A · HEADER
 // ============================================================
-function Header({ data, source }: { data: HolyOlyMacrocycle; source: 'backend' | 'fallback' }) {
+function Header({ data, source, onBack }: { data: HolyOlyMacrocycle; source: 'backend' | 'fallback'; onBack: () => void }) {
   return (
     <header className="ho-header" role="banner">
       <div className="ho-h-top">
+        <button onClick={onBack} aria-label="Volver"
+                style={{ background: 'transparent', border: 'none', color: 'var(--text-mid, #9aa)', fontSize: 26, lineHeight: 1, cursor: 'pointer', padding: '0 6px 0 0', fontFamily: 'inherit', flexShrink: 0 }}>‹</button>
         <div className="ho-avatar" aria-label="avatar">{data.athlete.avatar}</div>
         <div className="ho-h-meta">
           <div className="ho-h-name">{data.athlete.name}</div>
@@ -499,13 +501,13 @@ function DamageControl({ data }: { data: DamageControlData }) {
 // Main
 // ============================================================
 export default function HolyOlyMacrocycleV2() {
-  const { navigate } = useNav();
+  const { navigate, back, canGoBack } = useNav();
   const [backendData, setBackendData] = useState(null);
   const [source, setSource] = useState<'backend' | 'fallback'>('fallback');
   const [expandedIdx, setExpanded] = useState<number | null>(2); // current block expanded
 
-  // navigate referenced for future · ej tap macro badge → catálogo
-  void navigate;
+  // Salida: volver de donde vino · o al home del atleta si no hay historial (deep-link/refresh).
+  const onBack = () => (canGoBack ? back() : navigate('HOME'));
 
   // Fetch macro activo del atleta logueado · GET /v1/macrocycles/me/active.
   // Si responde OK · usamos backendData (merge sobre mock). Si 404/500 · fallback al mock.
@@ -541,7 +543,7 @@ export default function HolyOlyMacrocycleV2() {
 
   return (
     <div className="hmm-root">
-      <Header data={data} source={source}/>
+      <Header data={data} source={source} onBack={onBack}/>
 
       <div className="ho-scroll">
         <div className="ho-section-head">

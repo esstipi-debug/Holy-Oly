@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNav } from '../context/NavigationContext';
+import { useProduct } from '../context/ProductContext';
 import type { AthleteProfile, AthleteSession } from '../data/athletes';
 import type { PlannedSession } from '../types/training';
 import {
@@ -222,6 +223,10 @@ interface Props {
 
 const AthleteTrainingView: React.FC<Props> = ({ athlete }) => {
   const { navigate } = useNav();
+  // El skill tree, la evaluación de destreza y el WOD custom son de CrossFit (Volta).
+  // En halterofilia (HO) no corresponden → solo se montan en producto Volta.
+  const { product } = useProduct();
+  const isVolta = product === 'volta';
 
   const today = useMemo(() => {
     const d = new Date();
@@ -442,8 +447,8 @@ const AthleteTrainingView: React.FC<Props> = ({ athlete }) => {
         )}
       </section>
 
-      {/* ── Sección 2.5 · FOCOS TÉCNICOS · SKILL TREE ────────── */}
-      <SkillFocusAssign athlete={athlete} />
+      {/* ── Sección 2.5 · FOCOS TÉCNICOS · SKILL TREE (CrossFit · solo Volta) ── */}
+      {isVolta && <SkillFocusAssign athlete={athlete} />}
 
       {/* ── Sección 3 · CALENDAR 30 DÍAS ─────────────────────── */}
       <section className="atv-section atv-map">
@@ -474,10 +479,14 @@ const AthleteTrainingView: React.FC<Props> = ({ athlete }) => {
                   data-selected={isSel}
                   data-today={c.isToday}
                   data-future={!c.inPast && !c.isToday}
-                  style={{ ['--cbg' as string]: bg, ['--cb' as string]: border }}
-                  aria-label={fmtDayLabel(c.date)}
+                  style={{ ['--cbg' as string]: bg, ['--cb' as string]: border, position: 'relative' }}
+                  aria-label={`${fmtDayLabel(c.date)} · ${Math.round(c.pct * 100)}% 1RM`}
                 >
-                  <span className="atv-cell-num">{c.date.getDate()}</span>
+                  {/* fill de intensidad: altura ∝ %1RM → lectura fina del calor (más granular que la zona) */}
+                  {c.pct > 0 && (
+                    <span aria-hidden style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: `${Math.round(c.pct * 100)}%`, background: border, opacity: 0.45, borderRadius: '0 0 5px 5px', pointerEvents: 'none' }} />
+                  )}
+                  <span className="atv-cell-num" style={{ position: 'relative', zIndex: 1 }}>{c.date.getDate()}</span>
                   {c.completed && <span className="atv-cell-done" />}
                 </button>
               );
@@ -534,14 +543,14 @@ const AthleteTrainingView: React.FC<Props> = ({ athlete }) => {
       {/* ── Sección 3.5 · DOBLE SESIÓN ───────────────────────── */}
       <DoubleSessionPanel athlete={athlete} today={today} />
 
-      {/* ── Sección 3.6 · EVALUACIÓN DE DESTREZA (coach califica skill tree) ── */}
-      <SkillEvaluationPanel athlete={athlete} />
+      {/* ── Sección 3.6 · EVALUACIÓN DE DESTREZA (skill tree CrossFit · solo Volta) ── */}
+      {isVolta && <SkillEvaluationPanel athlete={athlete} />}
 
       {/* ── Sección 3.7 · ASIGNACIÓN MANUAL DEL DÍA ──────────── */}
       <ManualSessionAssigner athlete={athlete} />
 
-      {/* ── Sección 3.8 · TIER COMPETIDOR · VOLTA (promote + custom WOD) ── */}
-      <CustomWodAssigner athlete={athlete} />
+      {/* ── Sección 3.8 · TIER COMPETIDOR · VOLTA (promote + custom WOD · solo Volta) ── */}
+      {isVolta && <CustomWodAssigner athlete={athlete} />}
 
       {/* ── Sección 3.9 · HISTORIAL DE SESIONES (detalle cronológico) ── */}
       <SessionHistoryList athlete={athlete} />

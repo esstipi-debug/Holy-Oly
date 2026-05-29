@@ -23,6 +23,13 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }));
+    // El demo corre OFFLINE: el token 'demo' no es JWT → el backend responde 401
+    // "Token inválido o expirado". No mostramos ese error crudo (alarma sin sentido
+    // en el demo): lo convertimos en un mensaje benigno para que los componentes
+    // caigan a su estado vacío en vez de un error rojo.
+    if (res.status === 401 && token === 'demo') {
+      throw new Error('Sin datos en vivo · demo offline');
+    }
     throw new Error(err.detail ?? 'Error de red');
   }
 

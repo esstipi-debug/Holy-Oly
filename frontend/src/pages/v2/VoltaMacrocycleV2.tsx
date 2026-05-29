@@ -12,6 +12,7 @@
  */
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactElement } from 'react';
 import { api } from '../../lib/api';
+import { useNav } from '../../context/NavigationContext';
 import '../../styles/v2/volta-macrocycle.css';
 
 // ============================================================
@@ -462,6 +463,8 @@ function AdjustModal({ open, onClose }: { open: boolean; onClose: () => void }) 
 // Main
 // ============================================================
 export default function VoltaMacrocycleV2() {
+  const { navigate, back, canGoBack } = useNav();
+  const onBack = () => (canGoBack ? back() : navigate('VOLTA_HOME'));
   const [backendData, setBackendData] = useState<Record<string, unknown> | null>(null);
   const [source, setSource] = useState<'backend' | 'fallback'>('fallback');
   const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -503,6 +506,8 @@ export default function VoltaMacrocycleV2() {
 
   return (
     <div className="vm-root">
+      <button onClick={onBack} aria-label="Volver"
+              style={{ position: 'absolute', top: 10, left: 10, zIndex: 20, width: 34, height: 34, borderRadius: 10, background: 'rgba(0,0,0,0.45)', border: '1px solid rgba(255,255,255,0.14)', color: '#fff', fontSize: 22, lineHeight: 1, cursor: 'pointer', fontFamily: 'inherit' }}>‹</button>
       <Header data={data} source={source}/>
       <div className="vm-scroll">
         <HeroCard data={data} onLongPress={() => setModalOpen(true)}/>
