@@ -196,6 +196,10 @@ export function AthleteProvider({ children }: { children: ReactNode }) {
   const selectedAthlete = selectedId ? (roster.find(a => a.id === selectedId) ?? null) : null;
   const selectAthlete = (id: string) => setSelectedId(id);
 
+  // Roster del producto activo: el coach HO no debe ver atletas Volta (y viceversa).
+  // Atletas sin `product` se asumen Holy Oly (default del modelo). Consistente con demoAthlete.
+  const productRoster = roster.filter(a => (a.product ?? 'holy-oly') === product);
+
   const addAthlete = (input: NewAthleteInput): AthleteProfile => {
     const id = `ath_${Date.now().toString(36)}`;
     const profile: AthleteProfile = {
@@ -295,7 +299,7 @@ export function AthleteProvider({ children }: { children: ReactNode }) {
   }, [athlete?.id]);
 
   return (
-    <AthleteContext.Provider value={{ athlete, stress, stressLoading, adaptation, adaptationLoading, allAthletes: roster, selectedAthlete, selectAthlete, addAthlete }}>
+    <AthleteContext.Provider value={{ athlete, stress, stressLoading, adaptation, adaptationLoading, allAthletes: productRoster, selectedAthlete, selectAthlete, addAthlete }}>
       {children}
     </AthleteContext.Provider>
   );
