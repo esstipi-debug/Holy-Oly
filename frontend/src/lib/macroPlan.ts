@@ -61,12 +61,15 @@ const LIFT: Record<MaxKey, string> = {
   front_squat: 'Sentadilla Frontal',
 };
 
-const ACCESSORY: Record<MaxKey, { name: string; rpe: number }> = {
-  snatch: { name: 'Tirón de Arranque', rpe: 7 },
-  clean: { name: 'Tirón de Cargada', rpe: 7 },
-  jerk: { name: 'Push Press', rpe: 7 },
-  back_squat: { name: 'Trabajo de Core', rpe: 5 },
-  front_squat: { name: 'Buenos Días', rpe: 6 },
+// Accesorio de fuerza · movimiento CARGADO (muestra %RM + peso, no RPE).
+// `delta` = ajuste sobre la intensidad de la semana — los tirones / peso muerto
+// van más pesado que el lift (pueden superar el 100% del 1RM de referencia).
+const ACCESSORY: Record<MaxKey, { name: string; key: MaxKey; delta: number }> = {
+  snatch: { name: 'Tirón de Arranque', key: 'snatch', delta: 0.18 },
+  clean: { name: 'Tirón de Cargada', key: 'clean', delta: 0.18 },
+  jerk: { name: 'Push Press', key: 'jerk', delta: -0.08 },
+  back_squat: { name: 'Peso Muerto', key: 'back_squat', delta: 0.20 },
+  front_squat: { name: 'Sentadilla Frontal', key: 'front_squat', delta: 0.05 },
 };
 
 interface DayTheme {
@@ -130,9 +133,18 @@ function buildExercises(theme: DayTheme, wi: number, dayInWeek: number): PlanExe
     out.push({ name: LIFT[theme.second], ...secSR, intensity: secInt, rpe: rpeFor(secInt), maxKey: theme.second });
   }
 
-  // Accesorio guiado por RPE (sin %RM)
+  // Accesorio de fuerza · cargado con %RM + peso (los tirones pueden ir >100%)
   const acc = ACCESSORY[theme.main];
-  out.push({ name: acc.name, sets: 3, reps: theme.main === 'back_squat' ? 10 : 5, intensity: 0, rpe: acc.rpe });
+  const accInt = Math.max(0.55, Math.min(1.15, Math.round((wi + acc.delta + dayOffset) * 100) / 100));
+  const accSR = setsReps(Math.min(accInt, 0.9));
+  out.push({
+    name: acc.name,
+    sets: accSR.sets,
+    reps: Math.min(accSR.reps, 5),
+    intensity: accInt,
+    rpe: rpeFor(Math.min(accInt, 0.95)),
+    maxKey: acc.key,
+  });
 
   return out;
 }
