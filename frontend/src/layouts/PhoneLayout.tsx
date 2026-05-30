@@ -115,29 +115,53 @@ const PhoneLayout: React.FC<PhoneLayoutProps> = ({
     ? [COACH_HOME_ITEM, NAV_ITEMS_BASE[1], NAV_ITEMS_BASE[2]]
     : [NAV_ITEMS_BASE[0], TRAIN_ITEM, NAV_ITEMS_BASE[1], NAV_ITEMS_BASE[2]];
   const { back, canGoBack } = useNav();
+  // Responsive: en desktop mostramos el "marco de teléfono" (preview); en móvil
+  // la app ocupa toda la pantalla (full-bleed) y respeta las safe-areas del device.
+  const [isDesktop, setIsDesktop] = React.useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(min-width: 640px)').matches,
+  );
+  React.useEffect(() => {
+    const mq = window.matchMedia('(min-width: 640px)');
+    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
   const now = new Date();
   const time = now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-4"
-      style={{ background: '#0D0D18' }}
+      className="flex justify-center"
+      style={{
+        minHeight: '100dvh',
+        alignItems: isDesktop ? 'center' : 'stretch',
+        padding: isDesktop ? 16 : 0,
+        background: '#0D0D18',
+      }}
     >
       <div
         className="relative flex flex-col"
         style={{
-          width: 390,
-          height: 844,
           background: 'var(--bg)',
-          borderRadius: 44,
-          border: '2px solid #2a2a3a',
           overflow: 'hidden',
-          boxShadow: '0 0 80px rgba(99,102,241,0.15), 0 0 0 1px #1e1e30, 0 40px 80px rgba(0,0,0,0.6)',
+          ...(isDesktop
+            ? {
+                width: 390,
+                height: 844,
+                borderRadius: 44,
+                border: '2px solid #2a2a3a',
+                boxShadow: '0 0 80px rgba(99,102,241,0.15), 0 0 0 1px #1e1e30, 0 40px 80px rgba(0,0,0,0.6)',
+              }
+            : {
+                width: '100%',
+                height: '100dvh',
+                paddingTop: 'env(safe-area-inset-top)',
+              }),
         }}
       >
-        {/* Status Bar */}
+        {/* Status Bar falsa · solo en el marco desktop · en móvil usamos la barra real del SO */}
         <div
-          className="flex items-center justify-between px-7 flex-shrink-0"
+          className={`${isDesktop ? 'flex' : 'hidden'} items-center justify-between px-7 flex-shrink-0`}
           style={{ height: 44, background: 'var(--bg)' }}
         >
           <span className="text-xs font-semibold" style={{ color: 'var(--text)' }}>
@@ -199,7 +223,7 @@ const PhoneLayout: React.FC<PhoneLayoutProps> = ({
         )}
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: 'none', paddingBottom: hideNav ? 0 : 76 }}>
+        <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: 'none', paddingBottom: hideNav ? 0 : 'calc(76px + env(safe-area-inset-bottom))' }}>
           {children}
         </div>
 
@@ -211,10 +235,10 @@ const PhoneLayout: React.FC<PhoneLayoutProps> = ({
         <div
           className="absolute bottom-0 left-0 right-0 flex items-center justify-around"
           style={{
-            height: 76,
+            height: 'calc(76px + env(safe-area-inset-bottom))',
             background: product === 'volta' ? 'rgba(7,7,15,0.95)' : 'var(--surface)',
             borderTop: `1px solid ${product === 'volta' ? '#1E1E32' : 'var(--card-border)'}`,
-            paddingBottom: 12,
+            paddingBottom: 'calc(12px + env(safe-area-inset-bottom))',
             backdropFilter: product === 'volta' ? 'blur(12px)' : 'none',
           }}
         >
