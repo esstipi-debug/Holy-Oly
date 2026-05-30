@@ -5,6 +5,7 @@ import WiseAssistant from '../components/WiseAssistant';
 import QuestsSection, { type QuestProgress } from '../components/QuestsSection';
 import MetricHistoryModal, { type MetricType } from '../components/MetricHistoryModal';
 import WellnessButton from '../components/WellnessButton';
+import MacrocycleExplorer from '../components/MacrocycleExplorer';
 import { getPendingForToday, getPendingForTodayAsync, setActiveSlot } from '../lib/plannedSessions';
 import { skillFocus, type SkillFocusResponse } from '../lib/skillFocus';
 import type { PlannedSession, TrainingSlot } from '../types/training';
@@ -279,6 +280,11 @@ const AtletaHome: React.FC = () => {
           </div>
           <span style={{ fontSize: 14, color: '#F5C518', fontWeight: 900 }}>→</span>
         </button>
+      </div>
+
+      {/* Mi Macrociclo · explorador día a día (carta + curva de intensidad) */}
+      <div style={{ padding: '0 20px 16px' }}>
+        <MacrocycleExplorer />
       </div>
 
       {/* WISE SCORE — surfacing del puntaje "smart trainer" del engine */}
