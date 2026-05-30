@@ -2,12 +2,10 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useAthlete } from '../context/AthleteContext';
 import { useNav } from '../context/NavigationContext';
 import WiseAssistant from '../components/WiseAssistant';
-import QuestsSection, { type QuestProgress } from '../components/QuestsSection';
 import MetricHistoryModal, { type MetricType } from '../components/MetricHistoryModal';
 import WellnessButton from '../components/WellnessButton';
 import MacrocycleExplorer from '../components/MacrocycleExplorer';
 import { getPendingForToday, getPendingForTodayAsync, setActiveSlot } from '../lib/plannedSessions';
-import { skillFocus, type SkillFocusResponse } from '../lib/skillFocus';
 import type { PlannedSession, TrainingSlot } from '../types/training';
 
 const ringColor = (r: number) => r >= 70 ? '#22C55E' : r >= 50 ? '#F59E0B' : '#EF4444';
@@ -20,12 +18,6 @@ const RADIUS = 86;
 const STROKE = 10;
 const CIRCUM = 2 * Math.PI * RADIUS;
 
-const PILDORAS = [
-  { emoji: '🧠', label: 'Mentalidad',  ring: 'linear-gradient(135deg,#22C55E,#06B6D4)', active: true },
-  { emoji: '💤', label: 'Recuperación', ring: 'linear-gradient(135deg,#F59E0B,#EF4444)', active: true },
-  { emoji: '🎯', label: 'Técnica',      ring: 'var(--card-border)',                       active: false },
-  { emoji: '🥗', label: 'Nutrición',    ring: 'var(--card-border)',                       active: false },
-];
 
 const BELTS = [
   { name: 'BLANCO',  next: 'AMARILLO',  color: '#E5E7EB' },
@@ -64,16 +56,6 @@ const AtletaHome: React.FC = () => {
   const { navigate } = useNav();
   const { athlete, stress, stressLoading } = useAthlete();
   const [activeMetric, setActiveMetric] = useState<MetricType | null>(null);
-  const [coachFocuses, setCoachFocuses] = useState<SkillFocusResponse[]>([]);
-
-  useEffect(() => {
-    let cancelled = false;
-    skillFocus.list()
-      .then((list) => { if (!cancelled) setCoachFocuses(list); })
-      .catch(() => { /* no auth o no atleta · silenciamos */ });
-    return () => { cancelled = true; };
-  }, []);
-
   if (!athlete) return null;
 
   const { macrocycle, maxes, injuries } = athlete;
@@ -89,9 +71,6 @@ const AtletaHome: React.FC = () => {
   const sesiones = completedSessions.length;
   const tonelaje = completedSessions.reduce((acc, s) => acc + (s.load ?? 0) / 1000, 0);
 
-  const olyIndex = maxes.body_weight > 0
-    ? (maxes.snatch / maxes.body_weight * 2.5).toFixed(1)
-    : '7.4';
 
   const sessionExercises = [
     { name: 'Arrancada',         sets: 5, reps: 3, pct: 0.85, max: maxes.snatch },
@@ -258,31 +237,9 @@ const AtletaHome: React.FC = () => {
         )}
       </div>
 
-      {/* CTA Leaderboard · entry point del loop viral desde el home (no solo desde stats) */}
-      <div style={{ padding: '0 20px 16px' }}>
-        <button
-          onClick={() => navigate('LEADERBOARD')}
-          className="btn-press"
-          style={{
-            width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '12px 14px', borderRadius: 14,
-            background: 'linear-gradient(135deg, rgba(245,197,24,0.10) 0%, rgba(245,197,24,0.02) 100%)',
-            border: '1px solid rgba(245,197,24,0.30)',
-            color: 'var(--text)', cursor: 'pointer', fontFamily: 'inherit',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontSize: 18 }}>🏆</span>
-            <div style={{ textAlign: 'left' }}>
-              <p style={{ fontSize: 12, fontWeight: 900, color: 'var(--text)', margin: 0 }}>Top 10 del club</p>
-              <p style={{ fontSize: 10, color: 'var(--text-secondary)', margin: 0, marginTop: 2 }}>Ver tu ranking semanal</p>
-            </div>
-          </div>
-          <span style={{ fontSize: 14, color: '#F5C518', fontWeight: 900 }}>→</span>
-        </button>
-      </div>
+      {/* ranking semanal (Top 10) · removido · pedido del Boss */}
 
-      {/* Mi Macrociclo · explorador día a día (carta + curva de intensidad) */}
+      {/* Sesión de hoy · explorador con diseño de discos (carta del día + flechas ◀▶ + curva + iconos HOLY OLY) */}
       <div style={{ padding: '0 20px 16px' }}>
         <MacrocycleExplorer />
       </div>
@@ -381,130 +338,11 @@ const AtletaHome: React.FC = () => {
         </div>
       )}
 
-      {/* PÍLDORAS — story-style rings con emojis grandes */}
-      <div style={{ padding: '0 20px 20px' }}>
-        <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: 12 }}>
-          Píldoras de hoy
-        </p>
-        <div className="scroll-x-no-bar" style={{ display: 'flex', gap: 14, overflowX: 'auto', paddingBottom: 4 }}>
-          {PILDORAS.map((p) => (
-            <button
-              key={p.label}
-              onClick={() => navigate('PILLS')}
-              style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
-                flexShrink: 0, background: 'transparent', border: 'none', cursor: 'pointer',
-                fontFamily: 'inherit', padding: 0,
-              }}
-            >
-              <div style={{
-                width: 60, height: 60, borderRadius: '50%',
-                padding: p.active ? 2.5 : 2,
-                background: p.ring,
-              }}>
-                <div style={{
-                  width: '100%', height: '100%', borderRadius: '50%',
-                  background: 'var(--surface)',
-                  border: '2px solid var(--bg)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24,
-                  opacity: p.active ? 1 : 0.55,
-                }}>
-                  {p.emoji}
-                </div>
-              </div>
-              <span style={{ fontSize: 10, color: p.active ? 'var(--text-secondary)' : 'var(--text-secondary)', opacity: p.active ? 1 : 0.6, fontWeight: 600 }}>
-                {p.label}
-              </span>
-            </button>
-          ))}
-        </div>
-      </div>
+      {/* píldoras del día · removido · pedido del Boss */}
 
-      {/* SKILLS CHIP · focos del coach (si hay) */}
-      {(() => {
-        const activeCount = coachFocuses.filter(f => f.status === 'active').length;
-        const hasFocus = activeCount > 0;
-        return (
-          <div style={{ padding: '0 20px 16px' }}>
-            <button
-              onClick={() => navigate('PROGRESSION')}
-              className="btn-press"
-              style={{
-                width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '12px 14px', borderRadius: 14,
-                background: hasFocus
-                  ? 'linear-gradient(135deg, rgba(245,197,24,0.16) 0%, rgba(245,197,24,0.04) 100%)'
-                  : 'var(--surface)',
-                border: `1px solid ${hasFocus ? 'rgba(245,197,24,0.5)' : 'var(--card-border)'}`,
-                color: 'var(--text)', cursor: 'pointer', fontFamily: 'inherit',
-                boxShadow: hasFocus ? '0 0 18px rgba(245,197,24,0.18)' : 'none',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <span style={{ fontSize: 18 }}>{hasFocus ? '🎯' : '🌳'}</span>
-                <div style={{ textAlign: 'left' }}>
-                  <p style={{ fontSize: 12, fontWeight: 900, color: 'var(--text)', margin: 0 }}>
-                    Skill tree · mi progresión
-                  </p>
-                  <p style={{ fontSize: 10, color: 'var(--text-secondary)', margin: 0, marginTop: 2 }}>
-                    {hasFocus
-                      ? `${activeCount} foco${activeCount === 1 ? '' : 's'} del coach esta semana`
-                      : '95 movimientos · 5 niveles'}
-                  </p>
-                </div>
-              </div>
-              {hasFocus && (
-                <span style={{
-                  background: '#F5C518', color: '#000',
-                  fontSize: 11, fontWeight: 900,
-                  padding: '4px 10px', borderRadius: 10,
-                  letterSpacing: '.04em',
-                }}>{activeCount}</span>
-              )}
-              {!hasFocus && (
-                <span style={{ fontSize: 14, color: 'var(--text-secondary)', fontWeight: 900 }}>→</span>
-              )}
-            </button>
-          </div>
-        );
-      })()}
+      {/* skill tree · removido · pedido del Boss */}
 
-      {/* OLY INDEX + RACHA row */}
-      <div style={{ padding: '0 20px 16px', display: 'flex', gap: 12 }}>
-        <button
-          onClick={() => navigate('INDEX')}
-          style={{
-            flex: 1, background: 'var(--surface)', border: '1px solid var(--card-border)',
-            borderRadius: 20, padding: '14px 16px', textAlign: 'left', cursor: 'pointer',
-            fontFamily: 'inherit',
-          }}
-        >
-          <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: 6 }}>
-            OLY Index
-          </p>
-          <p style={{ fontSize: 28, fontWeight: 900, color: '#F59E0B', letterSpacing: '-.03em', lineHeight: 1 }}>
-            {olyIndex}
-          </p>
-          <p style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 4 }}>
-            Top 23% del club
-          </p>
-        </button>
-        <div style={{
-          flex: 1, background: 'var(--surface)', border: '1px solid var(--card-border)',
-          borderRadius: 20, padding: '14px 16px',
-        }}>
-          <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: 6 }}>
-            Racha
-          </p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontSize: 22 }}>🔥</span>
-            <span style={{ fontSize: 28, fontWeight: 900, color: '#f97316', letterSpacing: '-.03em', lineHeight: 1 }}>
-              {sesiones}
-            </span>
-            <span style={{ fontSize: 10, color: '#92400e', fontWeight: 800, letterSpacing: '.08em' }}>SEM</span>
-          </div>
-        </div>
-      </div>
+      {/* oly index + racha · removido · pedido del Boss */}
 
       {/* BELT / XP PROGRESS */}
       <div style={{ padding: '0 20px 18px' }}>
@@ -542,29 +380,7 @@ const AtletaHome: React.FC = () => {
         </div>
       </div>
 
-      {/* QUESTS DE LA SEMANA */}
-      <div style={{ padding: '0 20px 18px' }}>
-        <QuestsSection
-          product="holy-oly"
-          weekOfYear={Math.ceil(((new Date().getTime() - new Date(new Date().getFullYear(), 0, 1).getTime()) / 86400000 + new Date(new Date().getFullYear(), 0, 1).getDay() + 1) / 7)}
-          progress={{
-            sessionsThisWeek: 2,
-            rxThisWeek: 0,
-            prsThisWeek: 0,
-            tonelajeKg: 8500,
-            skippedThisWeek: 0,
-            mobilityDays: 2,
-            sleepDays: 5,
-            hrvDays: 4,
-            waterDays: 3,
-            foamDays: 2,
-            preCheckCount: 2,
-            benchmarkDone: false,
-            teamWodDone: false,
-            skillPrDone: false,
-          } satisfies QuestProgress}
-        />
-      </div>
+      {/* quests de la semana · removido · pedido del Boss */}
 
       {/* MACRO progress slim */}
       <div style={{ padding: '0 20px 18px' }}>

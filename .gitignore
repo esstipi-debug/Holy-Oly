@@ -43,3 +43,4 @@ backend/etl_out.txt
 backend/ingest_self_healing.py.claude/
 
 .claude/
+_design_tmp/

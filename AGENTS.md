@@ -1,5 +1,15 @@
 # Holy Oly — Task Brief para Agentes
 
+> ⛔ **REGLA DURA (Boss · 2026-05-30) · PRIORIDAD MÁXIMA — DATA Y DISEÑO REALES, CERO INVENTO SIN SUPERVISIÓN**
+> - Toda data que se muestre viene del **backend/engine real**. PROHIBIDO mockear, generar
+>   client-side, o usar `data/*` para datos del atleta. Demo = usuario demo real seedeado, no mock.
+> - Toda UI sigue el **diseño canónico aprobado por el Boss**. No inventar estilo nuevo ni copiar el viejo.
+> - Si falta el endpoint/dato/diseño real → **PARAR y preguntar al Boss**, NO inventar para "que funcione".
+> - **Verificar contra el código/backend antes de afirmar** (los docs pueden estar stale).
+> - Inventar sin supervisión = confusión (frontend ≠ backend ≠ docs) + retrabajo. Detalle: `AUDIT_DATA_INTEGRITY.md`.
+>
+> ⚠️ NOTA: el resto de este AGENTS.md está **desactualizado (2026-05-05)** — verificar contra el repo real antes de usarlo.
+
 > Repo: https://github.com/esstipi-debug/Holy-Oly  
 > App en vivo: https://holy-oly-frontend.onrender.com  
 > Stack: Vite + React + TypeScript (frontend) · FastAPI (backend en Render)  

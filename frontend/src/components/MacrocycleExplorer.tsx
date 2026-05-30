@@ -6,170 +6,139 @@ import {
   anchorDayIndex,
   type MacroPlan,
 } from '../lib/macroPlan';
+import PlateIcon, { type PlateWeight } from './PlateIcon';
+import '../styles/peakqual/tokens.css';
 
 /**
- * MacrocycleExplorer · carta del entrenamiento del día con flechas ◀▶ para
- * recorrer el macrociclo (pasado ↔ futuro) + curva de intensidad con un punto
- * marcando la semana actual.
+ * MacrocycleExplorer · "sesión de hoy" navegable, con el diseño Peak Qual (discos).
+ * Carta del entrenamiento del día (movimientos · %RM · peso + iconos HOLY OLY) +
+ * flechas ◀▶ para recorrer el macro (pasado↔futuro) + indicador de semana +
+ * curva de intensidad con punto en la semana actual.
  *
- * Datos: plan periodizado generado de `athlete.macrocycle` (programa, semanas,
- * focus) + pesos calculados con `athlete.maxes`. Ver lib/macroPlan.ts.
+ * Estilo scopeado a .pq (tokens Peak Qual). Data real de useAthlete + placeholder
+ * honesto donde falte historial. Iconos de disco = componente PlateIcon (nuevo estilo).
  */
 
-const GOLD = '#F5C518';
-const GREEN = '#22C55E';
+const CYAN = 'var(--engine-stress)';   // #00E5FF
+const AMBER = 'var(--engine-macro)';   // #FFB300
+const GREEN = 'var(--engine-oly)';     // #22C55E
+
+const TIER_KG: Array<[number, string]> = [[25, '4'], [20, '3'], [15, '2'], [10, '1']];
+const TIER_WEIGHT: Record<string, PlateWeight> = { '1': 10, '2': 15, '3': 20, '4': 25 };
+function platesForWeight(w: number): string[] {
+  if (!w || w <= 20) return [];
+  let perSide = (w - 20) / 2;
+  const out: string[] = [];
+  for (const [kg, tier] of TIER_KG) {
+    while (perSide >= kg - 0.01 && out.length < 4) { out.push(tier); perSide -= kg; }
+  }
+  return out.reverse();
+}
 
 type Status = 'done' | 'today' | 'future';
 const STATUS_META: Record<Status, { label: string; color: string }> = {
-  done: { label: '✓ Completado', color: GREEN },
-  today: { label: '▶ Hoy', color: GOLD },
-  future: { label: '○ Por venir', color: 'var(--text-secondary)' },
+  done: { label: '✓ COMPLETADO', color: GREEN },
+  today: { label: '▶ HOY', color: CYAN },
+  future: { label: '○ POR VENIR', color: 'var(--text-lo)' },
 };
 
 const IntensityCurve: React.FC<{ plan: MacroPlan; currentWeek: number }> = ({ plan, currentWeek }) => {
-  const W = 300, H = 66, pad = 8;
+  const W = 300, H = 60, pad = 8;
   const data = plan.weekIntensity;
   const n = data.length;
-  const min = Math.min(...data);
-  const max = Math.max(...data);
+  const min = Math.min(...data), max = Math.max(...data);
   const span = max - min || 1;
   const x = (w: number) => (n <= 1 ? W / 2 : pad + ((w - 1) / (n - 1)) * (W - 2 * pad));
   const y = (v: number) => (H - pad) - ((v - min) / span) * (H - 2 * pad);
   const points = data.map((v, i) => `${x(i + 1).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
-
   return (
     <div style={{ marginTop: 12 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
-        <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', color: 'var(--text-lo)' }}>
           Intensidad del macro
         </span>
-        <span style={{ fontSize: 10, color: 'var(--text-secondary)' }}>
-          Sem {currentWeek} · {Math.round((data[currentWeek - 1] ?? 0) * 100)}% media
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-mid)' }}>
+          Sem {currentWeek} · {Math.round((data[currentWeek - 1] ?? 0) * 100)}%
         </span>
       </div>
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H} preserveAspectRatio="none" style={{ display: 'block' }}>
-        <polyline
-          points={points}
-          fill="none"
-          stroke="rgba(245,197,24,0.35)"
-          strokeWidth={1.5}
-          strokeLinejoin="round"
-          strokeLinecap="round"
-          vectorEffect="non-scaling-stroke"
-        />
+        <polyline points={points} fill="none" stroke={CYAN} strokeOpacity={0.45} strokeWidth={1.5} vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
         {data.map((v, i) => {
-          const isCurrent = i + 1 === currentWeek;
-          return (
-            <circle
-              key={i}
-              cx={x(i + 1)}
-              cy={y(v)}
-              r={isCurrent ? 4 : 2}
-              fill={isCurrent ? GOLD : 'rgba(255,255,255,0.25)'}
-              stroke={isCurrent ? GOLD : 'none'}
-              strokeWidth={isCurrent ? 2 : 0}
-              style={isCurrent ? { filter: `drop-shadow(0 0 4px ${GOLD})` } : undefined}
-            />
-          );
+          const cur = i + 1 === currentWeek;
+          return <circle key={i} cx={x(i + 1)} cy={y(v)} r={cur ? 4 : 2} fill={cur ? AMBER : 'rgba(255,255,255,.25)'} style={cur ? { filter: `drop-shadow(0 0 5px ${AMBER})` } : undefined} />;
         })}
       </svg>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
-        <span style={{ fontSize: 8, color: 'var(--text-secondary)' }}>S1</span>
-        <span style={{ fontSize: 8, color: 'var(--text-secondary)' }}>S{n}</span>
-      </div>
     </div>
   );
 };
 
 const MacrocycleExplorer: React.FC = () => {
   const { athlete } = useAthlete();
-
   const macro = athlete?.macrocycle;
-  const plan = useMemo<MacroPlan | null>(() => {
-    if (!macro) return null;
-    return generateMacroPlan({
-      programName: macro.program_name,
-      focus: macro.focus,
-      totalWeeks: macro.total_weeks,
-      sessionsPerWeek: 4,
-    });
-  }, [macro?.program_name, macro?.focus, macro?.total_weeks]);
-
-  const anchor = useMemo(
-    () => (plan && macro ? anchorDayIndex(plan, macro.week, macro.day) : 0),
-    [plan, macro?.week, macro?.day],
+  const plan = useMemo<MacroPlan | null>(
+    () => (macro ? generateMacroPlan({ programName: macro.program_name, focus: macro.focus, totalWeeks: macro.total_weeks, sessionsPerWeek: 4 }) : null),
+    [macro?.program_name, macro?.focus, macro?.total_weeks],
   );
-
+  const anchor = useMemo(() => (plan && macro ? anchorDayIndex(plan, macro.week, macro.day) : 0), [plan, macro?.week, macro?.day]);
   const [current, setCurrent] = useState(anchor);
-  // Si cambia el plan/anchor (cambió de atleta o macro), reposicionar en "hoy".
   useEffect(() => { setCurrent(anchor); }, [anchor]);
 
   if (!plan || !macro || !athlete) return null;
-
   const day = plan.days[current];
   if (!day) return null;
 
   const status: Status = current < anchor ? 'done' : current === anchor ? 'today' : 'future';
   const meta = STATUS_META[status];
   const maxes = athlete.maxes;
+  const go = (d: number) => setCurrent((i) => Math.max(0, Math.min(plan.days.length - 1, i + d)));
+  const atStart = current === 0, atEnd = current === plan.days.length - 1;
 
-  const go = (delta: number) =>
-    setCurrent((i) => Math.max(0, Math.min(plan.days.length - 1, i + delta)));
-  const atStart = current === 0;
-  const atEnd = current === plan.days.length - 1;
-
-  const ArrowBtn: React.FC<{ dir: -1 | 1; disabled: boolean }> = ({ dir, disabled }) => (
-    <button
-      onClick={() => go(dir)}
-      disabled={disabled}
+  const Arrow: React.FC<{ dir: -1 | 1; disabled: boolean }> = ({ dir, disabled }) => (
+    <button onClick={() => go(dir)} disabled={disabled}
       aria-label={dir === -1 ? 'Día anterior' : 'Día siguiente'}
       style={{
-        width: 38, height: 38, borderRadius: '50%', flexShrink: 0,
-        background: 'var(--surface)', border: '1px solid var(--card-border)',
-        color: disabled ? 'var(--card-border)' : 'var(--text)',
-        fontSize: 18, fontWeight: 800, lineHeight: 1,
-        cursor: disabled ? 'default' : 'pointer', fontFamily: 'inherit',
-        opacity: disabled ? 0.4 : 1,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-      }}
-    >
-      {dir === -1 ? '‹' : '›'}
-    </button>
+        width: 40, height: 40, borderRadius: 8, flexShrink: 0,
+        background: 'var(--surface-2)', border: '1px solid var(--border-soft)',
+        color: disabled ? 'var(--text-lo)' : CYAN, fontSize: 20, fontWeight: 700, lineHeight: 1,
+        cursor: disabled ? 'default' : 'pointer', fontFamily: 'var(--font-display)',
+        opacity: disabled ? 0.4 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>{dir === -1 ? '‹' : '›'}</button>
   );
 
   return (
-    <div>
-      <p style={{ fontSize: 9, fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: 8 }}>
-        Mi Macrociclo
+    <div className="pq">
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700, letterSpacing: '.18em', textTransform: 'uppercase', color: 'var(--text-lo)', margin: '0 0 8px' }}>
+        Sesión de hoy · macrociclo
       </p>
 
       {/* Header · flechas + semana */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-        <ArrowBtn dir={-1} disabled={atStart} />
+        <Arrow dir={-1} disabled={atStart} />
         <div style={{ flex: 1, textAlign: 'center' }}>
-          <p style={{ fontSize: 15, fontWeight: 900, color: 'var(--text)', margin: 0 }}>
-            Semana {day.week} / {plan.totalWeeks}
+          <p style={{ fontFamily: 'var(--font-display)', fontSize: 17, fontWeight: 700, color: 'var(--text-hi)', margin: 0, letterSpacing: '-.01em' }}>
+            SEMANA {day.week} / {plan.totalWeeks}
           </p>
-          <p style={{ fontSize: 10, color: 'var(--text-secondary)', margin: 0, marginTop: 1 }}>
-            {plan.programName} · {day.dayLabel}
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-mid)', margin: '1px 0 0', letterSpacing: '.04em' }}>
+            {macro.program_name} · {day.dayLabel}
           </p>
         </div>
-        <ArrowBtn dir={1} disabled={atEnd} />
+        <Arrow dir={1} disabled={atEnd} />
       </div>
 
       {/* Carta del día */}
       <div style={{
-        background: 'var(--surface)',
-        border: `1px solid ${status === 'today' ? `${GOLD}55` : 'var(--card-border)'}`,
-        borderRadius: 16, padding: 14,
+        background: 'var(--surface-1)',
+        border: `1px solid ${status === 'today' ? 'var(--border-hard)' : 'var(--border-soft)'}`,
+        borderRadius: 14, padding: 14,
+        boxShadow: status === 'today' ? 'var(--glow-cyan)' : 'none',
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <p style={{ fontSize: 13, fontWeight: 800, color: 'var(--text)', margin: 0 }}>{day.theme}</p>
+          <p style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700, color: 'var(--text-hi)', margin: 0, textTransform: 'uppercase', letterSpacing: '.01em' }}>{day.theme}</p>
           <span style={{
-            fontSize: 9, fontWeight: 800, letterSpacing: '.04em',
-            color: meta.color, padding: '3px 8px', borderRadius: 6,
-            background: status === 'future' ? 'transparent' : `${meta.color}1a`,
-            border: `1px solid ${status === 'future' ? 'var(--card-border)' : `${meta.color}40`}`,
+            fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700, letterSpacing: '.06em',
+            color: meta.color, padding: '3px 8px', borderRadius: 4,
+            background: status === 'future' ? 'transparent' : `color-mix(in oklab, ${meta.color} 14%, transparent)`,
+            border: `1px solid ${status === 'future' ? 'var(--border-soft)' : `color-mix(in oklab, ${meta.color} 45%, transparent)`}`,
             whiteSpace: 'nowrap',
           }}>{meta.label}</span>
         </div>
@@ -177,38 +146,39 @@ const MacrocycleExplorer: React.FC = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {day.exercises.map((ex, i) => {
             const w = prescribedWeight(ex, maxes);
+            const tiers = w != null ? platesForWeight(w) : [];
             return (
               <div key={i} style={{
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                padding: '8px 10px', borderRadius: 10,
-                background: 'var(--bg)', border: '1px solid var(--card-border)',
+                padding: '8px 10px', borderRadius: 8,
+                background: 'var(--surface-2)', border: '1px solid var(--border-soft)',
               }}>
-                <div>
-                  <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)', margin: 0 }}>{ex.name}</p>
-                  <p style={{ fontSize: 10, color: 'var(--text-secondary)', margin: 0, marginTop: 1 }}>
-                    {ex.sets} × {ex.reps}
-                  </p>
+                <div style={{ minWidth: 0 }}>
+                  <p style={{ fontFamily: 'var(--font-display)', fontSize: 12, fontWeight: 700, color: 'var(--text-hi)', margin: 0, textTransform: 'uppercase', letterSpacing: '.01em' }}>{ex.name}</p>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-mid)', margin: '1px 0 0' }}>{ex.sets} × {ex.reps}</p>
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  {w != null ? (
-                    <>
-                      <p style={{ fontSize: 14, fontWeight: 900, color: GOLD, margin: 0 }}>{w} kg</p>
-                      <p style={{ fontSize: 9, color: 'var(--text-secondary)', margin: 0 }}>
-                        {Math.round(ex.intensity * 100)}% · RPE {ex.rpe}
-                      </p>
-                    </>
-                  ) : (
-                    <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', margin: 0 }}>
-                      RPE {ex.rpe}
-                    </p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  {tiers.length > 0 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 1 }} aria-hidden="true">
+                      {tiers.map((t, j) => <PlateIcon key={j} weight={TIER_WEIGHT[t]} view="flat" size="S" />)}
+                    </div>
                   )}
+                  <div style={{ textAlign: 'right', minWidth: 56 }}>
+                    {w != null ? (
+                      <>
+                        <p style={{ fontFamily: 'var(--font-display)', fontSize: 15, fontWeight: 700, color: 'var(--text-hi)', margin: 0 }}>{w}<span style={{ fontSize: 9, color: 'var(--text-mid)', marginLeft: 1 }}>kg</span></p>
+                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: AMBER, margin: 0 }}>{Math.round(ex.intensity * 100)}%</p>
+                      </>
+                    ) : (
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700, color: 'var(--text-mid)', margin: 0 }}>RPE {ex.rpe}</p>
+                    )}
+                  </div>
                 </div>
               </div>
             );
           })}
         </div>
 
-        {/* Curva del macro */}
         <IntensityCurve plan={plan} currentWeek={day.week} />
       </div>
     </div>
