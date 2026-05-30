@@ -6,6 +6,7 @@ import {
   type SkillEvaluationResponse,
 } from '../lib/skillEvaluation';
 import { useToast } from './Toast';
+import { useAuth } from '../context/AuthContext';
 import type { AthleteProfile } from '../data/athletes';
 
 /**
@@ -43,6 +44,7 @@ interface Props {
 
 const SkillEvaluationPanel: React.FC<Props> = ({ athlete }) => {
   const { showToast } = useToast();
+  const { demoMode } = useAuth();
 
   const [evaluations, setEvaluations] = useState<SkillEvaluationResponse[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -62,12 +64,13 @@ const SkillEvaluationPanel: React.FC<Props> = ({ athlete }) => {
   const refresh = async () => {
     setLoading(true);
     setError(null);
+    // Demo: sin datos reales del backend → lista vacía, no llamamos a la API.
+    if (demoMode) { setEvaluations([]); setLoading(false); return; }
     try {
       const list = await skillEvaluation.list({ athleteId: athlete.id });
       setEvaluations(list);
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : 'No pudimos cargar las evaluaciones';
-      setError(msg);
+    } catch {
+      setError('No pudimos cargar las evaluaciones.');
     } finally {
       setLoading(false);
     }

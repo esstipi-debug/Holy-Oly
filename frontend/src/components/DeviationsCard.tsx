@@ -6,6 +6,7 @@ import {
   type DeviationType,
 } from '../lib/api';
 import BottomSheet from './BottomSheet';
+import { useAuth } from '../context/AuthContext';
 
 /**
  * DeviationsCard · "Desvíos del macrociclo"
@@ -61,6 +62,7 @@ const TYPE_LABEL: Record<DeviationType, string> = {
 };
 
 const DeviationsCard: React.FC<Props> = ({ macroId, athleteId, weeks = 4 }) => {
+  const { demoMode } = useAuth();
   const [data, setData] = useState<DeviationsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -69,15 +71,18 @@ const DeviationsCard: React.FC<Props> = ({ macroId, athleteId, weeks = 4 }) => {
 
   useEffect(() => {
     let cancelled = false;
+    // En demo no hay datos reales del backend → placeholder neutro, sin llamar
+    // a la API (evita filtrar errores crudos tipo "athlete_id debe ser UUID").
+    if (demoMode) { setLoading(false); setData(null); setError(null); return () => { cancelled = true; }; }
     setLoading(true);
     setError(null);
     deviationsApi
       .get({ macro_id: macroId, weeks, athlete_id: athleteId })
       .then(res => { if (!cancelled) setData(res); })
-      .catch(e => { if (!cancelled) setError(e?.message ?? 'Error de red'); })
+      .catch(() => { if (!cancelled) setError('failed'); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [macroId, athleteId, weeks]);
+  }, [macroId, athleteId, weeks, demoMode]);
 
   const byTypeEntries = useMemo(() => {
     if (!data) return [] as Array<[DeviationType, number]>;
@@ -120,7 +125,7 @@ const DeviationsCard: React.FC<Props> = ({ macroId, athleteId, weeks = 4 }) => {
           letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 6,
         }}>Desvíos del macrociclo</p>
         <p style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
-          {error ?? 'No pudimos cargar los desvíos.'}
+          {demoMode ? 'Disponible con tus datos reales.' : 'No pudimos cargar los desvíos.'}
         </p>
       </div>
     );

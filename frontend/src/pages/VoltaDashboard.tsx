@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNav } from '../context/NavigationContext';
 import { useAthlete } from '../context/AthleteContext';
+import { useAuth } from '../context/AuthContext';
 import WiseAssistant from '../components/WiseAssistant';
 import HormonalPhaseCard from '../components/HormonalPhaseCard';
 import QuestsSection, { type QuestProgress } from '../components/QuestsSection';
@@ -301,6 +302,7 @@ interface VoltaWodTodayCardProps {
 }
 
 const VoltaWodTodayCard: React.FC<VoltaWodTodayCardProps> = ({ onStart }) => {
+  const { demoMode } = useAuth();
   const [wod, setWod] = useState<RecommendedWodResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -308,6 +310,8 @@ const VoltaWodTodayCard: React.FC<VoltaWodTodayCardProps> = ({ onStart }) => {
 
   useEffect(() => {
     let cancelled = false;
+    // Demo: sin datos reales → placeholder neutro, no llamamos a la API.
+    if (demoMode) { setLoading(false); setWod(null); setError(null); return () => { cancelled = true; }; }
     setLoading(true);
     voltaWod
       .today()
@@ -316,9 +320,9 @@ const VoltaWodTodayCard: React.FC<VoltaWodTodayCardProps> = ({ onStart }) => {
         setWod(res);
         setError(null);
       })
-      .catch((e: unknown) => {
+      .catch(() => {
         if (cancelled) return;
-        setError(e instanceof Error ? e.message : 'No pudimos cargar el WOD de hoy');
+        setError('failed');
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -326,7 +330,7 @@ const VoltaWodTodayCard: React.FC<VoltaWodTodayCardProps> = ({ onStart }) => {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [demoMode]);
 
   const pickScale = (s: WodScale) => {
     voltaWod.setScale(s);
@@ -347,13 +351,16 @@ const VoltaWodTodayCard: React.FC<VoltaWodTodayCardProps> = ({ onStart }) => {
   if (error || !wod) {
     return (
       <div style={{
-        background: C.surface, border: '1px solid rgba(255,61,0,0.25)',
+        background: C.surface,
+        border: demoMode ? `1px solid ${C.line}` : '1px solid rgba(255,61,0,0.25)',
         borderRadius: 18, padding: 16, marginBottom: 14,
       }}>
-        <div style={{ fontSize: 11, fontWeight: 800, color: C.red, marginBottom: 4 }}>
-          No pudimos cargar el WOD del día
+        <div style={{ fontSize: 11, fontWeight: 800, color: demoMode ? C.muted : C.red, marginBottom: 4 }}>
+          {demoMode ? 'WOD del día' : 'No pudimos cargar el WOD del día'}
         </div>
-        <div style={{ fontSize: 11, color: C.muted }}>{error ?? 'Reintentá en unos segundos.'}</div>
+        <div style={{ fontSize: 11, color: C.muted }}>
+          {demoMode ? 'Disponible con tus datos reales.' : 'Reintentá en unos segundos.'}
+        </div>
       </div>
     );
   }

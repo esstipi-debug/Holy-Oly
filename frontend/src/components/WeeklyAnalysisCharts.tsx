@@ -7,6 +7,7 @@ import {
 } from '../lib/api';
 import Chart from './social/Chart';
 import BottomSheet from './BottomSheet';
+import { useAuth } from '../context/AuthContext';
 
 /**
  * WeeklyAnalysisCharts · "Análisis semanal del atleta" para el coach.
@@ -77,6 +78,7 @@ const shortDate = (iso: string): string => {
 };
 
 const WeeklyAnalysisCharts: React.FC<Props> = ({ athleteId, weeks = 8 }) => {
+  const { demoMode } = useAuth();
   const [data, setData] = useState<WeeklyAnalyticsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -84,15 +86,17 @@ const WeeklyAnalysisCharts: React.FC<Props> = ({ athleteId, weeks = 8 }) => {
 
   useEffect(() => {
     let cancelled = false;
+    // Demo: sin datos reales → placeholder neutro, no llamamos a la API.
+    if (demoMode) { setLoading(false); setData(null); setError(null); return () => { cancelled = true; }; }
     setLoading(true);
     setError(null);
     analyticsApi
       .weekly(athleteId, weeks)
       .then(res => { if (!cancelled) setData(res); })
-      .catch(e => { if (!cancelled) setError(e?.message ?? 'Error de red'); })
+      .catch(() => { if (!cancelled) setError('failed'); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [athleteId, weeks]);
+  }, [athleteId, weeks, demoMode]);
 
   const lastWeek = useMemo<WeekAnalytics | null>(() => {
     if (!data || data.weeks.length === 0) return null;
@@ -148,7 +152,7 @@ const WeeklyAnalysisCharts: React.FC<Props> = ({ athleteId, weeks = 8 }) => {
           letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 6,
         }}>Análisis semanal</p>
         <p style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
-          {error ?? 'No pudimos cargar el análisis.'}
+          {demoMode ? 'Disponible con tus datos reales.' : 'No pudimos cargar el análisis.'}
         </p>
       </div>
     );

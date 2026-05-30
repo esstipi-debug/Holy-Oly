@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { SKILLS, SUBJECTS, type Skill, type SubjectId } from '../data/skillTree';
 import { skillFocus, type SkillFocusResponse } from '../lib/skillFocus';
 import { useToast } from './Toast';
+import { useAuth } from '../context/AuthContext';
 import type { AthleteProfile } from '../data/athletes';
 
 /**
@@ -28,6 +29,7 @@ interface Props {
 
 const SkillFocusAssign: React.FC<Props> = ({ athlete }) => {
   const { showToast } = useToast();
+  const { demoMode } = useAuth();
 
   const [focuses, setFocuses] = useState<SkillFocusResponse[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -41,12 +43,13 @@ const SkillFocusAssign: React.FC<Props> = ({ athlete }) => {
   const refresh = async () => {
     setLoading(true);
     setError(null);
+    // Demo: sin datos reales del backend → lista vacía, no llamamos a la API.
+    if (demoMode) { setFocuses([]); setLoading(false); return; }
     try {
       const list = await skillFocus.listForAthlete(athlete.id);
       setFocuses(list);
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : 'No pudimos cargar los focos';
-      setError(msg);
+    } catch {
+      setError('No pudimos cargar los focos.');
     } finally {
       setLoading(false);
     }
