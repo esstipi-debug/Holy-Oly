@@ -235,6 +235,10 @@ export function AthleteProvider({ children }: { children: ReactNode }) {
     const today = athlete.sessions_last_7.at(-1);
     if (!today) return;
 
+    // Guard contra race condition: si `athlete` cambia de nuevo antes de que
+    // resuelva este request (p.ej. toggle rápido HO↔Volta), ignoramos la
+    // respuesta stale para no pisar el stress del athlete actual con el de otro.
+    let cancelled = false;
     setStressLoading(true);
     api.post<StressResult>('/v1/stress/calculate', {
       athlete_id: athlete.id,
@@ -252,9 +256,10 @@ export function AthleteProvider({ children }: { children: ReactNode }) {
       prior_fitness: athlete.prior_fitness,
       prior_fatigue: athlete.prior_fatigue,
     })
-      .then(setStress)
-      .catch(() => setStress(null))
-      .finally(() => setStressLoading(false));
+      .then((res) => { if (!cancelled) setStress(res); })
+      .catch(() => { if (!cancelled) setStress(null); })
+      .finally(() => { if (!cancelled) setStressLoading(false); });
+    return () => { cancelled = true; };
   }, [athlete?.id]);
 
   // ─── Session Adaptation ───
@@ -263,6 +268,8 @@ export function AthleteProvider({ children }: { children: ReactNode }) {
     const today = athlete.sessions_last_7.at(-1);
     if (!today) { setAdaptation(null); return; }
 
+    // Mismo guard anti-race que el effect de stress arriba.
+    let cancelled = false;
     setAdaptationLoading(true);
 
     const preCheck = {
@@ -280,18 +287,19 @@ export function AthleteProvider({ children }: { children: ReactNode }) {
       warnings: string[];
       adapted_plan: AdaptationDegradation[];
     }>('/v1/session/adapt', { pre_check: preCheck, original_plan: DEFAULT_PLAN })
-      .then(res => setAdaptation({
+      .then(res => { if (!cancelled) setAdaptation({
         risk_score: res.risk_score,
         risk_zone: res.risk_zone,
         recommendation: res.recommendation,
         warnings: res.warnings ?? [],
         adapted_plan: res.adapted_plan ?? [],
-      }))
+      }); })
       .catch(() => {
         // Fallback client-side con la misma lógica conceptual
-        setAdaptation(computeAdaptationLocally(today));
+        if (!cancelled) setAdaptation(computeAdaptationLocally(today));
       })
-      .finally(() => setAdaptationLoading(false));
+      .finally(() => { if (!cancelled) setAdaptationLoading(false); });
+    return () => { cancelled = true; };
   }, [athlete?.id]);
 
   return (

@@ -56,6 +56,32 @@ const AtletaHome: React.FC = () => {
   const { navigate } = useNav();
   const { athlete, stress, stressLoading } = useAthlete();
   const [activeMetric, setActiveMetric] = useState<MetricType | null>(null);
+
+  // Belt / XP derivation — hoisted arriba del early-return de abajo para que
+  // el useEffect siguiente se llame siempre (mismo orden de hooks en cada render;
+  // si `athlete` pasa de non-null a null — p.ej. token inválido — un return
+  // temprano ANTES de un hook rompe las Rules of Hooks y crashea el screen).
+  const fitness = athlete?.prior_fitness ?? 60;
+  const beltIdx = Math.min(BELTS.length - 1, Math.floor(fitness / 15));
+
+  // Belt ceremony trigger: si subió de cinturón desde la última celebración, dispará la fullscreen.
+  useEffect(() => {
+    if (!athlete) return;
+    let lastCelebrated = -1;
+    try {
+      const raw = localStorage.getItem('belt:last_celebrated_idx');
+      lastCelebrated = raw === null ? beltIdx - 1 : parseInt(raw, 10);
+      // Si nunca se celebró nada (raw null), seedeamos con beltIdx-1 para que el siguiente up sí dispare.
+      if (raw === null) {
+        try { localStorage.setItem('belt:last_celebrated_idx', String(Math.max(0, beltIdx))); } catch { /* ignore */ }
+        return;
+      }
+    } catch { /* ignore */ }
+    if (beltIdx > lastCelebrated) {
+      navigate('BELT_CEREMONY');
+    }
+  }, [athlete, beltIdx, navigate]);
+
   if (!athlete) return null;
 
   const { macrocycle, maxes, injuries } = athlete;
@@ -82,32 +108,13 @@ const AtletaHome: React.FC = () => {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Buenos días' : hour < 19 ? 'Buenas tardes' : 'Buenas noches';
 
-  // Belt / XP derivation
-  const fitness = athlete.prior_fitness ?? 60;
-  const beltIdx = Math.min(BELTS.length - 1, Math.floor(fitness / 15));
+  // Belt / XP derivation — fitness/beltIdx ya calculados arriba (antes del early-return)
   const belt = BELTS[beltIdx];
   const beltNext = BELTS[Math.min(BELTS.length - 1, beltIdx + 1)];
   const xpNow = Math.round((fitness * 1500));
   const xpCurrentBase = beltIdx * 22500;
   const xpNextBase = (beltIdx + 1) * 22500;
   const xpPct = Math.max(4, Math.min(100, Math.round(((xpNow - xpCurrentBase) / (xpNextBase - xpCurrentBase)) * 100)));
-
-  // Belt ceremony trigger: si subió de cinturón desde la última celebración, dispará la fullscreen.
-  useEffect(() => {
-    let lastCelebrated = -1;
-    try {
-      const raw = localStorage.getItem('belt:last_celebrated_idx');
-      lastCelebrated = raw === null ? beltIdx - 1 : parseInt(raw, 10);
-      // Si nunca se celebró nada (raw null), seedeamos con beltIdx-1 para que el siguiente up sí dispare.
-      if (raw === null) {
-        try { localStorage.setItem('belt:last_celebrated_idx', String(Math.max(0, beltIdx))); } catch { /* ignore */ }
-        return;
-      }
-    } catch { /* ignore */ }
-    if (beltIdx > lastCelebrated) {
-      navigate('BELT_CEREMONY');
-    }
-  }, [beltIdx, navigate]);
 
   return (
     <div className="anim-fade-in" style={{ background: 'var(--bg)', paddingBottom: 90, minHeight: '100%' }}>

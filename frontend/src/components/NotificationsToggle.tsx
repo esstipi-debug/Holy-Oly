@@ -8,6 +8,23 @@ import {
 
 type Status = 'idle' | 'enabling' | 'disabling' | 'enabled' | 'denied' | 'unsupported';
 
+const Row: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div
+    style={{
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: '14px 16px',
+      background: 'var(--surface)',
+      border: '1px solid var(--card-border)',
+      borderRadius: 16,
+      gap: 12,
+    }}
+  >
+    {children}
+  </div>
+);
+
 const NotificationsToggle: React.FC = () => {
   const [status, setStatus] = useState<Status>('idle');
   const [error, setError] = useState<string | null>(null);
@@ -73,23 +90,6 @@ const NotificationsToggle: React.FC = () => {
   };
 
   /* -------- render -------- */
-
-  const Row: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '14px 16px',
-        background: 'var(--surface)',
-        border: '1px solid var(--card-border)',
-        borderRadius: 16,
-        gap: 12,
-      }}
-    >
-      {children}
-    </div>
-  );
 
   if (status === 'unsupported') {
     return (
