@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 /**
@@ -27,18 +27,17 @@ const ToastContext = createContext<ToastContextType | null>(null);
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
+  // Cada toast programa su propio dismiss una única vez al crearse (en vez de
+  // un effect keyed en `toasts`, que reprogramaba TODOS los timers —incluidos
+  // los de toasts ya visibles— cada vez que se agregaba/sacaba uno, haciendo
+  // que un toast en pantalla dure más de lo configurado si aparece otro).
   const showToast = useCallback(({ message, variant = 'info', duration = 2500 }: { message: string; variant?: Variant; duration?: number }) => {
     const id = Date.now() + Math.random();
     setToasts(prev => [...prev, { id, message, variant, duration }]);
+    setTimeout(() => {
+      setToasts(prev => prev.filter(x => x.id !== id));
+    }, duration);
   }, []);
-
-  useEffect(() => {
-    if (toasts.length === 0) return;
-    const timers = toasts.map(t => setTimeout(() => {
-      setToasts(prev => prev.filter(x => x.id !== t.id));
-    }, t.duration));
-    return () => timers.forEach(clearTimeout);
-  }, [toasts]);
 
   return (
     <ToastContext.Provider value={{ showToast }}>

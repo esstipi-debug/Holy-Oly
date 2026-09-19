@@ -24,8 +24,15 @@ const DEMO_USER: AuthUser = {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(() => {
-    const stored = localStorage.getItem('user');
-    return stored ? JSON.parse(stored) : null;
+    try {
+      const stored = localStorage.getItem('user');
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      // JSON corrupto (quota parcial, edit manual, versión vieja) → no crashear
+      // el root provider de toda la app, tratamos como sesión no logueada.
+      localStorage.removeItem('user');
+      return null;
+    }
   });
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('token'));
   const [backendAlive, setBackendAlive] = useState<boolean | null>(null);

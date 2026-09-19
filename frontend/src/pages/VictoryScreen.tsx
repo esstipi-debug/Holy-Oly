@@ -62,7 +62,7 @@ const readSummary = (): SessionSummary | null => {
  *  - IMR bajo (<72%): sesión liviana, considerar subir intensidad.
  */
 const recommendationByIMR = (imr: number): { title: string; body: string; color: string } => {
-  if (imr >= 82) return {
+  if (imr > 82) return {
     title: 'SNC bajo carga',
     body: 'Dormí 8h hoy · el sistema nervioso pide reset. Mañana priorizá descanso entre series si tenés otra sesión pesada.',
     color: '#EF4444',

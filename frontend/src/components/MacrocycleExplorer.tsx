@@ -42,6 +42,18 @@ const STATUS_META: Record<Status, { label: string; color: string }> = {
   future: { label: '○ POR VENIR', color: 'var(--text-lo)' },
 };
 
+const Arrow: React.FC<{ dir: -1 | 1; disabled: boolean; onGo: (d: number) => void }> = ({ dir, disabled, onGo }) => (
+  <button onClick={() => onGo(dir)} disabled={disabled}
+    aria-label={dir === -1 ? 'Día anterior' : 'Día siguiente'}
+    style={{
+      width: 40, height: 40, borderRadius: 8, flexShrink: 0,
+      background: 'var(--surface-2)', border: '1px solid var(--border-soft)',
+      color: disabled ? 'var(--text-lo)' : CYAN, fontSize: 20, fontWeight: 700, lineHeight: 1,
+      cursor: disabled ? 'default' : 'pointer', fontFamily: 'var(--font-display)',
+      opacity: disabled ? 0.4 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+    }}>{dir === -1 ? '‹' : '›'}</button>
+);
+
 const IntensityCurve: React.FC<{ plan: MacroPlan; currentWeek: number }> = ({ plan, currentWeek }) => {
   const W = 300, H = 60, pad = 8;
   const data = plan.weekIntensity;
@@ -93,18 +105,6 @@ const MacrocycleExplorer: React.FC = () => {
   const go = (d: number) => setCurrent((i) => Math.max(0, Math.min(plan.days.length - 1, i + d)));
   const atStart = current === 0, atEnd = current === plan.days.length - 1;
 
-  const Arrow: React.FC<{ dir: -1 | 1; disabled: boolean }> = ({ dir, disabled }) => (
-    <button onClick={() => go(dir)} disabled={disabled}
-      aria-label={dir === -1 ? 'Día anterior' : 'Día siguiente'}
-      style={{
-        width: 40, height: 40, borderRadius: 8, flexShrink: 0,
-        background: 'var(--surface-2)', border: '1px solid var(--border-soft)',
-        color: disabled ? 'var(--text-lo)' : CYAN, fontSize: 20, fontWeight: 700, lineHeight: 1,
-        cursor: disabled ? 'default' : 'pointer', fontFamily: 'var(--font-display)',
-        opacity: disabled ? 0.4 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
-      }}>{dir === -1 ? '‹' : '›'}</button>
-  );
-
   return (
     <div className="pq">
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700, letterSpacing: '.18em', textTransform: 'uppercase', color: 'var(--text-lo)', margin: '0 0 8px' }}>
@@ -113,7 +113,7 @@ const MacrocycleExplorer: React.FC = () => {
 
       {/* Header · flechas + semana */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-        <Arrow dir={-1} disabled={atStart} />
+        <Arrow dir={-1} disabled={atStart} onGo={go} />
         <div style={{ flex: 1, textAlign: 'center' }}>
           <p style={{ fontFamily: 'var(--font-display)', fontSize: 17, fontWeight: 700, color: 'var(--text-hi)', margin: 0, letterSpacing: '-.01em' }}>
             SEMANA {day.week} / {plan.totalWeeks}
@@ -122,7 +122,7 @@ const MacrocycleExplorer: React.FC = () => {
             {macro.program_name} · {day.dayLabel}
           </p>
         </div>
-        <Arrow dir={1} disabled={atEnd} />
+        <Arrow dir={1} disabled={atEnd} onGo={go} />
       </div>
 
       {/* Carta del día */}

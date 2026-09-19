@@ -183,7 +183,7 @@ const PerformanceDeepDive: React.FC = () => {
 
   const data = RANGE_DATA[range];
   const snatchBest = athlete?.maxes.snatch ?? 112;
-  const cjBest = athlete ? (athlete.maxes.clean + athlete.maxes.jerk - athlete.maxes.clean) : 145;
+  const cjBest = athlete ? Math.min(athlete.maxes.clean, athlete.maxes.jerk) : 145;
   const sRatio = athlete ? Math.round((athlete.maxes.snatch / athlete.maxes.clean) * 100) : 78;
 
   const selectedDay = selectedBar !== null ? data.details[selectedBar] : null;
