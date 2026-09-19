@@ -58,7 +58,14 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const onPop = (e: PopStateEvent) => {
       const v = e.state?.view as View | undefined;
-      if (v) setStack((s) => (s[s.length - 1] === v ? s : [...s.slice(0, -1), v]));
+      if (!v) return;
+      setStack((s) => {
+        // Retroceso esperado (in-app back() o gesto/botón nativo): el navegador ya
+        // se movió a la entrada anterior del propio stack → solo la sacamos.
+        if (s.length > 1 && s[s.length - 2] === v) return s.slice(0, -1);
+        // Salto fuera del stack conocido (forward button, historial ajeno) → reset.
+        return [v];
+      });
     };
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
@@ -68,9 +75,12 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
     setStack((s) => (s[s.length - 1] === v ? s : [...s, v]));
   }, []);
 
+  // Delega en el historial real del navegador (en vez de mutar `stack` a mano):
+  // así el botón de back de la app y el back nativo (browser/gesto/hardware)
+  // quedan sincronizados — popstate arriba es quien actualiza `stack`.
   const back = useCallback(() => {
-    setStack((s) => (s.length > 1 ? s.slice(0, -1) : s));
-  }, []);
+    if (stack.length > 1) window.history.back();
+  }, [stack.length]);
 
   return (
     <NavContext.Provider value={{ currentView, navigate, back, canGoBack: stack.length > 1 }}>
