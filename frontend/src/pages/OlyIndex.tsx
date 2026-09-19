@@ -85,7 +85,7 @@ const OlyIndex: React.FC = () => {
   // Compute breakdown
   const m = athlete?.maxes;
   const bw = m?.body_weight ?? 80;
-  const strength = m ? Math.min(10, (m.clean + m.jerk - m.clean + m.snatch) / bw / 2 * 10) : 8.2;
+  const strength = m ? Math.min(10, (Math.min(m.clean, m.jerk) + m.snatch) / bw / 2 * 10) : 8.2;
   const eff = m ? Math.min(10, (m.snatch / m.clean) * 12) : 6.9;
   const sess = athlete?.sessions_last_7 ?? [];
   const cons = sess.length > 0 ? +(sess.filter(s => s.completed).length / sess.length * 10).toFixed(1) : 9.1;

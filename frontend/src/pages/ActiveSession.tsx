@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNav } from '../context/NavigationContext';
 import { useAthlete } from '../context/AthleteContext';
 import { useToast } from '../components/Toast';
@@ -75,6 +75,21 @@ interface ExerciseDef {
 /** Redondea al múltiplo de 2.5 kg más cercano (resolución típica de discos). */
 const roundToPlate = (kg: number) => Math.round(kg / 2.5) * 2.5;
 
+// Ramp-up de calentamiento técnico. Constantes puras (no dependen de props/state) →
+// viven a nivel módulo para no recrearse (con nueva identidad) en cada render.
+// Olympic lifts: ramp-up técnico extendido (4 sets pre-trabajo).
+// Accessory: ramp-up corto (2 sets).
+const OLYMPIC_RAMPUP: WarmupSet[] = [
+  { pct: 0,    reps: 5, note: 'Barra vacía · técnica' },
+  { pct: 0.40, reps: 3 },
+  { pct: 0.55, reps: 2 },
+  { pct: 0.70, reps: 1 },
+];
+const ACCESSORY_RAMPUP: WarmupSet[] = [
+  { pct: 0.40, reps: 5 },
+  { pct: 0.60, reps: 3 },
+];
+
 const ActiveSession: React.FC = () => {
   const { navigate } = useNav();
   const { athlete } = useAthlete();
@@ -82,25 +97,16 @@ const ActiveSession: React.FC = () => {
   /** PRs detectados en esta sesión, para evitar disparar la misma celebration dos veces. */
   const [prFiredFor, setPrFiredFor] = useState<Set<string>>(new Set());
 
-  // Build exercises from athlete maxes
-  // Olympic lifts: ramp-up técnico extendido (4 sets pre-trabajo).
-  // Accessory: ramp-up corto (2 sets).
-  const OLYMPIC_RAMPUP: WarmupSet[] = [
-    { pct: 0,    reps: 5, note: 'Barra vacía · técnica' },
-    { pct: 0.40, reps: 3 },
-    { pct: 0.55, reps: 2 },
-    { pct: 0.70, reps: 1 },
-  ];
-  const ACCESSORY_RAMPUP: WarmupSet[] = [
-    { pct: 0.40, reps: 5 },
-    { pct: 0.60, reps: 3 },
-  ];
-
-  const exercises: ExerciseDef[] = athlete ? [
+  // Build exercises from athlete maxes.
+  // Memoizado: sin esto, `exercises` (y por lo tanto `current` más abajo) es un
+  // array/objeto nuevo en CADA render, lo que hace que el useEffect de auto-fill
+  // (dep `current`) se dispare en cada render — incluido el que provoca escribir
+  // en el input de peso/reps — pisando lo que el atleta acaba de tipear.
+  const exercises: ExerciseDef[] = useMemo(() => athlete ? [
     { name: 'Arrancada',          targetSets: 4, targetReps: 2, pct: 0.85, max: athlete.maxes.snatch,       coachNote: 'Mantené el pecho alto en el catch. No te precipites en la subida.', warmupSets: OLYMPIC_RAMPUP },
     { name: 'Clean & Jerk',       targetSets: 4, targetReps: 2, pct: 0.80, max: athlete.maxes.jerk,         coachNote: 'Dip vertical, dirige los codos rápido. Sin perder el eje.',           warmupSets: OLYMPIC_RAMPUP },
     { name: 'Sentadilla Frontal', targetSets: 4, targetReps: 4, pct: 0.75, max: athlete.maxes.front_squat,  coachNote: 'Codos arriba, mantén la barra alta en hombros.',                       warmupSets: ACCESSORY_RAMPUP },
-  ] : [];
+  ] : [], [athlete]);
 
   const [exIdx, setExIdx] = useState(0);
   const [logs, setLogs] = useState<Record<number, SetLog[]>>({});

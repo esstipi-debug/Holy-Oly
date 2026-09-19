@@ -136,7 +136,7 @@ const MacrocicloMask: React.FC = () => {
       </div>
       <div className="ho-duo" style={{ marginTop: 8, marginBottom: 14 }}>
         <LiftCard label="SNATCH" code="sn" oneRm={athlete.maxes.snatch} />
-        <LiftCard label="CLEAN & JERK" code="cj" oneRm={athlete.maxes.clean} />
+        <LiftCard label="CLEAN & JERK" code="cj" oneRm={Math.min(athlete.maxes.clean, athlete.maxes.jerk)} />
       </div>
 
       {/* TIMELINE DE BLOQUES */}

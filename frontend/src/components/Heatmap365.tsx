@@ -172,12 +172,22 @@ const Heatmap365: React.FC<Props> = ({ sessions = [], year }) => {
   const stats = useMemo(() => {
     // Solo días dentro del año
     const yearCells = grid.filter((c): c is NonNullable<typeof c> => c !== null && c.inYear);
-    const total = yearCells.filter(c => c.level > 0).length;
+
+    // Racha actual: hacia atrás desde hoy (o último día del año si ya pasó)
+    const today = new Date();
+    const cutoff = today.getFullYear() === currentYear ? today : new Date(currentYear, 11, 31);
+    const cutoffIso = cutoff.toISOString().slice(0, 10);
+
+    // Total/mejor racha solo deben contar días ya transcurridos — los días
+    // futuros del año llevan mock data decorativa (ver mockYearData) que
+    // todavía no "pasó", igual que currentStreak ya excluye con este cutoff.
+    const pastCells = yearCells.filter(c => c.date <= cutoffIso);
+    const total = pastCells.filter(c => c.level > 0).length;
 
     // Mejor racha: máximo run de days con level > 0
     let bestStreak = 0;
     let curStreak = 0;
-    for (const c of yearCells) {
+    for (const c of pastCells) {
       if (c.level > 0) {
         curStreak++;
         if (curStreak > bestStreak) bestStreak = curStreak;
@@ -186,10 +196,6 @@ const Heatmap365: React.FC<Props> = ({ sessions = [], year }) => {
       }
     }
 
-    // Racha actual: hacia atrás desde hoy (o último día del año si ya pasó)
-    const today = new Date();
-    const cutoff = today.getFullYear() === currentYear ? today : new Date(currentYear, 11, 31);
-    const cutoffIso = cutoff.toISOString().slice(0, 10);
     let currentStreak = 0;
     for (let i = yearCells.length - 1; i >= 0; i--) {
       const c = yearCells[i];
